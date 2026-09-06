@@ -1,0 +1,106 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Ludeka.Application.Contracts;
+using Ludeka.Application.DTOs;
+using Ludeka.Core.Entities;
+
+namespace Ludeka.Application.Features.Community;
+
+public class GiveawayService : IGiveawayService
+{
+    private readonly IGiveawayRepository _repository;
+
+    public GiveawayService(IGiveawayRepository repository)
+    {
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+    }
+
+    public async Task<IReadOnlyList<GiveawayDto>> GetGiveawaysAsync(bool includeExpired = false, CancellationToken ct = default)
+    {
+        var giveaways = await _repository.GetGiveawaysAsync(includeExpired, ct);
+        return giveaways.Select(MapToDto).ToList();
+    }
+
+    public async Task<GiveawayDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        var giveaway = await _repository.GetByIdAsync(id, ct);
+        return giveaway != null ? MapToDto(giveaway) : null;
+    }
+
+    public async Task<GiveawayDto> CreateOrMergeGiveawayAsync(CreateGiveawayRequest request, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Buscar posible colaboración o duplicado
+        var existing = await _repository.FindDuplicateOrCollaborativeAsync(
+            request.Title,
+            request.Organizer,
+            request.DeadlineAt,
+            ct);
+
+        if (existing != null)
+        {
+            // Fusión de colaboraciones (ej. editorial + influencer)
+            var collaboratorToMerge = !string.IsNullOrWhiteSpace(request.Collaborator)
+                ? request.Collaborator
+                : request.Organizer;
+
+            existing.MergeCollaborator(collaboratorToMerge);
+            await _repository.UpdateAsync(existing, ct);
+            return MapToDto(existing);
+        }
+
+        var newGiveaway = new Giveaway(
+            title: request.Title,
+            organizer: request.Organizer,
+            url: request.Url,
+            platform: request.Platform,
+            deadlineAt: request.DeadlineAt,
+            gameId: request.GameId,
+            gameTitle: request.GameTitle,
+            collaborator: request.Collaborator,
+            thumbnailUrl: request.ThumbnailUrl,
+            isCommunityExclusive: request.IsCommunityExclusive);
+
+        await _repository.AddAsync(newGiveaway, ct);
+        return MapToDto(newGiveaway);
+    }
+
+    private static GiveawayDto MapToDto(Giveaway g)
+    {
+        var remainingText = CalculateRemainingTime(g.DeadlineAt, g.IsExpired);
+
+        return new GiveawayDto(
+            g.Id,
+            g.Title,
+            g.Organizer,
+            g.Collaborator,
+            g.FormattedOrganizer,
+            g.Url,
+            g.Platform,
+            g.DeadlineAt,
+            remainingText,
+            g.IsExpired,
+            g.GameId,
+            g.GameTitle,
+            g.ThumbnailUrl,
+            g.IsCommunityExclusive,
+            g.CreatedAt);
+    }
+
+    private static string CalculateRemainingTime(DateTimeOffset deadline, bool isExpired)
+    {
+        if (isExpired)
+            return "Finalizado";
+
+        var diff = deadline - DateTimeOffset.UtcNow;
+        if (diff.TotalHours < 24)
+            return "Finaliza hoy (¡Últimas horas!)";
+
+        var days = (int)Math.Ceiling(diff.TotalDays);
+        return days == 1 ? "Queda 1 día" : $"Quedan {days} días";
+    }
+}

@@ -12,6 +12,11 @@ public class LudekaDbContext : DbContext
     public DbSet<FoundingVerdict> FoundingVerdicts => Set<FoundingVerdict>();
     public DbSet<MediaItem> MediaItems => Set<MediaItem>();
     public DbSet<PendingBggImport> PendingBggImports => Set<PendingBggImport>();
+    public DbSet<Giveaway> Giveaways => Set<Giveaway>();
+    public DbSet<WeeklyRelease> WeeklyReleases => Set<WeeklyRelease>();
+    public DbSet<RuleQuestion> RuleQuestions => Set<RuleQuestion>();
+    public DbSet<RuleAnswer> RuleAnswers => Set<RuleAnswer>();
+    public DbSet<RuleVote> RuleVotes => Set<RuleVote>();
 
     public LudekaDbContext(DbContextOptions<LudekaDbContext> options) : base(options)
     {
@@ -117,5 +122,65 @@ public class LudekaDbContext : DbContext
             .WithMany()
             .HasForeignKey(m => m.GameId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // --- Configuración de Giveaway ---
+        var giveaway = modelBuilder.Entity<Giveaway>();
+        giveaway.ToTable("Giveaways");
+        giveaway.HasKey(g => g.Id);
+
+        giveaway.HasIndex(g => g.DeadlineAt);
+        giveaway.HasIndex(g => g.Platform);
+        giveaway.HasIndex(g => g.IsCommunityExclusive);
+
+        giveaway.HasOne(g => g.Game)
+            .WithMany()
+            .HasForeignKey(g => g.GameId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // --- Configuración de WeeklyRelease ---
+        var release = modelBuilder.Entity<WeeklyRelease>();
+        release.ToTable("WeeklyReleases");
+        release.HasKey(r => r.Id);
+
+        release.HasIndex(r => r.ReleaseDate);
+
+        release.HasOne(r => r.Game)
+            .WithMany()
+            .HasForeignKey(r => r.GameId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // --- Configuración de RuleQuestion ---
+        var question = modelBuilder.Entity<RuleQuestion>();
+        question.ToTable("RuleQuestions");
+        question.HasKey(q => q.Id);
+
+        question.HasIndex(q => q.GameId);
+        question.HasIndex(q => q.CreatedAt);
+
+        question.HasOne(q => q.Game)
+            .WithMany()
+            .HasForeignKey(q => q.GameId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        question.HasMany(q => q.Answers)
+            .WithOne(a => a.Question)
+            .HasForeignKey(a => a.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // --- Configuración de RuleAnswer ---
+        var answer = modelBuilder.Entity<RuleAnswer>();
+        answer.ToTable("RuleAnswers");
+        answer.HasKey(a => a.Id);
+
+        answer.HasIndex(a => a.QuestionId);
+        answer.HasIndex(a => a.IsAccepted);
+
+        // --- Configuración de RuleVote ---
+        var vote = modelBuilder.Entity<RuleVote>();
+        vote.ToTable("RuleVotes");
+        vote.HasKey(v => v.Id);
+
+        vote.HasIndex(v => new { v.UserId, v.QuestionId });
+        vote.HasIndex(v => new { v.UserId, v.AnswerId });
     }
 }

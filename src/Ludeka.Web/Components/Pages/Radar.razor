@@ -1,0 +1,376 @@
+@page "/radar"
+@page "/sorteos"
+@rendermode InteractiveServer
+@inject IGiveawayService GiveawayService
+@inject IWeeklyReleaseService ReleaseService
+@inject ICurrentUserService CurrentUserService
+
+<PageTitle>Radar de Sorteos & Novedades — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Encabezado de Página *@
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-950/80 border border-orange-500/40 text-orange-300 text-xs font-bold mb-2">
+                <span>📡</span> Radar Omnicanal Comunitario
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                Sorteos & Novedades de Tienda
+            </h1>
+            <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+                Oportunidades lúdicas centralizadas sin spam. Sorteos activos verificados (con colaboraciones fusionadas) y los estrenos de los viernes en tiendas de juegos de mesa.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button type="button"
+                    @onclick="() => _isCreateModalOpen = true"
+                    class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-lg shadow-orange-950/50">
+                <span>➕</span> Proponer Sorteo
+            </button>
+        </div>
+    </div>
+
+    @* Selector de Pestañas Principales *@
+    <div class="flex items-center gap-3 border-b border-slate-800">
+        <button type="button"
+                @onclick="() => _activeTab = Tab.Giveaways"
+                class="pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 @(_activeTab == Tab.Giveaways ? "border-orange-500 text-orange-400" : "border-transparent text-slate-400 hover:text-slate-200")">
+            <span>🎁</span> Radar de Sorteos
+            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">@_giveaways.Count</span>
+        </button>
+
+        <button type="button"
+                @onclick="() => _activeTab = Tab.Releases"
+                class="pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 @(_activeTab == Tab.Releases ? "border-orange-500 text-orange-400" : "border-transparent text-slate-400 hover:text-slate-200")">
+            <span>🚀</span> Novedades de los Viernes
+            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">@_releases.Count</span>
+        </button>
+    </div>
+
+    @* Contenido de Pestaña 1: Sorteos *@
+    @if (_activeTab == Tab.Giveaways)
+    {
+        <div class="space-y-6">
+            @* Filtro de activos / todos *@
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <button type="button"
+                            @onclick="() => ToggleExpiredFilter(false)"
+                            class="px-3 py-1 rounded-lg text-xs font-bold border transition-colors @(!_includeExpired ? "bg-orange-950/80 border-orange-500/50 text-orange-300" : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200")">
+                        Vigentes
+                    </button>
+                    <button type="button"
+                            @onclick="() => ToggleExpiredFilter(true)"
+                            class="px-3 py-1 rounded-lg text-xs font-bold border transition-colors @(_includeExpired ? "bg-orange-950/80 border-orange-500/50 text-orange-300" : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200")">
+                        Incluir Finalizados
+                    </button>
+                </div>
+
+                <span class="text-xs text-slate-500">
+                    Sorteos fusionados por juego y campaña
+                </span>
+            </div>
+
+            @if (_isLoading)
+            {
+                <div class="py-16 text-center text-slate-400">
+                    <div class="inline-block animate-spin text-3xl mb-2">🎲</div>
+                    <p class="text-sm font-semibold">Sintonizando el radar de sorteos...</p>
+                </div>
+            }
+            else if (_giveaways.Count == 0)
+            {
+                <div class="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800">
+                    <span class="text-4xl block mb-3">📡</span>
+                    <h3 class="text-base font-bold text-white mb-1">Sin sorteos registrados</h3>
+                    <p class="text-xs text-slate-400 max-w-md mx-auto mb-4">
+                        Actualmente no hay sorteos activos en el radar. ¿Conoces alguno en marcha? ¡Añádelo con un clic!
+                    </p>
+                    <button type="button"
+                            @onclick="() => _isCreateModalOpen = true"
+                            class="px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition-colors">
+                        ➕ Añadir Sorteo
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    @foreach (var giveaway in _giveaways)
+                    {
+                        <GiveawayCard Giveaway="@giveaway" />
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        @* Contenido de Pestaña 2: Novedades del Viernes *@
+        <div class="space-y-6">
+            <div class="flex items-center justify-between">
+                <p class="text-xs text-slate-400">
+                    Novedades y reimpresiones de juegos de mesa programadas para llegar a tiendas especializadas.
+                </p>
+            </div>
+
+            @if (_isLoading)
+            {
+                <div class="py-16 text-center text-slate-400">
+                    <div class="inline-block animate-spin text-3xl mb-2">📦</div>
+                    <p class="text-sm font-semibold">Cargando lanzamientos de tiendas...</p>
+                </div>
+            }
+            else if (_releases.Count == 0)
+            {
+                <div class="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800">
+                    <span class="text-4xl block mb-3">📦</span>
+                    <h3 class="text-base font-bold text-white mb-1">No hay lanzamientos cargados para esta semana</h3>
+                    <p class="text-xs text-slate-400 max-w-md mx-auto">
+                        Las editoriales publican sus novedades habitualmente los jueves por la tarde.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    @foreach (var release in _releases)
+                    {
+                        <div class="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <span class="px-2.5 py-0.5 rounded-lg text-xs font-black tracking-wide border @(release.IsReprint ? "bg-cyan-950/70 border-cyan-500/40 text-cyan-300" : "bg-emerald-950/70 border-emerald-500/40 text-emerald-300")">
+                                        @(release.IsReprint ? "🔄 Reimpresión" : "🆕 Novedad")
+                                    </span>
+
+                                    <span class="text-xs text-slate-400 font-semibold">
+                                        🗓️ @release.ReleaseDate.ToString("dd/MM/yyyy")
+                                    </span>
+                                </div>
+
+                                <h3 class="text-base font-black text-white">
+                                    @release.Title
+                                </h3>
+
+                                <p class="text-xs text-slate-400 mt-1">
+                                    Editorial: <strong class="text-slate-200">@release.Publisher</strong>
+                                </p>
+
+                                @if (!string.IsNullOrWhiteSpace(release.Notes))
+                                {
+                                    <p class="text-xs text-slate-400 mt-3 p-2.5 rounded-xl bg-slate-950/50 border border-slate-800/80 leading-relaxed">
+                                        @release.Notes
+                                    </p>
+                                }
+                            </div>
+
+                            @if (release.EstimatedPvp.HasValue)
+                            {
+                                <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs">
+                                    <span class="text-slate-500">PVP aproximado:</span>
+                                    <span class="font-extrabold text-amber-400 text-sm">@release.EstimatedPvp.Value.ToString("0.00") €</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@* Modal de Proponer Sorteo *@
+@if (_isCreateModalOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+        <div class="w-full max-w-lg rounded-2xl bg-[#0F172A] border border-slate-700 p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-black text-white flex items-center gap-2">
+                    <span>🎁</span> Registrar o Proponer Sorteo
+                </h2>
+                <button type="button"
+                        @onclick="() => _isCreateModalOpen = false"
+                        class="text-slate-400 hover:text-white text-xl">
+                    &times;
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="font-bold text-slate-300 block mb-1">Título del Sorteo *</label>
+                    <input type="text"
+                           @bind="_formTitle"
+                           placeholder="Ej. Sorteo Brass Birmingham + Monedas de Metal"
+                           class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-bold text-slate-300 block mb-1">Organizador (Editorial / Tienda) *</label>
+                        <input type="text"
+                               @bind="_formOrganizer"
+                               placeholder="Ej. Maldito Games"
+                               class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500" />
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-300 block mb-1">Colaborador (Influencer / Canal)</label>
+                        <input type="text"
+                               @bind="_formCollaborator"
+                               placeholder="Ej. Análisis Parálisis"
+                               class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-300 block mb-1">Enlace Oficial al Sorteo *</label>
+                    <input type="url"
+                           @bind="_formUrl"
+                           placeholder="https://www.instagram.com/p/..."
+                           class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-bold text-slate-300 block mb-1">Plataforma</label>
+                        <select @bind="_formPlatform"
+                                class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500">
+                            <option value="@GiveawayPlatform.Instagram">Instagram</option>
+                            <option value="@GiveawayPlatform.TwitterX">Twitter / X</option>
+                            <option value="@GiveawayPlatform.YouTube">YouTube</option>
+                            <option value="@GiveawayPlatform.Community">Comunidad Ludeka</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-300 block mb-1">Días hasta fin de sorteo</label>
+                        <input type="number"
+                               @bind="_formDaysUntilEnd"
+                               min="1"
+                               max="60"
+                               class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500" />
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <input type="checkbox"
+                           id="commExcl"
+                           @bind="_formIsCommunityExclusive"
+                           class="rounded bg-slate-900 border-slate-700 text-orange-500 focus:ring-0" />
+                    <label for="commExcl" class="text-slate-300 font-medium cursor-pointer">
+                        Sorteo exclusivo para miembros activos de la comunidad Ludeka
+                    </label>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_formError))
+            {
+                <div class="p-2.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-300 text-xs">
+                    @_formError
+                </div>
+            }
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button"
+                        @onclick="() => _isCreateModalOpen = false"
+                        class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-colors">
+                    Cancelar
+                </button>
+                <button type="button"
+                        @onclick="HandleSubmitGiveaway"
+                        class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition-colors">
+                    Guardar y Publicar
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private enum Tab { Giveaways, Releases }
+    private Tab _activeTab = Tab.Giveaways;
+    private bool _includeExpired;
+    private bool _isLoading = true;
+
+    private IReadOnlyList<GiveawayDto> _giveaways = new List<GiveawayDto>();
+    private IReadOnlyList<WeeklyReleaseDto> _releases = new List<WeeklyReleaseDto>();
+
+    private bool _isCreateModalOpen;
+    private string _formTitle = string.Empty;
+    private string _formOrganizer = string.Empty;
+    private string? _formCollaborator;
+    private string _formUrl = string.Empty;
+    private GiveawayPlatform _formPlatform = GiveawayPlatform.Instagram;
+    private int _formDaysUntilEnd = 5;
+    private bool _formIsCommunityExclusive;
+    private string? _formError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _giveaways = await GiveawayService.GetGiveawaysAsync(_includeExpired);
+            _releases = await ReleaseService.GetReleasesAsync();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task ToggleExpiredFilter(bool includeExpired)
+    {
+        _includeExpired = includeExpired;
+        await LoadDataAsync();
+    }
+
+    private async Task HandleSubmitGiveaway()
+    {
+        _formError = null;
+
+        if (string.IsNullOrWhiteSpace(_formTitle))
+        {
+            _formError = "El título del sorteo es obligatorio.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_formOrganizer))
+        {
+            _formError = "El organizador es obligatorio.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_formUrl))
+        {
+            _formError = "El enlace oficial del sorteo es obligatorio.";
+            return;
+        }
+
+        var deadline = DateTimeOffset.UtcNow.AddDays(_formDaysUntilEnd);
+
+        var request = new CreateGiveawayRequest(
+            Title: _formTitle,
+            Organizer: _formOrganizer,
+            Collaborator: _formCollaborator,
+            Url: _formUrl,
+            Platform: _formPlatform,
+            DeadlineAt: deadline,
+            IsCommunityExclusive: _formIsCommunityExclusive);
+
+        await GiveawayService.CreateOrMergeGiveawayAsync(request);
+
+        _isCreateModalOpen = false;
+        _formTitle = string.Empty;
+        _formOrganizer = string.Empty;
+        _formCollaborator = null;
+        _formUrl = string.Empty;
+        _formIsCommunityExclusive = false;
+
+        await LoadDataAsync();
+    }
+}

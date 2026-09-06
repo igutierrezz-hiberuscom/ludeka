@@ -1,0 +1,98 @@
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+
+<div class="rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col justify-between @(Giveaway.IsExpired ? "bg-slate-900/30 border-slate-800/50 opacity-60" : "bg-slate-900/70 border-slate-800 hover:border-orange-500/50 hover:shadow-xl shadow-slate-950/40")">
+    <div>
+        @* Cabecera y Badges de Estado *@
+        <div class="p-5 pb-3 flex items-start justify-between gap-3">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-black tracking-wide border flex items-center gap-1.5 @GetPlatformBadgeClass(Giveaway.Platform)">
+                    <span>@GetPlatformIcon(Giveaway.Platform)</span>
+                    <span>@Giveaway.Platform</span>
+                </span>
+
+                @if (Giveaway.IsCommunityExclusive)
+                {
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-purple-950/80 text-purple-300 border border-purple-500/50 flex items-center gap-1">
+                        <span>🎁</span> Exclusivo Comunidad
+                    </span>
+                }
+            </div>
+
+            @* Countdown / Tiempo Restante *@
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold border @GetCountdownBadgeClass(Giveaway.IsExpired, Giveaway.RemainingTimeText)">
+                @Giveaway.RemainingTimeText
+            </span>
+        </div>
+
+        @* Contenido Central: Título y Organización *@
+        <div class="px-5 py-2">
+            <h3 class="text-base sm:text-lg font-black text-white leading-snug group-hover:text-orange-400 transition-colors">
+                @Giveaway.Title
+            </h3>
+
+            @* Fusión de colaboraciones destacada *@
+            <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                <span class="text-slate-500">Organizado por:</span>
+                <strong class="text-orange-300 font-semibold">@Giveaway.FormattedOrganizer</strong>
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(Giveaway.GameTitle))
+            {
+                <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300">
+                    <span>🎲</span>
+                    <span>Juego: <strong class="text-white">@Giveaway.GameTitle</strong></span>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Footer de la Tarjeta con Enlace Oficial *@
+    <div class="p-5 pt-3 border-t border-slate-800/60 bg-slate-950/40 flex items-center justify-between gap-3 mt-4">
+        <span class="text-[0.68rem] text-slate-500">
+            Límite: @Giveaway.DeadlineAt.ToString("dd/MM/yyyy HH:mm")
+        </span>
+
+        <a href="@Giveaway.Url"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition-colors inline-flex items-center gap-1.5 shadow-sm">
+            <span>Participar</span>
+            <span>&rarr;</span>
+        </a>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public GiveawayDto Giveaway { get; set; } = null!;
+
+    private string GetPlatformIcon(GiveawayPlatform platform) => platform switch
+    {
+        GiveawayPlatform.Instagram => "📸",
+        GiveawayPlatform.TwitterX => "𝕏",
+        GiveawayPlatform.YouTube => "🎬",
+        GiveawayPlatform.Community => "🎲",
+        _ => "🔗"
+    };
+
+    private string GetPlatformBadgeClass(GiveawayPlatform platform) => platform switch
+    {
+        GiveawayPlatform.Instagram => "bg-pink-950/70 border-pink-500/40 text-pink-300",
+        GiveawayPlatform.TwitterX => "bg-slate-800 border-slate-600 text-slate-200",
+        GiveawayPlatform.YouTube => "bg-red-950/70 border-red-500/40 text-red-300",
+        GiveawayPlatform.Community => "bg-amber-950/70 border-amber-500/40 text-amber-300",
+        _ => "bg-slate-800 border-slate-700 text-slate-300"
+    };
+
+    private string GetCountdownBadgeClass(bool isExpired, string remainingText)
+    {
+        if (isExpired)
+            return "bg-slate-800/80 border-slate-700 text-slate-400";
+
+        if (remainingText.Contains("horas", StringComparison.OrdinalIgnoreCase))
+            return "bg-rose-950/90 border-rose-500 text-rose-300 animate-pulse";
+
+        return "bg-emerald-950/80 border-emerald-500/50 text-emerald-300";
+    }
+}

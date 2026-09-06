@@ -1,6 +1,7 @@
 using Ludeka.Application.Contracts;
 using Ludeka.Application.Features.Bgg;
 using Ludeka.Application.Features.Catalog;
+using Ludeka.Application.Features.Community;
 using Ludeka.Application.Features.Founding;
 using Ludeka.Application.Features.Library;
 using Ludeka.Application.Features.Media;
@@ -41,6 +42,15 @@ builder.Services.AddScoped<IPendingBggImportRepository, SqlitePendingBggImportRe
 builder.Services.AddScoped<IBggImportService, BggImportService>();
 builder.Services.AddScoped<IBggCatalogQueueService, BggCatalogQueueService>();
 builder.Services.AddScoped<IBggSearchAssistedService, BggSearchAssistedService>();
+
+// Incremento 6: Sorteos, Novedades del Viernes, Q&A de Reglas y Tarjetas Sociales
+builder.Services.AddScoped<IGiveawayRepository, SqliteGiveawayRepository>();
+builder.Services.AddScoped<IGiveawayService, GiveawayService>();
+builder.Services.AddScoped<IWeeklyReleaseRepository, SqliteWeeklyReleaseRepository>();
+builder.Services.AddScoped<IWeeklyReleaseService, WeeklyReleaseService>();
+builder.Services.AddScoped<IRuleQARepository, SqliteRuleQARepository>();
+builder.Services.AddScoped<IRuleQAService, RuleQAService>();
+builder.Services.AddScoped<ISocialCardService, SocialCardService>();
 
 // Servicio de identidad en demo (Singleton para permitir alternancia interactiva de roles en la sesión)
 builder.Services.AddSingleton<ICurrentUserService, DefaultCurrentUserService>();

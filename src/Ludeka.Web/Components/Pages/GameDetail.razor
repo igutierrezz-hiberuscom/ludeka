@@ -38,6 +38,11 @@ else
                 <span>&larr;</span> Volver al catálogo
             </a>
             <div class="flex items-center gap-3">
+                <button type="button"
+                        @onclick="OpenSocialCardModal"
+                        class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                    <span>🎨</span> Cartel para Redes
+                </button>
                 @if (CurrentUserService.IsFoundingTeam)
                 {
                     <button type="button"
@@ -199,7 +204,10 @@ else
         @* 5. Hub Multimedia (YouTube e Instagram) *@
         <MultimediaHub MediaHub="@_mediaHub" GameTitle="@Game.SpanishTitle" />
 
-        @* 6. Sinopsis / Descripción *@
+        @* 6. Consultorio de Reglas Q&A *@
+        <RuleQuestionsSection GameId="@Game.Id" GameTitle="@Game.SpanishTitle" />
+
+        @* 7. Sinopsis / Descripción *@
         @if (!string.IsNullOrWhiteSpace(Game.Description))
         {
             <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80">
@@ -212,6 +220,11 @@ else
     </div>
 
     @* Modales *@
+    <SocialCardModal
+        IsOpen="@_isSocialCardModalOpen"
+        Data="@_socialCardData"
+        OnClose="() => _isSocialCardModalOpen = false" />
+
     <LoanModal
         IsOpen="@_isLoanModalOpen"
         ActiveLoan="@_activeLoan"
@@ -250,6 +263,40 @@ else
     private bool _isLoanModalOpen;
     private bool _isReviewModalOpen;
     private bool _isFoundingModalOpen;
+    private bool _isSocialCardModalOpen;
+    private SocialCardDataDto? _socialCardData;
+
+    private void OpenSocialCardModal()
+    {
+        if (Game == null) return;
+
+        string? verdictBadge = null;
+        if (_foundingVerdict != null)
+        {
+            verdictBadge = _foundingVerdict.Recommendation switch
+            {
+                FoundingRecommendation.MustPlay => "🛡️ Imprescindible (Mesa Fundadora)",
+                FoundingRecommendation.RecommendedWithAdaptations => "🛡️ Recomendado con adaptaciones",
+                _ => "🛡️ Prescindible"
+            };
+        }
+
+        _socialCardData = new SocialCardDataDto(
+            GameTitle: Game.SpanishTitle,
+            OriginalTitle: Game.OriginalTitle,
+            YearPublished: Game.YearPublished,
+            Designer: Game.Designer,
+            Publisher: Game.Publisher,
+            CoverImageUrl: Game.CoverImageUrl,
+            Rating: Game.LudistRating > 0 ? Game.LudistRating : Game.BggRating,
+            StyleText: Game.Style.ToString(),
+            ConfrontationText: Game.Confrontation.ToString(),
+            IdealPlayersText: Game.IdealPlayerCountText ?? "Consulta ficha",
+            EstimatedDurationPerPlayer: Game.Duration.EstimatedPerPlayerMinutes,
+            FoundingVerdictBadge: verdictBadge);
+
+        _isSocialCardModalOpen = true;
+    }
 
     protected override async Task OnParametersSetAsync()
     {

@@ -137,6 +137,11 @@ public static class CatalogSeeder
         // Semillado de la cola comunitaria de auto-catalogación BGG
         await SeedPendingBggImportsAsync(db, ct);
 
+        // Semillado del Incremento 6: Sorteos, Novedades y Consultorio de Reglas Q&A
+        await SeedGiveawaysAsync(db, ct);
+        await SeedWeeklyReleasesAsync(db, ct);
+        await SeedRuleQAAsync(db, ct);
+
         return seededCount;
     }
 
@@ -509,6 +514,198 @@ public static class CatalogSeeder
         for (int i = 0; i < 4; i++) pendingList[4].IncrementRequestCount();  // Clank! Catacombs: 5 solicitudes
 
         await db.PendingBggImports.AddRangeAsync(pendingList, ct);
+        await db.SaveChangesAsync(ct);
+    }
+
+    private static async Task SeedGiveawaysAsync(LudekaDbContext db, CancellationToken ct)
+    {
+        if (await db.Giveaways.AnyAsync(ct))
+            return;
+
+        var games = await db.Games.ToListAsync(ct);
+        var brass = games.FirstOrDefault(g => g.BggId == 224517);
+        var terraforming = games.FirstOrDefault(g => g.BggId == 167791);
+        var wingspan = games.FirstOrDefault(g => g.BggId == 266192);
+
+        var giveaways = new List<Giveaway>
+        {
+            new(
+                title: "Gran Sorteo Brass: Birmingham Edición Deluxe + Monedas",
+                organizer: "Maldito Games",
+                url: "https://www.instagram.com/p/maldito-brass-sorteo",
+                platform: GiveawayPlatform.Instagram,
+                deadlineAt: DateTimeOffset.UtcNow.AddDays(3),
+                gameId: brass?.Id,
+                gameTitle: "Brass: Birmingham",
+                collaborator: "Análisis Parálisis",
+                thumbnailUrl: brass?.CoverImageUrl ?? "https://cf.geekdo-images.com/x3zxjr7VhC60Ue0G0pfQnA__original/img/og98Nn6kd_e_vUf-30G1nO0b2_g=/0x0/filters:format(jpeg)/pic3490053.jpg",
+                isCommunityExclusive: false),
+
+            new(
+                title: "Sorteo Novedades Devir: Dwellings of Eldervale",
+                organizer: "Devir Iberia",
+                url: "https://www.instagram.com/p/devir-eldervale",
+                platform: GiveawayPlatform.Instagram,
+                deadlineAt: DateTimeOffset.UtcNow.AddDays(5),
+                gameId: null,
+                gameTitle: "Dwellings of Eldervale",
+                collaborator: "El Rincón Legacy",
+                thumbnailUrl: "https://cf.geekdo-images.com/3N8p29x1fQnA__thumb/img/pic4801123.jpg",
+                isCommunityExclusive: false),
+
+            new(
+                title: "Pack de Verano Zacatrus: Wingspan + Expansión Oceanía",
+                organizer: "Zacatrus",
+                url: "https://x.com/zacatrus/status/wingspan-sorteo",
+                platform: GiveawayPlatform.TwitterX,
+                deadlineAt: DateTimeOffset.UtcNow.AddHours(18),
+                gameId: wingspan?.Id,
+                gameTitle: "Wingspan",
+                collaborator: null,
+                thumbnailUrl: wingspan?.CoverImageUrl,
+                isCommunityExclusive: false),
+
+            new(
+                title: "Sorteo Mensual Ludeka: Ark Nova + Mapa de Acrílico",
+                organizer: "Comunidad Ludeka",
+                url: "https://ludeka.app/sorteos",
+                platform: GiveawayPlatform.Community,
+                deadlineAt: DateTimeOffset.UtcNow.AddDays(12),
+                gameId: null,
+                gameTitle: "Ark Nova",
+                collaborator: null,
+                thumbnailUrl: "https://cf.geekdo-images.com/SoU8CSclVF58FGnr7rKn8g__original/img/DR-oAhmplpM1t_2Fz-l2W1Z4d_Q=/0x0/filters:format(jpeg)/pic6293412.jpg",
+                isCommunityExclusive: true)
+        };
+
+        await db.Giveaways.AddRangeAsync(giveaways, ct);
+        await db.SaveChangesAsync(ct);
+    }
+
+    private static async Task SeedWeeklyReleasesAsync(LudekaDbContext db, CancellationToken ct)
+    {
+        if (await db.WeeklyReleases.AnyAsync(ct))
+            return;
+
+        // Calcular el viernes de la semana actual
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        int daysUntilFriday = ((int)DayOfWeek.Friday - (int)today.DayOfWeek + 7) % 7;
+        var thisFriday = today.AddDays(daysUntilFriday);
+        var nextFriday = thisFriday.AddDays(7);
+
+        var releases = new List<WeeklyRelease>
+        {
+            new(
+                title: "Slay the Spire: El Juego de Mesa",
+                publisher: "MasQueOca",
+                releaseDate: thisFriday,
+                gameId: null,
+                coverImageUrl: "https://cf.geekdo-images.com/pic7123901.jpg",
+                estimatedPvp: 110.00m,
+                isReprint: false,
+                notes: "Adaptación oficial en tablero del aclamado roguelike de construcción de mazos."),
+
+            new(
+                title: "Harmonies",
+                publisher: "Asmodee / Libellud",
+                releaseDate: thisFriday,
+                gameId: null,
+                coverImageUrl: "https://cf.geekdo-images.com/pic7981245.jpg",
+                estimatedPvp: 34.99m,
+                isReprint: false,
+                notes: "Juego de colocación de patrones en 3D y hábitats para fauna salvaje."),
+
+            new(
+                title: "Dune: Imperium - Uprising",
+                publisher: "Asmodee / Dire Wolf",
+                releaseDate: thisFriday,
+                gameId: null,
+                coverImageUrl: "https://cf.geekdo-images.com/pic7589123.jpg",
+                estimatedPvp: 59.99m,
+                isReprint: true,
+                notes: "Reimpresión esperada con compatibilidad total con expansiones del juego base."),
+
+            new(
+                title: "Las Ruinas Perdidas de Arnak: Líderes de la Expedición",
+                publisher: "Devir Iberia",
+                releaseDate: nextFriday,
+                gameId: null,
+                coverImageUrl: "https://cf.geekdo-images.com/pic6349120.jpg",
+                estimatedPvp: 29.95m,
+                isReprint: true,
+                notes: "Reimpresión de la expansión con 6 líderes con habilidades asimétricas únicas.")
+        };
+
+        await db.WeeklyReleases.AddRangeAsync(releases, ct);
+        await db.SaveChangesAsync(ct);
+    }
+
+    private static async Task SeedRuleQAAsync(LudekaDbContext db, CancellationToken ct)
+    {
+        if (await db.RuleQuestions.AnyAsync(ct))
+            return;
+
+        var games = await db.Games.ToListAsync(ct);
+        var brass = games.FirstOrDefault(g => g.BggId == 224517);
+        var terraforming = games.FirstOrDefault(g => g.BggId == 167791);
+
+        if (brass != null)
+        {
+            var q1 = new RuleQuestion(
+                gameId: brass.Id,
+                userId: "carlos-jugon",
+                userName: "Carlos",
+                title: "¿Puedo consumir carbón de una mina que no sea de mi propiedad?",
+                body: "Durante la era de los canales, quería construir una fábrica textil y necesitaba carbón. Había una mina de otro jugador conectada por canal. ¿Puedo consumir su carbón gratis?");
+
+            q1.Upvote();
+            q1.Upvote();
+
+            var a1 = new RuleAnswer(
+                questionId: q1.Id,
+                userId: "elena-rules",
+                userName: "Elena M.",
+                body: "¡Sí, totalmente! El carbón en Brass se consume de la fuente conectada más cercana, sin importar de quién sea la mina. De hecho, al consumir su último carbón, ¡darás la vuelta a su loseta dándole puntos y dinero a ese jugador!",
+                officialRuleReference: "Reglamento oficial de Brass: Birmingham, pág. 11, sección 'Fuentes de Carbón'");
+
+            a1.Upvote();
+            a1.Upvote();
+            a1.Upvote();
+
+            q1.AddAnswer(a1);
+            q1.MarkAcceptedAnswer(a1.Id, "carlos-jugon", isModerator: false);
+
+            await db.RuleQuestions.AddAsync(q1, ct);
+            await db.RuleAnswers.AddAsync(a1, ct);
+        }
+
+        if (terraforming != null)
+        {
+            var q2 = new RuleQuestion(
+                gameId: terraforming.Id,
+                userId: "marta-marte",
+                userName: "Marta",
+                title: "¿El hito de Jardinero cuenta bosques colocados por eventos?",
+                body: "Un jugador colocó un bosque mediante una carta de evento roja y quería reclamar el hito de Jardinero (3 bosques). ¿Cuenta para el hito?");
+
+            q2.Upvote();
+
+            var a2 = new RuleAnswer(
+                questionId: q2.Id,
+                userId: "pablo-vet",
+                userName: "Pablo Vet",
+                body: "Sí. Para el hito de Jardinero cuentan las losetas físicas de bosque que tengas en el tablero de Marte bajo tu ficha de jugador, independientemente de si las colocaste por proyecto estándar o por cartas de evento.",
+                officialRuleReference: "Reglamento Terraforming Mars, pág. 13");
+
+            a2.Upvote();
+
+            q2.AddAnswer(a2);
+            q2.MarkAcceptedAnswer(a2.Id, "marta-marte", isModerator: false);
+
+            await db.RuleQuestions.AddAsync(q2, ct);
+            await db.RuleAnswers.AddAsync(a2, ct);
+        }
+
         await db.SaveChangesAsync(ct);
     }
 
