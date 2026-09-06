@@ -1,0 +1,93 @@
+@using Ludeca.Application.DTOs
+@using Ludeca.Core.Enums
+
+@if (Game != null)
+{
+    <a href="/juegos/@Game.Slug" class="game-card-editorial group" aria-label="Ver ficha de @Game.SpanishTitle">
+        <div class="cover-wrapper">
+            @if (!string.IsNullOrWhiteSpace(Game.CoverImageUrl))
+            {
+                <img src="@Game.CoverImageUrl" alt="Carátula oficial de @Game.SpanishTitle" loading="lazy" />
+            }
+            else
+            {
+                <div class="w-full h-full flex items-center justify-center bg-slate-900 text-slate-600 font-bold text-sm">
+                    Sin carátula
+                </div>
+            }
+
+            @* Rating flotante *@
+            <div class="rating-badge-float">
+                <span>★</span>
+                <span>@Game.BggRating.ToString("0.0")</span>
+            </div>
+        </div>
+
+        <div class="p-3.5 flex flex-col flex-1 justify-between">
+            <div>
+                <div class="flex items-center justify-between gap-1 mb-1">
+                    <span class="text-xs font-semibold text-orange-400">@Game.YearPublished</span>
+                    @if (!string.IsNullOrWhiteSpace(Game.IdealPlayerCountText))
+                    {
+                        <span class="text-[0.68rem] font-bold px-1.5 py-0.5 rounded bg-emerald-950/70 text-emerald-300 border border-emerald-500/30">
+                            @Game.IdealPlayerCountText
+                        </span>
+                    }
+                </div>
+
+                <h3 class="font-extrabold text-base text-white group-hover:text-orange-400 transition-colors line-clamp-1">
+                    @Game.SpanishTitle
+                </h3>
+
+                @if (!string.Equals(Game.SpanishTitle, Game.OriginalTitle, StringComparison.OrdinalIgnoreCase))
+                {
+                    <p class="text-xs text-slate-400 italic line-clamp-1 mb-2">(@Game.OriginalTitle)</p>
+                }
+                else
+                {
+                    <div class="mb-2"></div>
+                }
+
+                <div class="text-[0.72rem] text-slate-400 line-clamp-1 mb-3">
+                    @Game.Designer &bull; @Game.Publisher
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 flex-wrap pt-2 border-t border-slate-800/60 text-[0.7rem] text-slate-400">
+                @switch (Game.Style)
+                {
+                    case GameStyle.Eurogame:
+                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">⚙️ Euro</span>
+                        break;
+                    case GameStyle.Ameritrash:
+                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">🎲 Temático</span>
+                        break;
+                    case GameStyle.PartyGame:
+                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">🎉 Party</span>
+                        break;
+                    case GameStyle.FillerAbstract:
+                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">🧩 Filler</span>
+                        break;
+                    default:
+                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">📖 Narrativo</span>
+                        break;
+                }
+
+                @if (Game.IsOfficialSolo)
+                {
+                    <span class="px-1.5 py-0.5 rounded bg-blue-950/60 text-blue-300 border border-blue-800/40">👤 Solitario</span>
+                }
+
+                @if (Game.IsAccessibleEarlier)
+                {
+                    <span class="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">👶 @Game.CommunityAge+</span>
+                }
+            </div>
+        </div>
+    </a>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public GameSummaryDto Game { get; set; } = null!;
+}

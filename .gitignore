@@ -1,4 +1,4 @@
-﻿# Build and binary folders (.NET)
+# Build and binary folders (.NET)
 bin/
 obj/
 *.user
@@ -27,6 +27,7 @@ Thumbs.db
 .tools/bin/*.tar.gz
 !.tools/bin/.gitkeep
 !.tools/scripts/
+*.db
 *.db-journal
 *.db-wal
 *.db-shm

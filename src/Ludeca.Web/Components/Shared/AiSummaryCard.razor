@@ -1,0 +1,73 @@
+@using Ludeca.Application.DTOs
+
+<div class="rounded-2xl border border-sky-500/30 bg-slate-900/80 p-6 sm:p-7 relative overflow-hidden shadow-xl shadow-sky-950/10">
+    @* Ambient glow *@
+    <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-sky-500 opacity-5 blur-3xl pointer-events-none"></div>
+
+    @* Cabecera *@
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-sky-950/80 text-sky-400 border border-sky-500/40">
+                <span>🤖</span> Resumen generado por IA
+            </span>
+            <span class="text-xs text-slate-400 font-medium">
+                Fase 1: Síntesis Objetiva del Hobby
+            </span>
+        </div>
+        <div class="text-[0.68rem] text-slate-500 flex items-center gap-1">
+            <span>⚡ Pre-análisis algorítmico</span>
+        </div>
+    </div>
+
+    @* Contenido estructurado *@
+    <div class="mt-4 space-y-4 text-xs sm:text-sm">
+        <p class="text-slate-300 leading-relaxed font-normal">
+            @Summary.GeneralVerdict
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+            @* Escalabilidad *@
+            <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1">
+                <span class="text-[0.68rem] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                    <span>👥</span> Escalabilidad
+                </span>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    @Summary.ScalabilitySummary
+                </p>
+            </div>
+
+            @* Edad Real *@
+            <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1">
+                <span class="text-[0.68rem] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+                    <span>🧒</span> Accesibilidad & Edad
+                </span>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    @Summary.AgeSummary
+                </p>
+            </div>
+
+            @* Huella en mesa *@
+            <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1">
+                <span class="text-[0.68rem] font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1">
+                    <span>📐</span> Espacio y Tiempo
+                </span>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    @Summary.FootprintSummary
+                </p>
+            </div>
+        </div>
+
+        @* Banner informativo didáctico del ciclo de vida *@
+        <div class="p-3 rounded-xl bg-slate-950/40 border border-slate-800/60 text-[0.72rem] text-slate-400 flex items-start gap-2.5">
+            <span class="text-base shrink-0">⏳</span>
+            <p>
+                <strong>Ciclo Editorial Ludeca:</strong> Este juego aún no cuenta con el análisis de la mesa fundadora ni fotos reales de partida. En cuanto nuestro equipo publique su veredicto oficial, este bloque de IA será sustituido de forma prioritaria.
+            </p>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public AiGameSummaryDto Summary { get; set; } = null!;
+}

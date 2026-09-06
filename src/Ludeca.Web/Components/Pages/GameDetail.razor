@@ -1,0 +1,339 @@
+@page "/juegos/{Slug}"
+@rendermode InteractiveServer
+@inject ICatalogService CatalogService
+@inject IUserLibraryService LibraryService
+@inject IFoundingVerdictService FoundingService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>@(Game != null ? $"{Game.SpanishTitle} — Ficha Inteligente | Ludeca" : "Juego no encontrado — Ludeca")</PageTitle>
+
+@if (_isLoading)
+{
+    <div class="container-ludeca py-20 text-center text-slate-400">
+        <div class="inline-block animate-spin text-4xl mb-3">🎲</div>
+        <p class="text-base font-semibold">Cargando ficha lúdica inteligente...</p>
+    </div>
+}
+else if (Game == null)
+{
+    <div class="container-ludeca py-20 text-center max-w-lg mx-auto">
+        <span class="text-5xl block mb-4">🕵️‍♂️</span>
+        <h1 class="text-2xl font-black text-white mb-2">Juego no encontrado</h1>
+        <p class="text-sm text-slate-400 mb-6">
+            El juego que buscas con identificador <code class="text-orange-400">@Slug</code> aún no está en nuestro catálogo base.
+        </p>
+        <a href="/" class="filter-btn active inline-block text-sm">
+            &larr; Volver al Catálogo
+        </a>
+    </div>
+}
+else
+{
+    @* Back bar y Acciones de Cabecera *@
+    <div class="border-b border-slate-800/60 bg-slate-950/40">
+        <div class="container-ludeca py-3 flex items-center justify-between">
+            <a href="/" class="text-xs font-semibold text-slate-400 hover:text-orange-400 transition-colors inline-flex items-center gap-1.5">
+                <span>&larr;</span> Volver al catálogo
+            </a>
+            <div class="flex items-center gap-3">
+                @if (CurrentUserService.IsFoundingTeam)
+                {
+                    <button type="button"
+                            @onclick="() => _isFoundingModalOpen = true"
+                            class="px-3 py-1 rounded-lg bg-orange-950/90 border border-orange-500/50 hover:bg-orange-900 text-orange-300 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                        <span>🛡️</span> Gestionar Veredicto Fundador
+                    </button>
+                }
+                <a href="/mi-ludoteca" class="text-xs font-semibold text-emerald-400 hover:underline inline-flex items-center gap-1">
+                    <span>📚</span> Ir a Mi Ludoteca
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @* Hero Section (Lectura en 3 segundos) *@
+    <div class="detail-hero-backdrop">
+        <div class="container-ludeca">
+            <div class="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                @* Carátula oficial BGG *@
+                <div class="w-full sm:w-64 md:w-72 shrink-0 rounded-2xl overflow-hidden border-2 border-slate-700/60 shadow-2xl bg-black">
+                    @if (!string.IsNullOrWhiteSpace(Game.CoverImageUrl))
+                    {
+                        <img src="@Game.CoverImageUrl" alt="Carátula de @Game.SpanishTitle" class="w-full h-auto object-cover" />
+                    }
+                    else
+                    {
+                        <div class="aspect-square flex items-center justify-center text-slate-600 font-bold">
+                            Sin carátula disponible
+                        </div>
+                    }
+                </div>
+
+                @* Bloque de Identidad y Ratings *@
+                <div class="flex-1 space-y-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-orange-950/80 text-orange-400 border border-orange-500/40">
+                                @Game.YearPublished
+                            </span>
+                            @if (Game.BggRank.HasValue)
+                            {
+                                <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                                    🏆 #@Game.BggRank Global BGG
+                                </span>
+                            }
+                        </div>
+
+                        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                            @Game.SpanishTitle
+                        </h1>
+
+                        @if (!string.Equals(Game.SpanishTitle, Game.OriginalTitle, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <p class="text-sm text-slate-400 italic">
+                                Título original: @Game.OriginalTitle
+                            </p>
+                        }
+
+                        <p class="text-xs text-slate-400 mt-1">
+                            Diseñado por <strong class="text-slate-300">@Game.Designer</strong> &bull; Publicado en España por <strong class="text-slate-300">@Game.Publisher</strong>
+                        </p>
+                    </div>
+
+                    @* Doble Rating (BGG vs Ludist) *@
+                    <div class="flex items-center gap-4 py-3 px-4 rounded-xl bg-slate-900/80 border border-slate-800 max-w-md">
+                        <div class="flex-1">
+                            <span class="text-[0.68rem] uppercase font-bold text-slate-500 block">Rating BGG</span>
+                            <div class="flex items-baseline gap-1 text-amber-400">
+                                <span class="text-xl font-black">★ @Game.BggRating.ToString("0.0")</span>
+                                <span class="text-xs text-slate-500">/ 10</span>
+                            </div>
+                        </div>
+                        <div class="w-px h-8 bg-slate-800"></div>
+                        <div class="flex-1">
+                            <span class="text-[0.68rem] uppercase font-bold text-slate-500 block">Consenso Ludist</span>
+                            <div class="flex items-baseline gap-1 text-emerald-400">
+                                <span class="text-xl font-black">★ @Game.LudistRating.ToString("0.0")</span>
+                                <span class="text-xs text-slate-500">/ 10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* ADN Lúdico *@
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">ADN Lúdico</span>
+                        <QuickBadges
+                            Confrontation="@Game.Confrontation"
+                            Style="@Game.Style"
+                            IsOfficialSolo="@Game.IsOfficialSolo"
+                            Age="@Game.Age"
+                            Language="@Game.Language"
+                            EstimatedMinutesPerPlayer="@Game.Duration.EstimatedPerPlayerMinutes"
+                            Footprint="@Game.Footprint" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Bloque de Interacción de Usuario: Colección en 4 Estados y Préstamos *@
+    <div class="container-ludeca pt-6">
+        <CollectionActionBar
+            CurrentItem="@_collectionItem"
+            ActiveLoan="@_activeLoan"
+            OnStatusSelected="HandleStatusSelected"
+            OnLoanClicked="() => _isLoanModalOpen = true" />
+
+        @if (_activeLoan != null)
+        {
+            <div class="mt-3 p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 flex items-center justify-between text-xs text-amber-200">
+                <div class="flex items-center gap-2">
+                    <span>📦</span>
+                    <span>
+                        Actualmente prestado a <strong class="text-white">@_activeLoan.BorrowerName</strong> desde el @_activeLoan.LoanDate.ToString("dd/MM/yyyy").
+                    </span>
+                </div>
+                <button type="button"
+                        @onclick="() => _isLoanModalOpen = true"
+                        class="px-2.5 py-1 rounded-lg bg-amber-900/80 hover:bg-amber-800 text-amber-200 font-bold text-[0.68rem] transition-colors">
+                    Ver préstamo &rarr;
+                </button>
+            </div>
+        }
+    </div>
+
+    @* Bloque de Análisis Editorial y Consenso *@
+    <div class="container-ludeca py-6 space-y-8">
+        @* 1. Bloque Editorial: Veredicto Fundador (Fase 2) o Resumen IA (Fase 1) *@
+        @if (_foundingVerdict != null)
+        {
+            <FoundingVerdictCard Verdict="@_foundingVerdict" />
+        }
+        else if (_aiSummary != null)
+        {
+            <AiSummaryCard Summary="@_aiSummary" />
+        }
+
+        @* 2. Tarjeta de Valoración Propia y Acceso a Review *@
+        <UserReviewCard
+            Review="@_userReview"
+            OnEditClicked="() => _isReviewModalOpen = true" />
+
+        @* 3. Semáforo Dinámico *@
+        <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
+            <h2 class="text-lg font-black text-white mb-1">
+                Semáforo Dinámico de Escalabilidad (1 a 7+ jugadores)
+            </h2>
+            <p class="text-xs text-slate-400 mb-4">
+                Basado en miles de partidas y votaciones del hobby para saber si el juego realmente escala bien antes de sacarlo a mesa.
+            </p>
+
+            <ScalabilityTrafficLight Entries="@Game.Scalability" IdealText="@Game.IdealPlayerCountText" />
+        </div>
+
+        @* 4. Guía de Fundas *@
+        <SleeveGuideCard Sleeves="@Game.Sleeves" />
+
+        @* 5. Sinopsis / Descripción *@
+        @if (!string.IsNullOrWhiteSpace(Game.Description))
+        {
+            <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80">
+                <h2 class="text-base font-bold text-white mb-3">Sobre el juego</h2>
+                <div class="text-sm text-slate-300 leading-relaxed space-y-3">
+                    @((MarkupString)Game.Description.Replace("\n", "<br />"))
+                </div>
+            </div>
+        }
+    </div>
+
+    @* Modales *@
+    <LoanModal
+        IsOpen="@_isLoanModalOpen"
+        ActiveLoan="@_activeLoan"
+        OnCreateLoan="HandleCreateLoan"
+        OnReturnLoan="HandleReturnLoan"
+        OnClose="() => _isLoanModalOpen = false" />
+
+    <ReviewBottomSheet
+        IsOpen="@_isReviewModalOpen"
+        ExistingReview="@_userReview"
+        OnSubmitReview="HandleSubmitReview"
+        OnClose="() => _isReviewModalOpen = false" />
+
+    <FoundingVerdictModal
+        IsOpen="@_isFoundingModalOpen"
+        GameId="@Game.Id"
+        GameTitle="@Game.SpanishTitle"
+        ExistingVerdict="@_foundingVerdict"
+        OnSaveVerdict="HandleSaveFoundingVerdict"
+        OnClose="() => _isFoundingModalOpen = false" />
+}
+
+@code {
+    [Parameter]
+    public string Slug { get; set; } = string.Empty;
+
+    private GameDetailDto? Game { get; set; }
+    private UserCollectionItemDto? _collectionItem;
+    private GameLoanDto? _activeLoan;
+    private UserReviewDto? _userReview;
+    private FoundingVerdictDto? _foundingVerdict;
+    private AiGameSummaryDto? _aiSummary;
+
+    private bool _isLoading = true;
+    private bool _isLoanModalOpen;
+    private bool _isReviewModalOpen;
+    private bool _isFoundingModalOpen;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+        Game = await CatalogService.GetGameBySlugAsync(Slug);
+        if (Game != null)
+        {
+            await LoadUserDataAsync();
+        }
+        _isLoading = false;
+    }
+
+    private async Task LoadUserDataAsync()
+    {
+        if (Game == null) return;
+        _collectionItem = await LibraryService.GetCollectionStateAsync(Game.Id);
+        _activeLoan = await LibraryService.GetActiveLoanAsync(Game.Id);
+        _userReview = await LibraryService.GetUserReviewAsync(Game.Id);
+
+        _foundingVerdict = await FoundingService.GetVerdictByGameIdAsync(Game.Id);
+        if (_foundingVerdict == null)
+        {
+            _aiSummary = await FoundingService.GetAiSummaryForGameAsync(Game.Id);
+        }
+        else
+        {
+            _aiSummary = null;
+        }
+    }
+
+    private async Task HandleStatusSelected(CollectionStatus status)
+    {
+        if (Game == null) return;
+
+        bool wasUnrated = _userReview == null;
+        var prevStatus = _collectionItem?.Status;
+
+        _collectionItem = await LibraryService.SetCollectionStateAsync(Game.Id, status);
+        _activeLoan = await LibraryService.GetActiveLoanAsync(Game.Id);
+
+        // Disparador de valoración: si el juego pasa a Jugado o En mi ludoteca por primera vez y no tiene valoración, sugerir valoración en 45s
+        if (wasUnrated && _collectionItem != null &&
+            (status == CollectionStatus.Played || status == CollectionStatus.InCollection) &&
+            prevStatus != status)
+        {
+            _isReviewModalOpen = true;
+        }
+    }
+
+    private async Task HandleCreateLoan(CreateLoanRequest req)
+    {
+        if (Game == null) return;
+
+        await LibraryService.CreateLoanAsync(new CreateLoanRequest(Game.Id, req.BorrowerName, req.LoanDate, req.Notes));
+        await LoadUserDataAsync();
+    }
+
+    private async Task HandleReturnLoan(Guid loanId)
+    {
+        await LibraryService.ReturnLoanAsync(loanId);
+        await LoadUserDataAsync();
+    }
+
+    private async Task HandleSubmitReview(SubmitReviewRequest req)
+    {
+        if (Game == null) return;
+
+        await LibraryService.SubmitReviewAsync(new SubmitReviewRequest(
+            Game.Id,
+            req.Score,
+            req.MicroReview,
+            req.PlayerCountVotes,
+            req.FamilyExperience,
+            req.PlayContext
+        ));
+
+        // Refrescar ficha del juego para reflejar el consenso actualizado
+        Game = await CatalogService.GetGameBySlugAsync(Slug);
+        await LoadUserDataAsync();
+    }
+
+    private async Task HandleSaveFoundingVerdict(SaveFoundingVerdictRequest req)
+    {
+        if (Game == null) return;
+
+        await FoundingService.SaveVerdictAsync(req);
+
+        // Refrescar ficha y datos del veredicto
+        Game = await CatalogService.GetGameBySlugAsync(Slug);
+        await LoadUserDataAsync();
+    }
+}

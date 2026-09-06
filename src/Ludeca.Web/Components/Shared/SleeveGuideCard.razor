@@ -1,0 +1,47 @@
+@using Ludeca.Core.ValueObjects
+
+<div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+            <span class="text-lg">🛡️</span>
+            <h3 class="font-bold text-sm text-slate-200">Guía de Fundas (Sleeves)</h3>
+        </div>
+        <span class="text-xs text-slate-400">Protege tus cartas</span>
+    </div>
+
+    @if (Sleeves != null && Sleeves.Count > 0)
+    {
+        <div class="space-y-3">
+            @foreach (var sleeve in Sleeves)
+            {
+                int packs50 = sleeve.CalculatePacksNeeded(50);
+                <div class="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <div class="font-semibold text-sm text-white">@sleeve.FormatName (@sleeve.DimensionText)</div>
+                        <div class="text-xs text-slate-400">
+                            <strong>@sleeve.CardCount</strong> cartas &bull; Necesitas <strong>@packs50</strong> paquetes de 50 fundas
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(sleeve.AffiliateUrl))
+                    {
+                        <a href="@sleeve.AffiliateUrl" target="_blank" rel="noopener noreferrer sponsored"
+                           class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white transition-colors">
+                            Comprar fundas compatibles &rarr;
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-xs text-slate-400 italic">
+            ¡Buenas noticias! Este juego no contiene cartas que requieran fundas o no tiene componentes enfundables.
+        </p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyList<SleeveItem>? Sleeves { get; set; }
+}

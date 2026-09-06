@@ -1,0 +1,308 @@
+@using Ludeca.Application.DTOs
+@using Ludeca.Core.Enums
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
+        <div class="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-6">
+            @* Modal Header *@
+            <div class="p-5 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl">🛡️</span>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black text-white leading-tight">
+                            @(ExistingVerdict != null ? "Editar Veredicto de la Mesa" : "Redactar Veredicto de la Mesa")
+                        </h2>
+                        <p class="text-xs text-orange-400 font-semibold">@GameTitle</p>
+                    </div>
+                </div>
+                <button type="button"
+                        @onclick="HandleClose"
+                        class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold transition-colors">
+                    ✕
+                </button>
+            </div>
+
+            @* Modal Body *@
+            <div class="p-5 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+                @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                {
+                    <div class="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-center gap-2">
+                        <span>⚠️</span>
+                        <span>@_errorMessage</span>
+                    </div>
+                }
+
+                @* 1. Sello Oficial de Recomendación *@
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                        1. Sello de Recomendación Oficial
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <button type="button"
+                                @onclick="() => _recommendation = FoundingRecommendation.MustPlay"
+                                class="p-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all @(_recommendation == FoundingRecommendation.MustPlay ? "bg-amber-950/80 border-amber-500 text-amber-300 shadow-md shadow-amber-950/40" : "bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700")">
+                            <span class="text-xl">🏆</span>
+                            <span>Imprescindible</span>
+                            <span class="text-[0.65rem] text-slate-500 font-normal">Brilla al máximo</span>
+                        </button>
+                        <button type="button"
+                                @onclick="() => _recommendation = FoundingRecommendation.RecommendedWithAdaptations"
+                                class="p-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all @(_recommendation == FoundingRecommendation.RecommendedWithAdaptations ? "bg-emerald-950/80 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-950/40" : "bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700")">
+                            <span class="text-xl">🏷️</span>
+                            <span>Recomendado</span>
+                            <span class="text-[0.65rem] text-slate-500 font-normal">Con adaptaciones</span>
+                        </button>
+                        <button type="button"
+                                @onclick="() => _recommendation = FoundingRecommendation.Skippable"
+                                class="p-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all @(_recommendation == FoundingRecommendation.Skippable ? "bg-slate-800 border-slate-500 text-slate-200 shadow-md" : "bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700")">
+                            <span class="text-xl">📦</span>
+                            <span>Prescindible</span>
+                            <span class="text-[0.65rem] text-slate-500 font-normal">Poco diferencial</span>
+                        </button>
+                    </div>
+                </div>
+
+                @* 2. Análisis General de la Casa *@
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-300">
+                            2. Veredicto y Análisis de la Casa
+                        </label>
+                        <span class="text-[0.68rem] text-slate-500">Mínimo 10 caracteres</span>
+                    </div>
+                    <textarea @bind="_overallVerdict"
+                              rows="3"
+                              placeholder="Describe las sensaciones de partida, producción, ritmo y por qué merece este sello..."
+                              class="w-full rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 p-3 text-sm text-slate-200 placeholder-slate-600 resize-none transition-all"></textarea>
+                </div>
+
+                @* 3. Experiencia a 2 Jugadores (En Pareja) *@
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-bold uppercase tracking-wider text-amber-400">
+                            3. Enfoque a 2 Jugadores (En Pareja)
+                        </label>
+                        <span class="text-[0.68rem] text-slate-500">Tensión, mapa y bot</span>
+                    </div>
+                    <textarea @bind="_twoPlayerVerdict"
+                              rows="2"
+                              placeholder="¿Escala bien a 2? ¿Queda el tablero desierto o se siente como un duelo tenso y satisfactorio?..."
+                              class="w-full rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 p-3 text-sm text-slate-200 placeholder-slate-600 resize-none transition-all"></textarea>
+                </div>
+
+                @* 4. Experiencia Familiar y con Niños *@
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                            4. Con Niños y Familias (Adaptaciones Reales)
+                        </label>
+                        <span class="text-[0.68rem] text-slate-500">Edad real y reglas adaptadas</span>
+                    </div>
+                    <textarea @bind="_familyVerdict"
+                              rows="2"
+                              placeholder="¿Desde qué edad funciona? ¿Qué reglas quitáis o adaptáis para que fluya con peques?..."
+                              class="w-full rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 p-3 text-sm text-slate-200 placeholder-slate-600 resize-none transition-all"></textarea>
+                </div>
+
+                @* 5. Galería de Fotos Reales de Partida (Máximo 3) *@
+                <div class="pt-2 border-t border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-300">
+                            5. Fotos Reales en Mesa Física (@_photos.Count / 3)
+                        </label>
+                        <span class="text-[0.68rem] text-slate-500">Imágenes tomadas en partida real</span>
+                    </div>
+
+                    @* Fotos existentes *@
+                    @if (_photos.Count > 0)
+                    {
+                        <div class="space-y-2 mb-3">
+                            @for (int i = 0; i < _photos.Count; i++)
+                            {
+                                var idx = i;
+                                var p = _photos[idx];
+                                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                                    <img src="@p.PhotoUrl" alt="@p.Caption" class="w-14 h-10 object-cover rounded-lg bg-slate-900 shrink-0" />
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs text-slate-200 truncate">@p.Caption</p>
+                                        <span class="text-[0.65rem] text-slate-500 truncate block">@p.PhotoUrl</span>
+                                    </div>
+                                    <button type="button"
+                                            @onclick="() => RemovePhoto(idx)"
+                                            class="px-2.5 py-1 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 text-xs font-bold transition-colors">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @* Formulario para añadir nueva foto *@
+                    @if (_photos.Count < 3)
+                    {
+                        <div class="p-3 rounded-xl bg-slate-950/60 border border-dashed border-slate-800 space-y-2">
+                            <span class="text-xs font-semibold text-slate-400 block">+ Adjuntar fotografía de mesa</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <input type="url"
+                                       @bind="_newPhotoUrl"
+                                       placeholder="URL de la imagen (https://...)"
+                                       class="w-full rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:border-orange-500" />
+                                <input type="text"
+                                       @bind="_newPhotoCaption"
+                                       placeholder="Pie de foto descriptivo..."
+                                       class="w-full rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:border-orange-500" />
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="button"
+                                        @onclick="AddPhoto"
+                                        disabled="@(string.IsNullOrWhiteSpace(_newPhotoUrl))"
+                                        class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-xs font-bold text-slate-200 transition-colors">
+                                    Añadir Foto
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Modal Footer *@
+            <div class="p-4 sm:p-5 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between">
+                <button type="button"
+                        @onclick="HandleClose"
+                        class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-colors">
+                    Cancelar
+                </button>
+                <button type="button"
+                        @onclick="HandleSubmit"
+                        class="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs sm:text-sm font-black shadow-lg shadow-orange-950/40 transition-all flex items-center gap-1.5">
+                    <span>💾</span> Publicar Veredicto Oficial
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public Guid GameId { get; set; }
+
+    [Parameter]
+    public string GameTitle { get; set; } = string.Empty;
+
+    [Parameter]
+    public FoundingVerdictDto? ExistingVerdict { get; set; }
+
+    [Parameter]
+    public EventCallback<SaveFoundingVerdictRequest> OnSaveVerdict { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private FoundingRecommendation _recommendation = FoundingRecommendation.MustPlay;
+    private string _overallVerdict = string.Empty;
+    private string _twoPlayerVerdict = string.Empty;
+    private string _familyVerdict = string.Empty;
+    private List<FoundingPhotoDto> _photos = [];
+
+    private string _newPhotoUrl = string.Empty;
+    private string _newPhotoCaption = string.Empty;
+    private string? _errorMessage;
+
+    protected override void OnParametersSet()
+    {
+        if (ExistingVerdict != null)
+        {
+            _recommendation = ExistingVerdict.Recommendation;
+            _overallVerdict = ExistingVerdict.OverallVerdict;
+            _twoPlayerVerdict = ExistingVerdict.TwoPlayerVerdict;
+            _familyVerdict = ExistingVerdict.FamilyVerdict;
+            _photos = ExistingVerdict.Photos.ToList();
+        }
+        else
+        {
+            _recommendation = FoundingRecommendation.MustPlay;
+            _overallVerdict = string.Empty;
+            _twoPlayerVerdict = string.Empty;
+            _familyVerdict = string.Empty;
+            _photos = [];
+        }
+        _errorMessage = null;
+    }
+
+    private void AddPhoto()
+    {
+        _errorMessage = null;
+        if (string.IsNullOrWhiteSpace(_newPhotoUrl))
+        {
+            _errorMessage = "Introduce la URL de la imagen antes de añadirla.";
+            return;
+        }
+
+        if (_photos.Count >= 3)
+        {
+            _errorMessage = "Solo se permiten hasta 3 fotografías reales por juego.";
+            return;
+        }
+
+        _photos.Add(new FoundingPhotoDto(
+            _newPhotoUrl.Trim(),
+            string.IsNullOrWhiteSpace(_newPhotoCaption) ? "Fotografía de partida real" : _newPhotoCaption.Trim()
+        ));
+
+        _newPhotoUrl = string.Empty;
+        _newPhotoCaption = string.Empty;
+    }
+
+    private void RemovePhoto(int index)
+    {
+        if (index >= 0 && index < _photos.Count)
+        {
+            _photos.RemoveAt(index);
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        _errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(_overallVerdict) || _overallVerdict.Trim().Length < 10)
+        {
+            _errorMessage = "El análisis general de la casa debe contener al menos 10 caracteres.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_twoPlayerVerdict) || _twoPlayerVerdict.Trim().Length < 10)
+        {
+            _errorMessage = "El análisis a 2 jugadores debe contener al menos 10 caracteres.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_familyVerdict) || _familyVerdict.Trim().Length < 10)
+        {
+            _errorMessage = "El análisis familiar con niños debe contener al menos 10 caracteres.";
+            return;
+        }
+
+        var request = new SaveFoundingVerdictRequest(
+            GameId,
+            _recommendation,
+            _overallVerdict.Trim(),
+            _twoPlayerVerdict.Trim(),
+            _familyVerdict.Trim(),
+            _photos
+        );
+
+        await OnSaveVerdict.InvokeAsync(request);
+        await HandleClose();
+    }
+
+    private async Task HandleClose()
+    {
+        _errorMessage = null;
+        await OnClose.InvokeAsync();
+    }
+}

@@ -1,0 +1,48 @@
+@using System.Timers
+
+<div class="search-input-wrapper">
+    <svg class="search-icon w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    <input type="text"
+           class="search-input"
+           placeholder="Buscar por título en español, título original, autor..."
+           value="@CurrentValue"
+           @oninput="OnInputChanged"
+           aria-label="Buscar juegos en el catálogo" />
+</div>
+
+@code {
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private string CurrentValue { get; set; } = string.Empty;
+    private System.Threading.Timer? _debounceTimer;
+
+    protected override void OnParametersSet()
+    {
+        CurrentValue = Value ?? string.Empty;
+    }
+
+    private void OnInputChanged(ChangeEventArgs e)
+    {
+        CurrentValue = e.Value?.ToString() ?? string.Empty;
+
+        _debounceTimer?.Dispose();
+        _debounceTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await ValueChanged.InvokeAsync(CurrentValue);
+            });
+        }, null, 250, Timeout.Infinite);
+    }
+
+    public void Dispose()
+    {
+        _debounceTimer?.Dispose();
+    }
+}
