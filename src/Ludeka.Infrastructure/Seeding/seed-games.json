@@ -30,7 +30,7 @@
       { "PlayerCount": 5, "DisplayCount": "5J", "Status": "NotRecommended", "BestVotes": 70, "RecommendedVotes": 340, "NotRecommendedVotes": 620 }
     ],
     "Sleeves": [
-      { "FormatName": "Estándar USA", "WidthMm": 57.0, "HeightMm": 89.0, "CardCount": 212, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Estándar USA", "WidthMm": 57.0, "HeightMm": 89.0, "CardCount": 212, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -60,8 +60,8 @@
       { "PlayerCount": 2, "DisplayCount": "2J", "Status": "MustPlay", "BestVotes": 1450, "RecommendedVotes": 60, "NotRecommendedVotes": 8 }
     ],
     "Sleeves": [
-      { "FormatName": "Mini Europeo", "WidthMm": 44.0, "HeightMm": 68.0, "CardCount": 73, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" },
-      { "FormatName": "Grande / Tarots", "WidthMm": 65.0, "HeightMm": 100.0, "CardCount": 12, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Mini Europeo", "WidthMm": 44.0, "HeightMm": 68.0, "CardCount": 73, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" },
+      { "FormatName": "Grande / Tarots", "WidthMm": 65.0, "HeightMm": 100.0, "CardCount": 12, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -92,7 +92,7 @@
       { "PlayerCount": 4, "DisplayCount": "4J", "Status": "MustPlay", "BestVotes": 1180, "RecommendedVotes": 320, "NotRecommendedVotes": 45 }
     ],
     "Sleeves": [
-      { "FormatName": "Mini Europeo", "WidthMm": 44.0, "HeightMm": 68.0, "CardCount": 120, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Mini Europeo", "WidthMm": 44.0, "HeightMm": 68.0, "CardCount": 120, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -157,7 +157,7 @@
       { "PlayerCount": 5, "DisplayCount": "5J", "Status": "NotRecommended", "BestVotes": 60, "RecommendedVotes": 320, "NotRecommendedVotes": 640 }
     ],
     "Sleeves": [
-      { "FormatName": "Estándar USA", "WidthMm": 63.5, "HeightMm": 88.0, "CardCount": 208, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Estándar USA", "WidthMm": 63.5, "HeightMm": 88.0, "CardCount": 208, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -220,8 +220,8 @@
       { "PlayerCount": 4, "DisplayCount": "4J", "Status": "Recommended", "BestVotes": 520, "RecommendedVotes": 640, "NotRecommendedVotes": 140 }
     ],
     "Sleeves": [
-      { "FormatName": "Estándar Europeo", "WidthMm": 59.0, "HeightMm": 92.0, "CardCount": 727, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" },
-      { "FormatName": "Mini Europeo", "WidthMm": 44.0, "HeightMm": 68.0, "CardCount": 975, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Estándar Europeo", "WidthMm": 59.0, "HeightMm": 92.0, "CardCount": 727, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" },
+      { "FormatName": "Mini Europeo", "WidthMm": 44.0, "HeightMm": 68.0, "CardCount": 975, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -254,7 +254,7 @@
       { "PlayerCount": 4, "DisplayCount": "4J", "Status": "Recommended", "BestVotes": 190, "RecommendedVotes": 410, "NotRecommendedVotes": 60 }
     ],
     "Sleeves": [
-      { "FormatName": "Tarot / Grande", "WidthMm": 70.0, "HeightMm": 120.0, "CardCount": 21, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Tarot / Grande", "WidthMm": 70.0, "HeightMm": 120.0, "CardCount": 21, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -287,8 +287,8 @@
       { "PlayerCount": 4, "DisplayCount": "4J", "Status": "MustPlay", "BestVotes": 850, "RecommendedVotes": 180, "NotRecommendedVotes": 15 }
     ],
     "Sleeves": [
-      { "FormatName": "Estándar USA", "WidthMm": 63.5, "HeightMm": 88.0, "CardCount": 162, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" },
-      { "FormatName": "Mini USA", "WidthMm": 44.0, "HeightMm": 67.0, "CardCount": 58, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Estándar USA", "WidthMm": 63.5, "HeightMm": 88.0, "CardCount": 162, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" },
+      { "FormatName": "Mini USA", "WidthMm": 44.0, "HeightMm": 67.0, "CardCount": 58, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -321,8 +321,8 @@
       { "PlayerCount": 5, "DisplayCount": "5J", "Status": "Recommended", "BestVotes": 180, "RecommendedVotes": 320, "NotRecommendedVotes": 85 }
     ],
     "Sleeves": [
-      { "FormatName": "Estándar USA", "WidthMm": 56.0, "HeightMm": 87.0, "CardCount": 45, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" },
-      { "FormatName": "Mini USA", "WidthMm": 44.0, "HeightMm": 67.0, "CardCount": 96, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Estándar USA", "WidthMm": 56.0, "HeightMm": 87.0, "CardCount": 45, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" },
+      { "FormatName": "Mini USA", "WidthMm": 44.0, "HeightMm": 67.0, "CardCount": 96, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -386,7 +386,7 @@
       { "PlayerCount": 4, "DisplayCount": "4J", "Status": "NotRecommended", "BestVotes": 70, "RecommendedVotes": 260, "NotRecommendedVotes": 420 }
     ],
     "Sleeves": [
-      { "FormatName": "Estándar USA", "WidthMm": 63.5, "HeightMm": 88.0, "CardCount": 255, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Estándar USA", "WidthMm": 63.5, "HeightMm": 88.0, "CardCount": 255, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -419,7 +419,7 @@
       { "PlayerCount": 7, "DisplayCount": "7J+", "Status": "MustPlay", "BestVotes": 780, "RecommendedVotes": 280, "NotRecommendedVotes": 20 }
     ],
     "Sleeves": [
-      { "FormatName": "Estándar USA", "WidthMm": 44.0, "HeightMm": 68.0, "CardCount": 200, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Estándar USA", "WidthMm": 44.0, "HeightMm": 68.0, "CardCount": 200, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {
@@ -452,7 +452,7 @@
       { "PlayerCount": 6, "DisplayCount": "6J", "Status": "MustPlay", "BestVotes": 720, "RecommendedVotes": 210, "NotRecommendedVotes": 10 }
     ],
     "Sleeves": [
-      { "FormatName": "Magnum Dixit", "WidthMm": 80.0, "HeightMm": 120.0, "CardCount": 84, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludist" }
+      { "FormatName": "Magnum Dixit", "WidthMm": 80.0, "HeightMm": 120.0, "CardCount": 84, "AffiliateUrl": "https://zacatrus.es/fundas?ref=ludeka" }
     ]
   },
   {

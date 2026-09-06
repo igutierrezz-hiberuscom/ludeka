@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -59,7 +59,8 @@ public class SqliteGameRepository : IGameRepository
             query = query.Where(g =>
                 EF.Functions.Like(g.SpanishTitle, $"%{term}%") ||
                 EF.Functions.Like(g.OriginalTitle, $"%{term}%") ||
-                EF.Functions.Like(g.Designer, $"%{term}%"));
+                EF.Functions.Like(g.Designer, $"%{term}%") ||
+                EF.Functions.Like(g.Publisher, $"%{term}%"));
         }
 
         // Filtro por estilo lúdico

@@ -27,8 +27,9 @@ public class SqlitePendingBggImportRepository : IPendingBggImportRepository
     public async Task<IReadOnlyList<PendingBggImport>> GetTopPendingAsync(int limit = 50, CancellationToken ct = default)
     {
         return await _context.PendingBggImports
-            .Where(p => p.Status == CatalogQueueStatus.Pending)
-            .OrderByDescending(p => p.RequestedCount)
+            .Where(p => p.Status == CatalogQueueStatus.Pending || p.Status == CatalogQueueStatus.Failed)
+            .OrderBy(p => p.Status == CatalogQueueStatus.Failed ? 1 : 0)
+            .ThenByDescending(p => p.RequestedCount)
             .Take(limit)
             .ToListAsync(ct);
     }
@@ -49,7 +50,7 @@ public class SqlitePendingBggImportRepository : IPendingBggImportRepository
     public async Task<int> GetTotalPendingCountAsync(CancellationToken ct = default)
     {
         return await _context.PendingBggImports
-            .CountAsync(p => p.Status == CatalogQueueStatus.Pending, ct);
+            .CountAsync(p => p.Status == CatalogQueueStatus.Pending || p.Status == CatalogQueueStatus.Failed, ct);
     }
 
     public async Task AddAsync(PendingBggImport item, CancellationToken ct = default)
@@ -61,6 +62,20 @@ public class SqlitePendingBggImportRepository : IPendingBggImportRepository
     public async Task UpdateAsync(PendingBggImport item, CancellationToken ct = default)
     {
         _context.PendingBggImports.Update(item);
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task ResetFailedToPendingAsync(CancellationToken ct = default)
+    {
+        var failedItems = await _context.PendingBggImports
+            .Where(p => p.Status == CatalogQueueStatus.Failed)
+            .ToListAsync(ct);
+
+        foreach (var item in failedItems)
+        {
+            item.ResetToPending();
+        }
+
         await _context.SaveChangesAsync(ct);
     }
 }

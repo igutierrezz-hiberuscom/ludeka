@@ -6,6 +6,7 @@ using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Microsoft.Extensions.Options;
 using Ludeka.Application.Contracts;
 using Ludeka.Application.DTOs;
 using Ludeka.Core.Entities;
@@ -18,10 +19,22 @@ public class BggXmlApiClient : IBggClient, IDisposable
     private readonly RateLimiter _rateLimiter;
     private readonly bool _ownsHttpClient;
 
-    public BggXmlApiClient(HttpClient? httpClient = null)
+    public BggXmlApiClient(HttpClient? httpClient = null, IOptions<BggOptions>? options = null)
     {
         _ownsHttpClient = httpClient == null;
         _httpClient = httpClient ?? new HttpClient();
+
+        var bggOpts = options?.Value ?? new BggOptions();
+        if (!string.IsNullOrWhiteSpace(bggOpts.ApiToken))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bggOpts.ApiToken.Trim());
+        }
+
+        if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
+        {
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(bggOpts.UserAgent);
+        }
 
         // Limitar a máximo 2 peticiones por segundo para cortesía hacia los servidores de BGG
         _rateLimiter = new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
@@ -77,6 +90,11 @@ public class BggXmlApiClient : IBggClient, IDisposable
                     return null;
                 }
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    throw new HttpRequestException("401 Unauthorized: BGG requiere autenticación mediante Application Token (Bearer). Consulta https://boardgamegeek.com/applications y configura 'Bgg:ApiToken'.", null, HttpStatusCode.Unauthorized);
+                }
+
                 if (!response.IsSuccessStatusCode)
                 {
                     return null;
@@ -90,6 +108,10 @@ public class BggXmlApiClient : IBggClient, IDisposable
                 if (item == null) return null;
 
                 return BggXmlParser.ParseItem(item);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                throw;
             }
             catch (HttpRequestException) when (attempt < maxRetries)
             {
@@ -147,6 +169,11 @@ public class BggXmlApiClient : IBggClient, IDisposable
                     return [];
                 }
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    throw new HttpRequestException("401 Unauthorized: BGG requiere autenticación mediante Application Token (Bearer). Consulta https://boardgamegeek.com/applications y configura 'Bgg:ApiToken'.", null, HttpStatusCode.Unauthorized);
+                }
+
                 if (!response.IsSuccessStatusCode)
                 {
                     return [];
@@ -157,6 +184,10 @@ public class BggXmlApiClient : IBggClient, IDisposable
 
                 var doc = XDocument.Parse(xmlContent);
                 return BggXmlParser.ParseCollection(doc);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                throw;
             }
             catch (HttpRequestException) when (attempt < maxRetries)
             {
@@ -203,6 +234,11 @@ public class BggXmlApiClient : IBggClient, IDisposable
                     return [];
                 }
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    throw new HttpRequestException("401 Unauthorized: BGG requiere autenticación mediante Application Token (Bearer). Consulta https://boardgamegeek.com/applications y configura 'Bgg:ApiToken'.", null, HttpStatusCode.Unauthorized);
+                }
+
                 if (!response.IsSuccessStatusCode)
                 {
                     return [];
@@ -213,6 +249,10 @@ public class BggXmlApiClient : IBggClient, IDisposable
 
                 var doc = XDocument.Parse(xmlContent);
                 return BggXmlParser.ParseSearchResults(doc);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                throw;
             }
             catch (HttpRequestException) when (attempt < maxRetries)
             {

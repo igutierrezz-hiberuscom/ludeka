@@ -11,6 +11,7 @@ using Ludeka.Infrastructure.Seeding;
 using Ludeka.Infrastructure.Services;
 using Ludeka.Web.Components;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +26,32 @@ builder.Services.AddDbContext<LudekaDbContext>(options =>
 });
 
 builder.Services.AddScoped<IGameRepository, SqliteGameRepository>();
-builder.Services.AddScoped<ICatalogService, CatalogService>();
+
+// Caché Nivel 1 (Aplicación en Memoria) y Decorador del Catálogo
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<CatalogService>();
+builder.Services.AddScoped<ICatalogService>(sp =>
+    new CachedCatalogService(
+        sp.GetRequiredService<CatalogService>(),
+        sp.GetRequiredService<IMemoryCache>()));
+
+// Caché Nivel 2 (HTTP / Output Caching con Tags de Invalidación)
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy("CatalogCache", policy =>
+        policy.Expire(TimeSpan.FromMinutes(10))
+              .Tag("tag-catalog"));
+
+    options.AddPolicy("RadarCache", policy =>
+        policy.Expire(TimeSpan.FromMinutes(5))
+              .Tag("tag-radar"));
+
+    options.AddPolicy("StaticPages", policy =>
+        policy.Expire(TimeSpan.FromMinutes(60))
+              .Tag("tag-static"));
+});
+
+builder.Services.Configure<BggOptions>(builder.Configuration.GetSection(BggOptions.SectionName));
 builder.Services.AddHttpClient<IBggClient, BggXmlApiClient>();
 
 builder.Services.AddScoped<IUserCollectionRepository, SqliteUserCollectionRepository>();
@@ -76,6 +102,7 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 app.UseAntiforgery();
+app.UseOutputCache();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

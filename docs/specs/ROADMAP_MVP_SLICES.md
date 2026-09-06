@@ -98,13 +98,13 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 ## Incremento 7: Compilación de Producción, Optimización de Assets y Rendimiento Web
 - **Identificador SDD:** `change-07-production-assets-perf`
 - **Objetivo Principal:** Optimización extrema de rendimiento en carga móvil, purga de estilos y cumplimiento estricto de Core Web Vitals y accesibilidad.
-- **Estado:** 📋 **Registrado (Pendiente de inicio)**
+- **Estado:** ✅ **Completado y Archivado** (154 tests en verde).
 - **Alcance Funcional y Técnico:**
-  1. **Pipeline de Assets y Tailwind CSS:** Configuración de compilación optimizada y purga de clases CSS no utilizadas, minimizando el bundle descargado en dispositivos móviles.
-  2. **Auditoría Core Web Vitals:** Optimización de Largest Contentful Paint (LCP < 1.2s), Cumulative Layout Shift (CLS = 0) e Interaction to Next Paint (INP) tanto en Blazor SSR como en componentes interactivos.
-  3. **Estrategia de Caché Avanzada:** Implementación de Output Caching y Response Caching en memoria para rutas de lectura intensiva (`/`, `/juegos`, `/radar`, `/transparencia`).
-  4. **Optimización Multimedia:** Atributos `loading="lazy"`, `decoding="async"`, ratios de aspecto y dimensiones fijas para evitar saltos de layout en carátulas BGG y fotos reales de mesa.
-  5. **Accesibilidad WCAG 2.2 AA:** Auditoría de contraste cromático, navegación completa por teclado, gestión de foco en modales y atributos semánticos ARIA en pestañas y controles.
+  1. **Pipeline de Assets y Tailwind CSS:** Configuración de compilación optimizada y purga de clases CSS mediante Tailwind CLI v3.4.17 (`app.css` minificado en 1.7s), eliminando dependencias CDN en producción.
+  2. **Auditoría Core Web Vitals:** Optimización de Largest Contentful Paint (LCP < 1.2s mediante preconexiones de fuentes y carátula con `fetchpriority="high"`), Cumulative Layout Shift (CLS = 0 con contenedores rígidos `aspect-square`) e Interaction to Next Paint (INP con `@implements IDisposable` en búsquedas reactivas).
+  3. **Estrategia de Caché Avanzada:** Caché de 2 niveles: Nivel 1 en aplicación con `CachedCatalogService` decorando `ICatalogService` con `IMemoryCache` (TTL 10m e invalidación por slug); Nivel 2 en HTTP con ASP.NET Core `Output Caching` con tags (`tag-catalog`, `tag-radar`, `tag-static`).
+  4. **Optimización Multimedia:** Atributos `loading="lazy"`, `decoding="async"`, ratios fijos (`aspect-square`, `aspect-video`) y dimensiones explícitas en carátulas BGG, tutoriales, partidas, reseñas y fotografías de la comunidad.
+  5. **Accesibilidad WCAG 2.2 Nivel AA:** Etiqueta `<html lang="es">`, enlace de salto accesible (*Skip Link*), estandarización de todos los modales con `role="dialog"` y `aria-labelledby`, semántica en pestañas (`role="tablist"`/`role="tab"`/`role="tabpanel"`), formularios accesibles con etiquetas asociadas y microtextos traducidos al español castellano.
 
 ---
 

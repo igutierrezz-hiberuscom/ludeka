@@ -39,16 +39,18 @@
             </h3>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Resumen de la duda en 1 frase *</label>
-                <input type="text"
+                <label for="new-q-title" class="block text-xs font-semibold text-slate-300 mb-1">Resumen de la duda en 1 frase *</label>
+                <input id="new-q-title"
+                       type="text"
                        @bind="_newQuestionTitle"
                        placeholder="Ej. ¿Puedo consumir carbón de una mina enemiga si no está conectada?"
                        class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-orange-500" />
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Contexto o detalle de la situación en mesa *</label>
-                <textarea rows="3"
+                <label for="new-q-body" class="block text-xs font-semibold text-slate-300 mb-1">Contexto o detalle de la situación en mesa *</label>
+                <textarea id="new-q-body"
+                          rows="3"
                           @bind="_newQuestionBody"
                           placeholder="Explica qué fase del turno era, cuántos jugadores estabais y qué cartas o losetas estaban en juego..."
                           class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-orange-500 resize-none">
@@ -121,6 +123,7 @@
                         <button type="button"
                                 @onclick="() => HandleVoteQuestion(question.Id)"
                                 title="Votar esta duda como útil"
+                                aria-label="@($"Votar esta duda como útil (actualmente {question.VotesCount} votos)")"
                                 class="px-2.5 py-1.5 rounded-xl border text-xs font-extrabold flex flex-col items-center gap-0.5 transition-all @(question.HasUserVoted ? "bg-orange-950/80 border-orange-500/60 text-orange-300" : "bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200")">
                             <span>▲</span>
                             <span>@question.VotesCount</span>
@@ -165,6 +168,7 @@
                                         <div class="flex flex-col items-end gap-1.5">
                                             <button type="button"
                                                     @onclick="() => HandleVoteAnswer(answer.Id)"
+                                                    aria-label="@($"Votar esta respuesta como útil (actualmente {answer.VotesCount} votos)")"
                                                     class="px-2 py-1 rounded-lg border text-[0.68rem] font-bold flex items-center gap-1 transition-all @(answer.HasUserVoted ? "bg-orange-950/80 border-orange-500/60 text-orange-300" : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200")">
                                                 <span>▲</span>
                                                 <span>@answer.VotesCount</span>
@@ -201,16 +205,18 @@
                     @if (_activeAnsweringQuestionId == question.Id)
                     {
                         <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 space-y-2 text-xs">
-                            <label class="font-bold text-slate-300 block">Tu respuesta o aclaración de regla *</label>
-                            <textarea rows="2"
+                            <label for="@($"answer-body-{question.Id}")" class="font-bold text-slate-300 block">Tu respuesta o aclaración de regla *</label>
+                            <textarea id="@($"answer-body-{question.Id}")"
+                                      rows="2"
                                       @bind="_answerBody"
                                       placeholder="Aporta la respuesta explicando cómo resolverlo según las reglas oficiales..."
                                       class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-orange-500 resize-none">
                             </textarea>
 
                             <div>
-                                <label class="font-semibold text-slate-400 block mb-0.5 text-[0.68rem]">Página o sección del manual (opcional)</label>
-                                <input type="text"
+                                <label for="@($"answer-ref-{question.Id}")" class="font-semibold text-slate-400 block mb-0.5 text-[0.68rem]">Página o sección del manual (opcional)</label>
+                                <input id="@($"answer-ref-{question.Id}")"
+                                       type="text"
                                        @bind="_answerRuleRef"
                                        placeholder="Ej. Página 12, sección 3.4"
                                        class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-orange-500" />

@@ -14,4 +14,5 @@ public interface IPendingBggImportRepository
     Task<int> GetTotalPendingCountAsync(CancellationToken ct = default);
     Task AddAsync(PendingBggImport item, CancellationToken ct = default);
     Task UpdateAsync(PendingBggImport item, CancellationToken ct = default);
+    Task ResetFailedToPendingAsync(CancellationToken ct = default);
 }

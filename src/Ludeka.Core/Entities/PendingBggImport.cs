@@ -64,4 +64,10 @@ public class PendingBggImport
         Status = CatalogQueueStatus.Failed;
         ErrorMessage = string.IsNullOrWhiteSpace(error) ? "Error desconocido durante la catalogación." : error.Trim();
     }
+
+    public void ResetToPending()
+    {
+        Status = CatalogQueueStatus.Pending;
+        ErrorMessage = null;
+    }
 }

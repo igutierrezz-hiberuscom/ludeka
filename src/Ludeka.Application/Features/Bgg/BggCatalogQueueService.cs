@@ -5,6 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ludeka.Application.Contracts;
 using Ludeka.Application.DTOs;
+using Ludeka.Core.Entities;
+using Ludeka.Core.Enums;
+using Ludeka.Core.ValueObjects;
 
 namespace Ludeka.Application.Features.Bgg;
 
@@ -39,7 +42,8 @@ public class BggCatalogQueueService : IBggCatalogQueueService
             i.RequestedCount,
             i.Status,
             i.CreatedAt,
-            i.ProcessedAt
+            i.ProcessedAt,
+            i.ErrorMessage
         )).ToList();
     }
 
@@ -70,10 +74,7 @@ public class BggCatalogQueueService : IBggCatalogQueueService
                 var fetchedGame = await _bggClient.FetchGameByBggIdAsync(pending.BggId, ct);
                 if (fetchedGame == null)
                 {
-                    pending.MarkAsFailed("No se pudieron recuperar los metadatos desde BoardGameGeek.");
-                    await _pendingRepo.UpdateAsync(pending, ct);
-                    failedCount++;
-                    continue;
+                    throw new InvalidOperationException($"BGG no devolvió información para el juego #{pending.BggId}. Puede que el juego no exista o que el token de API no tenga permisos suficientes.");
                 }
 
                 // Asegurar persistencia del juego en el catálogo local
@@ -112,5 +113,10 @@ public class BggCatalogQueueService : IBggCatalogQueueService
             FailedCount: failedCount,
             CatalogedGameTitles: catalogedTitles
         );
+    }
+
+    public async Task ResetFailedItemsAsync(CancellationToken ct = default)
+    {
+        await _pendingRepo.ResetFailedToPendingAsync(ct);
     }
 }

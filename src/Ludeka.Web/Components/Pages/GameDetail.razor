@@ -63,14 +63,21 @@ else
         <div class="container-ludeka">
             <div class="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 @* Carátula oficial BGG *@
-                <div class="w-full sm:w-64 md:w-72 shrink-0 rounded-2xl overflow-hidden border-2 border-slate-700/60 shadow-2xl bg-black">
+                <div class="w-full sm:w-64 md:w-72 shrink-0 aspect-square rounded-2xl overflow-hidden border-2 border-slate-700/60 shadow-2xl bg-black">
                     @if (!string.IsNullOrWhiteSpace(Game.CoverImageUrl))
                     {
-                        <img src="@Game.CoverImageUrl" alt="Carátula de @Game.SpanishTitle" class="w-full h-auto object-cover" />
+                        <img src="@Game.CoverImageUrl"
+                             alt="Carátula oficial de @Game.SpanishTitle"
+                             fetchpriority="high"
+                             decoding="async"
+                             width="320"
+                             height="320"
+                             onerror="this.onerror=null; this.src='/images/game-placeholder.svg';"
+                             class="w-full h-full object-cover" />
                     }
                     else
                     {
-                        <div class="aspect-square flex items-center justify-center text-slate-600 font-bold">
+                        <div class="w-full h-full flex items-center justify-center text-slate-600 font-bold">
                             Sin carátula disponible
                         </div>
                     }
@@ -118,7 +125,7 @@ else
                         </div>
                         <div class="w-px h-8 bg-slate-800"></div>
                         <div class="flex-1">
-                            <span class="text-[0.68rem] uppercase font-bold text-slate-500 block">Consenso Ludist</span>
+                            <span class="text-[0.68rem] uppercase font-bold text-slate-500 block">Consenso Ludeka</span>
                             <div class="flex items-baseline gap-1 text-emerald-400">
                                 <span class="text-xl font-black">★ @Game.LudistRating.ToString("0.0")</span>
                                 <span class="text-xs text-slate-500">/ 10</span>

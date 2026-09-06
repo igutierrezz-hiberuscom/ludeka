@@ -23,7 +23,19 @@
 
         @if (CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator"))
         {
-            <div>
+            <div class="flex items-center gap-2">
+                @if (_items.Any(i => i.Status == CatalogQueueStatus.Failed))
+                {
+                    <button type="button" 
+                            @onclick="RetryFailedItemsAsync"
+                            disabled="@_isProcessing"
+                            title="Restablecer elementos fallidos a estado pendiente para reintentar la catalogación"
+                            class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+                        <span>🔄</span>
+                        <span>Reintentar Fallidos</span>
+                    </button>
+                }
+
                 <button type="button" 
                         @onclick="ProcessQueueBatchAsync"
                         disabled="@(_isProcessing || _items.Count == 0)"
@@ -45,19 +57,56 @@
 
     @if (_lastResult != null)
     {
-        <div class="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs space-y-2">
-            <div class="font-bold text-emerald-300 flex items-center gap-2">
-                <span>✅</span>
-                <span>Proceso completado: @_lastResult.SuccessCount de @_lastResult.ProcessedCount juegos catalogados oficialmente con éxito.</span>
-            </div>
-            @if (_lastResult.CatalogedGameTitles.Count > 0)
-            {
-                <div class="text-slate-300">
-                    Títulos incorporados al catálogo y promovidos en ludotecas:
-                    <strong class="text-emerald-400">@string.Join(", ", _lastResult.CatalogedGameTitles)</strong>
+        @if (_lastResult.SuccessCount > 0 && _lastResult.FailedCount == 0)
+        {
+            <div class="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs space-y-2">
+                <div class="font-bold text-emerald-300 flex items-center gap-2">
+                    <span>✅</span>
+                    <span>Proceso completado con éxito: @_lastResult.SuccessCount juegos catalogados e incorporados al catálogo.</span>
                 </div>
-            }
-        </div>
+                @if (_lastResult.CatalogedGameTitles.Count > 0)
+                {
+                    <div class="text-slate-300">
+                        Títulos incorporados al catálogo y promovidos en ludotecas:
+                        <strong class="text-emerald-400">@string.Join(", ", _lastResult.CatalogedGameTitles)</strong>
+                    </div>
+                }
+            </div>
+        }
+        else if (_lastResult.SuccessCount > 0 && _lastResult.FailedCount > 0)
+        {
+            <div class="p-4 rounded-xl bg-amber-950/40 border border-amber-500/40 text-xs space-y-2">
+                <div class="font-bold text-amber-300 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>Proceso parcial: @_lastResult.SuccessCount catalogados con éxito, pero @_lastResult.FailedCount fallaron.</span>
+                </div>
+                <div class="text-slate-300">
+                    Títulos incorporados: <strong class="text-emerald-400">@string.Join(", ", _lastResult.CatalogedGameTitles)</strong>
+                </div>
+                <p class="text-slate-400 text-[0.7rem]">
+                    Los elementos fallidos permanecen en la cola para que puedas reintentarlos.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="p-4 rounded-xl bg-rose-950/40 border border-rose-500/40 text-xs space-y-2">
+                <div class="font-bold text-rose-300 flex items-center gap-2">
+                    <span>❌</span>
+                    <span>Fallo en la auto-catalogación: 0 de @_lastResult.ProcessedCount solicitudes procesadas con éxito (@_lastResult.FailedCount fallos).</span>
+                </div>
+                <p class="text-slate-300 leading-relaxed">
+                    La API de BoardGameGeek requiere autenticación registrada (HTTP 401 Unauthorized) o no se pudo conectar.
+                    <strong>Los juegos no se han eliminado de la cola</strong> y están listos para reintentarse cuando configures tus credenciales de BGG.
+                </p>
+                <div class="pt-1">
+                    <p class="text-[0.7rem] text-slate-400 mb-1">Para configurar tu token de BGG de forma segura en tu equipo local:</p>
+                    <code class="px-2.5 py-1 rounded-md bg-black/60 text-slate-200 font-mono text-[0.7rem] block overflow-x-auto border border-white/10">
+                        dotnet user-secrets set "Bgg:ApiToken" "TU_TOKEN_AQUI" --project src/Ludeka.Web
+                    </code>
+                </div>
+            </div>
+        }
     }
 
     @if (_isLoading)
@@ -80,7 +129,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             @foreach (var item in _items)
             {
-                <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/50 flex items-center gap-3">
+                <div class="p-3.5 rounded-xl @(item.Status == CatalogQueueStatus.Failed ? "bg-rose-950/20 border-rose-500/30" : "bg-slate-800/40 border-slate-700/50") border flex items-center gap-3">
                     @if (!string.IsNullOrWhiteSpace(item.ThumbnailUrl))
                     {
                         <img src="@item.ThumbnailUrl" alt="@item.Title" class="w-12 h-12 object-cover rounded-lg bg-slate-700 flex-shrink-0" />
@@ -102,10 +151,16 @@
                                 <span class="text-[0.65rem] text-slate-400 font-mono">(@item.YearPublished)</span>
                             }
                         </div>
-                        <div class="flex items-center gap-2 mt-1">
+                        <div class="flex items-center gap-2 mt-1 flex-wrap">
                             <span class="text-[0.68rem] font-bold px-2 py-0.5 rounded-md bg-amber-950/70 text-amber-300 border border-amber-500/30">
                                 🔥 @item.RequestedCount @(item.RequestedCount == 1 ? "solicitud" : "solicitudes")
                             </span>
+                            @if (item.Status == CatalogQueueStatus.Failed)
+                            {
+                                <span class="text-[0.65rem] font-bold px-1.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-500/40" title="@(item.ErrorMessage ?? "Error al conectar con BGG")">
+                                    ⚠️ Falló (Reintentable)
+                                </span>
+                            }
                             <span class="text-[0.65rem] text-slate-400 font-mono">ID: @item.BggId</span>
                         </div>
                     </div>
@@ -157,6 +212,20 @@
         finally
         {
             _isProcessing = false;
+        }
+    }
+
+    private async Task RetryFailedItemsAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            await QueueService.ResetFailedItemsAsync();
+            await LoadQueueAsync();
+        }
+        finally
+        {
+            _isLoading = false;
         }
     }
 }

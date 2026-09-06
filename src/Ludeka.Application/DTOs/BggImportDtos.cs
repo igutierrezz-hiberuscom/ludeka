@@ -47,7 +47,8 @@ public record CatalogQueueItemDto(
     int RequestedCount,
     CatalogQueueStatus Status,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? ProcessedAt
+    DateTimeOffset? ProcessedAt,
+    string? ErrorMessage = null
 );
 
 public record ProcessQueueResultDto(

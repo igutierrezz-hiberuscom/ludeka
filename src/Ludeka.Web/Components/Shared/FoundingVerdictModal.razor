@@ -1,16 +1,19 @@
-﻿@using Ludeka.Application.DTOs
+@using Ludeka.Application.DTOs
 @using Ludeka.Core.Enums
 
 @if (IsOpen)
 {
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
+    <div class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="founding-verdict-modal-title">
         <div class="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-6">
             @* Modal Header *@
             <div class="p-5 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <span class="text-xl">🛡️</span>
                     <div>
-                        <h2 class="text-base sm:text-lg font-black text-white leading-tight">
+                        <h2 id="founding-verdict-modal-title" class="text-base sm:text-lg font-black text-white leading-tight">
                             @(ExistingVerdict != null ? "Editar Veredicto de la Mesa" : "Redactar Veredicto de la Mesa")
                         </h2>
                         <p class="text-xs text-orange-400 font-semibold">@GameTitle</p>
@@ -18,7 +21,8 @@
                 </div>
                 <button type="button"
                         @onclick="HandleClose"
-                        class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold transition-colors">
+                        class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold transition-colors"
+                        aria-label="Cerrar modal de veredicto">
                     ✕
                 </button>
             </div>

@@ -41,6 +41,24 @@ public class BggSearchAssistedService : IBggSearchAssistedService
         var results = await _bggClient.SearchGamesAsync(query.Trim(), ct);
         var enrichedResults = new List<BggSearchResultDto>();
 
+        if (results.Count == 0)
+        {
+            // Búsqueda asistida local de resiliencia: si BGG requiere token o está saturado, busca en catálogo local
+            var localMatches = await _gameRepo.SearchAsync(new GameFilterCriteria(SearchTerm: query.Trim()), page: 1, pageSize: 10, ct: ct);
+            foreach (var g in localMatches.Items)
+            {
+                enrichedResults.Add(new BggSearchResultDto(
+                    g.BggId,
+                    g.SpanishTitle,
+                    g.YearPublished,
+                    IsAlreadyCataloged: true,
+                    ExistingGameSlug: g.Slug,
+                    ExistingGameId: g.Id
+                ));
+            }
+            return enrichedResults;
+        }
+
         foreach (var r in results)
         {
             var localGame = await _gameRepo.GetByBggIdAsync(r.BggId, ct);

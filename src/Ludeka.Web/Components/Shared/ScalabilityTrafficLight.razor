@@ -1,4 +1,4 @@
-﻿@using Ludeka.Core.Enums
+@using Ludeka.Core.Enums
 @using Ludeka.Core.ValueObjects
 
 <div class="scalability-component">
@@ -31,7 +31,7 @@
                     _ => $"{entry.DisplayCount}: No recomendado ({entry.NotRecommendedVotes} votos)"
                 };
 
-                <div class="traffic-chip @statusClass" title="@tooltip" aria-label="@tooltip">
+                <div class="traffic-chip @statusClass" role="img" tabindex="0" title="@tooltip" aria-label="@tooltip">
                     <span class="player-label">@entry.DisplayCount</span>
                     <span class="dot-indicator" aria-hidden="true"></span>
                 </div>

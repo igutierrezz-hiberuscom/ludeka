@@ -23,13 +23,13 @@ public class BggCatalogQueueServiceTests
             Task.FromResult(Items.FirstOrDefault(i => i.BggId == bggId));
 
         public Task<IReadOnlyList<PendingBggImport>> GetTopPendingAsync(int limit = 50, CancellationToken ct = default) =>
-            Task.FromResult((IReadOnlyList<PendingBggImport>)Items.Where(i => i.Status == CatalogQueueStatus.Pending).OrderByDescending(i => i.RequestedCount).Take(limit).ToList());
+            Task.FromResult((IReadOnlyList<PendingBggImport>)Items.Where(i => i.Status == CatalogQueueStatus.Pending || i.Status == CatalogQueueStatus.Failed).OrderBy(i => i.Status == CatalogQueueStatus.Failed ? 1 : 0).ThenByDescending(i => i.RequestedCount).Take(limit).ToList());
 
         public Task<IReadOnlyList<PendingBggImport>> GetAllAsync(CatalogQueueStatus? status = null, CancellationToken ct = default) =>
             Task.FromResult((IReadOnlyList<PendingBggImport>)(status.HasValue ? Items.Where(i => i.Status == status.Value).ToList() : Items.ToList()));
 
         public Task<int> GetTotalPendingCountAsync(CancellationToken ct = default) =>
-            Task.FromResult(Items.Count(i => i.Status == CatalogQueueStatus.Pending));
+            Task.FromResult(Items.Count(i => i.Status == CatalogQueueStatus.Pending || i.Status == CatalogQueueStatus.Failed));
 
         public Task AddAsync(PendingBggImport item, CancellationToken ct = default)
         {
@@ -38,6 +38,15 @@ public class BggCatalogQueueServiceTests
         }
 
         public Task UpdateAsync(PendingBggImport item, CancellationToken ct = default) => Task.CompletedTask;
+
+        public Task ResetFailedToPendingAsync(CancellationToken ct = default)
+        {
+            foreach (var item in Items.Where(i => i.Status == CatalogQueueStatus.Failed))
+            {
+                item.ResetToPending();
+            }
+            return Task.CompletedTask;
+        }
     }
 
     private class FakeBggClient : IBggClient
@@ -195,5 +204,55 @@ public class BggCatalogQueueServiceTests
         // La cola se marca como completada
         Assert.Equal(CatalogQueueStatus.Completed, pendingArkNova.Status);
         Assert.NotNull(pendingArkNova.ProcessedAt);
+    }
+
+    [Fact]
+    public async Task ProcessPendingQueueBatchAsync_WhenBggFails_MarksAsFailedAndDoesNotCreateDummyGame()
+    {
+        // Arrange
+        var pendingRepo = new FakePendingRepo();
+        var pendingItem = new PendingBggImport(99999, "Juego Desconocido");
+        pendingRepo.Items.Add(pendingItem);
+
+        var bggClient = new FakeBggClient(); // No tiene el juego -> devolverá null
+        var gameRepo = new FakeGameRepo();
+        var collectionRepo = new FakeCollectionRepo();
+
+        var service = new BggCatalogQueueService(pendingRepo, bggClient, gameRepo, collectionRepo);
+
+        // Act
+        var result = await service.ProcessPendingQueueBatchAsync(10);
+
+        // Assert
+        Assert.Equal(1, result.ProcessedCount);
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Equal(1, result.FailedCount);
+        Assert.Empty(result.CatalogedGameTitles);
+
+        // Cero mocks: no se añade ningún juego ficticio a la base de datos
+        Assert.Empty(gameRepo.Games);
+
+        // El ítem se marca como Failed con el mensaje descriptivo y NO se pierde
+        Assert.Equal(CatalogQueueStatus.Failed, pendingItem.Status);
+        Assert.NotNull(pendingItem.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ResetFailedItemsAsync_ResetsFailedItemsToPending()
+    {
+        // Arrange
+        var pendingRepo = new FakePendingRepo();
+        var pendingItem = new PendingBggImport(99999, "Juego Fallido");
+        pendingItem.MarkAsFailed("Error previo");
+        pendingRepo.Items.Add(pendingItem);
+
+        var service = new BggCatalogQueueService(pendingRepo, new FakeBggClient(), new FakeGameRepo(), new FakeCollectionRepo());
+
+        // Act
+        await service.ResetFailedItemsAsync();
+
+        // Assert
+        Assert.Equal(CatalogQueueStatus.Pending, pendingItem.Status);
+        Assert.Null(pendingItem.ErrorMessage);
     }
 }

@@ -73,7 +73,7 @@ public class SocialCardService : ISocialCardService
         sb.AppendLine(@"  <!-- Cabecera de Marca -->");
         sb.AppendLine(@"  <g transform=""translate(140, 64)"">");
         sb.AppendLine(@"    <text x=""0"" y=""28"" fill=""#FFFFFF"" font-family=""'Inter', 'Segoe UI', system-ui, sans-serif"" font-size=""32"" font-weight=""900"" letter-spacing=""-0.5"">Ludeka<tspan fill=""#F97316"">.</tspan></text>");
-        sb.AppendLine(@"    <text x=""135"" y=""26"" fill=""#94A3B8"" font-family=""'Inter', 'Segoe UI', system-ui, sans-serif"" font-size=""16"" font-weight=""600"" letter-spacing=""0.5"">EL LETTERBOXD DE LOS JUEGOS DE MESA</text>");
+        sb.AppendLine(@"    <text x=""135"" y=""26"" fill=""#94A3B8"" font-family=""'Inter', 'Segoe UI', system-ui, sans-serif"" font-size=""16"" font-weight=""600"" letter-spacing=""0.5"">COMUNIDAD Y CATÁLOGO DE JUEGOS</text>");
         sb.AppendLine(@"  </g>");
 
         // Carátula / Imagen
@@ -132,7 +132,7 @@ public class SocialCardService : ISocialCardService
         sb.AppendLine(@"  <line x1=""140"" y1=""840"" x2=""940"" y2=""840"" stroke=""#334155"" stroke-width=""1"" stroke-dasharray=""4 4""/>");
         sb.AppendLine(@"  <g transform=""translate(140, 890)"">");
         sb.AppendLine(@"    <rect x=""0"" y=""0"" width=""800"" height=""110"" rx=""20"" fill=""#0F172A"" stroke=""#1E293B"" stroke-width=""1""/>");
-        sb.AppendLine(@"    <text x=""40"" y=""46"" fill=""#F97316"" font-family=""'Inter', 'Segoe UI', sans-serif"" font-size=""18"" font-weight=""800"">LUDIST / LUDEKA</text>");
+        sb.AppendLine(@"    <text x=""40"" y=""46"" fill=""#F97316"" font-family=""'Inter', 'Segoe UI', sans-serif"" font-size=""18"" font-weight=""800"">LUDEKA</text>");
         sb.AppendLine(@"    <text x=""40"" y=""76"" fill=""#E2E8F0"" font-family=""'Inter', 'Segoe UI', sans-serif"" font-size=""20"" font-weight=""700"">Ficha completa, semáforo de mesa y fotos reales en ludeka.app</text>");
         sb.AppendLine(@"  </g>");
 

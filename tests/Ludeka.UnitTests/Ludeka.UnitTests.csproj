@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\Ludeka.Core\Ludeka.Core.csproj" />
     <ProjectReference Include="..\..\src\Ludeka.Application\Ludeka.Application.csproj" />
     <ProjectReference Include="..\..\src\Ludeka.Infrastructure\Ludeka.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Ludeka.Web\Ludeka.Web.csproj" />
   </ItemGroup>
 
 </Project>

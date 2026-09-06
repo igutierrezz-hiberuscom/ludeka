@@ -138,6 +138,15 @@ public class BggImportServiceTests
         }
 
         public Task UpdateAsync(PendingBggImport item, CancellationToken ct = default) => Task.CompletedTask;
+
+        public Task ResetFailedToPendingAsync(CancellationToken ct = default)
+        {
+            foreach (var item in Queue.Where(p => p.Status == CatalogQueueStatus.Failed))
+            {
+                item.ResetToPending();
+            }
+            return Task.CompletedTask;
+        }
     }
 
     private static Game CreateGame(int bggId, string title)
