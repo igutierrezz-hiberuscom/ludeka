@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -139,6 +139,12 @@ public partial class Game
     public void UpdateLudistRating(double newAverageRating)
     {
         LudistRating = Math.Clamp(Math.Round(newAverageRating, 1), 0.0, 10.0);
+    }
+
+    public void UpdateImages(string? coverImageUrl, string? thumbnailUrl = null)
+    {
+        CoverImageUrl = coverImageUrl?.Trim();
+        ThumbnailUrl = thumbnailUrl?.Trim();
     }
 
     public static string GenerateSlug(string input)

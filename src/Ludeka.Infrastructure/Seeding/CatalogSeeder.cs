@@ -127,6 +127,40 @@ public static class CatalogSeeder
                 }
             }
         }
+        else
+        {
+            // Sincronizar carátulas de juegos existentes para garantizar imágenes locales
+            string json = ReadSeedJson();
+            if (!string.IsNullOrWhiteSpace(json))
+            {
+                var items = JsonSerializer.Deserialize<List<SeedGameModel>>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (items != null && items.Count > 0)
+                {
+                    var existingGames = await db.Games.ToListAsync(ct);
+                    bool modified = false;
+
+                    foreach (var m in items)
+                    {
+                        var match = existingGames.FirstOrDefault(g => g.BggId == m.BggId);
+                        if (match != null && (!string.Equals(match.CoverImageUrl, m.CoverImageUrl, StringComparison.OrdinalIgnoreCase) ||
+                                              !string.Equals(match.ThumbnailUrl, m.ThumbnailUrl, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            match.UpdateImages(m.CoverImageUrl, m.ThumbnailUrl ?? m.CoverImageUrl);
+                            modified = true;
+                        }
+                    }
+
+                    if (modified)
+                    {
+                        await db.SaveChangesAsync(ct);
+                    }
+                }
+            }
+        }
 
         // Semillado de veredictos iniciales de la mesa fundadora
         await SeedFoundingVerdictsAsync(db, ct);
@@ -574,7 +608,7 @@ public static class CatalogSeeder
                 gameId: null,
                 gameTitle: "Ark Nova",
                 collaborator: null,
-                thumbnailUrl: "https://cf.geekdo-images.com/SoU8CSclVF58FGnr7rKn8g__original/img/DR-oAhmplpM1t_2Fz-l2W1Z4d_Q=/0x0/filters:format(jpeg)/pic6293412.jpg",
+                thumbnailUrl: "/images/games/ark-nova.jpg",
                 isCommunityExclusive: true)
         };
 

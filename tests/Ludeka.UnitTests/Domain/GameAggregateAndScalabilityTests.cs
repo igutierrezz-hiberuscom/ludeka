@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Ludeka.Core.Entities;
 using Ludeka.Core.Enums;
 using Ludeka.Core.ValueObjects;
@@ -67,6 +67,16 @@ public class GameAggregateAndScalabilityTests
         Assert.Equal(ConfrontationType.Competitive, game.Confrontation);
         Assert.Equal(GameStyle.Eurogame, game.Style);
         Assert.True(game.Age.IsAccessibleEarlier);
+    }
+
+    [Fact]
+    public void Game_UpdateImages_ShouldUpdateCoverAndThumbnail()
+    {
+        var game = CreateSampleGame("Wingspan", "Wingspan", null);
+        game.UpdateImages("/images/games/wingspan.png", "/images/games/wingspan.png");
+
+        Assert.Equal("/images/games/wingspan.png", game.CoverImageUrl);
+        Assert.Equal("/images/games/wingspan.png", game.ThumbnailUrl);
     }
 
     private static Game CreateSampleGame(string originalTitle, string spanishTitle, List<ScalabilityEntry>? scalability)
