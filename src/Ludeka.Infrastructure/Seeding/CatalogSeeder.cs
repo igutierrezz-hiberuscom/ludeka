@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -131,6 +131,9 @@ public static class CatalogSeeder
         // Semillado de veredictos iniciales de la mesa fundadora
         await SeedFoundingVerdictsAsync(db, ct);
 
+        // Semillado del Hub Multimedia (YouTube e Instagram)
+        await SeedMediaItemsAsync(db, ct);
+
         return seededCount;
     }
 
@@ -204,6 +207,271 @@ public static class CatalogSeeder
         if (verdicts.Count > 0)
         {
             await db.FoundingVerdicts.AddRangeAsync(verdicts, ct);
+            await db.SaveChangesAsync(ct);
+        }
+    }
+
+    private static async Task SeedMediaItemsAsync(LudekaDbContext db, CancellationToken ct)
+    {
+        if (await db.MediaItems.AnyAsync(ct))
+        {
+            return; // Ya existen medios semillados
+        }
+
+        var allGames = await db.Games.ToListAsync(ct);
+        if (allGames.Count == 0) return;
+
+        var mediaList = new List<MediaItem>();
+
+        var catan = allGames.FirstOrDefault(g => g.Slug == "catan");
+        if (catan != null)
+        {
+            mediaList.Add(new MediaItem(
+                MediaType.Tutorial,
+                MediaPlatform.YouTube,
+                "Cómo se juega a CATAN en 10 minutos (Reglas completas)",
+                "https://www.youtube.com/watch?v=kYQf7p_catan10",
+                "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=640&q=80",
+                "@zacatrustv",
+                gameId: catan.Id,
+                durationSeconds: 615,
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.Playthrough,
+                MediaPlatform.YouTube,
+                "Partida completa a CATAN | Guerra de ovejas y trigo a 4 jugadores",
+                "https://www.youtube.com/watch?v=kYQf7p_catanplay",
+                "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=640&q=80",
+                "@analisisparalisis",
+                gameId: catan.Id,
+                durationSeconds: 3420,
+                playerCountBadge: "Partida a 4",
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.ShortReel,
+                MediaPlatform.YouTube,
+                "Short: ¿Por qué nadie cambia ovejas en el 7 de Catan?",
+                "https://www.youtube.com/shorts/catan_ovejas_short",
+                "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=640&q=80",
+                "@analisisparalisis",
+                gameId: catan.Id,
+                durationSeconds: 48,
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.Tutorial,
+                MediaPlatform.YouTube,
+                "Unboxing y componentes de Catan Plus en detalle",
+                "https://www.youtube.com/watch?v=catan_plus_unboxing",
+                "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=640&q=80",
+                "@comunidad_catan",
+                gameId: catan.Id,
+                durationSeconds: 780,
+                status: ModerationStatus.PendingApproval
+            ));
+        }
+
+        var tfm = allGames.FirstOrDefault(g => g.Slug == "terraforming-mars");
+        if (tfm != null)
+        {
+            mediaList.Add(new MediaItem(
+                MediaType.Tutorial,
+                MediaPlatform.YouTube,
+                "Aprende a jugar a Terraforming Mars: Guía completa de corporaciones",
+                "https://www.youtube.com/watch?v=tfm_tutorial_ap",
+                "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&w=640&q=80",
+                "@analisisparalisis",
+                gameId: tfm.Id,
+                durationSeconds: 1540,
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.Playthrough,
+                MediaPlatform.YouTube,
+                "Terraforming Mars: Duelo táctico en directo a 2 corporaciones",
+                "https://www.youtube.com/watch?v=tfm_playthrough_2p",
+                "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=640&q=80",
+                "@rinconlegacy",
+                gameId: tfm.Id,
+                durationSeconds: 5800,
+                playerCountBadge: "Partida a 2",
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.InstagramPost,
+                MediaPlatform.Instagram,
+                "Oxígeno al 14%, océanos completados y una producción de titanio demencial. ¡Victoria épica con Tharsis Republic!",
+                "https://www.instagram.com/p/tfm_marte_epico/",
+                "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&w=640&q=80",
+                "@eldardoludico",
+                gameId: tfm.Id,
+                likesCount: 524,
+                excerpt: "Oxígeno al 14%, océanos completados y una producción de titanio demencial. ¡Qué gran juego!",
+                status: ModerationStatus.Approved
+            ));
+        }
+
+        var wingspan = allGames.FirstOrDefault(g => g.Slug == "wingspan");
+        if (wingspan != null)
+        {
+            mediaList.Add(new MediaItem(
+                MediaType.Tutorial,
+                MediaPlatform.YouTube,
+                "Wingspan: Tutorial oficial y mecánicas de hábitats",
+                "https://www.youtube.com/watch?v=wingspan_tuto_meeple",
+                "https://images.unsplash.com/photo-1444464666168-49d633b86797?auto=format&fit=crop&w=640&q=80",
+                "@meepletopia",
+                gameId: wingspan.Id,
+                durationSeconds: 985,
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.Playthrough,
+                MediaPlatform.YouTube,
+                "Partida a 2 jugadores a Wingspan: Comedero a tope y rapaces",
+                "https://www.youtube.com/watch?v=wingspan_play_221b",
+                "https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=640&q=80",
+                "@juegosdemesa221b",
+                gameId: wingspan.Id,
+                durationSeconds: 3120,
+                playerCountBadge: "Partida a 2",
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.InstagramPost,
+                MediaPlatform.Instagram,
+                "Los componentes de Wingspan son una fiesta para la vista. El comedero y los huevitos pastel dan ganas de jugar siempre.",
+                "https://www.instagram.com/p/wingspan_fotos_mesa/",
+                "https://images.unsplash.com/photo-1444464666168-49d633b86797?auto=format&fit=crop&w=640&q=80",
+                "@ludist_app",
+                gameId: wingspan.Id,
+                likesCount: 680,
+                excerpt: "Los componentes de Wingspan son una fiesta para la vista. El comedero y los huevitos pastel...",
+                status: ModerationStatus.Approved
+            ));
+        }
+
+        var azul = allGames.FirstOrDefault(g => g.Slug == "azul");
+        if (azul != null)
+        {
+            mediaList.Add(new MediaItem(
+                MediaType.Tutorial,
+                MediaPlatform.YouTube,
+                "Cómo jugar a AZUL en 5 minutos: Reglas claras y puntuación",
+                "https://www.youtube.com/watch?v=azul_tutorial_rapido",
+                "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=640&q=80",
+                "@eltroquel",
+                gameId: azul.Id,
+                durationSeconds: 410,
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.Playthrough,
+                MediaPlatform.YouTube,
+                "Duelo despiadado a 2 jugadores en Azul | No hay amigos en la línea de suelo",
+                "https://www.youtube.com/watch?v=azul_playthrough_2p",
+                "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=640&q=80",
+                "@zacatrustv",
+                gameId: azul.Id,
+                durationSeconds: 1850,
+                playerCountBadge: "Partida a 2",
+                status: ModerationStatus.Approved
+            ));
+        }
+
+        var arknova = allGames.FirstOrDefault(g => g.Slug == "ark-nova");
+        if (arknova != null)
+        {
+            mediaList.Add(new MediaItem(
+                MediaType.Tutorial,
+                MediaPlatform.YouTube,
+                "Ark Nova: Cómo jugar al eurogame de zoos más aclamado",
+                "https://www.youtube.com/watch?v=arknova_como_jugar",
+                "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?auto=format&fit=crop&w=640&q=80",
+                "@analisisparalisis",
+                gameId: arknova.Id,
+                durationSeconds: 1980,
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.Playthrough,
+                MediaPlatform.YouTube,
+                "Partida completa a 2 jugadores a Ark Nova | Cierres de recinto y proyectos de conservación",
+                "https://www.youtube.com/watch?v=arknova_partida_2p",
+                "https://images.unsplash.com/photo-1504173010664-32509aeebb62?auto=format&fit=crop&w=640&q=80",
+                "@meepletopia",
+                gameId: arknova.Id,
+                durationSeconds: 6850,
+                playerCountBadge: "Partida a 2",
+                status: ModerationStatus.Approved
+            ));
+
+            mediaList.Add(new MediaItem(
+                MediaType.Playthrough,
+                MediaPlatform.YouTube,
+                "Mi primera partida en club a Ark Nova a 3 jugadores",
+                "https://www.youtube.com/watch?v=arknova_partida_3p_pendiente",
+                "https://images.unsplash.com/photo-1504173010664-32509aeebb62?auto=format&fit=crop&w=640&q=80",
+                "@resenas_novatas",
+                gameId: arknova.Id,
+                durationSeconds: 7100,
+                playerCountBadge: "Partida a 3",
+                status: ModerationStatus.PendingApproval
+            ));
+        }
+
+        // Elementos Huérfanos (GameId == null) para la bandeja de moderación
+        mediaList.Add(new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Top 10 novedades presentadas en la feria de Córdoba",
+            "https://www.youtube.com/watch?v=feria_cordoba_top10",
+            "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=640&q=80",
+            "@eltroquel",
+            gameId: null,
+            durationSeconds: 1140,
+            status: ModerationStatus.PendingApproval
+        ));
+
+        mediaList.Add(new MediaItem(
+            MediaType.InstagramPost,
+            MediaPlatform.Instagram,
+            "Mesa de domingo repleta de meeples, cartas y dados. ¿Qué estáis jugando vosotros hoy?",
+            "https://www.instagram.com/p/domingo_ludico_mesa/",
+            "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=640&q=80",
+            "@eldardoludico",
+            gameId: null,
+            likesCount: 390,
+            excerpt: "Mesa de domingo repleta de meeples, cartas y dados. ¿Qué estáis jugando vosotros hoy?",
+            status: ModerationStatus.PendingApproval
+        ));
+
+        mediaList.Add(new MediaItem(
+            MediaType.ShortReel,
+            MediaPlatform.YouTube,
+            "Short: Cómo enfundar tus cartas sin que queden burbujas",
+            "https://www.youtube.com/shorts/como_enfundar_express",
+            "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=640&q=80",
+            "@zacatrustv",
+            gameId: null,
+            durationSeconds: 45,
+            status: ModerationStatus.PendingApproval
+        ));
+
+        if (mediaList.Count > 0)
+        {
+            await db.MediaItems.AddRangeAsync(mediaList, ct);
             await db.SaveChangesAsync(ct);
         }
     }

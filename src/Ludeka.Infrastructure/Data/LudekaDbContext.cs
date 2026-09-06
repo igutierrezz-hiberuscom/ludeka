@@ -1,4 +1,4 @@
-﻿using Ludeka.Core.Entities;
+using Ludeka.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ludeka.Infrastructure.Data;
@@ -10,6 +10,7 @@ public class LudekaDbContext : DbContext
     public DbSet<GameLoan> Loans => Set<GameLoan>();
     public DbSet<UserGameReview> Reviews => Set<UserGameReview>();
     public DbSet<FoundingVerdict> FoundingVerdicts => Set<FoundingVerdict>();
+    public DbSet<MediaItem> MediaItems => Set<MediaItem>();
 
     public LudekaDbContext(DbContextOptions<LudekaDbContext> options) : base(options)
     {
@@ -88,5 +89,21 @@ public class LudekaDbContext : DbContext
         verdict.HasIndex(v => v.GameId).IsUnique();
 
         verdict.OwnsMany(v => v.Photos, b => b.ToJson());
+
+        // --- Configuración de MediaItem ---
+        var media = modelBuilder.Entity<MediaItem>();
+        media.ToTable("MediaItems");
+        media.HasKey(m => m.Id);
+
+        media.HasIndex(m => m.GameId);
+        media.HasIndex(m => m.Status);
+        media.HasIndex(m => m.Type);
+        media.HasIndex(m => m.Platform);
+        media.HasIndex(m => new { m.GameId, m.Status });
+
+        media.HasOne(m => m.Game)
+            .WithMany()
+            .HasForeignKey(m => m.GameId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

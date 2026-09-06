@@ -1,0 +1,367 @@
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+
+<div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 shadow-xl space-y-6">
+    @* Cabecera del Hub Multimedia *@
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">📺</span>
+                <h2 class="text-lg font-black text-white tracking-tight">
+                    Hub Multimedia en Español
+                </h2>
+            </div>
+            <p class="text-xs text-slate-400">
+                Tutoriales, partidas completas y reseñas en redes segregados sin mezclar formatos.
+            </p>
+        </div>
+
+        @* Pestañas Selectoras *@
+        <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800 self-start sm:self-auto overflow-x-auto max-w-full">
+            <button type="button"
+                    @onclick='() => _activeTab = "tutorials"'
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 @(_activeTab == "tutorials" ? "bg-orange-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200")">
+                <span>🎬</span>
+                <span>Tutoriales</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeTab == "tutorials" ? "bg-orange-800 text-orange-200" : "bg-slate-800 text-slate-400")">
+                    @(MediaHub?.Tutorials.Count ?? 0)
+                </span>
+            </button>
+
+            <button type="button"
+                    @onclick='() => _activeTab = "playthroughs"'
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 @(_activeTab == "playthroughs" ? "bg-orange-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200")">
+                <span>🎲</span>
+                <span>Partidas Completas</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeTab == "playthroughs" ? "bg-orange-800 text-orange-200" : "bg-slate-800 text-slate-400")">
+                    @(MediaHub?.Playthroughs.Count ?? 0)
+                </span>
+            </button>
+
+            <button type="button"
+                    @onclick='() => _activeTab = "social"'
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 @(_activeTab == "social" ? "bg-orange-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200")">
+                <span>💬</span>
+                <span>Opiniones y Redes</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeTab == "social" ? "bg-orange-800 text-orange-200" : "bg-slate-800 text-slate-400")">
+                    @((MediaHub?.InstagramPosts.Count ?? 0) + (MediaHub?.ShortReels.Count ?? 0))
+                </span>
+            </button>
+        </div>
+    </div>
+
+    @* Contenido de las pestañas *@
+    @if (_activeTab == "tutorials")
+    {
+        @* PESTAÑA 1: TUTORIALES (16:9) *@
+        @if (MediaHub != null && MediaHub.Tutorials.Count > 0)
+        {
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                @foreach (var tutorial in MediaHub.Tutorials)
+                {
+                    <div class="group cursor-pointer rounded-xl overflow-hidden bg-slate-950/80 border border-slate-800/80 hover:border-orange-500/50 transition-all flex flex-col shadow-md"
+                         @onclick="() => OpenEmbedModal(tutorial)">
+                        @* Miniatura 16:9 *@
+                        <div class="aspect-video relative overflow-hidden bg-black">
+                            <img src="@tutorial.ThumbnailUrl"
+                                 alt="@tutorial.Title"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+
+                            @* Botón de reproducción centrado *@
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-full bg-orange-600/90 text-white flex items-center justify-center text-lg pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-orange-500 transition-all">
+                                    ▶
+                                </div>
+                            </div>
+
+                            @* Duración en esquina inferior *@
+                            @if (!string.IsNullOrWhiteSpace(tutorial.FormattedDuration))
+                            {
+                                <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight">
+                                    ⏱️ @tutorial.FormattedDuration
+                                </div>
+                            }
+                        </div>
+
+                        @* Datos del tutorial *@
+                        <div class="p-3.5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[0.7rem] font-bold text-orange-400 block mb-0.5">
+                                    @tutorial.AuthorChannel
+                                </span>
+                                <h3 class="text-sm font-bold text-white group-hover:text-orange-300 transition-colors line-clamp-2 leading-snug">
+                                    @tutorial.Title
+                                </h3>
+                            </div>
+                            <div class="mt-2.5 pt-2 border-t border-slate-900 flex items-center justify-between text-[0.68rem] text-slate-500">
+                                <span>YouTube Tutorial</span>
+                                <span class="text-orange-400 font-semibold group-hover:underline">Reproducir &rarr;</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="p-8 text-center rounded-xl bg-slate-950/40 border border-slate-800/60 max-w-md mx-auto">
+                <span class="text-4xl block mb-2">🎬</span>
+                <h3 class="text-sm font-bold text-white mb-1">Aún no hay tutoriales en español</h3>
+                <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+                    Nadie ha añadido un tutorial de reglas de este juego a la comunidad todavía. ¿Conoces uno excelente de YouTube?
+                </p>
+                <a href="/moderacion/multimedia" class="inline-block text-xs text-orange-400 hover:underline font-semibold">
+                    &rarr; Avisar al equipo en moderación
+                </a>
+            </div>
+        }
+    }
+    else if (_activeTab == "playthroughs")
+    {
+        @* PESTAÑA 2: PARTIDAS COMPLETAS (16:9 + BADGE DE COMENSALES) *@
+        @if (MediaHub != null && MediaHub.Playthroughs.Count > 0)
+        {
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                @foreach (var play in MediaHub.Playthroughs)
+                {
+                    <div class="group cursor-pointer rounded-xl overflow-hidden bg-slate-950/80 border border-slate-800/80 hover:border-emerald-500/50 transition-all flex flex-col shadow-md"
+                         @onclick="() => OpenEmbedModal(play)">
+                        @* Miniatura 16:9 *@
+                        <div class="aspect-video relative overflow-hidden bg-black">
+                            <img src="@play.ThumbnailUrl"
+                                 alt="@play.Title"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+
+                            @* BADGE OBLIGATORIO Y PROMINENTE DE COMENSALES *@
+                            <div class="absolute top-2.5 left-2.5">
+                                <span class="px-2.5 py-1 rounded-lg bg-emerald-950/95 text-emerald-300 border border-emerald-500/60 font-black text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
+                                    <span>👥</span>
+                                    <span>@(play.PlayerCountBadge ?? "Partida")</span>
+                                </span>
+                            </div>
+
+                            @* Botón de reproducción centrado *@
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-full bg-emerald-600/90 text-white flex items-center justify-center text-lg pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-emerald-500 transition-all">
+                                    ▶
+                                </div>
+                            </div>
+
+                            @* Duración en esquina inferior *@
+                            @if (!string.IsNullOrWhiteSpace(play.FormattedDuration))
+                            {
+                                <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight">
+                                    ⏱️ @play.FormattedDuration
+                                </div>
+                            }
+                        </div>
+
+                        @* Datos de la partida *@
+                        <div class="p-3.5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[0.7rem] font-bold text-emerald-400 block mb-0.5">
+                                    @play.AuthorChannel
+                                </span>
+                                <h3 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors line-clamp-2 leading-snug">
+                                    @play.Title
+                                </h3>
+                            </div>
+                            <div class="mt-2.5 pt-2 border-t border-slate-900 flex items-center justify-between text-[0.68rem] text-slate-500">
+                                <span class="text-emerald-400/90 font-medium">Sesión completa</span>
+                                <span class="text-emerald-400 font-semibold group-hover:underline">Ver partida &rarr;</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="p-8 text-center rounded-xl bg-slate-950/40 border border-slate-800/60 max-w-md mx-auto">
+                <span class="text-4xl block mb-2">🎲</span>
+                <h3 class="text-sm font-bold text-white mb-1">Sin partidas completas grabadas</h3>
+                <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+                    Aún nadie ha indexado una partida a 2 o más jugadores de este título. ¿Conoces un canal hispanohablante que lo haya jugado?
+                </p>
+                <a href="/moderacion/multimedia" class="inline-block text-xs text-emerald-400 hover:underline font-semibold">
+                    &rarr; Sugerir partida en moderación
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        @* PESTAÑA 3: OPINIONES Y REDES (Instagram 1:1 + Shorts/Reels 9:16) *@
+        <div class="space-y-6">
+            @* Subsección A: Posts de Instagram (1:1) *@
+            @if (MediaHub != null && MediaHub.InstagramPosts.Count > 0)
+            {
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-sm font-bold text-pink-400 uppercase tracking-wider">
+                            📸 Reseñas en Instagram (Fotos 1:1)
+                        </span>
+                        <div class="h-px flex-1 bg-slate-800"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        @foreach (var post in MediaHub.InstagramPosts)
+                        {
+                            <div class="group cursor-pointer rounded-xl overflow-hidden bg-slate-950/80 border border-slate-800 hover:border-pink-500/50 transition-all flex flex-col shadow-md"
+                                 @onclick="() => OpenEmbedModal(post)">
+                                @* Foto cuadrada 1:1 *@
+                                <div class="aspect-square relative overflow-hidden bg-black">
+                                    <img src="@post.ThumbnailUrl"
+                                         alt="@post.Title"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    
+                                    @if (post.LikesCount.HasValue)
+                                    {
+                                        <div class="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-full bg-black/75 text-pink-300 border border-pink-500/30 text-xs font-bold flex items-center gap-1 backdrop-blur-sm">
+                                            <span>❤️</span>
+                                            <span>@post.LikesCount</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="p-3 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <span class="text-xs font-bold text-pink-400 block mb-1">
+                                            @post.AuthorChannel
+                                        </span>
+                                        @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+                                        {
+                                            <p class="text-xs text-slate-300 line-clamp-3 italic leading-relaxed">
+                                                "@post.Excerpt"
+                                            </p>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-xs text-slate-400 line-clamp-2">
+                                                @post.Title
+                                            </p>
+                                        }
+                                    </div>
+                                    <div class="mt-2 pt-2 border-t border-slate-900 text-[0.68rem] text-pink-400/80 font-medium flex items-center justify-between">
+                                        <span>Instagram Post</span>
+                                        <span>Ver reseña &rarr;</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Subsección B: Vídeos Verticales (Reels / Shorts 9:16) *@
+            @if (MediaHub != null && MediaHub.ShortReels.Count > 0)
+            {
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-sm font-bold text-orange-400 uppercase tracking-wider">
+                            📱 Vídeos Verticales (Reels & Shorts 9:16)
+                        </span>
+                        <div class="h-px flex-1 bg-slate-800"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        @foreach (var reel in MediaHub.ShortReels)
+                        {
+                            <div class="group cursor-pointer rounded-xl overflow-hidden bg-slate-950/80 border border-slate-800 hover:border-orange-500/50 transition-all flex flex-col shadow-md"
+                                 @onclick="() => OpenEmbedModal(reel)">
+                                @* Formato vertical 9:16 *@
+                                <div class="aspect-[9/16] relative overflow-hidden bg-black">
+                                    <img src="@reel.ThumbnailUrl"
+                                         alt="@reel.Title"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+
+                                    @* Icono de reproducción rápida *@
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="w-10 h-10 rounded-full bg-orange-600/90 text-white flex items-center justify-center text-sm pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-orange-500 transition-all">
+                                            ▶
+                                        </div>
+                                    </div>
+
+                                    @* Duración y autor en la parte inferior *@
+                                    <div class="absolute bottom-2 inset-x-2 flex items-center justify-between text-[0.68rem] text-white font-semibold">
+                                        <span class="truncate max-w-[70%] text-orange-300">@reel.AuthorChannel</span>
+                                        @if (!string.IsNullOrWhiteSpace(reel.FormattedDuration))
+                                        {
+                                            <span class="px-1.5 py-0.5 rounded bg-black/80 font-mono text-[0.65rem]">
+                                                @reel.FormattedDuration
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="p-2 bg-slate-950/90 border-t border-slate-900">
+                                    <h4 class="text-[0.72rem] font-bold text-slate-200 truncate group-hover:text-orange-300">
+                                        @reel.Title
+                                    </h4>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Estado vacío si no hay posts ni reels *@
+            @if (MediaHub == null || (!MediaHub.HasSocial))
+            {
+                <div class="p-8 text-center rounded-xl bg-slate-950/40 border border-slate-800/60 max-w-md mx-auto">
+                    <span class="text-4xl block mb-2">💬</span>
+                    <h3 class="text-sm font-bold text-white mb-1">Sin menciones en redes todavía</h3>
+                    <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+                        Aún no se han indexado posts de Instagram ni Reels de la comunidad sobre este título.
+                    </p>
+                    <a href="/moderacion/multimedia" class="inline-block text-xs text-pink-400 hover:underline font-semibold">
+                        &rarr; Proponer post en moderación
+                    </a>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@* Modal de reproducción embebida *@
+<MediaEmbedModal
+    IsOpen="@_isEmbedModalOpen"
+    Item="@_selectedMediaItem"
+    OnClose="() => _isEmbedModalOpen = false" />
+
+@code {
+    [Parameter]
+    public GameMediaHubDto? MediaHub { get; set; }
+
+    [Parameter]
+    public string GameTitle { get; set; } = string.Empty;
+
+    private string _activeTab = "tutorials";
+    private bool _isEmbedModalOpen;
+    private MediaItemDto? _selectedMediaItem;
+
+    protected override void OnParametersSet()
+    {
+        // Si no hay tutoriales pero sí partidas, activar la pestaña de partidas por defecto
+        if (MediaHub != null && !MediaHub.HasTutorials && MediaHub.HasPlaythroughs && _activeTab == "tutorials")
+        {
+            _activeTab = "playthroughs";
+        }
+        else if (MediaHub != null && !MediaHub.HasTutorials && !MediaHub.HasPlaythroughs && MediaHub.HasSocial && _activeTab == "tutorials")
+        {
+            _activeTab = "social";
+        }
+    }
+
+    private void OpenEmbedModal(MediaItemDto item)
+    {
+        _selectedMediaItem = item;
+        _isEmbedModalOpen = true;
+    }
+}

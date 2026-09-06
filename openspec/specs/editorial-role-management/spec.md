@@ -31,3 +31,19 @@ Para posibilitar la verificación manual y demostración fluida en el MVP sin re
 - CUANDO pulsa el conmutador de la cabecera seleccionando `"🛡️ Modo Mesa Fundadora"`
 - ENTONCES el rol activo del servicio DEBE pasar a `"FoundingTeam"`
 - Y los componentes reactivos DEBEN actualizar su visualización inmediatamente.
+
+---
+
+### Requerimiento: Acceso Rápido de Moderación en Navegación
+La cabecera de la aplicación (`MainLayout.razor`) DEBE mostrar un botón o enlace `[ 🎬 Moderar Medios ]` cuando el usuario activo posea el rol `FoundingTeam` o `Moderator`.
+
+#### Escenario: Moderador visualiza acceso a moderación
+- DADO un usuario activo con rol `Moderator` o `FoundingTeam`
+- CUANDO visualiza cualquier pantalla en Ludeka
+- ENTONCES en la barra superior DEBE estar visible el acceso directo `[ 🎬 Moderar Medios ]` que enlaza a `/moderacion/multimedia`.
+
+#### Escenario: Usuario regular no visualiza acceso
+- DADO un usuario con rol regular `User`
+- CUANDO navega por la plataforma
+- ENTONCES el enlace de moderación NO DEBE ser visible ni accesible en la barra superior.
+

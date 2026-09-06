@@ -30,6 +30,13 @@
                     <span>📚</span>
                     <span class="hidden sm:inline">Mi Ludoteca</span>
                 </a>
+                @if (CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator"))
+                {
+                    <a href="/moderacion/multimedia" class="px-2.5 py-1.5 rounded-xl bg-orange-950/80 border border-orange-500/40 text-orange-300 hover:bg-orange-900/80 transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm">
+                        <span>🎬</span>
+                        <span class="hidden sm:inline">Moderar Medios</span>
+                    </a>
+                }
                 <a href="/?parejas=true" class="text-slate-400 hover:text-orange-400 transition-colors hidden md:inline text-xs sm:text-sm">
                     Especial Parejas
                 </a>
@@ -47,7 +54,7 @@
     <footer class="mt-auto border-t border-slate-800/80 bg-slate-950/60 py-8 text-xs text-slate-500">
         <div class="container-ludeka flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-                <p class="font-bold text-slate-400">Ludeka &bull; Ludist MVP (Incremento 3: Panel y Veredicto de la Mesa Fundadora)</p>
+                <p class="font-bold text-slate-400">Ludeka &bull; Ludist MVP (Incremento 4: Hub Multimedia YouTube e Instagram)</p>
                 <p>El Letterboxd de los juegos de mesa en español. Sin anuncios invasivos &bull; 100% de código abierto.</p>
             </div>
             <div class="text-center sm:text-right">

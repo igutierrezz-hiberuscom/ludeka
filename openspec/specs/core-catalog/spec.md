@@ -89,3 +89,13 @@ La página de detalle del juego DEBE renderizar en su zona superior el bloque ed
 - DADO un usuario con rol `FoundingTeam` o `Moderator`
 - CUANDO se encuentra en la ficha de un juego
 - ENTONCES el botón `[ 🛡️ Gestionar Veredicto Fundador ]` DEBE ser visible y permitir la edición en tiempo real.
+
+---
+
+### Requerimiento: Integración de la Sección Multimedia en la Ficha
+La ficha de juego DEBE incorporar la sección multimedia entre el bloque de escalabilidad/fundas y la descripción, o como bloque editorial de primer nivel.
+
+#### Escenario: Renderizado del hub multimedia en la ficha
+- DADO un usuario navegando a la ficha `/juegos/{Slug}`
+- CUANDO la ficha termina de cargar
+- ENTONCES el componente `MultimediaHub` DEBE inicializarse con los tutoriales, partidas completas y opiniones aprobadas correspondientes a dicho `GameId`.

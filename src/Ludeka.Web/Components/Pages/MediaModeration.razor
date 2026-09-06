@@ -1,0 +1,395 @@
+@page "/moderacion/multimedia"
+@rendermode InteractiveServer
+@inject IMediaService MediaService
+@inject ICatalogService CatalogService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>Panel de Moderación Multimedia | Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-6">
+    @* Verificación de Rol *@
+    @if (!CurrentUserService.IsFoundingTeam && !CurrentUserService.IsInRole("Moderator"))
+    {
+        <div class="max-w-md mx-auto py-16 text-center space-y-4">
+            <span class="text-5xl block">🛡️</span>
+            <h1 class="text-2xl font-black text-white">Acceso Restringido</h1>
+            <p class="text-sm text-slate-400">
+                Esta sección está reservada para moderadores y el equipo fundador de Ludeka.
+            </p>
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
+                <p class="mb-2">
+                    💡 Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
+                </p>
+                <button type="button"
+                        @onclick="SwitchToFounder"
+                        class="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition-colors">
+                    Activar Modo Fundador Ahora
+                </button>
+            </div>
+            <a href="/" class="inline-block text-xs text-slate-400 hover:text-white underline">
+                &larr; Volver al Catálogo
+            </a>
+        </div>
+    }
+    else
+    {
+        @* Cabecera del Panel *@
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-2xl">🎬</span>
+                    <h1 class="text-2xl font-black text-white tracking-tight">
+                        Panel de Moderación Rápida
+                    </h1>
+                </div>
+                <p class="text-xs text-slate-400">
+                    Aprobación en 1 clic, asignación de vídeos huérfanos y detector de enlaces rotos.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="button"
+                        @onclick="RunBrokenLinksCheck"
+                        disabled="@_isCheckingLinks"
+                        class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors flex items-center gap-2 border border-slate-700 shadow-sm disabled:opacity-50">
+                    <span>🔍</span>
+                    <span>@(_isCheckingLinks ? "Comprobando..." : "Comprobar Enlaces")</span>
+                </button>
+                <a href="/" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 text-xs font-semibold transition-colors border border-slate-800">
+                    &larr; Ir a la Web
+                </a>
+            </div>
+        </div>
+
+        @* Notificación de comprobación de enlaces *@
+        @if (_brokenLinkReport != null)
+        {
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between text-xs animate-fade-in">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">@(_brokenLinkReport.BrokenCount > 0 ? "⚠️" : "✅")</span>
+                    <span>
+                        Verificación completada: <strong>@_brokenLinkReport.TotalChecked</strong> recursos revisados,
+                        <strong class="@(_brokenLinkReport.BrokenCount > 0 ? "text-rose-400" : "text-emerald-400")">
+                            @_brokenLinkReport.BrokenCount enlaces rotos detectados
+                        </strong>.
+                    </span>
+                </div>
+                <button type="button"
+                        @onclick="() => _brokenLinkReport = null"
+                        class="text-slate-500 hover:text-slate-300">
+                    ✕
+                </button>
+            </div>
+        }
+
+        @* Pestañas de Moderación *@
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
+            <button type="button"
+                    @onclick='() => _currentTab = "pending"'
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @(_currentTab == "pending" ? "bg-orange-600 text-white" : "text-slate-400 hover:text-white bg-slate-900/60")">
+                <span>⏳ Pendientes de Aprobación</span>
+                <span class="px-2 py-0.5 rounded-full text-[0.68rem] @(_currentTab == "pending" ? "bg-orange-800 text-orange-100" : "bg-slate-800 text-slate-300")">
+                    @_pendingItems.Count
+                </span>
+            </button>
+
+            <button type="button"
+                    @onclick='() => _currentTab = "orphans"'
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @(_currentTab == "orphans" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white bg-slate-900/60")">
+                <span>📦 Bandeja de Huérfanos</span>
+                <span class="px-2 py-0.5 rounded-full text-[0.68rem] @(_currentTab == "orphans" ? "bg-amber-800 text-amber-100" : "bg-slate-800 text-slate-300")">
+                    @_orphanItems.Count
+                </span>
+            </button>
+
+            <button type="button"
+                    @onclick='() => _currentTab = "approved"'
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @(_currentTab == "approved" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white bg-slate-900/60")">
+                <span>✅ Aprobados y Públicos</span>
+                <span class="px-2 py-0.5 rounded-full text-[0.68rem] @(_currentTab == "approved" ? "bg-emerald-800 text-emerald-100" : "bg-slate-800 text-slate-300")">
+                    @_approvedItems.Count
+                </span>
+            </button>
+        </div>
+
+        @* Listado según la pestaña activa *@
+        @if (_isLoading)
+        {
+            <div class="py-16 text-center text-slate-400">
+                <div class="inline-block animate-spin text-3xl mb-2">🎲</div>
+                <p class="text-xs">Cargando cola de moderación...</p>
+            </div>
+        }
+        else
+        {
+            var activeList = _currentTab switch
+            {
+                "pending" => _pendingItems,
+                "orphans" => _orphanItems,
+                _ => _approvedItems
+            };
+
+            @if (activeList.Count == 0)
+            {
+                <div class="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800/80 max-w-md mx-auto space-y-2">
+                    <span class="text-4xl block">✨</span>
+                    <h3 class="text-base font-bold text-white">Cola despejada</h3>
+                    <p class="text-xs text-slate-400">
+                        No hay elementos en esta categoría en este momento.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach (var item in activeList)
+                    {
+                        <div class="p-4 rounded-2xl bg-slate-900/70 border @(item.IsBroken ? "border-rose-500/50 bg-rose-950/20" : "border-slate-800") flex flex-col justify-between gap-3 shadow-md">
+                            <div class="flex gap-3">
+                                @* Miniatura compacta *@
+                                <div class="w-28 h-20 shrink-0 rounded-xl overflow-hidden bg-black relative border border-slate-800">
+                                    <img src="@item.ThumbnailUrl" alt="@item.Title" class="w-full h-full object-cover" />
+                                    @if (!string.IsNullOrWhiteSpace(item.FormattedDuration))
+                                    {
+                                        <span class="absolute bottom-1 right-1 px-1.5 py-0.2 rounded bg-black/80 text-[0.62rem] text-white font-mono font-bold">
+                                            @item.FormattedDuration
+                                        </span>
+                                    }
+                                </div>
+
+                                @* Metadatos *@
+                                <div class="flex-1 min-w-0 space-y-1">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="px-2 py-0.5 rounded text-[0.62rem] font-bold uppercase @(item.Platform == MediaPlatform.YouTube ? "bg-red-950 text-red-400 border border-red-500/30" : "bg-pink-950 text-pink-400 border border-pink-500/30")">
+                                            @item.Platform
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded text-[0.62rem] font-bold bg-slate-800 text-slate-300">
+                                            @item.Type
+                                        </span>
+                                        @if (!string.IsNullOrWhiteSpace(item.PlayerCountBadge))
+                                        {
+                                            <span class="px-2 py-0.5 rounded text-[0.62rem] font-black bg-emerald-950 text-emerald-300 border border-emerald-500/30">
+                                                👥 @item.PlayerCountBadge
+                                            </span>
+                                        }
+                                        @if (item.IsBroken)
+                                        {
+                                            <span class="px-2 py-0.5 rounded text-[0.62rem] font-black bg-rose-950 text-rose-300 border border-rose-500/40">
+                                                ⚠️ Enlace Roto (404)
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <h3 class="text-xs font-bold text-white line-clamp-2 leading-snug">
+                                        @item.Title
+                                    </h3>
+
+                                    <p class="text-[0.68rem] text-orange-400">
+                                        @item.AuthorChannel
+                                        @if (!string.IsNullOrWhiteSpace(item.GameTitle))
+                                        {
+                                            <span class="text-slate-400 font-normal"> &bull; Juego: <strong class="text-slate-300">@item.GameTitle</strong></span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-amber-400 font-semibold"> &bull; ⚠️ Sin juego asignado</span>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+
+                            @* Barra de Acciones Móvil en 1 Clic *@
+                            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2 text-xs">
+                                <button type="button"
+                                        @onclick="() => PreviewItem(item)"
+                                        class="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition-colors flex items-center gap-1">
+                                    <span>👁️</span> Previsualizar
+                                </button>
+
+                                <div class="flex items-center gap-2">
+                                    @if (item.IsOrphan)
+                                    {
+                                        <button type="button"
+                                                @onclick="() => OpenAssignModal(item)"
+                                                class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-sm">
+                                            <span>🔗</span> Asignar Juego
+                                        </button>
+                                    }
+
+                                    @if (item.Status != ModerationStatus.Approved)
+                                    {
+                                        <button type="button"
+                                                @onclick="() => ApproveItem(item.Id)"
+                                                class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-sm">
+                                            <span>✅</span> Aprobar
+                                        </button>
+                                    }
+
+                                    @if (item.Status != ModerationStatus.Rejected)
+                                    {
+                                        <button type="button"
+                                                @onclick="() => RejectItem(item.Id)"
+                                                class="px-3 py-1.5 rounded-lg bg-rose-600/90 hover:bg-rose-500 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-sm">
+                                            <span>❌</span> Descartar
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    }
+</div>
+
+@* Modal de Asignación de Juego para Huérfanos *@
+@if (_isAssignModalOpen && _itemToAssign != null)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+         @onclick="() => _isAssignModalOpen = false">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl"
+             @onclick:stopPropagation="true">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🔗</span>
+                    <h3 class="text-base font-bold text-white">Vincular Contenido Huérfano</h3>
+                </div>
+                <button type="button" @onclick="() => _isAssignModalOpen = false" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div>
+                <p class="text-xs text-slate-300 font-semibold mb-1 truncate">
+                    @_itemToAssign.Title
+                </p>
+                <p class="text-[0.68rem] text-orange-400 mb-4">
+                    Por @_itemToAssign.AuthorChannel
+                </p>
+
+                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                    Selecciona el juego del catálogo:
+                </label>
+                <select @bind="_selectedGameId"
+                        class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-500">
+                    <option value="">-- Elige un título --</option>
+                    @foreach (var g in _availableGames)
+                    {
+                        <option value="@g.Id.ToString()">@g.SpanishTitle (@g.YearPublished)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 text-xs">
+                <button type="button"
+                        @onclick="() => _isAssignModalOpen = false"
+                        class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition-colors">
+                    Cancelar
+                </button>
+                <button type="button"
+                        @onclick="SaveAssignment"
+                        disabled="@(string.IsNullOrWhiteSpace(_selectedGameId))"
+                        class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-bold transition-colors disabled:opacity-50">
+                    Vincular y Aprobar
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@* Modal de previsualización embebida *@
+<MediaEmbedModal
+    IsOpen="@_isPreviewModalOpen"
+    Item="@_previewItem"
+    OnClose="() => _isPreviewModalOpen = false" />
+
+@code {
+    private string _currentTab = "pending";
+    private bool _isLoading = true;
+    private bool _isCheckingLinks;
+
+    private List<MediaItemDto> _pendingItems = [];
+    private List<MediaItemDto> _orphanItems = [];
+    private List<MediaItemDto> _approvedItems = [];
+    private IReadOnlyList<GameSummaryDto> _availableGames = [];
+
+    private BrokenLinkReportDto? _brokenLinkReport;
+
+    private bool _isAssignModalOpen;
+    private MediaItemDto? _itemToAssign;
+    private string _selectedGameId = string.Empty;
+
+    private bool _isPreviewModalOpen;
+    private MediaItemDto? _previewItem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        var pending = await MediaService.GetPendingModerationAsync();
+        _pendingItems = pending.ToList();
+
+        var orphans = await MediaService.GetOrphansAsync();
+        _orphanItems = orphans.ToList();
+
+        var approved = await MediaService.GetApprovedAsync();
+        _approvedItems = approved.ToList();
+
+        var catalog = await CatalogService.GetCatalogAsync(new GameFilterCriteria(), 1, 50);
+        _availableGames = catalog.Games;
+        _isLoading = false;
+    }
+
+    private async Task ApproveItem(Guid id)
+    {
+        await MediaService.ApproveMediaAsync(id);
+        await LoadDataAsync();
+    }
+
+    private async Task RejectItem(Guid id)
+    {
+        await MediaService.RejectMediaAsync(id);
+        await LoadDataAsync();
+    }
+
+    private void OpenAssignModal(MediaItemDto item)
+    {
+        _itemToAssign = item;
+        _selectedGameId = string.Empty;
+        _isAssignModalOpen = true;
+    }
+
+    private async Task SaveAssignment()
+    {
+        if (_itemToAssign == null || !Guid.TryParse(_selectedGameId, out var gameId)) return;
+
+        await MediaService.AssignOrphanMediaAsync(_itemToAssign.Id, gameId);
+        await MediaService.ApproveMediaAsync(_itemToAssign.Id);
+        _isAssignModalOpen = false;
+        await LoadDataAsync();
+    }
+
+    private async Task RunBrokenLinksCheck()
+    {
+        _isCheckingLinks = true;
+        _brokenLinkReport = await MediaService.CheckBrokenLinksAsync();
+        _isCheckingLinks = false;
+        await LoadDataAsync();
+    }
+
+    private void PreviewItem(MediaItemDto item)
+    {
+        _previewItem = item;
+        _isPreviewModalOpen = true;
+    }
+
+    private void SwitchToFounder()
+    {
+        CurrentUserService.SwitchRole("FoundingTeam");
+        Navigation.NavigateTo("/moderacion/multimedia", forceLoad: true);
+    }
+}

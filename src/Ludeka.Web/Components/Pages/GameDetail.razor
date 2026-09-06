@@ -1,8 +1,9 @@
-﻿@page "/juegos/{Slug}"
+@page "/juegos/{Slug}"
 @rendermode InteractiveServer
 @inject ICatalogService CatalogService
 @inject IUserLibraryService LibraryService
 @inject IFoundingVerdictService FoundingService
+@inject IMediaService MediaService
 @inject ICurrentUserService CurrentUserService
 @inject NavigationManager Navigation
 
@@ -195,7 +196,10 @@ else
         @* 4. Guía de Fundas *@
         <SleeveGuideCard Sleeves="@Game.Sleeves" />
 
-        @* 5. Sinopsis / Descripción *@
+        @* 5. Hub Multimedia (YouTube e Instagram) *@
+        <MultimediaHub MediaHub="@_mediaHub" GameTitle="@Game.SpanishTitle" />
+
+        @* 6. Sinopsis / Descripción *@
         @if (!string.IsNullOrWhiteSpace(Game.Description))
         {
             <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80">
@@ -240,6 +244,7 @@ else
     private UserReviewDto? _userReview;
     private FoundingVerdictDto? _foundingVerdict;
     private AiGameSummaryDto? _aiSummary;
+    private GameMediaHubDto? _mediaHub;
 
     private bool _isLoading = true;
     private bool _isLoanModalOpen;
@@ -273,6 +278,8 @@ else
         {
             _aiSummary = null;
         }
+
+        _mediaHub = await MediaService.GetGameMediaAsync(Game.Id);
     }
 
     private async Task HandleStatusSelected(CollectionStatus status)
