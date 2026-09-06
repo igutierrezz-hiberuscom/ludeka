@@ -23,7 +23,7 @@ Run only when the orchestrator selects `sdd-research` and supplies the change, q
 
 ## Hard Rules
 
-- Generated technical artifacts default to English. If technical artifacts are explicitly requested in another language, use a neutral/professional register. Public/contextual comments follow the target context language. Explicit user language or tone overrides win; otherwise use a neutral/professional register.
+- Generated technical artifacts MUST BE IN SPANISH (CASTELLANO). Use a clear and professional Spanish register. Public/contextual comments follow the target context language. Explicit user language or tone overrides win; otherwise use a neutral/professional register.
 - Read `../_shared/research-lifecycle.md` and `../_shared/sdd-phase-common.md` first.
 - Admit only `gentle-ai.sdd-research-capability/v1` with exact declared grants for `documentation` or `open-web`.
 - Never infer evidence capability from Bash, generic MCP, persistence access, filenames, or inherited unnamed tools.

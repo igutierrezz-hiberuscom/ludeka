@@ -1,9 +1,14 @@
 ﻿schema: "1.0"
 mode: "hybrid"
+language: "es"
+language_rules:
+  artifacts: "es"
+  chat: "es"
 context: |
   Ludist / Ludeca — "El Letterboxd de los juegos de mesa en español".
   Arquitectura: .NET 10 (C# 13), Blazor Web App (SSR + Interactivo), Clean Architecture / Vertical Slices.
   Memoria persistente: Engram MCP. UI: Tailwind CSS + componentes propios/Lucide Icons.
+  IDIOMA OBLIGATORIO: Todos los artefactos de SDD, propuestas, especificaciones, tareas y comunicaciones deben estar redactados en español (castellano).
 strict_tdd: true
 testing:
   workspace_command: "dotnet test src/Ludeca.slnx"

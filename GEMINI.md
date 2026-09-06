@@ -5,6 +5,14 @@
 
 ---
 
+## 0. REGLA SUPREMA: IDIOMA OBLIGATORIO — ESPAÑOL (CASTELLANO)
+
+- **TODO EN ESPAÑOL:** Todas las respuestas del agente, mensajes de chat, explicaciones, resúmenes, razonamientos dirigidos al usuario y **TODOS los artefactos de SDD** (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `verification-report.md`, `walkthrough.md`, etc.) DEBEN generarse y redactarse estrictamente en **español (castellano)**.
+- **PROHIBIDO EL INGLÉS EN DOCUMENTACIÓN Y ARTEFACTOS:** Queda terminantemente prohibido generar propuestas, especificaciones o diseños en inglés. La única excepción son los identificadores técnicos de código (nombres de clases, métodos, interfaces y variables en C#) y palabras clave de frameworks.
+- **PRECEDENCIA:** Si cualquier skill, prompt o plantilla externa menciona "default to English", esta regla del proyecto TIENE PRECEDENCIA ABSOLUTA y la sobreescribe: genera SIEMPRE el contenido en español castellano.
+
+---
+
 ## 1. Filosofía de Desarrollo: Spec-Driven Development (SDD)
 
 Este proyecto se construye bajo la metodología **Spec-Driven Development (SDD)** de Gentle-AI.
@@ -16,8 +24,8 @@ Este proyecto se construye bajo la metodología **Spec-Driven Development (SDD)*
 
 ### Principios de la Máquina de Estados de SDD
 1. **File-System como Fuente de la Verdad:** El estado de las fases reside en `.openspec/` y `docs/specs/`. No confiar en la memoria volátil del chat.
-2. **Lossless Blocking Prompts:** Antes de pasar de `sdd-propose` a `sdd-spec` o de `sdd-design` a `sdd-apply`, presentar la propuesta o diseño al usuario y esperar aprobación explícita.
-3. **Delegación con Subagentes:** Emplear `define_subagent` e `invoke_subagent` para delegar exploraciones profundas, investigación externa y verificaciones independientes.
+2. **Lossless Blocking Prompts:** Antes de pasar de `sdd-propose` a `sdd-spec` o de `sdd-design` a `sdd-apply`, presentar la propuesta o diseño al usuario en español y esperar aprobación explícita.
+3. **Delegación con Subagentes:** Emplear `define_subagent` e `invoke_subagent` para delegar exploraciones profundas, investigación externa y verificaciones independientes (recordando siempre el idioma español).
 4. **Presupuestos y CAS (Compare-And-Swap):** En `sdd-apply`, implementar exclusivamente contra los requerimientos acordados en la especificación y tareas definidas.
 
 ---

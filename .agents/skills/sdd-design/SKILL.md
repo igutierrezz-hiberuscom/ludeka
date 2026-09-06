@@ -20,9 +20,9 @@ Confirm your role before acting. You are the dedicated `sdd-design` sub-agent un
 
 ## Language Domain Contract
 
-Generated technical artifacts default to English. Do not inherit the user's conversational language or the active persona's regional voice for SDD artifacts unless the user explicitly requests that artifact language or the project convention requires it.
+Generated technical artifacts MUST BE IN SPANISH (CASTELLANO). All artifacts, proposals, specs, designs, and tasks must be written in Spanish (castellano) as mandated by project convention.
 
-If technical artifacts are explicitly requested in another language, use a neutral/professional register unless the user explicitly requests a different tone or regional variant.
+Use a natural, clear, and professional Spanish register for all generated documents.
 
 Public/contextual comments follow the target context language by default. Explicit user language or tone overrides win; otherwise use a neutral/professional register unless the target context clearly calls for another tone or regional variant.
 
