@@ -1,7 +1,7 @@
 # Especificación: core-catalog
 
 ## Propósito
-Definir la entidad raíz de agregado `Game`, la interfaz de repositorio para persistencia, el motor de búsqueda y filtrado multi-criterio, y el enrutamiento amigable para SEO basado en slug para el catálogo de juegos de mesa de Ludeca.
+Definir la entidad raíz de agregado `Game`, la interfaz de repositorio para persistencia, el motor de búsqueda y filtrado multi-criterio, y el enrutamiento amigable para SEO basado en slug para el catálogo de juegos de mesa de Ludeka.
 
 ## Requerimientos
 

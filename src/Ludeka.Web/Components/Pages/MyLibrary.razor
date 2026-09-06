@@ -1,0 +1,293 @@
+﻿@page "/mi-ludoteca"
+@rendermode InteractiveServer
+@inject IUserLibraryService LibraryService
+@inject NavigationManager Navigation
+
+<PageTitle>Mi Ludoteca Personal — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Cabecera de la sección *@
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-500/40">
+                    Tu Espacio Lúdico
+                </span>
+                <span class="text-xs text-slate-400">Sesión activa como <strong class="text-slate-200">Mesa Fundadora</strong></span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                Mi Ludoteca Personal
+            </h1>
+            <p class="text-sm text-slate-400 mt-1">
+                Gestiona tus copias físicas en propiedad, títulos jugados, deseos y el cuaderno de préstamos ("¿A quién se lo dejé?").
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="/" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors inline-flex items-center gap-1.5 shadow-sm">
+                <span>🔍</span>
+                <span>Explorar Catálogo</span>
+            </a>
+        </div>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="py-20 text-center text-slate-400">
+            <div class="inline-block animate-spin text-4xl mb-3">🎲</div>
+            <p class="text-base font-semibold">Cargando tu ludoteca...</p>
+        </div>
+    }
+    else if (_summary != null)
+    {
+        @* Pestañas Horizontales *@
+        <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
+            <button type="button"
+                    @onclick="() => _activeTab = TabType.InCollection"
+                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.InCollection)">
+                <span>🟢 En mi ludoteca</span>
+                <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.InCollection)">
+                    @_summary.TotalInCollection
+                </span>
+            </button>
+
+            <button type="button"
+                    @onclick="() => _activeTab = TabType.Played"
+                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Played)">
+                <span>🔵 Jugados</span>
+                <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.Played)">
+                    @_summary.TotalPlayed
+                </span>
+            </button>
+
+            <button type="button"
+                    @onclick="() => _activeTab = TabType.Wishlist"
+                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Wishlist)">
+                <span>🟡 Deseados</span>
+                <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.Wishlist)">
+                    @_summary.TotalWishlist
+                </span>
+            </button>
+
+            <button type="button"
+                    @onclick="() => _activeTab = TabType.WantToBuy"
+                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.WantToBuy)">
+                <span>🔴 Quiero comprar</span>
+                <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.WantToBuy)">
+                    @_summary.TotalWantToBuy
+                </span>
+            </button>
+
+            <button type="button"
+                    @onclick="() => _activeTab = TabType.Loans"
+                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Loans)">
+                <span>📦 Préstamos activos</span>
+                <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.Loans)">
+                    @_summary.TotalActiveLoans
+                </span>
+            </button>
+        </div>
+
+        @* Contenido de la pestaña activa *@
+        @if (_activeTab == TabType.Loans)
+        {
+            @* Vista de Préstamos Activos *@
+            @if (_summary.ActiveLoans.Count == 0)
+            {
+                <div class="py-16 text-center max-w-md mx-auto p-8 rounded-2xl bg-slate-900/40 border border-slate-800">
+                    <span class="text-4xl block mb-3">🤝</span>
+                    <h3 class="text-lg font-bold text-white mb-1">Todos tus juegos están a buen recaudo</h3>
+                    <p class="text-xs text-slate-400">
+                        No tienes ningún juego prestado en este momento. Cuando le dejes un título a un amigo o asociación, regístralo desde su ficha.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach (var loan in _summary.ActiveLoans)
+                    {
+                        <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between gap-4">
+                            <div class="flex gap-4 items-start">
+                                <a href="/juegos/@loan.GameSlug" class="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-slate-700/80 bg-black block">
+                                    @if (!string.IsNullOrWhiteSpace(loan.GameCoverUrl))
+                                    {
+                                        <img src="@loan.GameCoverUrl" alt="@loan.GameTitle" class="w-full h-full object-cover" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-full h-full flex items-center justify-center text-xs text-slate-600">🎲</div>
+                                    }
+                                </a>
+
+                                <div class="flex-1 min-w-0">
+                                    <a href="/juegos/@loan.GameSlug" class="text-sm font-black text-white hover:text-orange-400 transition-colors block truncate">
+                                        @loan.GameTitle
+                                    </a>
+                                    <div class="mt-2 space-y-1">
+                                        <div class="flex items-center gap-1.5 text-xs text-amber-400 font-bold">
+                                            <span>👤</span>
+                                            <span>@loan.BorrowerName</span>
+                                        </div>
+                                        <div class="text-[0.68rem] text-slate-400">
+                                            Prestado el @loan.LoanDate.ToString("dd/MM/yyyy")
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(loan.Notes))
+                                    {
+                                        <p class="text-[0.68rem] text-slate-400 mt-2 italic line-clamp-2">
+                                            &ldquo;@loan.Notes&rdquo;
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+
+                            <button type="button"
+                                    @onclick="() => HandleReturnLoan(loan.Id)"
+                                    class="w-full py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-700 hover:bg-emerald-600 text-white transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40">
+                                <span>↩️</span>
+                                <span>Marcar como devuelto</span>
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            @* Vista de Juegos por Estado *@
+            var currentList = GetFilteredItems();
+
+            @if (currentList.Count == 0)
+            {
+                <div class="py-16 text-center max-w-md mx-auto p-8 rounded-2xl bg-slate-900/40 border border-slate-800">
+                    <span class="text-4xl block mb-3">🎲</span>
+                    <h3 class="text-lg font-bold text-white mb-1">Sin juegos en esta lista</h3>
+                    <p class="text-xs text-slate-400 mb-6">
+                        Aún no tienes ningún título clasificado como @GetActiveTabName(). Explora el catálogo de más de 1.000 juegos y márcalos con un toque.
+                    </p>
+                    <a href="/" class="px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-600 hover:bg-orange-500 text-white transition-colors inline-block">
+                        Explorar Catálogo Base
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    @foreach (var item in currentList)
+                    {
+                        <div class="group relative rounded-2xl bg-slate-900/70 border border-slate-800/90 overflow-hidden flex flex-col hover:border-slate-700 transition-all shadow-md">
+                            <a href="/juegos/@item.GameSlug" class="block aspect-square w-full overflow-hidden bg-black relative">
+                                @if (!string.IsNullOrWhiteSpace(item.GameCoverUrl))
+                                {
+                                    <img src="@item.GameCoverUrl" alt="@item.GameTitle" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                }
+                                else
+                                {
+                                    <div class="w-full h-full flex items-center justify-center text-slate-600 text-2xl font-bold">🎲</div>
+                                }
+
+                                @if (item.IsCurrentlyLoaned)
+                                {
+                                    <div class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-amber-950/90 text-amber-300 border border-amber-500/50 text-[0.62rem] font-black uppercase tracking-wider backdrop-blur-sm">
+                                        📦 Prestado
+                                    </div>
+                                }
+                            </a>
+
+                            <div class="p-3 flex-1 flex flex-col justify-between gap-2">
+                                <div>
+                                    <a href="/juegos/@item.GameSlug" class="text-xs font-black text-white hover:text-orange-400 transition-colors line-clamp-2">
+                                        @item.GameTitle
+                                    </a>
+                                </div>
+                                <div class="text-[0.62rem] text-slate-500 font-medium">
+                                    Añadido el @item.AddedAt.ToString("dd/MM/yyyy")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    }
+</div>
+
+@code {
+    private enum TabType
+    {
+        InCollection,
+        Played,
+        Wishlist,
+        WantToBuy,
+        Loans
+    }
+
+    private TabType _activeTab = TabType.InCollection;
+    private UserLibrarySummaryDto? _summary;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSummaryAsync();
+    }
+
+    private async Task LoadSummaryAsync()
+    {
+        _isLoading = true;
+        _summary = await LibraryService.GetLibrarySummaryAsync();
+        _isLoading = false;
+    }
+
+    private async Task HandleReturnLoan(Guid loanId)
+    {
+        await LibraryService.ReturnLoanAsync(loanId);
+        await LoadSummaryAsync();
+    }
+
+    private List<UserCollectionItemDto> GetFilteredItems()
+    {
+        if (_summary == null) return [];
+
+        var targetStatus = _activeTab switch
+        {
+            TabType.InCollection => CollectionStatus.InCollection,
+            TabType.Played => CollectionStatus.Played,
+            TabType.Wishlist => CollectionStatus.Wishlist,
+            TabType.WantToBuy => CollectionStatus.WantToBuy,
+            _ => CollectionStatus.InCollection
+        };
+
+        return _summary.Items.Where(i => i.Status == targetStatus).ToList();
+    }
+
+    private string GetActiveTabName() => _activeTab switch
+    {
+        TabType.InCollection => "«En mi ludoteca»",
+        TabType.Played => "«Jugado»",
+        TabType.Wishlist => "«Deseado»",
+        TabType.WantToBuy => "«Quiero comprar»",
+        TabType.Loans => "«Préstamos»",
+        _ => ""
+    };
+
+    private string GetTabClass(TabType tab)
+    {
+        bool isActive = _activeTab == tab;
+        if (isActive)
+        {
+            return "bg-orange-600 text-white shadow-md shadow-orange-950/40";
+        }
+        return "bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800";
+    }
+
+    private string GetBadgeClass(TabType tab)
+    {
+        bool isActive = _activeTab == tab;
+        if (isActive)
+        {
+            return "bg-orange-800 text-orange-200";
+        }
+        return "bg-slate-800 text-slate-400";
+    }
+}

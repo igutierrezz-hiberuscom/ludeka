@@ -1,6 +1,6 @@
-﻿# Ludeca / Ludist — Reglas Maestras del Monorepo y Guía de Agentes
+# Ludeka / Ludist — Reglas Maestras del Monorepo y Guía de Agentes
 
-> **Proyecto:** Ludist / Ludeca ("El Letterboxd de los juegos de mesa en español")  
+> **Proyecto:** Ludist / Ludeka ("El Letterboxd de los juegos de mesa en español")  
 > **Arquitectura:** .NET 10 (C# 13), Blazor Web App (SSR + Interactivo), Clean Architecture / Vertical Slices, Tailwind CSS + Componentes Editoriales, Engram Persistent Memory.
 
 ---
@@ -41,7 +41,7 @@ El proyecto cuenta con el servidor MCP de **Engram** conectado en `.tools/bin/en
 
 ## 3. Principios de UI/UX: Anti-Plantillas y Cero "AI Slop"
 
-- **Identidad Propia:** Ludeca no es una base de datos corporativa ni un clon genérico con gradientes púrpura o tarjetas estándar. Debe respirar la pasión de los juegos de mesa (estilo editorial moderno, tipografía nítida con contraste, badges compactos de 3 segundos, microtextos con personalidad lúdica).
+- **Identidad Propia:** Ludeka no es una base de datos corporativa ni un clon genérico con gradientes púrpura o tarjetas estándar. Debe respirar la pasión de los juegos de mesa (estilo editorial moderno, tipografía nítida con contraste, badges compactos de 3 segundos, microtextos con personalidad lúdica).
 - **Mobile-First Radical:** Barra de acciones al alcance del pulgar (`Tengo`, `Jugado`, `Deseado`, `Prestar`), fichas por pestañas horizontales limpias, tiempo de carga instantáneo.
 - **Componentes Gratuitos y Abiertos:** Uso de Tailwind CSS con utilidades bien estructuradas, componentes Razor propios e iconografía abierta (Lucide Icons). Cumplimiento estricto de WCAG 2.2 AA (accesibilidad).
 
@@ -50,10 +50,10 @@ El proyecto cuenta con el servidor MCP de **Engram** conectado en `.tools/bin/en
 ## 4. Estándares Técnicos (.NET 10 & C# 13)
 
 - **Solución y Capas:**
-  - `src/Ludeca.Web`: Frontend Blazor Web App (SSR estático donde sea posible, interactividad por componentes, Streaming Rendering).
-  - `src/Ludeca.Core`: Entidades de dominio y reglas de negocio puras (cero dependencias de framework).
-  - `src/Ludeca.Application`: Casos de uso, interfaces, validaciones (FluentValidation o data annotations) y DTOs.
-  - `src/Ludeca.Infrastructure`: Integración BGG XMLAPI2, APIs de YouTube/Instagram, persistencia y autenticación OAuth.
-  - `tests/`: Pruebas unitarias con xUnit y pruebas de componentes/integración.
+  - `src/Ludeka.Web`: Frontend Blazor Web App (SSR estático donde sea posible, interactividad por componentes, Streaming Rendering).
+  - `src/Ludeka.Core`: Entidades de dominio y reglas de negocio puras (cero dependencias de framework).
+  - `src/Ludeka.Application`: Casos de uso, interfaces, validaciones (FluentValidation o data annotations) y DTOs.
+  - `src/Ludeka.Infrastructure`: Integración BGG XMLAPI2, APIs de YouTube/Instagram, persistencia y autenticación OAuth.
+  - `tests/Ludeka.UnitTests`: Pruebas unitarias con xUnit y pruebas de componentes/integración.
 - **Async/Await:** Emplear `ValueTask` cuando proceda, pasar siempre `CancellationToken`, evitar `.Result` o `.Wait()`.
 - **Commits Convencionales:** Formato `feat:`, `fix:`, `refactor:`, `test:`, `docs:`. Prohibido añadir atribuciones "Co-Authored-By" de IA.

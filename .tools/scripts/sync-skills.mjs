@@ -1,4 +1,4 @@
-﻿import fs from "fs";
+import fs from "fs";
 import path from "path";
 
 const AUTOSKILLS = [
@@ -36,7 +36,7 @@ if (!fs.existsSync(targetSkillsDir)) {
 }
 
 async function fetchJson(url) {
-  const res = await fetch(url, { headers: { "User-Agent": "Ludeca-Skills-Sync" } });
+  const res = await fetch(url, { headers: { "User-Agent": "Ludeka-Skills-Sync" } });
   if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
   return await res.json();
 }
@@ -44,7 +44,7 @@ async function fetchJson(url) {
 async function downloadFile(url, dest) {
   const dir = path.dirname(dest);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const res = await fetch(url, { headers: { "User-Agent": "Ludeca-Skills-Sync" } });
+  const res = await fetch(url, { headers: { "User-Agent": "Ludeka-Skills-Sync" } });
   if (!res.ok) throw new Error(`HTTP ${res.status} downloading ${url}`);
   const text = await res.text();
   fs.writeFileSync(dest, text, "utf8");

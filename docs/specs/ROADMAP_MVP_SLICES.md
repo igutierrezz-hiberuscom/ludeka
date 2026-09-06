@@ -1,4 +1,4 @@
-﻿# 🗺️ Ludeca / Ludist — Hoja de Ruta de Incrementos SDD (Roadmap MVP)
+# 🗺️ Ludeka / Ludist — Hoja de Ruta de Incrementos SDD (Roadmap MVP)
 
 Este documento desglosa los 13 bloques de la especificación funcional maestra (`LUDIST_SPEC_FUNCIONAL_MVP.md`) en **6 Vertical Slices (Incrementos Entregables)**. Cada incremento atraviesa todas las capas de la arquitectura (Dominio -> Casos de Uso -> Infraestructura -> UI Blazor -> Tests) y se implementará mediante el ciclo formal **Spec-Driven Development (SDD)**.
 

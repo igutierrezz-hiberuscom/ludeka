@@ -5,13 +5,13 @@ Proveer un seeder inicial con 25 a 50 juegos de mesa populares en español (fich
 
 ## Requerimientos
 
-### Requerimiento: Contexto de Base de Datos SQLite (`LudecaDbContext`)
-La capa de infraestructura DEBE configurar EF Core 10 con SQLite y mapeo de Value Objects JSON (`ToJson()`) para almacenar el catálogo de juegos.
+### Requerimiento: Contexto de Base de Datos SQLite (`LudekaDbContext`)
+El sistema DEBE proveer un contexto de persistencia SQLite que configure el agregado `Game` y mapee los Value Objects de escalabilidad y ADN lúdico mediante columnas JSON (`ToJson()`).
 
-#### Escenario: Inicialización de base de datos y migraciones
+#### Escenario: Creación automática de la base de datos
 - DADO que la aplicación arranca por primera vez
-- CUANDO `LudecaDbContext` se inicializa
-- ENTONCES DEBE crear la base de datos local SQLite `ludeca.db` si no existe
+- CUANDO `LudekaDbContext` se inicializa
+- ENTONCES DEBE crear la base de datos local SQLite `ludeka.db` si no existe
 - Y aplicar automáticamente el esquema relacional.
 
 ---

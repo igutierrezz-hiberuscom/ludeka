@@ -1,0 +1,140 @@
+﻿@page "/"
+@page "/catalogo"
+@rendermode InteractiveServer
+@inject ICatalogService CatalogService
+@inject NavigationManager Navigation
+
+<PageTitle>Ludeka — El Letterboxd de los juegos de mesa en español</PageTitle>
+
+<div class="container-ludeka py-6">
+    @* Cabecera y buscador principal *@
+    <div class="max-w-3xl mx-auto text-center mb-8">
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
+            Descubre tu próxima gran partida<span class="text-orange-500">.</span>
+        </h1>
+        <p class="text-sm sm:text-base text-slate-400 mb-6">
+            Fichas inteligentes en español, semáforo real de 1 a 7+ jugadores y lectura en 3 segundos.
+        </p>
+
+        <div class="max-w-xl mx-auto">
+            <CatalogSearchBar Value="@_searchTerm" ValueChanged="@OnSearchChanged" />
+        </div>
+    </div>
+
+    @* Filtros prácticos de situación real (Puntos 9.1 y 9.2 de la spec) *@
+    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar" role="group" aria-label="Filtros de situación real">
+        <button type="button" class="filter-btn @(_activePreset == Preset.Todos ? "active" : "")" @onclick="() => SetPreset(Preset.Todos)">
+            Todos (@_totalCount)
+        </button>
+        <button type="button" class="filter-btn @(_activePreset == Preset.EspecialParejas ? "active" : "")" @onclick="() => SetPreset(Preset.EspecialParejas)">
+            ⚔️ Especial Parejas (2J)
+        </button>
+        <button type="button" class="filter-btn @(_activePreset == Preset.MesaFamiliar ? "active" : "")" @onclick="() => SetPreset(Preset.MesaFamiliar)">
+            👨‍👩‍👧 Mesa Familiar
+        </button>
+        <button type="button" class="filter-btn @(_activePreset == Preset.SoloTop ? "active" : "")" @onclick="() => SetPreset(Preset.SoloTop)">
+            👤 Modo Solitario
+        </button>
+        <button type="button" class="filter-btn @(_activePreset == Preset.PartidasRapidas ? "active" : "")" @onclick="() => SetPreset(Preset.PartidasRapidas)">
+            ⏱️ &le; 45 min
+        </button>
+    </div>
+
+    @* Listado de tarjetas de juegos *@
+    @if (_isLoading)
+    {
+        <div class="py-16 text-center text-slate-400">
+            <div class="inline-block animate-spin text-3xl mb-2">🎲</div>
+            <p class="text-sm font-medium">Cargando catálogo lúdico...</p>
+        </div>
+    }
+    else if (_games == null || _games.Count == 0)
+    {
+        <div class="py-16 text-center max-w-md mx-auto p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
+            <span class="text-4xl mb-3 block">🧩</span>
+            <h3 class="text-lg font-bold text-white mb-1">Sin resultados</h3>
+            <p class="text-xs text-slate-400 mb-4">
+                No hemos encontrado ningún juego que coincida con tu búsqueda. Prueba a limpiar los filtros.
+            </p>
+            <button type="button" class="filter-btn active text-xs" @onclick="ResetFilters">
+                Restablecer filtros
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+            @foreach (var game in _games)
+            {
+                <GameCard Game="@game" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private enum Preset { Todos, EspecialParejas, MesaFamiliar, SoloTop, PartidasRapidas }
+
+    private Preset _activePreset = Preset.Todos;
+    private string _searchTerm = string.Empty;
+    private bool _isLoading = true;
+    private int _totalCount = 0;
+    private IReadOnlyList<GameSummaryDto> _games = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Leer query params si vienen de navegación externa
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.ContainsKey("parejas"))
+        {
+            _activePreset = Preset.EspecialParejas;
+        }
+        else if (query.ContainsKey("familiar"))
+        {
+            _activePreset = Preset.MesaFamiliar;
+        }
+
+        await LoadCatalogAsync();
+    }
+
+    private async Task OnSearchChanged(string term)
+    {
+        _searchTerm = term;
+        await LoadCatalogAsync();
+    }
+
+    private async Task SetPreset(Preset preset)
+    {
+        _activePreset = preset;
+        await LoadCatalogAsync();
+    }
+
+    private async Task ResetFilters()
+    {
+        _activePreset = Preset.Todos;
+        _searchTerm = string.Empty;
+        await LoadCatalogAsync();
+    }
+
+    private async Task LoadCatalogAsync()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        var criteria = new GameFilterCriteria(
+            SearchTerm: _searchTerm,
+            EspecialParejas: _activePreset == Preset.EspecialParejas,
+            MesaFamiliar: _activePreset == Preset.MesaFamiliar,
+            SoloTop: _activePreset == Preset.SoloTop,
+            MaxDurationMinutes: _activePreset == Preset.PartidasRapidas ? 45 : null
+        );
+
+        var result = await CatalogService.GetCatalogAsync(criteria, page: 1, pageSize: 50);
+        _games = result.Games;
+        _totalCount = result.TotalCount;
+        _isLoading = false;
+        StateHasChanged();
+    }
+}

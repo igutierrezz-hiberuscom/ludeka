@@ -1,4 +1,4 @@
-# 🎲 PROYECTO: LUDIST / LUDECA — ESPECIFICACIÓN FUNCIONAL MAESTRA (MVP)
+# 🎲 PROYECTO: LUDIST / LUDEKA — ESPECIFICACIÓN FUNCIONAL MAESTRA (MVP)
 
 > **Documento de Definición Funcional, Reglas de Negocio, UX y Alcance de Producto**  
 > **Versión:** 1.2 (MVP Maestro con Automatización Omnicanal)  
@@ -23,7 +23,7 @@ Convertirse en la plataforma web de referencia ágil, contemporánea y visual pa
   * Microtextos con identidad (ej. *"Aún nadie ha probado este juego a 2 jugadores, ¿te animas a ser el primero?"* en lugar de *"Sin registros"*).
 
 ### 1.2 Nombres de Trabajo y Evaluación de Marca
-* **Opción A: LUDECA** (Ludo + Fonoteca/Biblioteca: evoca catálogo ordenado, repositorio de consulta ágil).
+* **Opción A: LUDEKA** (Ludo + Fonoteca/Biblioteca: evoca catálogo ordenado, repositorio de consulta ágil).
 * **Opción B: LUDIST** (Término anglosajón que define al aficionado/jugador: club, perfil jugón, red social de mesa).
 * *(Descartes acordados: Ludex descartado por colisión directa con marcas y federaciones existentes).*
 

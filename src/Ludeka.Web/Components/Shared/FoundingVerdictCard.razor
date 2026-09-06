@@ -1,0 +1,163 @@
+﻿@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+
+<div class="rounded-2xl border p-6 sm:p-7 relative overflow-hidden transition-all duration-300 @GetCardContainerStyle(Verdict.Recommendation)">
+    @* Ambient gradient background *@
+    <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full opacity-10 blur-3xl pointer-events-none @GetGlowStyle(Verdict.Recommendation)"></div>
+
+    @* Header: Sello y Autoría *@
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-800/80">
+        <div class="flex items-center gap-3">
+            <span class="text-xs uppercase font-extrabold tracking-wider px-3 py-1 rounded-full border @GetBadgeStyle(Verdict.Recommendation)">
+                @Verdict.RecommendationLabel
+            </span>
+            <span class="text-xs text-slate-400">
+                Por <strong class="text-slate-200">@Verdict.AuthorName</strong>
+            </span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-slate-500">
+            <span>🛡️ Veredicto Editorial</span>
+            <span>&bull;</span>
+            <span>@Verdict.UpdatedAt.ToString("dd/MM/yyyy")</span>
+        </div>
+    </div>
+
+    @* Navigation Tabs de Análisis *@
+    <div class="mt-5">
+        <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
+            <button type="button"
+                    @onclick="() => _activeTab = TabGeneral"
+                    class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 @(_activeTab == TabGeneral ? "bg-orange-500/20 text-orange-400 border border-orange-500/40" : "bg-slate-800/50 text-slate-400 hover:text-slate-200 border border-transparent")">
+                <span>✍️</span> Análisis de la Casa
+            </button>
+            <button type="button"
+                    @onclick="() => _activeTab = TabTwoPlayers"
+                    class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 @(_activeTab == TabTwoPlayers ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" : "bg-slate-800/50 text-slate-400 hover:text-slate-200 border border-transparent")">
+                <span>👥</span> A 2 Jugadores (En Pareja)
+            </button>
+            <button type="button"
+                    @onclick="() => _activeTab = TabFamily"
+                    class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 @(_activeTab == TabFamily ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" : "bg-slate-800/50 text-slate-400 hover:text-slate-200 border border-transparent")">
+                <span>🧒</span> Con Niños y Familias
+            </button>
+        </div>
+
+        @* Tab Content *@
+        <div class="pt-4 text-sm leading-relaxed text-slate-200 min-h-[5rem]">
+            @if (_activeTab == TabGeneral)
+            {
+                <div class="animate-fadeIn space-y-2">
+                    <p class="font-medium text-slate-300">@Verdict.OverallVerdict</p>
+                </div>
+            }
+            else if (_activeTab == TabTwoPlayers)
+            {
+                <div class="animate-fadeIn space-y-2">
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs font-bold mb-2">
+                        <span>⚖️ Ritmo, Tensión y Mapa a 2 Comensales</span>
+                    </div>
+                    <p class="font-medium text-slate-300">@Verdict.TwoPlayerVerdict</p>
+                </div>
+            }
+            else if (_activeTab == TabFamily)
+            {
+                <div class="animate-fadeIn space-y-2">
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-bold mb-2">
+                        <span>🧩 Adaptaciones y Experiencia Infantil Real</span>
+                    </div>
+                    <p class="font-medium text-slate-300">@Verdict.FamilyVerdict</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Galería de Fotos Reales de Partida *@
+    @if (Verdict.Photos.Count > 0)
+    {
+        <div class="mt-6 pt-5 border-t border-slate-800/80">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <span>📸</span> En Nuestra Mesa: Fotos Reales de Partida
+                </h3>
+                <span class="text-[0.68rem] text-slate-500">@Verdict.Photos.Count @(Verdict.Photos.Count == 1 ? "foto real" : "fotos reales")</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                @for (int i = 0; i < Verdict.Photos.Count; i++)
+                {
+                    var photo = Verdict.Photos[i];
+                    var index = i;
+                    <div class="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 cursor-pointer transition-all hover:border-orange-500/60 shadow-lg"
+                         @onclick="() => _previewPhoto = photo">
+                        <div class="aspect-video overflow-hidden bg-slate-900 flex items-center justify-center">
+                            <img src="@photo.PhotoUrl" alt="@photo.Caption" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                        <div class="p-2.5 bg-slate-900/90 text-xs">
+                            <p class="text-slate-300 text-[0.75rem] line-clamp-2 leading-snug">@photo.Caption</p>
+                            <span class="text-[0.65rem] text-orange-400 font-bold block mt-1">🔍 Ampliar foto</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @* Lightbox Modal de Foto Real *@
+    @if (_previewPhoto != null)
+    {
+        <div class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+             @onclick="() => _previewPhoto = null">
+            <div class="max-w-3xl w-full bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl relative"
+                 @onclick:stopPropagation="true">
+                <button type="button"
+                        @onclick="() => _previewPhoto = null"
+                        class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/70 text-white hover:bg-orange-600 flex items-center justify-center text-sm font-bold transition-colors">
+                    ✕
+                </button>
+                <div class="max-h-[70vh] bg-black flex items-center justify-center overflow-hidden">
+                    <img src="@_previewPhoto.PhotoUrl" alt="@_previewPhoto.Caption" class="max-w-full max-h-[70vh] object-contain" />
+                </div>
+                <div class="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
+                    <p class="text-sm font-semibold text-slate-200">@_previewPhoto.Caption</p>
+                    <span class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-400 shrink-0 ml-3">📸 Foto de mesa física</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public FoundingVerdictDto Verdict { get; set; } = null!;
+
+    private const string TabGeneral = "general";
+    private const string TabTwoPlayers = "two-players";
+    private const string TabFamily = "family";
+
+    private string _activeTab = TabGeneral;
+    private FoundingPhotoDto? _previewPhoto;
+
+    private static string GetCardContainerStyle(FoundingRecommendation rec) => rec switch
+    {
+        FoundingRecommendation.MustPlay => "bg-slate-900/90 border-amber-500/40 shadow-xl shadow-amber-950/20",
+        FoundingRecommendation.RecommendedWithAdaptations => "bg-slate-900/90 border-emerald-500/40 shadow-xl shadow-emerald-950/20",
+        FoundingRecommendation.Skippable => "bg-slate-900/90 border-slate-700/60 shadow-lg",
+        _ => "bg-slate-900/90 border-slate-800"
+    };
+
+    private static string GetGlowStyle(FoundingRecommendation rec) => rec switch
+    {
+        FoundingRecommendation.MustPlay => "bg-amber-500",
+        FoundingRecommendation.RecommendedWithAdaptations => "bg-emerald-500",
+        FoundingRecommendation.Skippable => "bg-slate-500",
+        _ => "bg-orange-500"
+    };
+
+    private static string GetBadgeStyle(FoundingRecommendation rec) => rec switch
+    {
+        FoundingRecommendation.MustPlay => "bg-amber-950/80 text-amber-300 border-amber-500/50",
+        FoundingRecommendation.RecommendedWithAdaptations => "bg-emerald-950/80 text-emerald-300 border-emerald-500/50",
+        FoundingRecommendation.Skippable => "bg-slate-800 text-slate-300 border-slate-600",
+        _ => "bg-slate-800 text-slate-300 border-slate-700"
+    };
+}
