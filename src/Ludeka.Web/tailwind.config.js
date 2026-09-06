@@ -8,9 +8,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'brand-primary': '#E05A38',
-        'brand-primary-hover': '#EA6B4A',
-        'brand-accent': '#E59866',
+        'brand-primary': 'var(--brand-primary)',
+        'brand-primary-hover': 'var(--brand-primary-hover)',
+        'brand-accent': 'var(--brand-accent)',
+        'theme-main': 'var(--bg-main)',
+        'theme-surface': 'var(--bg-surface)',
+        'theme-surface-elevated': 'var(--bg-surface-elevated)',
+        'theme-card': 'var(--bg-card)',
+        'theme-nav': 'var(--bg-nav)',
+        'theme-border': 'var(--border-subtle)',
+        'theme-border-highlight': 'var(--border-highlight)',
+        'theme-text': 'var(--text-primary)',
+        'theme-text-secondary': 'var(--text-secondary)',
+        'theme-text-muted': 'var(--text-muted)',
         'ludeka-bg': '#121418',
         'ludeka-surface': '#181B21',
         'ludeka-card': '#1C1F27',

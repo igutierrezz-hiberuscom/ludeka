@@ -13,6 +13,14 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["Ludeka.Web.styles.css"]" />
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('ludeka-theme') || 'charcoal';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        })();
+    </script>
     <ImportMap />
     <HeadOutlet />
 </head>
@@ -20,6 +28,21 @@
 <body>
     <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
+    <script>
+        window.setLudekaTheme = function(theme) {
+            try {
+                localStorage.setItem('ludeka-theme', theme);
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        };
+        window.getLudekaTheme = function() {
+            try {
+                return localStorage.getItem('ludeka-theme') || 'charcoal';
+            } catch (e) {
+                return 'charcoal';
+            }
+        };
+    </script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
