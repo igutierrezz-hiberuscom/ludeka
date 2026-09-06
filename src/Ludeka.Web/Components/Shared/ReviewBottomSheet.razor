@@ -7,28 +7,28 @@
 
 @if (IsOpen)
 {
-    <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/85 backdrop-blur-sm animate-fade-in"
+    <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
          role="dialog"
          aria-modal="true"
          aria-labelledby="review-sheet-title"
          @onclick="HandleBackdropClick">
-        <div class="w-full sm:max-w-xl max-h-[90vh] bg-slate-900 border-t sm:border border-slate-700/80 rounded-t-3xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 text-left relative flex flex-col overflow-hidden"
+        <div class="w-full sm:max-w-xl max-h-[90vh] bg-[var(--bg-card)] border-t sm:border border-[var(--border-subtle)] rounded-t-3xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 text-left relative flex flex-col overflow-hidden"
              @onclick:stopPropagation="true">
 
             @* Header *@
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+            <div class="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)] shrink-0">
                 <div class="flex items-center gap-2">
                     <span class="text-2xl">⚡</span>
                     <div>
-                        <h3 id="review-sheet-title" class="text-base font-black text-white">
+                        <h3 id="review-sheet-title" class="text-base font-bold text-[var(--text-primary)]">
                             @(ExistingReview != null ? "Editar mi Valoración" : "Valoración del Juego")
                         </h3>
-                        <p class="text-[0.68rem] text-slate-400">Tu veredicto real ayuda a recalcular el consenso en español</p>
+                        <p class="text-[0.68rem] text-[var(--text-muted)]">Tu veredicto real ayuda a recalcular el consenso en español</p>
                     </div>
                 </div>
                 <button type="button" @onclick="Close"
                         aria-label="Cerrar formulario de valoración"
-                        class="text-slate-400 hover:text-white p-1 rounded-lg text-xl transition-colors">
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg text-xl transition-colors">
                     &times;
                 </button>
             </div>
@@ -37,18 +37,18 @@
             <div class="py-4 space-y-5 overflow-y-auto pr-1">
 
                 @* 1. Puntuación (1.0 a 10.0) *@
-                <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col items-center gap-2">
-                    <span class="text-[0.68rem] uppercase font-bold text-slate-400">Puntuación General</span>
-                    <div class="flex items-baseline gap-1.5 text-amber-400">
+                <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex flex-col items-center gap-2">
+                    <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)]">Puntuación General</span>
+                    <div class="flex items-baseline gap-1.5 text-amber-500">
                         <span class="text-3xl font-black">★ @_score.ToString("0.0")</span>
-                        <span class="text-xs text-slate-500">/ 10</span>
+                        <span class="text-xs text-[var(--text-muted)]">/ 10</span>
                     </div>
                     <input type="range" min="1.0" max="10.0" step="0.5"
                            @bind="_score"
                            @bind:event="oninput"
                            aria-label="Puntuación general del juego del 1 al 10"
                            class="w-full accent-amber-500 cursor-pointer" />
-                    <div class="w-full flex justify-between text-[0.62rem] text-slate-500 font-bold px-1">
+                    <div class="w-full flex justify-between text-[0.62rem] text-[var(--text-muted)] font-bold px-1">
                         <span>1 (Malo)</span>
                         <span>5 (Pasable)</span>
                         <span>8 (Notable)</span>
@@ -59,10 +59,10 @@
                 @* 2. Micro-reseña (Máx. 280 caracteres) *@
                 <div>
                     <div class="flex justify-between items-center mb-1">
-                        <label for="review-microreview-textarea" class="text-xs font-bold text-slate-300">
+                        <label for="review-microreview-textarea" class="text-xs font-bold text-[var(--text-secondary)]">
                             Micro-reseña (Tu veredicto en pocas palabras)
                         </label>
-                        <span class="text-[0.68rem] font-mono @(RemainingChars < 0 ? "text-rose-400 font-bold" : "text-slate-500")">
+                        <span class="text-[0.68rem] font-mono @(RemainingChars < 0 ? "text-rose-500 font-bold" : "text-[var(--text-muted)]")">
                             @_microReview.Length / 280
                         </span>
                     </div>
@@ -71,10 +71,10 @@
                               @bind="_microReview"
                               @bind:event="oninput"
                               placeholder="¿Qué te pareció el ritmo, el entreturno o el final de partida? Máximo 280 caracteres."
-                              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border @(RemainingChars < 0 ? "border-rose-500" : "border-slate-800") text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 resize-none"></textarea>
+                              class="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border @(RemainingChars < 0 ? "border-rose-500" : "border-[var(--border-subtle)]") text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] resize-none"></textarea>
                     @if (RemainingChars < 0)
                     {
-                        <span class="text-[0.68rem] text-rose-400 font-semibold block mt-1">
+                        <span class="text-[0.68rem] text-rose-500 font-semibold block mt-1">
                             Has superado el límite de 280 caracteres por @(-RemainingChars).
                         </span>
                     }
@@ -82,10 +82,10 @@
 
                 @* 3. Experiencia por número de jugadores (Chips 1J a 7J+) *@
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1">
                         ¿Cómo escala? (Vota solo los comensales que has probado)
                     </label>
-                    <p class="text-[0.68rem] text-slate-400 mb-3">Toca para encender el número de jugadores y asignar tu semáforo:</p>
+                    <p class="text-[0.68rem] text-[var(--text-muted)] mb-3">Toca para encender el número de jugadores y asignar tu semáforo:</p>
 
                     <div class="space-y-2">
                         @for (int count = 1; count <= 7; count++)
@@ -94,10 +94,10 @@
                             string label = pCount == 7 ? "7+J" : $"{pCount}J";
                             bool isEnabled = _playerVotes.ContainsKey(pCount);
 
-                            <div class="flex items-center justify-between p-2 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                            <div class="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
                                 <button type="button"
                                         @onclick="() => TogglePlayerCount(pCount)"
-                                        class="px-3 py-1.5 rounded-lg text-xs font-black transition-colors @(isEnabled ? "bg-orange-600 text-white" : "bg-slate-800 text-slate-400 hover:text-white")">
+                                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors @(isEnabled ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]")">
                                     @label
                                 </button>
 
@@ -106,24 +106,24 @@
                                     <div class="flex gap-1.5 text-xs">
                                         <button type="button"
                                                 @onclick="() => SetPlayerVote(pCount, ScalabilityStatus.MustPlay)"
-                                                class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.MustPlay ? "bg-emerald-900 text-emerald-300 border border-emerald-500 ring-1 ring-emerald-500/40" : "bg-slate-900 text-slate-400")">
+                                                class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.MustPlay ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40" : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-subtle)]")">
                                             🟢 Imprescindible
                                         </button>
                                         <button type="button"
                                                 @onclick="() => SetPlayerVote(pCount, ScalabilityStatus.Recommended)"
-                                                class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.Recommended ? "bg-amber-900 text-amber-300 border border-amber-500 ring-1 ring-amber-500/40" : "bg-slate-900 text-slate-400")">
+                                                class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.Recommended ? "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40" : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-subtle)]")">
                                             🟡 Recomendado
                                         </button>
                                         <button type="button"
                                                 @onclick="() => SetPlayerVote(pCount, ScalabilityStatus.NotRecommended)"
-                                                class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.NotRecommended ? "bg-rose-900 text-rose-300 border border-rose-500 ring-1 ring-rose-500/40" : "bg-slate-900 text-slate-400")">
+                                                class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.NotRecommended ? "bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/40" : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-subtle)]")">
                                             🔴 No recomendado
                                         </button>
                                     </div>
                                 }
                                 else
                                 {
-                                    <span class="text-[0.68rem] text-slate-600 italic">No probado</span>
+                                    <span class="text-[0.68rem] text-[var(--text-muted)] italic">No probado</span>
                                 }
                             </div>
                         }
@@ -131,21 +131,21 @@
                 </div>
 
                 @* 4. Experiencia Familiar / Infantil (Opcional) *@
-                <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <div class="p-3.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-3">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" @bind="_playedWithChildren" class="rounded accent-orange-500 w-4 h-4" />
-                        <span class="text-xs font-bold text-slate-200">👶 Lo he jugado con niños / en familia</span>
+                        <input type="checkbox" @bind="_playedWithChildren" class="rounded accent-[var(--brand-primary)] w-4 h-4" />
+                        <span class="text-xs font-bold text-[var(--text-primary)]">👶 Lo he jugado con niños / en familia</span>
                     </label>
 
                     @if (_playedWithChildren)
                     {
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-900">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[var(--border-subtle)]">
                             <div>
-                                <label class="block text-[0.68rem] font-semibold text-slate-400 mb-1">
+                                <label class="block text-[0.68rem] font-semibold text-[var(--text-secondary)] mb-1">
                                     Edad mínima real sugerida
                                 </label>
                                 <select @bind="_suggestedAge"
-                                        class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none">
+                                        class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none">
                                     <option value="">(Sin especificar)</option>
                                     <option value="4">4+ años</option>
                                     <option value="6">6+ años</option>
@@ -157,8 +157,8 @@
                             </div>
                             <div class="flex items-center">
                                 <label class="flex items-center gap-2 cursor-pointer mt-4">
-                                    <input type="checkbox" @bind="_isAdaptedRules" class="rounded accent-orange-500 w-4 h-4" />
-                                    <span class="text-xs text-slate-300">Reglas adaptadas / simplificadas</span>
+                                    <input type="checkbox" @bind="_isAdaptedRules" class="rounded accent-[var(--brand-primary)] w-4 h-4" />
+                                    <span class="text-xs text-[var(--text-secondary)]">Reglas adaptadas / simplificadas</span>
                                 </label>
                             </div>
                         </div>
@@ -167,7 +167,7 @@
 
                 @* 5. Contexto de partida (Proof of play) *@
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1.5">
                         Contexto principal de tus partidas (Opcional)
                     </label>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -176,7 +176,7 @@
                             bool isSelected = _playContext == context;
                             <button type="button"
                                     @onclick="() => _playContext = isSelected ? null : context"
-                                    class="py-2 px-2.5 rounded-xl text-xs font-semibold border transition-all text-center @(isSelected ? "bg-orange-950 border-orange-500 text-orange-300 font-bold" : "bg-slate-950/70 border-slate-800 text-slate-400 hover:border-slate-700")">
+                                    class="py-2 px-2.5 rounded-xl text-xs font-semibold border transition-all text-center @(isSelected ? "bg-[var(--brand-glow)] border-[var(--brand-primary)] text-[var(--text-primary)] font-bold" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
                                 @GetContextLabel(context)
                             </button>
                         }
@@ -186,15 +186,15 @@
             </div>
 
             @* Actions *@
-            <div class="pt-3 border-t border-slate-800 flex gap-3 shrink-0">
+            <div class="pt-3 border-t border-[var(--border-subtle)] flex gap-3 shrink-0">
                 <button type="button" @onclick="Close"
-                        class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors">
+                        class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] transition-colors">
                     Cancelar
                 </button>
                 <button type="button"
                         disabled="@(RemainingChars < 0)"
                         @onclick="HandleSubmit"
-                        class="flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white shadow-lg shadow-orange-950/50 transition-all">
+                        class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-[var(--brand-primary)] hover:opacity-90 disabled:opacity-50 text-white shadow-sm transition-opacity">
                     Guardar Valoración
                 </button>
             </div>

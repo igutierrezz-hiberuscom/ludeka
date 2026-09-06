@@ -36,7 +36,7 @@
                     <span class="text-xs font-bold text-[var(--brand-primary)]">@Game.YearPublished</span>
                     @if (!string.IsNullOrWhiteSpace(Game.IdealPlayerCountText))
                     {
-                        <span class="text-[0.68rem] font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
+                        <span class="text-[0.68rem] font-bold px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--color-mustplay)] border border-[var(--border-subtle)]">
                             @Game.IdealPlayerCountText
                         </span>
                     }
@@ -82,12 +82,12 @@
 
                 @if (Game.IsOfficialSolo)
                 {
-                    <span class="px-2 py-0.5 rounded-full bg-blue-950/50 text-blue-300 border border-blue-500/30">👤 Solo</span>
+                    <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">👤 Solo</span>
                 }
 
                 @if (Game.IsAccessibleEarlier)
                 {
-                    <span class="px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 border border-emerald-500/30">👶 @Game.CommunityAge+</span>
+                    <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">👶 @Game.CommunityAge+</span>
                 }
             </div>
         </div>

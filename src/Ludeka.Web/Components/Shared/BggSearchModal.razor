@@ -6,24 +6,24 @@
 
 @if (IsVisible)
 {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn"
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
          role="dialog" aria-modal="true" aria-labelledby="bgg-search-modal-title">
-        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
             
             @* Cabecera del modal *@
-            <div class="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+            <div class="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-surface-elevated)]">
                 <div class="flex items-center gap-2.5">
                     <span class="text-2xl">🎲</span>
                     <div>
-                        <h3 id="bgg-search-modal-title" class="text-lg font-black text-white tracking-tight">
+                        <h3 id="bgg-search-modal-title" class="text-lg font-bold text-[var(--text-primary)] tracking-tight">
                             Buscador Asistido por BGG
                         </h3>
-                        <p class="text-xs text-slate-400">Encuentra y añade cualquier juego del mundo al catálogo</p>
+                        <p class="text-xs text-[var(--text-muted)]">Encuentra y añade cualquier juego del mundo al catálogo</p>
                     </div>
                 </div>
                 <button type="button" 
                         @onclick="Close"
-                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1.5 rounded-lg hover:bg-[var(--bg-surface)] transition-colors"
                         aria-label="Cerrar modal de búsqueda">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -32,21 +32,21 @@
             </div>
 
             @* Input de búsqueda reactiva *@
-            <div class="p-6 border-b border-slate-800/80 bg-slate-900/30 space-y-3">
+            <div class="p-6 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] space-y-3">
                 <div class="flex gap-2">
                     <div class="relative flex-1">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-sm">🔍</span>
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)] text-sm">🔍</span>
                         <input type="text" 
                                @bind="_query" 
                                @bind:event="oninput"
                                @onkeydown="HandleKeyDown"
                                placeholder="Escribe el nombre del juego (ej. Ark Nova, Dune)..."
-                               class="w-full pl-10 pr-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all" />
+                               class="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] text-sm placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] transition-all" />
                     </div>
                     <button type="button" 
                             @onclick="PerformSearchAsync"
                             disabled="@(string.IsNullOrWhiteSpace(_query) || _query.Trim().Length < 2 || _isSearching)"
-                            class="px-4 py-2.5 rounded-xl font-bold text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="px-4 py-2.5 rounded-xl font-bold text-xs bg-[var(--brand-primary)] hover:opacity-90 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
                         @if (_isSearching)
                         {
                             <span>Buscando...</span>
@@ -59,12 +59,12 @@
                 </div>
 
                 <div class="flex items-center gap-2 text-xs">
-                    <span class="text-slate-400">Añadir como:</span>
-                    <select @bind="_selectedStatus" class="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
-                        <option value="@CollectionStatus.InCollection">🟢 En mi ludoteca</option>
-                        <option value="@CollectionStatus.Played">🔵 Jugado</option>
-                        <option value="@CollectionStatus.Wishlist">🟡 Deseado</option>
-                        <option value="@CollectionStatus.WantToBuy">🔴 Quiero comprar</option>
+                    <span class="text-[var(--text-secondary)]">Añadir como:</span>
+                    <select @bind="_selectedStatus" class="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1 text-[var(--text-primary)] text-xs focus:outline-none focus:border-[var(--brand-primary)]">
+                        <option value="@CollectionStatus.InCollection">En mi ludoteca</option>
+                        <option value="@CollectionStatus.Played">Jugado</option>
+                        <option value="@CollectionStatus.Wishlist">Deseado</option>
+                        <option value="@CollectionStatus.WantToBuy">Quiero comprar</option>
                     </select>
                 </div>
             </div>
@@ -75,19 +75,19 @@
                 {
                     <div class="py-12 text-center space-y-3">
                         <div class="inline-block animate-spin text-4xl">⚙️</div>
-                        <h4 class="text-sm font-bold text-white">@_addingMessage</h4>
-                        <p class="text-xs text-slate-400">Creando ficha oficial con ADN lúdico, escalabilidad y ratings...</p>
+                        <h4 class="text-sm font-bold text-[var(--text-primary)]">@_addingMessage</h4>
+                        <p class="text-xs text-[var(--text-muted)]">Creando ficha oficial con ADN lúdico, escalabilidad y ratings...</p>
                     </div>
                 }
                 else if (!string.IsNullOrWhiteSpace(_errorMessage))
                 {
-                    <div class="p-4 bg-red-950/40 border border-red-800/50 rounded-xl text-xs text-red-300">
+                    <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-600 dark:text-red-300">
                         ⚠️ @_errorMessage
                     </div>
                 }
                 else if (_hasSearched && _results.Count == 0 && !_isSearching)
                 {
-                    <div class="py-10 text-center text-slate-400">
+                    <div class="py-10 text-center text-[var(--text-muted)]">
                         <span class="text-3xl block mb-2">🤷</span>
                         <p class="text-xs font-semibold">No se encontraron juegos en BoardGameGeek con ese término.</p>
                     </div>
@@ -96,28 +96,28 @@
                 {
                     @foreach (var item in _results)
                     {
-                        <div class="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/60 flex items-center justify-between gap-3 hover:border-slate-600 transition-colors">
+                        <div class="p-3.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 hover:border-[var(--border-highlight)] transition-colors">
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
-                                    <h4 class="text-sm font-bold text-white truncate">@item.Title</h4>
+                                    <h4 class="text-sm font-bold text-[var(--text-primary)] truncate">@item.Title</h4>
                                     @if (item.YearPublished.HasValue)
                                     {
-                                        <span class="text-[0.7rem] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 font-mono">
+                                        <span class="text-[0.7rem] px-1.5 py-0.5 rounded bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-subtle)] font-mono">
                                             @item.YearPublished
                                         </span>
                                     }
                                 </div>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[0.68rem] text-slate-400">BGG ID: @item.BggId</span>
+                                    <span class="text-[0.68rem] text-[var(--text-muted)]">BGG ID: @item.BggId</span>
                                     @if (item.IsAlreadyCataloged)
                                     {
-                                        <span class="text-[0.68rem] font-bold text-emerald-400 flex items-center gap-1">
+                                        <span class="text-[0.68rem] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                             ✓ Ya en catálogo de Ludeka
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="text-[0.68rem] font-bold text-amber-400/90">
+                                        <span class="text-[0.68rem] font-bold text-[var(--brand-primary)]">
                                             ⚡ Se catalogará al vuelo
                                         </span>
                                     }
@@ -127,7 +127,7 @@
                             <div>
                                 <button type="button" 
                                         @onclick="() => AddToCollectionAsync(item)"
-                                        class="px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-700 hover:bg-amber-500 hover:text-slate-950 text-white transition-all shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                                        class="px-3 py-1.5 rounded-xl font-bold text-xs bg-[var(--brand-primary)] hover:opacity-90 text-white transition-opacity shadow-sm flex items-center gap-1.5 whitespace-nowrap">
                                     <span>+ Añadir</span>
                                 </button>
                             </div>
@@ -137,10 +137,10 @@
             </div>
 
             @* Pie del modal *@
-            <div class="px-6 py-3.5 border-t border-slate-800 bg-slate-900/50 flex justify-end">
+            <div class="px-6 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] flex justify-end">
                 <button type="button" 
                         @onclick="Close"
-                        class="py-2 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors">
+                        class="py-2 px-4 rounded-xl font-semibold text-xs bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] transition-colors">
                     Cerrar
                 </button>
             </div>

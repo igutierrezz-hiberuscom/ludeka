@@ -3,10 +3,10 @@
 
 <div class="scalability-component">
     <div class="flex items-center justify-between mb-2">
-        <span class="text-xs uppercase tracking-wider font-bold text-slate-400">Escalabilidad en Mesa</span>
+        <span class="text-xs uppercase tracking-wider font-bold text-[var(--text-secondary)]">Escalabilidad en Mesa</span>
         @if (!string.IsNullOrWhiteSpace(IdealText))
         {
-            <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-950/80 text-emerald-400 border border-emerald-500/40">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--color-mustplay)] border border-[var(--border-subtle)]">
                 ✨ @IdealText
             </span>
         }
@@ -39,7 +39,7 @@
         }
         else
         {
-            <span class="text-xs text-slate-500 italic">Sin datos de escalabilidad</span>
+            <span class="text-xs text-[var(--text-muted)] italic">Sin datos de escalabilidad</span>
         }
     </div>
 </div>

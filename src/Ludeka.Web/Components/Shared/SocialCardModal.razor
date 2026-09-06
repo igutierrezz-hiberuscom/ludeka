@@ -7,22 +7,22 @@
 {
     var card = SocialCardService.GenerateCard(Data);
 
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in"
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
          role="dialog"
          aria-modal="true"
          aria-labelledby="social-card-modal-title">
-        <div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0F172A] border border-slate-700 p-6 shadow-2xl space-y-6">
+        <div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-6">
             @* Cabecera *@
-            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
                 <div>
-                    <span class="text-xs uppercase font-extrabold tracking-wider text-orange-400">Automatización Omnicanal</span>
-                    <h2 id="social-card-modal-title" class="text-xl font-black text-white flex items-center gap-2 mt-0.5">
+                    <span class="text-xs uppercase font-bold tracking-wider text-[var(--brand-primary)]">Automatización Omnicanal</span>
+                    <h2 id="social-card-modal-title" class="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2 mt-0.5">
                         <span>🎨</span> Generador de Cartel para Instagram (1:1)
                     </h2>
                 </div>
                 <button type="button"
                         @onclick="Close"
-                        class="text-slate-400 hover:text-white text-2xl px-2"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl px-2"
                         aria-label="Cerrar modal de cartel social">
                     &times;
                 </button>
@@ -32,11 +32,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 @* Vista previa del SVG *@
                 <div class="space-y-3">
-                    <div class="aspect-square w-full rounded-2xl overflow-hidden border border-slate-700 shadow-2xl bg-[#0B0F17] flex items-center justify-center p-2">
+                    <div class="aspect-square w-full rounded-2xl overflow-hidden border border-[var(--border-subtle)] shadow-lg bg-[var(--bg-surface-elevated)] flex items-center justify-center p-2">
                         @((MarkupString)card.SvgContent)
                     </div>
 
-                    <div class="flex items-center justify-between text-[0.7rem] text-slate-400 px-1">
+                    <div class="flex items-center justify-between text-[0.7rem] text-[var(--text-muted)] px-1">
                         <span>Formato cuadrado nativo 1080x1080 px</span>
                         <span>Vectorial SVG de alta fidelidad</span>
                     </div>
@@ -45,13 +45,13 @@
                 @* Bloque de Copy y Acciones *@
                 <div class="space-y-4 flex flex-col justify-between h-full">
                     <div>
-                        <label for="social-caption-textarea" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        <label for="social-caption-textarea" class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
                             Texto del post con hashtags en español
                         </label>
                         <textarea id="social-caption-textarea"
                                   readonly
                                   rows="10"
-                                  class="w-full p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-200 text-xs font-mono leading-relaxed resize-none focus:outline-none focus:border-orange-500/50">
+                                  class="w-full p-3 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs font-mono leading-relaxed resize-none focus:outline-none focus:border-[var(--brand-primary)]">
 @card.InstagramCaption
                         </textarea>
                     </div>
@@ -60,7 +60,7 @@
                     <div class="space-y-3 pt-2">
                         <button type="button"
                                 @onclick="() => CopyToClipboard(card.InstagramCaption)"
-                                class="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-950/60">
+                                class="w-full py-3 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity flex items-center justify-center gap-2 shadow-sm">
                             @if (_isCopied)
                             {
                                 <span>✓ ¡Texto copiado al portapapeles!</span>
@@ -74,12 +74,12 @@
 
                         <a href="data:image/svg+xml;charset=utf-8,@Uri.EscapeDataString(card.SvgContent)"
                            download="@card.FileName"
-                           class="w-full py-3 rounded-xl border border-slate-700 hover:border-slate-500 bg-slate-800/80 hover:bg-slate-800 text-slate-200 font-extrabold text-xs transition-colors flex items-center justify-center gap-2">
+                           class="w-full py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-xs transition-colors flex items-center justify-center gap-2">
                             <span>📥</span>
                             <span>Descargar Cartel SVG</span>
                         </a>
 
-                        <p class="text-[0.68rem] text-slate-500 text-center">
+                        <p class="text-[0.68rem] text-[var(--text-muted)] text-center">
                             Listo para publicar en Instagram Feed, Threads o canal de Telegram.
                         </p>
                     </div>

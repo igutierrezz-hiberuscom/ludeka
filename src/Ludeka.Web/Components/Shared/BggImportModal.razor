@@ -4,24 +4,24 @@
 
 @if (IsVisible)
 {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn"
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
          role="dialog" aria-modal="true" aria-labelledby="bgg-import-modal-title">
-        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
+        <div class="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
             
             @* Cabecera del modal *@
-            <div class="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+            <div class="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-surface-elevated)]">
                 <div class="flex items-center gap-2.5">
                     <span class="text-2xl">📥</span>
                     <div>
-                        <h3 id="bgg-import-modal-title" class="text-lg font-black text-white tracking-tight">
+                        <h3 id="bgg-import-modal-title" class="text-lg font-bold text-[var(--text-primary)] tracking-tight">
                             Importar desde BoardGameGeek
                         </h3>
-                        <p class="text-xs text-slate-400">Sincroniza tus juegos de mesa en 1 clic</p>
+                        <p class="text-xs text-[var(--text-muted)]">Sincroniza tus juegos de mesa en 1 clic</p>
                     </div>
                 </div>
                 <button type="button" 
                         @onclick="Close"
-                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1.5 rounded-lg hover:bg-[var(--bg-surface)] transition-colors"
                         aria-label="Cerrar modal de importación">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -35,46 +35,46 @@
                 {
                     <div class="py-12 text-center space-y-4">
                         <div class="inline-block animate-bounce text-5xl">🎲</div>
-                        <h4 class="text-base font-bold text-white">Sincronizando con BoardGameGeek...</h4>
-                        <p class="text-xs text-slate-400 max-w-sm mx-auto">
+                        <h4 class="text-base font-bold text-[var(--text-primary)]">Sincronizando con BoardGameGeek...</h4>
+                        <p class="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
                             Estamos descargando tu colección y cruzándola con el catálogo oficial de Ludeka. Esto puede tomar unos instantes si BGG está preparando su caché.
                         </p>
-                        <div class="w-48 h-1.5 bg-slate-800 rounded-full mx-auto overflow-hidden">
-                            <div class="h-full bg-emerald-500 rounded-full animate-pulse w-3/4"></div>
+                        <div class="w-48 h-1.5 bg-[var(--bg-surface-elevated)] rounded-full mx-auto overflow-hidden">
+                            <div class="h-full bg-[var(--brand-primary)] rounded-full animate-pulse w-3/4"></div>
                         </div>
                     </div>
                 }
                 else if (_result != null)
                 {
                     <div class="space-y-4">
-                        <div class="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-center">
+                        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-center">
                             <span class="text-3xl block mb-2">🎉</span>
-                            <h4 class="text-base font-black text-emerald-300">¡Colección sincronizada con éxito!</h4>
-                            <p class="text-xs text-emerald-400/80 mt-1">
+                            <h4 class="text-base font-bold text-emerald-600 dark:text-emerald-300">¡Colección sincronizada con éxito!</h4>
+                            <p class="text-xs text-[var(--text-secondary)] mt-1">
                                 Procesados un total de <strong>@_result.TotalProcessed</strong> juegos de tu perfil.
                             </p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 text-center">
+                            <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-center">
                                 <span class="text-2xl block mb-1">🟢</span>
-                                <div class="text-2xl font-black text-white">@_result.ImportedToCollection</div>
-                                <div class="text-xs font-semibold text-slate-400 mt-0.5">En tu ludoteca ahora</div>
+                                <div class="text-2xl font-bold text-[var(--text-primary)]">@_result.ImportedToCollection</div>
+                                <div class="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">En tu ludoteca ahora</div>
                             </div>
-                            <div class="p-4 rounded-xl bg-amber-950/30 border border-amber-500/30 text-center">
+                            <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-center">
                                 <span class="text-2xl block mb-1">⏳</span>
-                                <div class="text-2xl font-black text-amber-300">@_result.EnqueuedForCataloging</div>
-                                <div class="text-xs font-semibold text-amber-400/90 mt-0.5">En cola de catalogación</div>
+                                <div class="text-2xl font-bold text-amber-600 dark:text-amber-300">@_result.EnqueuedForCataloging</div>
+                                <div class="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">En cola de catalogación</div>
                             </div>
                         </div>
 
-                        <p class="text-[0.75rem] text-slate-400 bg-slate-800/40 p-3 rounded-xl border border-slate-700/40 leading-relaxed">
+                        <p class="text-[0.75rem] text-[var(--text-muted)] bg-[var(--bg-surface-elevated)] p-3 rounded-xl border border-[var(--border-subtle)] leading-relaxed">
                             💡 <strong>¿Qué son los juegos en cola?</strong> Son títulos que aún no tienen ficha oficial en Ludeka. Ya puedes gestionarlos y prestarles, y nuestro motor de auto-catalogación creará su ficha oficial pronto.
                         </p>
 
                         @if (_result.Errors.Count > 0)
                         {
-                            <div class="p-3 bg-red-950/40 border border-red-800/50 rounded-xl text-xs text-red-300">
+                            <div class="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-600 dark:text-red-300">
                                 <strong>Avisos durante la importación (@_result.Errors.Count):</strong>
                                 <ul class="list-disc list-inside mt-1 space-y-0.5">
                                     @foreach (var err in _result.Errors.Take(3))
@@ -87,7 +87,7 @@
 
                         <button type="button" 
                                 @onclick="CloseAndRefresh"
-                                class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-colors shadow-lg shadow-emerald-500/20">
+                                class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-[var(--brand-primary)] hover:opacity-90 text-white transition-opacity shadow-sm">
                             ¡Ver mi ludoteca actualizada!
                         </button>
                     </div>
@@ -96,43 +96,43 @@
                 {
                     <div class="space-y-4">
                         <div>
-                            <label for="bgg-username" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                            <label for="bgg-username" class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
                                 Usuario de BoardGameGeek
                             </label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-sm">👤</span>
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)] text-sm">👤</span>
                                 <input id="bgg-username" 
                                        type="text" 
                                        @bind="_username" 
                                        @bind:event="oninput"
                                        placeholder="Ej. ludomaster99"
-                                       class="w-full pl-10 pr-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" />
+                                       class="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] text-sm placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] transition-all" />
                             </div>
                         </div>
 
                         <div class="space-y-2 pt-1">
-                            <span class="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                            <span class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                                 Listas a Importar
                             </span>
-                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-800 hover:border-slate-700 cursor-pointer transition-colors">
-                                <input type="checkbox" @bind="_importOwned" class="w-4 h-4 rounded text-emerald-500 bg-slate-700 border-slate-600 focus:ring-emerald-500 focus:ring-offset-slate-900" />
+                            <label class="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] cursor-pointer transition-colors">
+                                <input type="checkbox" @bind="_importOwned" class="w-4 h-4 rounded text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]" />
                                 <div class="text-xs">
-                                    <strong class="text-white block">Juegos en propiedad (Owned)</strong>
-                                    <span class="text-slate-400">Se añadirán a tu pestaña <em>🟢 En mi ludoteca</em></span>
+                                    <strong class="text-[var(--text-primary)] block">Juegos en propiedad (Owned)</strong>
+                                    <span class="text-[var(--text-muted)]">Se añadirán a tu pestaña <em>En mi ludoteca</em></span>
                                 </div>
                             </label>
-                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-800 hover:border-slate-700 cursor-pointer transition-colors">
-                                <input type="checkbox" @bind="_importWishlist" class="w-4 h-4 rounded text-emerald-500 bg-slate-700 border-slate-600 focus:ring-emerald-500 focus:ring-offset-slate-900" />
+                            <label class="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] cursor-pointer transition-colors">
+                                <input type="checkbox" @bind="_importWishlist" class="w-4 h-4 rounded text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]" />
                                 <div class="text-xs">
-                                    <strong class="text-white block">Lista de deseos (Wishlist & Want to Buy)</strong>
-                                    <span class="text-slate-400">Se añadirán a <em>🟡 Deseados</em> o <em>🔴 Quiero comprar</em></span>
+                                    <strong class="text-[var(--text-primary)] block">Lista de deseos (Wishlist & Want to Buy)</strong>
+                                    <span class="text-[var(--text-muted)]">Se añadirán a <em>Deseados</em> o <em>Quiero comprar</em></span>
                                 </div>
                             </label>
                         </div>
 
                         @if (!string.IsNullOrWhiteSpace(_errorMessage))
                         {
-                            <div class="p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-xs text-red-300 flex items-center gap-2">
+                            <div class="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-600 dark:text-red-300 flex items-center gap-2">
                                 <span>⚠️</span>
                                 <span>@_errorMessage</span>
                             </div>
@@ -141,13 +141,13 @@
                         <div class="pt-2 flex gap-3">
                             <button type="button" 
                                     @onclick="Close"
-                                    class="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors">
+                                    class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-xs bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] transition-colors">
                                 Cancelar
                             </button>
                             <button type="button" 
                                     @onclick="StartImportAsync"
                                     disabled="@(string.IsNullOrWhiteSpace(_username))"
-                                    class="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-emerald-500/10">
+                                    class="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs bg-[var(--brand-primary)] hover:opacity-90 text-white transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
                                 Importar Colección
                             </button>
                         </div>

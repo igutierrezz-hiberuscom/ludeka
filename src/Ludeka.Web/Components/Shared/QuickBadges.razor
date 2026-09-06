@@ -1,4 +1,4 @@
-﻿@using Ludeka.Core.Enums
+@using Ludeka.Core.Enums
 @using Ludeka.Core.ValueObjects
 
 <div class="flex flex-wrap items-center gap-1.5" role="list" aria-label="ADN Lúdico y Ficha Rápida">
@@ -56,7 +56,7 @@
     {
         @if (Age.IsAccessibleEarlier)
         {
-            <div class="badge-pill" style="border-color: rgba(16, 185, 129, 0.4); color: #34D399;" role="listitem" title="La comunidad lo considera jugable a partir de @Age.CommunityAge años aunque la caja marque +@Age.BoxAge">
+            <div class="badge-pill active-pill" role="listitem" title="La comunidad lo considera jugable a partir de @Age.CommunityAge años aunque la caja marque +@Age.BoxAge">
                 <span>👶 Accesible antes: @Age.CommunityAge+ años</span>
             </div>
         }

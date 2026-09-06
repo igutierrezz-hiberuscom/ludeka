@@ -57,9 +57,9 @@
                             @onclick="ToggleUserRole"
                             title="Alternar entre rol de la Mesa Fundadora y rol de Usuario Comunitario"
                             aria-label="Alternar rol entre Mesa Fundadora y Usuario Comunitario"
-                            class="px-2.5 py-1 rounded-full border text-xs font-bold transition-all flex items-center gap-1.5 @(CurrentUserService.IsFoundingTeam ? "bg-orange-950/80 border-orange-500/40 text-orange-300 shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                            class="px-2.5 py-1 rounded-full border text-xs font-bold transition-all flex items-center gap-1.5 @(CurrentUserService.IsFoundingTeam ? "bg-[var(--brand-primary)] border-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
                         <span>@(CurrentUserService.IsFoundingTeam ? "🛡️ Mesa" : "👤 Usuario")</span>
-                        <span class="text-[0.65rem] opacity-70 underline">Cambiar</span>
+                        <span class="text-[0.65rem] opacity-80 underline">Cambiar</span>
                     </button>
 
                     <a href="/" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs sm:text-sm font-semibold">
@@ -69,13 +69,13 @@
                         <span>📡</span>
                         <span class="hidden sm:inline">Radar</span>
                     </a>
-                    <a href="/mi-ludoteca" class="px-2.5 py-1.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-900/60 transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm">
+                    <a href="/mi-ludoteca" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm">
                         <span>📚</span>
                         <span class="hidden sm:inline">Mi Ludoteca</span>
                     </a>
                     @if (CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator"))
                     {
-                        <a href="/moderacion-media" class="px-2.5 py-1.5 rounded-full bg-orange-950/60 border border-orange-500/30 text-orange-300 hover:bg-orange-900/60 transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm">
+                        <a href="/moderacion-media" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm">
                             <span>🎬</span>
                             <span class="hidden sm:inline">Moderar</span>
                         </a>

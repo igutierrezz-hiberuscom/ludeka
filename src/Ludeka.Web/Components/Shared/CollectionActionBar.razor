@@ -1,20 +1,20 @@
-﻿@using Ludeka.Core.Enums
+@using Ludeka.Core.Enums
 @using Ludeka.Application.DTOs
 
-<div class="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 sm:p-5 shadow-xl backdrop-blur-md">
+<div class="rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-4 sm:p-5 shadow-sm">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <span class="text-[0.68rem] uppercase font-black text-slate-400 tracking-wider block mb-1">
+            <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] tracking-wider block mb-1">
                 Tu Ludoteca Personal
             </span>
-            <p class="text-xs text-slate-300">
+            <p class="text-xs text-[var(--text-secondary)]">
                 @if (CurrentItem != null)
                 {
-                    <span>Estado actual: <strong class="text-white">@GetStatusName(CurrentItem.Status)</strong></span>
+                    <span>Estado actual: <strong class="text-[var(--text-primary)]">@GetStatusName(CurrentItem.Status)</strong></span>
                 }
                 else
                 {
-                    <span>Añade este título a tu colección lúdica en un clic:</span>
+                    <span>Añade este título a tu colección lúdica:</span>
                 }
             </p>
         </div>
@@ -24,16 +24,18 @@
             <div class="w-full sm:w-auto flex items-center gap-2">
                 @if (ActiveLoan != null)
                 {
-                    <button @onclick="OnLoanClicked"
-                            class="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-600/50 hover:bg-amber-900/80 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                    <button type="button"
+                            @onclick="OnLoanClicked"
+                            class="w-full sm:w-auto px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-500 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition-all flex items-center justify-center gap-1.5 shadow-sm">
                         <span>📦</span>
                         <span>Prestado a <strong>@ActiveLoan.BorrowerName</strong></span>
                     </button>
                 }
                 else
                 {
-                    <button @onclick="OnLoanClicked"
-                            class="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                    <button type="button"
+                            @onclick="OnLoanClicked"
+                            class="w-full sm:w-auto px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] transition-all flex items-center justify-center gap-1.5 shadow-sm">
                         <span>🤝</span>
                         <span>Prestar juego</span>
                     </button>
@@ -42,38 +44,38 @@
         }
     </div>
 
-    @* Barra con los 4 estados principales *@
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
+    @* Barra de 4 acciones estilo Letterboxd *@
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4" role="group" aria-label="Estados de colección">
         @* 1. En mi ludoteca *@
         <button type="button"
                 @onclick="() => HandleStatusClick(CollectionStatus.InCollection)"
-                class="px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border @GetButtonStyle(CollectionStatus.InCollection)">
-            <span class="text-base">🟢</span>
+                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetButtonStyle(CollectionStatus.InCollection)">
+            <span>📚</span>
             <span>En mi ludoteca</span>
         </button>
 
         @* 2. Jugado *@
         <button type="button"
                 @onclick="() => HandleStatusClick(CollectionStatus.Played)"
-                class="px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border @GetButtonStyle(CollectionStatus.Played)">
-            <span class="text-base">🔵</span>
+                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetButtonStyle(CollectionStatus.Played)">
+            <span>🎲</span>
             <span>Jugado</span>
         </button>
 
         @* 3. Deseado *@
         <button type="button"
                 @onclick="() => HandleStatusClick(CollectionStatus.Wishlist)"
-                class="px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border @GetButtonStyle(CollectionStatus.Wishlist)">
-            <span class="text-base">🟡</span>
+                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetButtonStyle(CollectionStatus.Wishlist)">
+            <span>🔖</span>
             <span>Deseado</span>
         </button>
 
         @* 4. Quiero comprar *@
         <button type="button"
                 @onclick="() => HandleStatusClick(CollectionStatus.WantToBuy)"
-                class="px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border @GetButtonStyle(CollectionStatus.WantToBuy)">
-            <span class="text-base">🔴</span>
-            <span>Quiero comprar</span>
+                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetButtonStyle(CollectionStatus.WantToBuy)">
+            <span>🛒</span>
+            <span>Comprar</span>
         </button>
     </div>
 </div>
@@ -102,22 +104,15 @@
 
         if (!isSelected)
         {
-            return "bg-slate-950/60 hover:bg-slate-800/80 text-slate-300 border-slate-800 hover:border-slate-700";
+            return "bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)]";
         }
 
-        return status switch
-        {
-            CollectionStatus.InCollection => "bg-emerald-950/90 text-emerald-300 border-emerald-500 ring-2 ring-emerald-500/30 font-extrabold shadow-lg shadow-emerald-950/50",
-            CollectionStatus.Played => "bg-sky-950/90 text-sky-300 border-sky-500 ring-2 ring-sky-500/30 font-extrabold shadow-lg shadow-sky-950/50",
-            CollectionStatus.Wishlist => "bg-amber-950/90 text-amber-300 border-amber-500 ring-2 ring-amber-500/30 font-extrabold shadow-lg shadow-amber-950/50",
-            CollectionStatus.WantToBuy => "bg-rose-950/90 text-rose-300 border-rose-500 ring-2 ring-rose-500/30 font-extrabold shadow-lg shadow-rose-950/50",
-            _ => "bg-slate-800 text-white border-slate-700"
-        };
+        return "bg-[var(--brand-glow)] text-[var(--text-primary)] border-2 border-[var(--brand-primary)] font-bold shadow-sm";
     }
 
     private static string GetStatusName(CollectionStatus status) => status switch
     {
-        CollectionStatus.InCollection => "En mi ludoteca (Físico propio)",
+        CollectionStatus.InCollection => "En mi ludoteca",
         CollectionStatus.Played => "Jugado",
         CollectionStatus.Wishlist => "En lista de deseos",
         CollectionStatus.WantToBuy => "En seguimiento para comprar",

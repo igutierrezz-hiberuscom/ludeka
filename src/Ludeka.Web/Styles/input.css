@@ -4,25 +4,25 @@
 
 /* Ludeka — Variables y Componentes Editoriales con Soporte Multi-Tema */
 
-/* Tema Original: Carbón Oscuro & Naranja Terracota */
+/* Tema Original: Carbón Oscuro & Naranja Terracota (Estilo Letterboxd) */
 :root,
 [data-theme="charcoal"] {
-    --bg-main: #121418;
-    --bg-surface: #181B21;
-    --bg-surface-elevated: #21252E;
-    --bg-card: #1B1E26;
-    --bg-nav: rgba(18, 20, 24, 0.90);
+    --bg-main: #14181C;
+    --bg-surface: #1B2228;
+    --bg-surface-elevated: #242C34;
+    --bg-card: #1F262D;
+    --bg-nav: rgba(20, 24, 28, 0.94);
     --border-subtle: rgba(255, 255, 255, 0.08);
     --border-highlight: rgba(255, 255, 255, 0.16);
     
-    --text-primary: #F3F4F6;
-    --text-secondary: #9EABC0;
-    --text-muted: #6B7688;
+    --text-primary: #FFFFFF;
+    --text-secondary: #9AB0C2;
+    --text-muted: #677B8C;
     
     --brand-primary: #E05A38;
     --brand-primary-hover: #EA6B4A;
     --brand-accent: #E59866;
-    --brand-glow: rgba(224, 90, 56, 0.25);
+    --brand-glow: rgba(224, 90, 56, 0.20);
     
     --color-mustplay: #10B981;
     --color-mustplay-bg: rgba(16, 185, 129, 0.12);
@@ -40,36 +40,36 @@
     color-scheme: dark;
 }
 
-/* Opción A: Editorial Claro (Papel & Tinta) */
+/* Opción A: Editorial Claro (Papel & Tinta - Alta Legibilidad) */
 [data-theme="editorial"] {
-    --bg-main: #F6F5F2;
+    --bg-main: #F8F7F4;
     --bg-surface: #FFFFFF;
-    --bg-surface-elevated: #EFECE6;
+    --bg-surface-elevated: #EDEAE5;
     --bg-card: #FFFFFF;
-    --bg-nav: rgba(246, 245, 242, 0.94);
-    --border-subtle: rgba(26, 29, 36, 0.10);
-    --border-highlight: rgba(26, 29, 36, 0.22);
+    --bg-nav: rgba(248, 247, 244, 0.95);
+    --border-subtle: rgba(0, 0, 0, 0.08);
+    --border-highlight: rgba(0, 0, 0, 0.16);
     
-    --text-primary: #191B1F;
-    --text-secondary: #4B5565;
-    --text-muted: #6E7787;
+    --text-primary: #121417;
+    --text-secondary: #3D4451;
+    --text-muted: #5C6675;
     
     --brand-primary: #B8432F;
     --brand-primary-hover: #A03825;
     --brand-accent: #D96550;
-    --brand-glow: rgba(184, 67, 47, 0.18);
+    --brand-glow: rgba(184, 67, 47, 0.15);
     
     --color-mustplay: #059669;
-    --color-mustplay-bg: rgba(5, 150, 105, 0.12);
-    --color-mustplay-border: rgba(5, 150, 105, 0.28);
+    --color-mustplay-bg: rgba(5, 150, 105, 0.10);
+    --color-mustplay-border: rgba(5, 150, 105, 0.25);
     
     --color-recommended: #D97706;
-    --color-recommended-bg: rgba(217, 119, 6, 0.12);
-    --color-recommended-border: rgba(217, 119, 6, 0.28);
+    --color-recommended-bg: rgba(217, 119, 6, 0.10);
+    --color-recommended-border: rgba(217, 119, 6, 0.25);
     
     --color-notrec: #E11D48;
-    --color-notrec-bg: rgba(225, 29, 72, 0.12);
-    --color-notrec-border: rgba(225, 29, 72, 0.28);
+    --color-notrec-bg: rgba(225, 29, 72, 0.10);
+    --color-notrec-border: rgba(225, 29, 72, 0.25);
 
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     color-scheme: light;
@@ -236,9 +236,10 @@ a {
 }
 
 .badge-pill.active-pill {
-    background-color: rgba(224, 90, 56, 0.15);
-    border-color: rgba(224, 90, 56, 0.35);
-    color: #FFA58E;
+    background-color: var(--brand-glow);
+    border-color: var(--brand-primary);
+    color: var(--text-primary);
+    font-weight: 700;
 }
 
 /* Traffic Light Badges */
@@ -247,32 +248,39 @@ a {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 2.85rem;
-    height: 3.2rem;
-    padding: 0.25rem 0.4rem;
-    border-radius: 0.75rem;
+    min-width: 2.75rem;
+    height: 2.85rem;
+    padding: 0.2rem 0.35rem;
+    border-radius: 0.5rem;
     font-weight: 700;
     font-size: 0.75rem;
-    border: 1px solid transparent;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    background-color: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.traffic-chip:hover {
+    border-color: var(--border-highlight);
+    transform: translateY(-2px);
 }
 
 .traffic-chip.status-mustplay {
+    border-color: var(--color-mustplay);
+    color: var(--text-primary);
     background-color: var(--color-mustplay-bg);
-    border-color: var(--color-mustplay-border);
-    color: #34D399;
 }
 
 .traffic-chip.status-recommended {
+    border-color: var(--color-recommended);
+    color: var(--text-primary);
     background-color: var(--color-recommended-bg);
-    border-color: var(--color-recommended-border);
-    color: #FBBF24;
 }
 
 .traffic-chip.status-notrecommended {
-    background-color: var(--color-notrec-bg);
-    border-color: var(--color-notrec-border);
-    color: #FB7185;
+    border-color: var(--border-subtle);
+    color: var(--text-muted);
+    opacity: 0.65;
 }
 
 .traffic-chip .player-label {
