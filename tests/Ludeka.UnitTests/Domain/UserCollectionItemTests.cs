@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Ludeka.Core.Entities;
 using Ludeka.Core.Enums;
 using Xunit;
@@ -68,4 +68,61 @@ public class UserCollectionItemTests
         // Assert
         Assert.Null(item.UpdatedAt);
     }
+
+    [Fact]
+    public void Constructor_Pending_InitializesCorrectly_WithPendingState()
+    {
+        // Act
+        var item = new UserCollectionItem(
+            userId: "user-1",
+            bggId: 342942,
+            pendingTitle: "Ark Nova",
+            status: CollectionStatus.InCollection,
+            thumbnailUrl: "https://example.com/thumb.jpg",
+            yearPublished: 2021
+        );
+
+        // Assert
+        Assert.Null(item.GameId);
+        Assert.True(item.IsPendingCataloging);
+        Assert.Equal(342942, item.BggId);
+        Assert.Equal("Ark Nova", item.PendingTitle);
+        Assert.Equal("https://example.com/thumb.jpg", item.PendingThumbnailUrl);
+        Assert.Equal(2021, item.PendingYearPublished);
+        Assert.Equal(CollectionStatus.InCollection, item.Status);
+    }
+
+    [Fact]
+    public void PromoteToCataloged_SetsGameIdAndUpdatesTimestamp()
+    {
+        // Arrange
+        var item = new UserCollectionItem(
+            userId: "user-1",
+            bggId: 342942,
+            pendingTitle: "Ark Nova",
+            status: CollectionStatus.InCollection
+        );
+        Assert.True(item.IsPendingCataloging);
+
+        Guid officialGameId = Guid.NewGuid();
+
+        // Act
+        item.PromoteToCataloged(officialGameId);
+
+        // Assert
+        Assert.False(item.IsPendingCataloging);
+        Assert.Equal(officialGameId, item.GameId);
+        Assert.NotNull(item.UpdatedAt);
+    }
+
+    [Fact]
+    public void PromoteToCataloged_WithEmptyGuid_ThrowsArgumentException()
+    {
+        // Arrange
+        var item = new UserCollectionItem("user-1", 13, "Catan", CollectionStatus.InCollection);
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => item.PromoteToCataloged(Guid.Empty));
+    }
 }
+

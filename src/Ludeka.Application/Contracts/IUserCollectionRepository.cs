@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +10,10 @@ namespace Ludeka.Application.Contracts;
 public interface IUserCollectionRepository
 {
     Task<UserCollectionItem?> GetByUserAndGameAsync(string userId, Guid gameId, CancellationToken cancellationToken = default);
+    Task<UserCollectionItem?> GetByUserAndBggIdAsync(string userId, int bggId, CancellationToken cancellationToken = default);
     Task<List<UserCollectionItem>> GetByUserIdAsync(string userId, CollectionStatus? status = null, CancellationToken cancellationToken = default);
+    Task<List<UserCollectionItem>> GetPendingItemsByBggIdAsync(int bggId, CancellationToken cancellationToken = default);
+    Task PromotePendingItemsAsync(int bggId, Guid gameId, CancellationToken cancellationToken = default);
     Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken cancellationToken = default);
     Task AddAsync(UserCollectionItem item, CancellationToken cancellationToken = default);
     Task UpdateAsync(UserCollectionItem item, CancellationToken cancellationToken = default);

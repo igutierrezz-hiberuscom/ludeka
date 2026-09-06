@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -26,6 +26,13 @@ public class SqliteUserCollectionRepository : IUserCollectionRepository
             .FirstOrDefaultAsync(c => c.UserId == userId && c.GameId == gameId, cancellationToken);
     }
 
+    public async Task<UserCollectionItem?> GetByUserAndBggIdAsync(string userId, int bggId, CancellationToken cancellationToken = default)
+    {
+        return await _context.CollectionItems
+            .Include(c => c.Game)
+            .FirstOrDefaultAsync(c => c.UserId == userId && (c.BggId == bggId || (c.Game != null && c.Game.BggId == bggId)), cancellationToken);
+    }
+
     public async Task<List<UserCollectionItem>> GetByUserIdAsync(string userId, CollectionStatus? status = null, CancellationToken cancellationToken = default)
     {
         var query = _context.CollectionItems
@@ -39,6 +46,30 @@ public class SqliteUserCollectionRepository : IUserCollectionRepository
 
         var list = await query.ToListAsync(cancellationToken);
         return list.OrderByDescending(c => c.AddedAt).ToList();
+    }
+
+    public async Task<List<UserCollectionItem>> GetPendingItemsByBggIdAsync(int bggId, CancellationToken cancellationToken = default)
+    {
+        return await _context.CollectionItems
+            .Where(c => c.BggId == bggId && c.GameId == null)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task PromotePendingItemsAsync(int bggId, Guid gameId, CancellationToken cancellationToken = default)
+    {
+        var pendingItems = await _context.CollectionItems
+            .Where(c => c.BggId == bggId && c.GameId == null)
+            .ToListAsync(cancellationToken);
+
+        foreach (var item in pendingItems)
+        {
+            item.PromoteToCataloged(gameId);
+        }
+
+        if (pendingItems.Count > 0)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 
     public async Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken cancellationToken = default)

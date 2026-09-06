@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -248,17 +248,38 @@ public class UserLibraryService : IUserLibraryService
         var itemDtos = new List<UserCollectionItemDto>();
         foreach (var item in collectionItems)
         {
-            var game = item.Game ?? await _gameRepo.GetByIdAsync(item.GameId, ct);
-            itemDtos.Add(new UserCollectionItemDto(
-                item.Id,
-                item.GameId,
-                game?.SpanishTitle ?? "Juego",
-                game?.CoverImageUrl,
-                game?.Slug ?? string.Empty,
-                item.Status,
-                item.AddedAt,
-                activeLoanGameIds.Contains(item.GameId)
-            ));
+            if (item.IsPendingCataloging)
+            {
+                itemDtos.Add(new UserCollectionItemDto(
+                    item.Id,
+                    null,
+                    item.PendingTitle ?? "Juego en cola",
+                    item.PendingThumbnailUrl,
+                    string.Empty,
+                    item.Status,
+                    item.AddedAt,
+                    false,
+                    item.BggId,
+                    true
+                ));
+            }
+            else
+            {
+                var game = item.Game ?? (item.GameId.HasValue ? await _gameRepo.GetByIdAsync(item.GameId.Value, ct) : null);
+                bool isLoaned = item.GameId.HasValue && activeLoanGameIds.Contains(item.GameId.Value);
+                itemDtos.Add(new UserCollectionItemDto(
+                    item.Id,
+                    item.GameId,
+                    game?.SpanishTitle ?? item.PendingTitle ?? "Juego",
+                    game?.CoverImageUrl ?? item.PendingThumbnailUrl,
+                    game?.Slug ?? string.Empty,
+                    item.Status,
+                    item.AddedAt,
+                    isLoaned,
+                    item.BggId ?? game?.BggId,
+                    false
+                ));
+            }
         }
 
         var loanDtos = new List<GameLoanDto>();
@@ -292,18 +313,36 @@ public class UserLibraryService : IUserLibraryService
 
     private async Task<UserCollectionItemDto> MapCollectionItemAsync(UserCollectionItem item, CancellationToken ct)
     {
-        var game = item.Game ?? await _gameRepo.GetByIdAsync(item.GameId, ct);
-        var activeLoan = await _loanRepo.GetActiveLoanByUserAndGameAsync(item.UserId, item.GameId, ct);
+        if (item.IsPendingCataloging)
+        {
+            return new UserCollectionItemDto(
+                item.Id,
+                null,
+                item.PendingTitle ?? "Juego en cola",
+                item.PendingThumbnailUrl,
+                string.Empty,
+                item.Status,
+                item.AddedAt,
+                false,
+                item.BggId,
+                true
+            );
+        }
+
+        var game = item.Game ?? (item.GameId.HasValue ? await _gameRepo.GetByIdAsync(item.GameId.Value, ct) : null);
+        var activeLoan = item.GameId.HasValue ? await _loanRepo.GetActiveLoanByUserAndGameAsync(item.UserId, item.GameId.Value, ct) : null;
 
         return new UserCollectionItemDto(
             item.Id,
             item.GameId,
-            game?.SpanishTitle ?? "Juego",
-            game?.CoverImageUrl,
+            game?.SpanishTitle ?? item.PendingTitle ?? "Juego",
+            game?.CoverImageUrl ?? item.PendingThumbnailUrl,
             game?.Slug ?? string.Empty,
             item.Status,
             item.AddedAt,
-            activeLoan != null
+            activeLoan != null,
+            item.BggId ?? game?.BggId,
+            false
         );
     }
 

@@ -1,4 +1,5 @@
 using Ludeka.Application.Contracts;
+using Ludeka.Application.Features.Bgg;
 using Ludeka.Application.Features.Catalog;
 using Ludeka.Application.Features.Founding;
 using Ludeka.Application.Features.Library;
@@ -35,6 +36,11 @@ builder.Services.AddScoped<IFoundingVerdictService, FoundingVerdictService>();
 builder.Services.AddScoped<IMediaRepository, SqliteMediaRepository>();
 builder.Services.AddHttpClient<IBrokenLinkCheckerService, BrokenLinkCheckerService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
+
+builder.Services.AddScoped<IPendingBggImportRepository, SqlitePendingBggImportRepository>();
+builder.Services.AddScoped<IBggImportService, BggImportService>();
+builder.Services.AddScoped<IBggCatalogQueueService, BggCatalogQueueService>();
+builder.Services.AddScoped<IBggSearchAssistedService, BggSearchAssistedService>();
 
 // Servicio de identidad en demo (Singleton para permitir alternancia interactiva de roles en la sesión)
 builder.Services.AddSingleton<ICurrentUserService, DefaultCurrentUserService>();

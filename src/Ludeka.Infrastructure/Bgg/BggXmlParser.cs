@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Ludeka.Application.DTOs;
 using Ludeka.Core.Entities;
 using Ludeka.Core.Enums;
 using Ludeka.Core.ValueObjects;
@@ -261,4 +262,74 @@ public static class BggXmlParser
 
         return (confrontation, style, isSolo);
     }
+
+    public static IReadOnlyList<BggCollectionItemDto> ParseCollection(XDocument doc)
+    {
+        var items = new List<BggCollectionItemDto>();
+        if (doc.Root == null) return items;
+
+        foreach (var item in doc.Root.Elements("item"))
+        {
+            string subtype = item.Attribute("subtype")?.Value ?? "boardgame";
+            if (subtype != "boardgame" && subtype != "boardgameexpansion")
+                continue;
+
+            if (!int.TryParse(item.Attribute("objectid")?.Value, out int bggId) || bggId <= 0)
+                continue;
+
+            string title = item.Element("name")?.Value?.Trim() ?? "Desconocido";
+            int? year = int.TryParse(item.Element("yearpublished")?.Value, out int yr) ? yr : null;
+            string? thumbnail = item.Element("thumbnail")?.Value?.Trim();
+            string? image = item.Element("image")?.Value?.Trim();
+
+            var statusEl = item.Element("status");
+            bool isOwned = statusEl?.Attribute("own")?.Value == "1";
+            bool isWishlist = statusEl?.Attribute("wishlist")?.Value == "1";
+            bool isWantToBuy = statusEl?.Attribute("wanttobuy")?.Value == "1";
+            int numPlays = int.TryParse(item.Element("numplays")?.Value, out int plays) ? plays : 0;
+
+            items.Add(new BggCollectionItemDto(
+                BggId: bggId,
+                Title: WebUtility.HtmlDecode(title),
+                YearPublished: year,
+                ThumbnailUrl: thumbnail,
+                CoverImageUrl: image,
+                IsOwned: isOwned,
+                IsWishlist: isWishlist,
+                IsWantToBuy: isWantToBuy,
+                NumPlays: numPlays
+            ));
+        }
+
+        return items;
+    }
+
+    public static IReadOnlyList<BggSearchResultDto> ParseSearchResults(XDocument doc)
+    {
+        var results = new List<BggSearchResultDto>();
+        if (doc.Root == null) return results;
+
+        foreach (var item in doc.Root.Elements("item"))
+        {
+            if (!int.TryParse(item.Attribute("id")?.Value, out int bggId) || bggId <= 0)
+                continue;
+
+            var names = item.Elements("name").ToList();
+            string title = names.FirstOrDefault(n => n.Attribute("type")?.Value == "primary")?.Attribute("value")?.Value
+                ?? names.FirstOrDefault()?.Attribute("value")?.Value
+                ?? item.Element("name")?.Value
+                ?? "Desconocido";
+
+            int? year = int.TryParse(item.Element("yearpublished")?.Attribute("value")?.Value, out int yr) ? yr : null;
+
+            results.Add(new BggSearchResultDto(
+                BggId: bggId,
+                Title: WebUtility.HtmlDecode(title).Trim(),
+                YearPublished: year
+            ));
+        }
+
+        return results;
+    }
 }
+

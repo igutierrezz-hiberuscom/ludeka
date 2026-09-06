@@ -11,6 +11,7 @@ public class LudekaDbContext : DbContext
     public DbSet<UserGameReview> Reviews => Set<UserGameReview>();
     public DbSet<FoundingVerdict> FoundingVerdicts => Set<FoundingVerdict>();
     public DbSet<MediaItem> MediaItems => Set<MediaItem>();
+    public DbSet<PendingBggImport> PendingBggImports => Set<PendingBggImport>();
 
     public LudekaDbContext(DbContextOptions<LudekaDbContext> options) : base(options)
     {
@@ -43,13 +44,24 @@ public class LudekaDbContext : DbContext
         collection.ToTable("UserCollectionItems");
         collection.HasKey(c => c.Id);
 
-        collection.HasIndex(c => new { c.UserId, c.GameId }).IsUnique();
+        collection.HasIndex(c => new { c.UserId, c.GameId });
+        collection.HasIndex(c => new { c.UserId, c.BggId });
         collection.HasIndex(c => new { c.UserId, c.Status });
 
         collection.HasOne(c => c.Game)
             .WithMany()
             .HasForeignKey(c => c.GameId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // --- Configuración de PendingBggImport ---
+        var pending = modelBuilder.Entity<PendingBggImport>();
+        pending.ToTable("PendingBggImports");
+        pending.HasKey(p => p.Id);
+
+        pending.HasIndex(p => p.BggId).IsUnique();
+        pending.HasIndex(p => new { p.Status, p.RequestedCount });
+        pending.HasIndex(p => p.CreatedAt);
 
         // --- Configuración de GameLoan ---
         var loan = modelBuilder.Entity<GameLoan>();

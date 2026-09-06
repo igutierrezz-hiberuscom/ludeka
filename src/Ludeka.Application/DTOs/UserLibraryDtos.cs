@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Ludeka.Core.Enums;
 using Ludeka.Core.ValueObjects;
@@ -7,13 +7,15 @@ namespace Ludeka.Application.DTOs;
 
 public record UserCollectionItemDto(
     Guid Id,
-    Guid GameId,
+    Guid? GameId,
     string GameTitle,
     string? GameCoverUrl,
     string GameSlug,
     CollectionStatus Status,
     DateTimeOffset AddedAt,
-    bool IsCurrentlyLoaned
+    bool IsCurrentlyLoaned,
+    int? BggId = null,
+    bool IsPendingCataloging = false
 );
 
 public record GameLoanDto(

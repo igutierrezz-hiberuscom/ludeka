@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -31,6 +31,21 @@ public class UserLibraryServiceTests
 
         public Task<UserCollectionItem?> GetByUserAndGameAsync(string userId, Guid gameId, CancellationToken ct = default) =>
             Task.FromResult(Items.FirstOrDefault(i => i.UserId == userId && i.GameId == gameId));
+
+        public Task<UserCollectionItem?> GetByUserAndBggIdAsync(string userId, int bggId, CancellationToken ct = default) =>
+            Task.FromResult(Items.FirstOrDefault(i => i.UserId == userId && (i.BggId == bggId || (i.Game != null && i.Game.BggId == bggId))));
+
+        public Task<List<UserCollectionItem>> GetPendingItemsByBggIdAsync(int bggId, CancellationToken ct = default) =>
+            Task.FromResult(Items.Where(i => i.BggId == bggId && i.GameId == null).ToList());
+
+        public Task PromotePendingItemsAsync(int bggId, Guid gameId, CancellationToken ct = default)
+        {
+            foreach (var item in Items.Where(i => i.BggId == bggId && i.GameId == null))
+            {
+                item.PromoteToCataloged(gameId);
+            }
+            return Task.CompletedTask;
+        }
 
         public Task<List<UserCollectionItem>> GetByUserIdAsync(string userId, CollectionStatus? status = null, CancellationToken ct = default)
         {

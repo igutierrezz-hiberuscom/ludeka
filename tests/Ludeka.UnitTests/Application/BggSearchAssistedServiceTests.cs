@@ -1,0 +1,230 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Ludeka.Application.Contracts;
+using Ludeka.Application.DTOs;
+using Ludeka.Application.Features.Bgg;
+using Ludeka.Core.Entities;
+using Ludeka.Core.Enums;
+using Ludeka.Core.ValueObjects;
+using Xunit;
+
+namespace Ludeka.UnitTests.Application;
+
+public class BggSearchAssistedServiceTests
+{
+    private class FakeCurrentUserService : ICurrentUserService
+    {
+        public string UserId => "user-123";
+        public string UserName => "Tester";
+        public string Email => "test@ludeka.es";
+        public bool IsAuthenticated => true;
+        public bool IsFoundingTeam => false;
+        public bool IsModerator => false;
+        public IReadOnlyList<string> Roles => ["User"];
+        public bool IsInRole(string role) => false;
+        public void SwitchRole(string role) { }
+    }
+
+    private class FakeBggClient : IBggClient
+    {
+        public List<BggSearchResultDto> SearchResults = [];
+        public Dictionary<int, Game?> Games = [];
+
+        public Task<Game?> FetchGameByBggIdAsync(int bggId, CancellationToken ct = default) =>
+            Task.FromResult(Games.GetValueOrDefault(bggId));
+
+        public Task<IReadOnlyList<BggCollectionItemDto>> FetchUserCollectionAsync(string username, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<BggCollectionItemDto>>([]);
+
+        public Task<IReadOnlyList<BggSearchResultDto>> SearchGamesAsync(string query, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<BggSearchResultDto>>(SearchResults);
+    }
+
+    private class FakeGameRepo : IGameRepository
+    {
+        public List<Game> Games = [];
+
+        public Task<Game?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult(Games.FirstOrDefault(g => g.Id == id));
+
+        public Task<Game?> GetBySlugAsync(string slug, CancellationToken ct = default) =>
+            Task.FromResult(Games.FirstOrDefault(g => g.Slug == slug));
+
+        public Task<Game?> GetByBggIdAsync(int bggId, CancellationToken ct = default) =>
+            Task.FromResult(Games.FirstOrDefault(g => g.BggId == bggId));
+
+        public Task<(IReadOnlyList<Game> Items, int TotalCount)> SearchAsync(GameFilterCriteria criteria, int page = 1, int pageSize = 20, CancellationToken ct = default) =>
+            Task.FromResult(((IReadOnlyList<Game>)Games, Games.Count));
+
+        public Task AddRangeAsync(IEnumerable<Game> games, CancellationToken ct = default)
+        {
+            Games.AddRange(games);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateAsync(Game game, CancellationToken ct = default) => Task.CompletedTask;
+
+        public Task<bool> HasAnyAsync(CancellationToken ct = default) => Task.FromResult(Games.Count > 0);
+    }
+
+    private class FakeCollectionRepo : IUserCollectionRepository
+    {
+        public List<UserCollectionItem> Items = [];
+
+        public Task<UserCollectionItem?> GetByUserAndGameAsync(string userId, Guid gameId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Items.FirstOrDefault(i => i.UserId == userId && i.GameId == gameId));
+
+        public Task<UserCollectionItem?> GetByUserAndBggIdAsync(string userId, int bggId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Items.FirstOrDefault(i => i.UserId == userId && (i.BggId == bggId || (i.Game != null && i.Game.BggId == bggId))));
+
+        public Task<List<UserCollectionItem>> GetByUserIdAsync(string userId, CollectionStatus? status = null, CancellationToken cancellationToken = default) =>
+            Task.FromResult(status.HasValue ? Items.Where(i => i.UserId == userId && i.Status == status.Value).ToList() : Items.Where(i => i.UserId == userId).ToList());
+
+        public Task<List<UserCollectionItem>> GetPendingItemsByBggIdAsync(int bggId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Items.Where(i => i.BggId == bggId && i.GameId == null).ToList());
+
+        public Task PromotePendingItemsAsync(int bggId, Guid gameId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Items.Where(i => i.UserId == userId).GroupBy(i => i.Status).ToDictionary(g => g.Key, g => g.Count()));
+
+        public Task AddAsync(UserCollectionItem item, CancellationToken cancellationToken = default)
+        {
+            Items.Add(item);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateAsync(UserCollectionItem item, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task RemoveAsync(UserCollectionItem item, CancellationToken cancellationToken = default)
+        {
+            Items.Remove(item);
+            return Task.CompletedTask;
+        }
+    }
+
+    private class FakePendingRepo : IPendingBggImportRepository
+    {
+        public List<PendingBggImport> Items = [];
+
+        public Task<PendingBggImport?> GetByBggIdAsync(int bggId, CancellationToken ct = default) =>
+            Task.FromResult(Items.FirstOrDefault(i => i.BggId == bggId));
+
+        public Task<IReadOnlyList<PendingBggImport>> GetTopPendingAsync(int limit = 50, CancellationToken ct = default) =>
+            Task.FromResult((IReadOnlyList<PendingBggImport>)Items);
+
+        public Task<IReadOnlyList<PendingBggImport>> GetAllAsync(CatalogQueueStatus? status = null, CancellationToken ct = default) =>
+            Task.FromResult((IReadOnlyList<PendingBggImport>)Items);
+
+        public Task<int> GetTotalPendingCountAsync(CancellationToken ct = default) =>
+            Task.FromResult(Items.Count);
+
+        public Task AddAsync(PendingBggImport item, CancellationToken ct = default)
+        {
+            Items.Add(item);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateAsync(PendingBggImport item, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private static Game CreateGame(int bggId, string title)
+    {
+        return new Game(
+            bggId: bggId,
+            originalTitle: title,
+            spanishTitle: title,
+            designer: "Autor",
+            publisher: "Editorial",
+            yearPublished: 2022,
+            coverImageUrl: null,
+            thumbnailUrl: null,
+            description: null,
+            bggRating: 8.2,
+            bggRank: 10,
+            ludistRating: 8.2,
+            confrontation: ConfrontationType.Competitive,
+            style: GameStyle.Eurogame,
+            isOfficialSolo: true,
+            age: new AgeRating(10, 10),
+            language: LanguageDependence.None,
+            footprint: TableFootprint.StandardTable,
+            duration: new GameDuration(45, 60, 20)
+        );
+    }
+
+    [Fact]
+    public async Task SearchGamesAsync_WithShortQuery_ReturnsEmptyListWithoutCallingBgg()
+    {
+        // Arrange
+        var fakeBgg = new FakeBggClient();
+        fakeBgg.SearchResults = [new(13, "Catan", 1995)];
+        var service = new BggSearchAssistedService(fakeBgg, new FakeGameRepo(), new FakeCollectionRepo(), new FakePendingRepo(), new FakeCurrentUserService());
+
+        // Act
+        var result = await service.SearchGamesAsync("a");
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task SearchGamesAsync_EnrichesResultsWithCatalogState()
+    {
+        // Arrange
+        var fakeBgg = new FakeBggClient();
+        fakeBgg.SearchResults =
+        [
+            new(13, "Catan", 1995),
+            new(342942, "Ark Nova", 2021)
+        ];
+
+        var fakeGameRepo = new FakeGameRepo();
+        var catan = CreateGame(13, "Catan");
+        fakeGameRepo.Games.Add(catan);
+
+        var service = new BggSearchAssistedService(fakeBgg, fakeGameRepo, new FakeCollectionRepo(), new FakePendingRepo(), new FakeCurrentUserService());
+
+        // Act
+        var results = await service.SearchGamesAsync("cat");
+
+        // Assert
+        Assert.Equal(2, results.Count);
+
+        var catanResult = results[0];
+        Assert.True(catanResult.IsAlreadyCataloged);
+        Assert.Equal(catan.Id, catanResult.ExistingGameId);
+        Assert.Equal(catan.Slug, catanResult.ExistingGameSlug);
+
+        var arkNovaResult = results[1];
+        Assert.False(arkNovaResult.IsAlreadyCataloged);
+        Assert.Null(arkNovaResult.ExistingGameId);
+    }
+
+    [Fact]
+    public async Task AddGameToCollectionAsync_WhenGameNotCataloged_CatalogsOnTheFlyAndAddsToCollection()
+    {
+        // Arrange
+        var fakeBgg = new FakeBggClient();
+        var arkNova = CreateGame(342942, "Ark Nova");
+        fakeBgg.Games[342942] = arkNova;
+
+        var fakeGameRepo = new FakeGameRepo();
+        var fakeCollectionRepo = new FakeCollectionRepo();
+        var fakePendingRepo = new FakePendingRepo();
+        var service = new BggSearchAssistedService(fakeBgg, fakeGameRepo, fakeCollectionRepo, fakePendingRepo, new FakeCurrentUserService());
+
+        // Act
+        var gameId = await service.AddGameToCollectionAsync(342942, CollectionStatus.InCollection);
+
+        // Assert
+        Assert.Equal(arkNova.Id, gameId);
+        Assert.Single(fakeGameRepo.Games);
+        Assert.Single(fakeCollectionRepo.Items);
+        Assert.Equal(gameId, fakeCollectionRepo.Items[0].GameId);
+        Assert.Equal(CollectionStatus.InCollection, fakeCollectionRepo.Items[0].Status);
+    }
+}

@@ -134,6 +134,9 @@ public static class CatalogSeeder
         // Semillado del Hub Multimedia (YouTube e Instagram)
         await SeedMediaItemsAsync(db, ct);
 
+        // Semillado de la cola comunitaria de auto-catalogación BGG
+        await SeedPendingBggImportsAsync(db, ct);
+
         return seededCount;
     }
 
@@ -474,6 +477,39 @@ public static class CatalogSeeder
             await db.MediaItems.AddRangeAsync(mediaList, ct);
             await db.SaveChangesAsync(ct);
         }
+    }
+
+    private static async Task SeedPendingBggImportsAsync(LudekaDbContext db, CancellationToken ct)
+    {
+        if (await db.PendingBggImports.AnyAsync(ct)) return;
+
+        var pendingList = new List<PendingBggImport>
+        {
+            new(342942, "Ark Nova", 2021,
+                "https://cf.geekdo-images.com/SoU8CSclVF58FGnr7rKn8g__thumb/img/w37H0Z5q8Y7j6vO4K44u9qKk1Z4=/fit-in/200x150/filters:strip_icc()/pic6293412.jpg",
+                "https://cf.geekdo-images.com/SoU8CSclVF58FGnr7rKn8g__original/img/DR-oAhmplpM1t_2Fz-l2W1Z4d_Q=/0x0/filters:format(jpeg)/pic6293412.jpg")
+            {
+            },
+            new(174430, "Gloomhaven", 2017,
+                "https://cf.geekdo-images.com/sZYp_3BTDGjh2XdDANbvAw__thumb/img/N1tQ1y7xY4x0_Y1u6d9e0i4v_8=/fit-in/200x150/filters:strip_icc()/pic2437871.jpg",
+                "https://cf.geekdo-images.com/sZYp_3BTDGjh2XdDANbvAw__original/img/N1tQ1y7xY4x0_Y1u6d9e0i4v_8=/0x0/filters:format(jpeg)/pic2437871.jpg"),
+            new(162886, "Spirit Island", 2017,
+                "https://cf.geekdo-images.com/kjCm4mfPZwgGQWSfioFnhg__thumb/img/1m1l8z7x_1tQ0Y5k1v_8kL8w0p8=/fit-in/200x150/filters:strip_icc()/pic3114971.jpg"),
+            new(366013, "Heat: Pedal to the Metal", 2022,
+                "https://cf.geekdo-images.com/0i_z2v-vj28V6Qv4T1w6_w__thumb/img/0s1k2l3v_4x0_Y1u6d9e0i4v_8=/fit-in/200x150/filters:strip_icc()/pic6900143.jpg"),
+            new(365717, "Clank! Catacombs", 2022,
+                "https://cf.geekdo-images.com/z4_z2v-vj28V6Qv4T1w6_w__thumb/img/0s1k2l3v_4x0_Y1u6d9e0i4v_8=/fit-in/200x150/filters:strip_icc()/pic6920143.jpg")
+        };
+
+        // Simular distintas demandas comunitarias
+        for (int i = 0; i < 14; i++) pendingList[0].IncrementRequestCount(); // Ark Nova: 15 solicitudes
+        for (int i = 0; i < 11; i++) pendingList[1].IncrementRequestCount(); // Gloomhaven: 12 solicitudes
+        for (int i = 0; i < 8; i++) pendingList[2].IncrementRequestCount();  // Spirit Island: 9 solicitudes
+        for (int i = 0; i < 6; i++) pendingList[3].IncrementRequestCount();  // Heat: 7 solicitudes
+        for (int i = 0; i < 4; i++) pendingList[4].IncrementRequestCount();  // Clank! Catacombs: 5 solicitudes
+
+        await db.PendingBggImports.AddRangeAsync(pendingList, ct);
+        await db.SaveChangesAsync(ct);
     }
 
     private static string ReadSeedJson()
