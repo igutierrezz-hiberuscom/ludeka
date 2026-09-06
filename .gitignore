@@ -1,0 +1,37 @@
+﻿# Build and binary folders (.NET)
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+_ReSharper*/
+
+# Packages & Node
+node_modules/
+dist/
+.output/
+
+# Testing and Code Coverage
+TestResults/
+*.trx
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Tools & Local Environment
+.tools/bin/*.exe
+.tools/bin/*.zip
+.tools/bin/*.tar.gz
+!.tools/bin/.gitkeep
+!.tools/scripts/
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment & Secrets
+.env
+.env.local
+*.secret.json

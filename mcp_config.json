@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "engram": {
+      "args": [
+        "mcp",
+        "--tools=agent"
+      ],
+      "command": "C:\\repos\\Ludeca\\.tools\\bin\\engram.exe"
+    }
+  }
+}
