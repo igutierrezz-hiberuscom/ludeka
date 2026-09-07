@@ -129,6 +129,7 @@ using (var scope = app.Services.CreateScope())
 
     var db = scope.ServiceProvider.GetRequiredService<LudekaDbContext>();
     await db.Database.EnsureCreatedAsync();
+    await SqliteSchemaMigrator.EnsureSchemaUpToDateAsync(db);
     await CatalogSeeder.SeedAsync(db);
 }
 
