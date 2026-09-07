@@ -2,11 +2,13 @@ using Ludeka.Application.Contracts;
 using Ludeka.Application.Features.Bgg;
 using Ludeka.Application.Features.Catalog;
 using Ludeka.Application.Features.Community;
+using Ludeka.Application.Features.Expansions;
 using Ludeka.Application.Features.Founding;
 using Ludeka.Application.Features.Library;
 using Ludeka.Application.Features.Media;
 using Ludeka.Infrastructure.Bgg;
 using Ludeka.Infrastructure.Data;
+using Ludeka.Infrastructure.Repositories;
 using Ludeka.Infrastructure.Seeding;
 using Ludeka.Infrastructure.Services;
 using Ludeka.Web.Components;
@@ -77,6 +79,10 @@ builder.Services.AddScoped<IWeeklyReleaseService, WeeklyReleaseService>();
 builder.Services.AddScoped<IRuleQARepository, SqliteRuleQARepository>();
 builder.Services.AddScoped<IRuleQAService, RuleQAService>();
 builder.Services.AddScoped<ISocialCardService, SocialCardService>();
+
+// Incremento 8: Expansiones, Sinergias y Mezclador de Mesa
+builder.Services.AddScoped<IExpansionRepository, SqliteExpansionRepository>();
+builder.Services.AddScoped<IExpansionService, ExpansionService>();
 
 // Servicio de identidad en demo (Singleton para permitir alternancia interactiva de roles en la sesión)
 builder.Services.AddSingleton<ICurrentUserService, DefaultCurrentUserService>();

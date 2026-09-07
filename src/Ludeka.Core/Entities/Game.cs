@@ -35,6 +35,19 @@ public partial class Game
     public List<ScalabilityEntry> Scalability { get; private set; } = [];
     public List<SleeveItem> Sleeves { get; private set; } = [];
 
+    // --- Soporte de Expansiones y Ecosistema (Incremento 8) ---
+    public GameType Type { get; private set; } = GameType.BaseGame;
+    public Guid? BaseGameId { get; private set; }
+    public Game? BaseGame { get; private set; }
+    public List<Game> Expansions { get; private set; } = [];
+    public ExpansionNecessity? ExpansionNecessity { get; private set; }
+    public List<ExpansionImpactTag> ImpactTags { get; private set; } = [];
+    public string? WhatItBringsSummary { get; private set; }
+    public int? ExtraPlayerCount { get; private set; }
+    public int? ExtraDurationMinutes { get; private set; }
+
+    public bool IsExpansion => Type == GameType.Expansion || Type == GameType.StandaloneExpansion;
+
     // Constructor privado para EF Core
     private Game() { }
 
@@ -60,7 +73,14 @@ public partial class Game
         GameDuration duration,
         IEnumerable<ScalabilityEntry>? scalability = null,
         IEnumerable<SleeveItem>? sleeves = null,
-        string? customSlug = null)
+        string? customSlug = null,
+        GameType type = GameType.BaseGame,
+        Guid? baseGameId = null,
+        ExpansionNecessity? expansionNecessity = null,
+        IEnumerable<ExpansionImpactTag>? impactTags = null,
+        string? whatItBringsSummary = null,
+        int? extraPlayerCount = null,
+        int? extraDurationMinutes = null)
     {
         if (bggId <= 0) throw new ArgumentOutOfRangeException(nameof(bggId), "El BggId debe ser positivo.");
         if (string.IsNullOrWhiteSpace(originalTitle)) throw new ArgumentException("El título original no puede estar vacío.", nameof(originalTitle));
@@ -91,6 +111,14 @@ public partial class Game
         Slug = string.IsNullOrWhiteSpace(customSlug)
             ? GenerateSlug(SpanishTitle)
             : GenerateSlug(customSlug);
+
+        Type = type;
+        BaseGameId = baseGameId;
+        ExpansionNecessity = expansionNecessity;
+        if (impactTags != null) ImpactTags.AddRange(impactTags);
+        WhatItBringsSummary = whatItBringsSummary?.Trim();
+        ExtraPlayerCount = extraPlayerCount;
+        ExtraDurationMinutes = extraDurationMinutes;
     }
 
     public string IdealPlayerCountText => CalculateIdealPlayerCountText();
@@ -145,6 +173,26 @@ public partial class Game
     {
         CoverImageUrl = coverImageUrl?.Trim();
         ThumbnailUrl = thumbnailUrl?.Trim();
+    }
+
+    public void ConfigureExpansion(
+        Guid baseGameId,
+        ExpansionNecessity necessity,
+        IEnumerable<ExpansionImpactTag> impactTags,
+        string whatItBringsSummary,
+        int? extraPlayerCount = null,
+        int? extraDurationMinutes = null)
+    {
+        if (baseGameId == Guid.Empty) throw new ArgumentException("El BaseGameId no puede estar vacío.", nameof(baseGameId));
+
+        Type = GameType.Expansion;
+        BaseGameId = baseGameId;
+        ExpansionNecessity = necessity;
+        ImpactTags.Clear();
+        if (impactTags != null) ImpactTags.AddRange(impactTags);
+        WhatItBringsSummary = whatItBringsSummary?.Trim();
+        ExtraPlayerCount = extraPlayerCount;
+        ExtraDurationMinutes = extraDurationMinutes;
     }
 
     public static string GenerateSlug(string input)

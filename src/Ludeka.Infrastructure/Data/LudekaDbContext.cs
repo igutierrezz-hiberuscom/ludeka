@@ -17,6 +17,8 @@ public class LudekaDbContext : DbContext
     public DbSet<RuleQuestion> RuleQuestions => Set<RuleQuestion>();
     public DbSet<RuleAnswer> RuleAnswers => Set<RuleAnswer>();
     public DbSet<RuleVote> RuleVotes => Set<RuleVote>();
+    public DbSet<ExpansionSynergy> ExpansionSynergies => Set<ExpansionSynergy>();
+    public DbSet<ExpansionRecipe> ExpansionRecipes => Set<ExpansionRecipe>();
 
     public LudekaDbContext(DbContextOptions<LudekaDbContext> options) : base(options)
     {
@@ -36,13 +38,22 @@ public class LudekaDbContext : DbContext
         game.HasIndex(g => g.BggId).IsUnique();
         game.HasIndex(g => g.SpanishTitle);
         game.HasIndex(g => g.OriginalTitle);
+        game.HasIndex(g => g.BaseGameId);
+        game.HasIndex(g => g.Type);
 
         game.ComplexProperty(g => g.Age);
         game.ComplexProperty(g => g.Duration);
 
-        // Mapeo JSON nativo en EF Core 10 para colecciones de Value Objects
+        // Mapeo JSON nativo en EF Core 10 para colecciones de Value Objects y primitivas
         game.OwnsMany(g => g.Scalability, b => b.ToJson());
         game.OwnsMany(g => g.Sleeves, b => b.ToJson());
+        game.PrimitiveCollection(g => g.ImpactTags);
+
+        // Relación reflexiva para juego base y expansiones
+        game.HasOne(g => g.BaseGame)
+            .WithMany(g => g.Expansions)
+            .HasForeignKey(g => g.BaseGameId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // --- Configuración de UserCollectionItem ---
         var collection = modelBuilder.Entity<UserCollectionItem>();
@@ -182,5 +193,41 @@ public class LudekaDbContext : DbContext
 
         vote.HasIndex(v => new { v.UserId, v.QuestionId });
         vote.HasIndex(v => new { v.UserId, v.AnswerId });
+
+        // --- Configuración de ExpansionSynergy ---
+        var synergy = modelBuilder.Entity<ExpansionSynergy>();
+        synergy.ToTable("ExpansionSynergies");
+        synergy.HasKey(s => s.Id);
+
+        synergy.HasIndex(s => s.BaseGameId);
+        synergy.HasIndex(s => new { s.ExpansionAId, s.ExpansionBId });
+
+        synergy.HasOne(s => s.BaseGame)
+            .WithMany()
+            .HasForeignKey(s => s.BaseGameId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        synergy.HasOne(s => s.ExpansionA)
+            .WithMany()
+            .HasForeignKey(s => s.ExpansionAId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        synergy.HasOne(s => s.ExpansionB)
+            .WithMany()
+            .HasForeignKey(s => s.ExpansionBId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // --- Configuración de ExpansionRecipe ---
+        var recipe = modelBuilder.Entity<ExpansionRecipe>();
+        recipe.ToTable("ExpansionRecipes");
+        recipe.HasKey(r => r.Id);
+
+        recipe.HasIndex(r => r.BaseGameId);
+        recipe.PrimitiveCollection(r => r.IncludedExpansionIds);
+
+        recipe.HasOne(r => r.BaseGame)
+            .WithMany()
+            .HasForeignKey(r => r.BaseGameId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

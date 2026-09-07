@@ -5,6 +5,7 @@
 @inject IFoundingVerdictService FoundingService
 @inject IMediaService MediaService
 @inject ICurrentUserService CurrentUserService
+@inject IExpansionService ExpansionService
 @inject NavigationManager Navigation
 
 <PageTitle>@(Game != null ? $"{Game.SpanishTitle} — Ficha Inteligente | Ludeca" : "Juego no encontrado — Ludeca")</PageTitle>
@@ -58,6 +59,13 @@ else
         </div>
     </div>
 
+    @if (Game.IsExpansion && _parentGame != null)
+    {
+        <div class="container-ludeka pt-4">
+            <ParentGameBanner ParentGame="@_parentGame" />
+        </div>
+    }
+
     @* Hero Section (Lectura en 3 segundos) *@
     <div class="detail-hero-backdrop">
         <div class="container-ludeka">
@@ -86,7 +94,13 @@ else
                 @* Bloque de Identidad y Ratings *@
                 <div class="flex-1 space-y-4">
                     <div>
-                        <div class="flex items-center gap-2 mb-1.5">
+                        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                            @if (Game.IsExpansion)
+                            {
+                                <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30">
+                                    🧩 Expansión Oficial
+                                </span>
+                            }
                             <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
                                 @Game.YearPublished
                             </span>
@@ -188,6 +202,22 @@ else
             <AiSummaryCard Summary="@_aiSummary" />
         }
 
+        @* MÓDULO DE EXPANSIÓN: ¿Qué aporta al Juego Base? *@
+        @if (Game.IsExpansion)
+        {
+            <ExpansionAporteCard
+                Necessity="@Game.ExpansionNecessity"
+                ImpactTags="@Game.ImpactTags"
+                WhatItBringsSummary="@Game.WhatItBringsSummary"
+                ExtraPlayerCount="@Game.ExtraPlayerCount"
+                ExtraDurationMinutes="@Game.ExtraDurationMinutes" />
+        }
+        else if (_expansions.Count > 0)
+        {
+            @* MÓDULO DE JUEGO BASE: Ecosistema de Expansiones y Mezclador de Mesa *@
+            <ExpansionEcosystemSection BaseGameId="@Game.Id" Expansions="@_expansions" />
+        }
+
         @* 2. Tarjeta de Valoración Propia y Acceso a Review *@
         <UserReviewCard
             Review="@_userReview"
@@ -204,6 +234,16 @@ else
 
             <ScalabilityTrafficLight Entries="@Game.Scalability" IdealText="@Game.IdealPlayerCountText" />
         </div>
+
+        @* MÓDULO DE EXPANSIÓN: Expansiones Hermanas del mismo Ecosistema *@
+        @if (Game.IsExpansion && _sisterExpansions.Count > 0)
+        {
+            <ExpansionSisterList
+                CurrentExpansionId="@Game.Id"
+                BaseGameTitle="@(_parentGame?.SpanishTitle ?? "Juego Base")"
+                Sisters="@_sisterExpansions"
+                Synergies="@_sisterSynergies" />
+        }
 
         @* 4. Guía de Fundas *@
         <SleeveGuideCard Sleeves="@Game.Sleeves" />
@@ -265,6 +305,12 @@ else
     private FoundingVerdictDto? _foundingVerdict;
     private AiGameSummaryDto? _aiSummary;
     private GameMediaHubDto? _mediaHub;
+
+    // Incremento 8: Expansiones, Sinergias y Ecosistema
+    private IReadOnlyList<ExpansionSummaryDto> _expansions = [];
+    private IReadOnlyList<ExpansionSummaryDto> _sisterExpansions = [];
+    private IReadOnlyList<ExpansionSynergyDto> _sisterSynergies = [];
+    private ParentGameSummaryDto? _parentGame;
 
     private bool _isLoading = true;
     private bool _isLoanModalOpen;
@@ -334,6 +380,22 @@ else
         }
 
         _mediaHub = await MediaService.GetGameMediaAsync(Game.Id);
+
+        // Carga de datos de expansiones
+        if (Game.IsExpansion)
+        {
+            _parentGame = Game.BaseGame ?? (Game.BaseGameId.HasValue ? await ExpansionService.GetParentGameForExpansionAsync(Game.Id) : null);
+            if (Game.BaseGameId.HasValue)
+            {
+                var allSisters = await ExpansionService.GetExpansionsForBaseGameAsync(Game.BaseGameId.Value);
+                _sisterExpansions = allSisters.Where(s => s.Id != Game.Id).ToList();
+                _sisterSynergies = await ExpansionService.GetSynergiesForExpansionAsync(Game.Id);
+            }
+        }
+        else
+        {
+            _expansions = await ExpansionService.GetExpansionsForBaseGameAsync(Game.Id);
+        }
     }
 
     private async Task HandleStatusSelected(CollectionStatus status)

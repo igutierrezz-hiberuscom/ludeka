@@ -108,8 +108,27 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
-## Incremento 8: Sistema de Notificaciones y Webhooks de Comunidad (Discord & Telegram)
-- **Identificador SDD:** `change-08-notifications-webhooks`
+## Incremento 8: Fichas de Expansión, Ecosistema y Compatibilidad Lúdica ("Mezclador de Mesa")
+- **Identificador SDD:** `change-08-game-expansions`
+- **Objetivo Principal:** Dotar a las expansiones de ficha propia, vídeos y valoraciones independientes, vinculación bidireccional con el juego base, tarjeta editorial de aportes, matriz de sinergia par-a-par y Mezclador interactivo de mesa con detección de sobrecarga.
+- **Estado:** ✅ **Completado y Verificado** (170 tests en verde al 100%).
+- **Alcance Funcional y Técnico:**
+  1. **Modelo de Dominio Polimórfico (`GameType`, `ExpansionNecessity`, `ExpansionImpactTag`, `ExpansionSynergyLevel`):** Tipado formal en `Game` con relación reflexiva `BaseGameId`, deltas de duración/jugadores y etiquetas de impacto lúdico.
+  2. **Matriz de Sinergias Par-a-Par (`ExpansionSynergy`) y Recetas de Mesa (`ExpansionRecipe`):** Relaciones conmutativas con explicaciones de compatibilidad y packs de expansión prediseñados para distintas configuraciones de mesa.
+  3. **Motor de Evaluación en Tiempo Real (`IExpansionService`):** Lógica que analiza selecciones de expansiones en el "Mezclador de Mesa", detecta incompatibilidades, sobrecarga por duración (+45 min) o exceso de módulos (+2 módulos pesados) y calcula el tiempo total de la partida.
+  4. **Persistencia e Índices en SQLite (`SqliteExpansionRepository`):** Consultas indexadas por juego base y pares de expansiones, con almacenamiento JSON de listas de etiquetas y colecciones de IDs.
+  5. **Semillado Real de Alta Calidad:** Expansiones oficiales precargadas con imágenes, metadatos, valoraciones y tutoriales propios (Wingspan: Europa, Oceanía y Asia; Terraforming Mars: Preludio y Hellas & Elysium; Carcassonne: Posadas & Catedrales y Constructores & Comerciantes).
+  6. **Componentes UI Editoriales Blazor:**
+     - `ParentGameBanner.razor`: Banner de acceso al juego base desde la ficha de la expansión.
+     - `ExpansionAporteCard.razor`: Tarjeta editorial con insignias de necesidad, etiquetas de impacto y resumen narrativo.
+     - `ExpansionSisterList.razor`: Expansiones hermanas con badges de compatibilidad directa.
+     - `ExpansionEcosystemSection.razor`: 3 pestañas dinámicas en el juego base (Catálogo, Mezclador interactivo y Recetas).
+     - `GameCard.razor` & `Home.razor`: Badge `🧩 Expansión` y filtros de navegación segmentados.
+
+---
+
+## Incremento 9: Sistema de Notificaciones y Webhooks de Comunidad (Discord & Telegram)
+- **Identificador SDD:** `change-09-notifications-webhooks`
 - **Objetivo Principal:** Difusión multicanal automatizada para dinamizar la comunidad avisando de eventos clave en Discord y Telegram sin intervención manual.
 - **Estado:** 📋 **Registrado (Pendiente de inicio)**
 - **Alcance Funcional y Técnico:**
@@ -124,8 +143,8 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
-## Incremento 9: Despliegue, Empaquetado Docker y Configuración de Staging/Producción
-- **Identificador SDD:** `change-09-docker-deployment-staging`
+## Incremento 10: Despliegue, Empaquetado Docker y Configuración de Staging/Producción
+- **Identificador SDD:** `change-10-docker-deployment-staging`
 - **Objetivo Principal:** Empaquetado reproducible, seguro y listo para producción de toda la solución Ludeka para su despliegue en cualquier servidor VPS o entorno en la nube.
 - **Estado:** 📋 **Registrado (Pendiente de inicio)**
 - **Alcance Funcional y Técnico:**

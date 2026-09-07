@@ -1,0 +1,145 @@
+@using Ludeka.Core.Enums
+
+<div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
+        <div>
+            <span class="text-[0.68rem] font-bold uppercase tracking-wider text-[var(--brand-primary)] block mb-1">
+                Ecosistema y Aporte Lúdico
+            </span>
+            <h2 class="text-xl font-black text-[var(--text-primary)]">
+                ¿Qué aporta al Juego Base?
+            </h2>
+        </div>
+
+        @if (Necessity.HasValue)
+        {
+            <div class="inline-flex items-center px-3 py-1.5 rounded-xl border text-xs font-bold shadow-sm @GetNecessityClass(Necessity.Value)">
+                <span>@GetNecessityText(Necessity.Value)</span>
+            </div>
+        }
+    </div>
+
+    @* Chips de Impacto Lúdico *@
+    @if (ImpactTags != null && ImpactTags.Count > 0)
+    {
+        <div>
+            <span class="text-xs font-semibold text-[var(--text-muted)] block mb-2">
+                Modificaciones y Nuevas Mecánicas:
+            </span>
+            <div class="flex flex-wrap gap-2">
+                @foreach (var tag in ImpactTags)
+                {
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)]">
+                        <span>@GetTagIcon(tag)</span>
+                        <span>@GetTagLabel(tag)</span>
+                    </span>
+                }
+            </div>
+        </div>
+    }
+
+    @* Resumen Editorial *@
+    @if (!string.IsNullOrWhiteSpace(WhatItBringsSummary))
+    {
+        <div class="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p class="font-medium text-[var(--text-primary)] mb-1 text-xs uppercase tracking-wider text-[var(--text-muted)]">
+                Veredicto de la Mesa:
+            </p>
+            @WhatItBringsSummary
+        </div>
+    }
+
+    @* Métricas de Impacto (Deltas de jugadores y duración) *@
+    @if (ExtraPlayerCount.HasValue || ExtraDurationMinutes.HasValue)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            @if (ExtraPlayerCount.HasValue && ExtraPlayerCount.Value != 0)
+            {
+                <div class="p-3 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center gap-3">
+                    <span class="text-2xl">👥</span>
+                    <div>
+                        <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] block">Escalabilidad</span>
+                        <span class="text-sm font-extrabold text-[var(--text-primary)]">
+                            @(ExtraPlayerCount.Value > 0 ? $"+{ExtraPlayerCount.Value} jugadores a la mesa" : $"{ExtraPlayerCount.Value} jugadores")
+                        </span>
+                    </div>
+                </div>
+            }
+
+            @if (ExtraDurationMinutes.HasValue && ExtraDurationMinutes.Value != 0)
+            {
+                <div class="p-3 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center gap-3">
+                    <span class="text-2xl">⏱️</span>
+                    <div>
+                        <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] block">Impacto en Duración</span>
+                        <span class="text-sm font-extrabold @(ExtraDurationMinutes.Value < 0 ? "text-emerald-400" : "text-[var(--text-primary)]")">
+                            @(ExtraDurationMinutes.Value > 0 ? $"+{ExtraDurationMinutes.Value} min por partida" : $"{ExtraDurationMinutes.Value} min (acelera el arranque)")
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public ExpansionNecessity? Necessity { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<ExpansionImpactTag>? ImpactTags { get; set; }
+
+    [Parameter]
+    public string? WhatItBringsSummary { get; set; }
+
+    [Parameter]
+    public int? ExtraPlayerCount { get; set; }
+
+    [Parameter]
+    public int? ExtraDurationMinutes { get; set; }
+
+    private static string GetNecessityText(ExpansionNecessity n) => n switch
+    {
+        ExpansionNecessity.MustHave => "🟢 Imprescindible, mejora el juego base",
+        ExpansionNecessity.HighlyRecommended => "🟢 Muy recomendada",
+        ExpansionNecessity.Situational => "🟡 Recomendada según perfil",
+        ExpansionNecessity.OnlyForFans => "🔵 Solo para muy cafeteros / completistas",
+        ExpansionNecessity.Dispensable => "⚪ Prescindible / Aporta poco",
+        _ => "Expansión Oficial"
+    };
+
+    private static string GetNecessityClass(ExpansionNecessity n) => n switch
+    {
+        ExpansionNecessity.MustHave => "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+        ExpansionNecessity.HighlyRecommended => "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+        ExpansionNecessity.Situational => "bg-amber-500/10 text-amber-300 border-amber-500/30",
+        ExpansionNecessity.OnlyForFans => "bg-blue-500/10 text-blue-300 border-blue-500/30",
+        _ => "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
+    };
+
+    private string GetTagLabel(ExpansionImpactTag tag) => tag switch
+    {
+        ExpansionImpactTag.AddsPlayers => ExtraPlayerCount.HasValue && ExtraPlayerCount.Value > 0 ? $"+{ExtraPlayerCount.Value} Jugador(es)" : "Agrega más jugadores",
+        ExpansionImpactTag.ImprovesTwoPlayers => "Imprescindible para 2 jugadores",
+        ExpansionImpactTag.FixesBalance => "Corrige balance / ritmo",
+        ExpansionImpactTag.AddsSoloMode => "Introduce modo solitario oficial",
+        ExpansionImpactTag.AddsAsymmetry => "Añade asimetría y facciones",
+        ExpansionImpactTag.ModularContent => "Módulos independientes combinables",
+        ExpansionImpactTag.NewMapOrFactions => "Nuevos mapas / tableros",
+        ExpansionImpactTag.TightensTime => ExtraDurationMinutes.HasValue && ExtraDurationMinutes.Value < 0 ? $"Acelera partida ({ExtraDurationMinutes.Value} min)" : "Dinamiza la partida",
+        _ => tag.ToString()
+    };
+
+    private static string GetTagIcon(ExpansionImpactTag tag) => tag switch
+    {
+        ExpansionImpactTag.AddsPlayers => "👥",
+        ExpansionImpactTag.ImprovesTwoPlayers => "⚔️",
+        ExpansionImpactTag.FixesBalance => "⚖️",
+        ExpansionImpactTag.AddsSoloMode => "👤",
+        ExpansionImpactTag.AddsAsymmetry => "🎭",
+        ExpansionImpactTag.ModularContent => "🧩",
+        ExpansionImpactTag.NewMapOrFactions => "🗺️",
+        ExpansionImpactTag.TightensTime => "⚡",
+        _ => "✨"
+    };
+}

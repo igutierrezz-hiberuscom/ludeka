@@ -95,6 +95,12 @@ public class SqliteGameRepository : IGameRepository
             query = query.Where(g => g.IsOfficialSolo);
         }
 
+        // Filtro por tipo de juego (BaseGame vs Expansion)
+        if (criteria.TypeFilter.HasValue)
+        {
+            query = query.Where(g => g.Type == criteria.TypeFilter.Value);
+        }
+
         // Para filtros que evalúan elementos de colecciones JSON complejas en SQLite
         var list = await query.ToListAsync(ct);
 

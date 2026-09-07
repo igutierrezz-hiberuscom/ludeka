@@ -1,6 +1,7 @@
 @page "/"
 @page "/catalogo"
 @rendermode InteractiveServer
+@using Ludeka.Core.Enums
 @inject ICatalogService CatalogService
 @inject NavigationManager Navigation
 
@@ -21,10 +22,16 @@
         </div>
     </div>
 
-    @* Filtros prácticos de situación real (Puntos 9.1 y 9.2 de la spec) *@
-    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar" role="group" aria-label="Filtros de situación real">
+    @* Filtros prácticos de situación real y tipo de juego *@
+    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar" role="group" aria-label="Filtros del catálogo">
         <button type="button" class="filter-btn @(_activePreset == Preset.Todos ? "active" : "")" @onclick="() => SetPreset(Preset.Todos)">
             Todos (@_totalCount)
+        </button>
+        <button type="button" class="filter-btn @(_activePreset == Preset.JuegosBase ? "active" : "")" @onclick="() => SetPreset(Preset.JuegosBase)">
+            🎲 Juegos Base
+        </button>
+        <button type="button" class="filter-btn @(_activePreset == Preset.Expansiones ? "active" : "")" @onclick="() => SetPreset(Preset.Expansiones)">
+            🧩 Expansiones
         </button>
         <button type="button" class="filter-btn @(_activePreset == Preset.EspecialParejas ? "active" : "")" @onclick="() => SetPreset(Preset.EspecialParejas)">
             ⚔️ Especial Parejas (2J)
@@ -73,7 +80,7 @@
 </div>
 
 @code {
-    private enum Preset { Todos, EspecialParejas, MesaFamiliar, SoloTop, PartidasRapidas }
+    private enum Preset { Todos, JuegosBase, Expansiones, EspecialParejas, MesaFamiliar, SoloTop, PartidasRapidas }
 
     private Preset _activePreset = Preset.Todos;
     private string _searchTerm = string.Empty;
@@ -94,6 +101,10 @@
         else if (query.ContainsKey("familiar"))
         {
             _activePreset = Preset.MesaFamiliar;
+        }
+        else if (query.ContainsKey("expansiones"))
+        {
+            _activePreset = Preset.Expansiones;
         }
 
         await LoadCatalogAsync();
@@ -123,12 +134,20 @@
         _isLoading = true;
         StateHasChanged();
 
+        GameType? typeFilter = _activePreset switch
+        {
+            Preset.JuegosBase => GameType.BaseGame,
+            Preset.Expansiones => GameType.Expansion,
+            _ => null
+        };
+
         var criteria = new GameFilterCriteria(
             SearchTerm: _searchTerm,
             EspecialParejas: _activePreset == Preset.EspecialParejas,
             MesaFamiliar: _activePreset == Preset.MesaFamiliar,
             SoloTop: _activePreset == Preset.SoloTop,
-            MaxDurationMinutes: _activePreset == Preset.PartidasRapidas ? 45 : null
+            MaxDurationMinutes: _activePreset == Preset.PartidasRapidas ? 45 : null,
+            TypeFilter: typeFilter
         );
 
         var result = await CatalogService.GetCatalogAsync(criteria, page: 1, pageSize: 50);

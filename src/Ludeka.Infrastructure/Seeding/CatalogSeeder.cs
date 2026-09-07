@@ -176,6 +176,9 @@ public static class CatalogSeeder
         await SeedWeeklyReleasesAsync(db, ct);
         await SeedRuleQAAsync(db, ct);
 
+        // Semillado del Incremento 8: Fichas de Expansión, Sinergias y Recetas de Mesa
+        await SeedExpansionsAndSynergiesAsync(db, ct);
+
         return seededCount;
     }
 
@@ -738,6 +741,401 @@ public static class CatalogSeeder
 
             await db.RuleQuestions.AddAsync(q2, ct);
             await db.RuleAnswers.AddAsync(a2, ct);
+        }
+
+        await db.SaveChangesAsync(ct);
+    }
+
+    private static List<ScalabilityEntry> CloneScalability(IEnumerable<ScalabilityEntry> source) =>
+        source.Select(s => new ScalabilityEntry(s.PlayerCount, s.DisplayCount, s.Status, s.BestVotes, s.RecommendedVotes, s.NotRecommendedVotes)).ToList();
+
+    private static async Task SeedExpansionsAndSynergiesAsync(LudekaDbContext db, CancellationToken ct)
+    {
+        if (await db.Games.AnyAsync(g => g.Type == GameType.Expansion, ct))
+        {
+            return; // Ya existen expansiones semilladas
+        }
+
+        var allGames = await db.Games.ToListAsync(ct);
+        if (allGames.Count == 0) return;
+
+        // 1. Expansiones de Wingspan
+        var wingspan = allGames.FirstOrDefault(g => g.Slug == "wingspan");
+        if (wingspan != null)
+        {
+            var expEuropa = new Game(
+                bggId: 290448,
+                originalTitle: "Wingspan: European Expansion",
+                spanishTitle: "Wingspan: Expansión Europa",
+                designer: "Elizabeth Hargrave",
+                publisher: "Maldito Games",
+                yearPublished: 2019,
+                coverImageUrl: "/images/games/wingspan.png",
+                thumbnailUrl: "/images/games/wingspan.png",
+                description: "La primera expansión de Wingspan amplía el alcance a las majestuosas aves de Europa. Incluye 81 nuevas cartas de aves con poderes de final de ronda ('teal powers'), nuevos objetivos de fin de ronda, cartas de bonificación adicionales y una bandeja de huevos morada.",
+                bggRating: 8.35,
+                bggRank: 78,
+                ludistRating: 8.6,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: true,
+                age: new AgeRating(10, 10),
+                language: LanguageDependence.Low,
+                footprint: TableFootprint.StandardTable,
+                duration: new GameDuration(40, 70, 25),
+                scalability: CloneScalability(wingspan.Scalability),
+                sleeves: [new SleeveItem("Chimera Standard (Aves)", 57, 89, 81, null), new SleeveItem("Mini European (Bonos)", 44, 68, 15, null)],
+                customSlug: "wingspan-expansion-europa",
+                type: GameType.Expansion,
+                baseGameId: wingspan.Id,
+                expansionNecessity: ExpansionNecessity.MustHave,
+                impactTags: [ExpansionImpactTag.FixesBalance, ExpansionImpactTag.ModularContent],
+                whatItBringsSummary: "Introduce 81 aves europeas con poderes de final de ronda ('teal powers') que aumentan la interacción positiva y la variedad estratégica sin sobrecargar las reglas.",
+                extraPlayerCount: 0,
+                extraDurationMinutes: 5
+            );
+
+            var expOceania = new Game(
+                bggId: 300580,
+                originalTitle: "Wingspan: Oceania Expansion",
+                spanishTitle: "Wingspan: Expansión Oceanía",
+                designer: "Elizabeth Hargrave",
+                publisher: "Maldito Games",
+                yearPublished: 2020,
+                coverImageUrl: "/images/games/wingspan.png",
+                thumbnailUrl: "/images/games/wingspan.png",
+                description: "La segunda expansión de Wingspan destaca las aves coloridas e impresionantes de Oceanía. Introduce nuevos tableros de jugador rebalanceados, dados de alimento de néctar (que actúa como comodín), aves no voladoras con nuevas mecánicas de final de partida y huevos amarillos.",
+                bggRating: 8.42,
+                bggRank: 55,
+                ludistRating: 8.8,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: true,
+                age: new AgeRating(10, 10),
+                language: LanguageDependence.Low,
+                footprint: TableFootprint.StandardTable,
+                duration: new GameDuration(40, 75, 25),
+                scalability: CloneScalability(wingspan.Scalability),
+                sleeves: [new SleeveItem("Chimera Standard (Aves)", 57, 89, 95, null)],
+                customSlug: "wingspan-expansion-oceania",
+                type: GameType.Expansion,
+                baseGameId: wingspan.Id,
+                expansionNecessity: ExpansionNecessity.MustHave,
+                impactTags: [ExpansionImpactTag.FixesBalance, ExpansionImpactTag.ModularContent],
+                whatItBringsSummary: "Revoluciona el juego base al rebalancear los tableros de jugador (debilitando la acción masiva de poner huevos) e introduciendo el néctar como recurso comodín y aves no voladoras.",
+                extraPlayerCount: 0,
+                extraDurationMinutes: 10
+            );
+
+            var expAsia = new Game(
+                bggId: 366161,
+                originalTitle: "Wingspan: Asia",
+                spanishTitle: "Wingspan: Expansión Asia",
+                designer: "Elizabeth Hargrave",
+                publisher: "Maldito Games",
+                yearPublished: 2022,
+                coverImageUrl: "/images/games/wingspan.png",
+                thumbnailUrl: "/images/games/wingspan.png",
+                description: "Wingspan Asia funciona tanto como juego independiente para 1 o 2 jugadores (con el sobresaliente Modo Dúo en un mapa territorial interactivo) como expansión para el juego base, incorporando el modo Bandada para jugar de 6 a 7 personas en simultáneo.",
+                bggRating: 8.38,
+                bggRank: 62,
+                ludistRating: 8.7,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: true,
+                age: new AgeRating(10, 10),
+                language: LanguageDependence.Low,
+                footprint: TableFootprint.StandardTable,
+                duration: new GameDuration(40, 75, 25),
+                scalability: [new ScalabilityEntry(1, "1J", ScalabilityStatus.Recommended, 120, 300, 20), new ScalabilityEntry(2, "2J", ScalabilityStatus.MustPlay, 850, 120, 5), new ScalabilityEntry(6, "6J", ScalabilityStatus.Recommended, 90, 250, 40), new ScalabilityEntry(7, "7J+", ScalabilityStatus.Recommended, 70, 200, 50)],
+                sleeves: [new SleeveItem("Chimera Standard (Aves)", 57, 89, 90, null)],
+                customSlug: "wingspan-expansion-asia",
+                type: GameType.StandaloneExpansion,
+                baseGameId: wingspan.Id,
+                expansionNecessity: ExpansionNecessity.MustHave,
+                impactTags: [ExpansionImpactTag.ImprovesTwoPlayers, ExpansionImpactTag.AddsPlayers, ExpansionImpactTag.AddsSoloMode],
+                whatItBringsSummary: "Incluye el innovador Modo Dúo (un mapa de tablero interactivo para 2 personas que convierte el juego en un duelo táctico impecable) y el modo Bandada para 6-7 jugadores.",
+                extraPlayerCount: 2,
+                extraDurationMinutes: 15
+            );
+
+            await db.Games.AddRangeAsync([expEuropa, expOceania, expAsia], ct);
+
+            // Sinergias de Wingspan
+            var synEuropaOceania = new ExpansionSynergy(
+                wingspan.Id, expEuropa.Id, expOceania.Id, ExpansionSynergyLevel.PerfectCombo,
+                "El combo reina de Wingspan: el néctar y los nuevos tableros de Oceanía rebalancean el motor, mientras las aves europeas aportan poderes estratégicos de fin de ronda."
+            );
+
+            var synEuropaAsia = new ExpansionSynergy(
+                wingspan.Id, expEuropa.Id, expAsia.Id, ExpansionSynergyLevel.PerfectCombo,
+                "Totalmente compatibles y complementarias: las aves de Europa se pueden integrar en el Modo Dúo de Asia para una variedad ornitológica infinita."
+            );
+
+            var synOceaniaAsia = new ExpansionSynergy(
+                wingspan.Id, expOceania.Id, expAsia.Id, ExpansionSynergyLevel.CompatibleWithCaution,
+                "Al jugar el Modo Dúo de Asia con Oceanía se debe acordar previamente si se utilizan los tableros de néctar de Oceanía o los tableros estándar de Asia para evitar desequilibrio en la comida comodín."
+            );
+
+            await db.ExpansionSynergies.AddRangeAsync([synEuropaOceania, synEuropaAsia, synOceaniaAsia], ct);
+
+            // Recetas de Wingspan
+            var recetaDuo = new ExpansionRecipe(
+                wingspan.Id,
+                "El Duelo Definitivo a 2",
+                "Convierte Wingspan en una experiencia de tensión táctica directa a 2 personas usando el tablero territorial del Modo Dúo.",
+                "2 jugadores en 45 minutos",
+                [expAsia.Id]
+            );
+
+            var recetaEcosistema = new ExpansionRecipe(
+                wingspan.Id,
+                "El Ecosistema Completo Rebalanceado",
+                "La experiencia definitiva de motor de cartas con tableros corregidos, recurso néctar y poderes de final de ronda de Europa.",
+                "3 a 5 jugadores en 70 minutos",
+                [expEuropa.Id, expOceania.Id]
+            );
+
+            await db.ExpansionRecipes.AddRangeAsync([recetaDuo, recetaEcosistema], ct);
+
+            // Vídeos para las expansiones de Wingspan
+            await db.MediaItems.AddRangeAsync([
+                new MediaItem(
+                    MediaType.Tutorial,
+                    MediaPlatform.YouTube,
+                    "Cómo se juega Wingspan Oceanía (Explicación del néctar y nuevos tableros)",
+                    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                    "Análisis Lúdico",
+                    gameId: expOceania.Id,
+                    durationSeconds: 14 * 60,
+                    status: ModerationStatus.Approved
+                ),
+                new MediaItem(
+                    MediaType.Playthrough,
+                    MediaPlatform.YouTube,
+                    "Partida completa al Modo Dúo de Wingspan Asia",
+                    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                    "Mesa de Dos",
+                    gameId: expAsia.Id,
+                    durationSeconds: 42 * 60,
+                    playerCountBadge: "Partida a 2",
+                    status: ModerationStatus.Approved
+                )
+            ], ct);
+
+            // Reseñas comunitarias para las expansiones
+            var reviewOceania = new UserGameReview(
+                "marta-marte",
+                expOceania.Id,
+                9.0,
+                "Oceanía es imprescindible. Una vez juegas con los nuevos tableros y el néctar, no puedes volver al juego base original; soluciona el monopolio de huevos en la última ronda.",
+                [new UserPlayerCountVote(3, ScalabilityStatus.MustPlay)]
+            );
+            var reviewAsia = new UserGameReview(
+                "pablo-vet",
+                expAsia.Id,
+                9.0,
+                "El modo Dúo es una obra maestra de diseño. Wingspan a 2 siempre fue bueno, pero con el mapa de Asia es una batalla territorial emocionante.",
+                [new UserPlayerCountVote(2, ScalabilityStatus.MustPlay)]
+            );
+            await db.Reviews.AddRangeAsync([reviewOceania, reviewAsia], ct);
+        }
+
+        // 2. Expansiones de Terraforming Mars
+        var tm = allGames.FirstOrDefault(g => g.Slug == "terraforming-mars");
+        if (tm != null)
+        {
+            var expPreludio = new Game(
+                bggId: 247030,
+                originalTitle: "Terraforming Mars: Prelude",
+                spanishTitle: "Terraforming Mars: Preludio",
+                designer: "Jacob Fryxelius",
+                publisher: "Maldito Games",
+                yearPublished: 2018,
+                coverImageUrl: "/images/games/terraforming-mars.png",
+                thumbnailUrl: "/images/games/terraforming-mars.png",
+                description: "Preludio permite comenzar la partida con un impulso inicial al repartir cartas de preludio que potencian la producción y colocación inicial, reduciendo el lento arranque en unos 30-40 minutos.",
+                bggRating: 8.64,
+                bggRank: 32,
+                ludistRating: 8.9,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: true,
+                age: new AgeRating(12, 12),
+                language: LanguageDependence.Low,
+                footprint: TableFootprint.StandardTable,
+                duration: new GameDuration(60, 100, 25),
+                scalability: CloneScalability(tm.Scalability),
+                sleeves: [new SleeveItem("Standard Card Game (Preludios)", 63.5, 88, 35, null)],
+                customSlug: "terraforming-mars-preludio",
+                type: GameType.Expansion,
+                baseGameId: tm.Id,
+                expansionNecessity: ExpansionNecessity.MustHave,
+                impactTags: [ExpansionImpactTag.FixesBalance, ExpansionImpactTag.TightensTime],
+                whatItBringsSummary: "Reduce el arranque lento de las primeras generaciones otorgando cartas de preludio que aceleran el motor productivo y acortan la partida en 30-40 minutos.",
+                extraPlayerCount: 0,
+                extraDurationMinutes: -30
+            );
+
+            var expHellas = new Game(
+                bggId: 230914,
+                originalTitle: "Terraforming Mars: Hellas & Elysium",
+                spanishTitle: "Terraforming Mars: Hellas & Elysium",
+                designer: "Jacob Fryxelius",
+                publisher: "Maldito Games",
+                yearPublished: 2017,
+                coverImageUrl: "/images/games/terraforming-mars.png",
+                thumbnailUrl: "/images/games/terraforming-mars.png",
+                description: "Tablero reversible con dos mapas completamente nuevos de Marte: Hellas (el mar del polo sur con bonificaciones de calor y agua) y Elysium (al otro lado del ecuador marciano, con los grandes volcanes Olimpo y Arsia Mons), con hitos y recompensas totalmente inéditos.",
+                bggRating: 8.21,
+                bggRank: 95,
+                ludistRating: 8.5,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: true,
+                age: new AgeRating(12, 12),
+                language: LanguageDependence.None,
+                footprint: TableFootprint.StandardTable,
+                duration: new GameDuration(90, 120, 30),
+                scalability: CloneScalability(tm.Scalability),
+                sleeves: [],
+                customSlug: "terraforming-mars-hellas-elysium",
+                type: GameType.Expansion,
+                baseGameId: tm.Id,
+                expansionNecessity: ExpansionNecessity.HighlyRecommended,
+                impactTags: [ExpansionImpactTag.NewMapOrFactions, ExpansionImpactTag.ModularContent],
+                whatItBringsSummary: "Doble tablero con dos mapas inéditos de Marte (Hellas con el polo sur y Elysium con los volcanes gigantes) con hitos y recompensas totalmente renovados.",
+                extraPlayerCount: 0,
+                extraDurationMinutes: 0
+            );
+
+            await db.Games.AddRangeAsync([expPreludio, expHellas], ct);
+
+            // Sinergia TM
+            var synTm = new ExpansionSynergy(
+                tm.Id, expPreludio.Id, expHellas.Id, ExpansionSynergyLevel.PerfectCombo,
+                "El combo por excelencia de torneo: Preludio otorga fluidez y rapidez al arranque, mientras que Hellas & Elysium renueva los hitos y metas estratégicas sobre el mapa."
+            );
+            await db.ExpansionSynergies.AddAsync(synTm, ct);
+
+            // Receta TM
+            var recetaTmTorneo = new ExpansionRecipe(
+                tm.Id,
+                "Setup de Torneo Ágil",
+                "El estándar competitivo mundial: partida dinámica con arranque acelerado y mapa fresco sin saturar la mesa de módulos adicionales.",
+                "3 a 4 jugadores en 80-90 minutos",
+                [expPreludio.Id, expHellas.Id]
+            );
+            await db.ExpansionRecipes.AddAsync(recetaTmTorneo, ct);
+
+            // Vídeos y Reviews para Terraforming Mars
+            await db.MediaItems.AddAsync(new MediaItem(
+                MediaType.Tutorial,
+                MediaPlatform.YouTube,
+                "Por qué Preludio es la mejor expansión de Terraforming Mars",
+                "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                "Planeta de Juegos",
+                gameId: expPreludio.Id,
+                durationSeconds: 11 * 60,
+                status: ModerationStatus.Approved
+            ), ct);
+
+            await db.Reviews.AddAsync(new UserGameReview(
+                "carlos-tablero",
+                expPreludio.Id,
+                10.0,
+                "Imprescindible absoluto. Debería venir dentro de la caja básica. Quita los 45 minutos más lentos de la partida.",
+                [new UserPlayerCountVote(3, ScalabilityStatus.MustPlay)]
+            ), ct);
+        }
+
+        // 3. Expansiones de Carcassonne
+        var carcassonne = allGames.FirstOrDefault(g => g.Slug == "carcassonne");
+        if (carcassonne != null)
+        {
+            var expPosadas = new Game(
+                bggId: 2993,
+                originalTitle: "Carcassonne: Inns & Cathedrals",
+                spanishTitle: "Carcassonne: Posadas y Catedrales",
+                designer: "Klaus-Jürgen Wrede",
+                publisher: "Devir",
+                yearPublished: 2002,
+                coverImageUrl: "/images/games/carcassonne.png",
+                thumbnailUrl: "/images/games/carcassonne.png",
+                description: "La primera y más aclamada expansión de Carcassonne. Añade piezas para un sexto jugador, el meeple gigante (que cuenta como 2 meeples en disputas de control de ciudades, caminos y campos), 18 nuevas losetas de terreno con posadas a la orilla del camino y catedrales en las ciudades.",
+                bggRating: 7.91,
+                bggRank: 120,
+                ludistRating: 8.4,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: false,
+                age: new AgeRating(8, 8),
+                language: LanguageDependence.None,
+                footprint: TableFootprint.StandardTable,
+                duration: new GameDuration(35, 60, 10),
+                scalability: [new ScalabilityEntry(2, "2J", ScalabilityStatus.MustPlay, 450, 100, 10), new ScalabilityEntry(5, "5J", ScalabilityStatus.MustPlay, 400, 120, 15), new ScalabilityEntry(6, "6J", ScalabilityStatus.MustPlay, 500, 150, 20)],
+                sleeves: [],
+                customSlug: "carcassonne-posadas-y-catedrales",
+                type: GameType.Expansion,
+                baseGameId: carcassonne.Id,
+                expansionNecessity: ExpansionNecessity.MustHave,
+                impactTags: [ExpansionImpactTag.AddsPlayers, ExpansionImpactTag.ModularContent],
+                whatItBringsSummary: "Añade componentes para un 6º jugador, el meeple grande (fuerza 2 en disputas de mayorías) y losetas de posadas y catedrales con alto riesgo y recompensa de puntos.",
+                extraPlayerCount: 1,
+                extraDurationMinutes: 10
+            );
+
+            var expConstructores = new Game(
+                bggId: 8443,
+                originalTitle: "Carcassonne: Traders & Builders",
+                spanishTitle: "Carcassonne: Constructores y Comerciantes",
+                designer: "Klaus-Jürgen Wrede",
+                publisher: "Devir",
+                yearPublished: 2003,
+                coverImageUrl: "/images/games/carcassonne.png",
+                thumbnailUrl: "/images/games/carcassonne.png",
+                description: "La segunda gran expansión incorpora el meeple constructor (que permite colocar una segunda loseta consecutiva al ampliar la ciudad o camino donde se encuentra), el cerdo para puntuar más en granjas y fichas de mercancías (vino, trigo y tela).",
+                bggRating: 7.84,
+                bggRank: 135,
+                ludistRating: 8.3,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: false,
+                age: new AgeRating(8, 8),
+                language: LanguageDependence.None,
+                footprint: TableFootprint.StandardTable,
+                duration: new GameDuration(40, 60, 10),
+                scalability: CloneScalability(carcassonne.Scalability),
+                sleeves: [],
+                customSlug: "carcassonne-constructores-y-comerciantes",
+                type: GameType.Expansion,
+                baseGameId: carcassonne.Id,
+                expansionNecessity: ExpansionNecessity.MustHave,
+                impactTags: [ExpansionImpactTag.ModularContent, ExpansionImpactTag.TightensTime],
+                whatItBringsSummary: "Añade el cerdo (puntos extra en granjas), recursos comerciales de vino, trigo y tela, y el meeple constructor que otorga turnos dobles encadenados al expandir ciudades o caminos.",
+                extraPlayerCount: 0,
+                extraDurationMinutes: 5
+            );
+
+            await db.Games.AddRangeAsync([expPosadas, expConstructores], ct);
+
+            var synCarc = new ExpansionSynergy(
+                carcassonne.Id, expPosadas.Id, expConstructores.Id, ExpansionSynergyLevel.PerfectCombo,
+                "El combo clásico por excelencia de Carcassonne: permite jugar a 6 personas, introduce los turnos dobles del constructor y mantiene la pureza y elegancia del juego."
+            );
+            await db.ExpansionSynergies.AddAsync(synCarc, ct);
+
+            var recetaCarc = new ExpansionRecipe(
+                carcassonne.Id,
+                "Carcassonne Clásico Pro",
+                "La combinación histórica perfecta: suma el 6º jugador, las disputas de ciudades y los turnos dobles sin alterar la sencillez original.",
+                "2 a 6 jugadores en 50 minutos",
+                [expPosadas.Id, expConstructores.Id]
+            );
+            await db.ExpansionRecipes.AddAsync(recetaCarc, ct);
         }
 
         await db.SaveChangesAsync(ct);

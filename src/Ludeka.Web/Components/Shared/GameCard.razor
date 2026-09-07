@@ -23,6 +23,14 @@
                 </div>
             }
 
+            @* Badge de Expansión *@
+            @if (Game.IsExpansion)
+            {
+                <div class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-sm border border-[var(--border-subtle)] text-[0.68rem] font-black text-white shadow-sm">
+                    🧩 Expansión
+                </div>
+            }
+
             @* Rating flotante *@
             <div class="rating-badge-float">
                 <span>★</span>

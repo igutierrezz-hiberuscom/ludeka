@@ -1,0 +1,54 @@
+@using Ludeka.Application.DTOs
+
+@if (ParentGame != null)
+{
+    <div class="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border-2 border-[var(--border-highlight)] shadow-md mb-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+                <div class="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+                    @if (!string.IsNullOrWhiteSpace(ParentGame.CoverImageUrl))
+                    {
+                        <img src="@ParentGame.CoverImageUrl"
+                             alt="Carátula de @ParentGame.SpanishTitle"
+                             class="w-full h-full object-cover"
+                             onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                    }
+                    else
+                    {
+                        <div class="w-full h-full flex items-center justify-center text-xs text-[var(--text-muted)] font-bold">
+                            🎲
+                        </div>
+                    }
+                </div>
+
+                <div>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-[0.68rem] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30">
+                            🧩 Requiere Juego Base
+                        </span>
+                        <span class="text-[0.68rem] font-bold text-[var(--text-muted)]">
+                            ★ @ParentGame.LudistRating.ToString("0.0") Ludeka
+                        </span>
+                    </div>
+                    <h2 class="text-base sm:text-lg font-black text-[var(--text-primary)] leading-tight">
+                        @ParentGame.SpanishTitle
+                    </h2>
+                    <p class="text-xs text-[var(--text-secondary)]">
+                        Diseñado por @ParentGame.Designer &bull; @ParentGame.YearPublished
+                    </p>
+                </div>
+            </div>
+
+            <a href="/juegos/@ParentGame.Slug"
+               class="px-4 py-2 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold text-xs transition-colors inline-flex items-center gap-2 shrink-0 shadow-sm">
+                <span>🎲 Ver ficha del Juego Base</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public ParentGameSummaryDto? ParentGame { get; set; }
+}

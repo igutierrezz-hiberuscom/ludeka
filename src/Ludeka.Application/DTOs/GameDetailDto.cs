@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Ludeka.Core.Entities;
 using Ludeka.Core.Enums;
@@ -30,10 +30,22 @@ public record GameDetailDto(
     TableFootprint Footprint,
     GameDuration Duration,
     IReadOnlyList<ScalabilityEntry> Scalability,
-    IReadOnlyList<SleeveItem> Sleeves
+    IReadOnlyList<SleeveItem> Sleeves,
+    GameType Type = GameType.BaseGame,
+    Guid? BaseGameId = null,
+    ParentGameSummaryDto? BaseGame = null,
+    ExpansionNecessity? ExpansionNecessity = null,
+    IReadOnlyList<ExpansionImpactTag>? ImpactTags = null,
+    string? WhatItBringsSummary = null,
+    int? ExtraPlayerCount = null,
+    int? ExtraDurationMinutes = null
 )
 {
-    public static GameDetailDto FromEntity(Game g) => new(
+    public bool IsExpansion => Type == GameType.Expansion || Type == GameType.StandaloneExpansion;
+
+    public static GameDetailDto FromEntity(Game g) => FromEntity(g, null);
+
+    public static GameDetailDto FromEntity(Game g, ParentGameSummaryDto? parentGame) => new(
         g.Id,
         g.BggId,
         g.Slug,
@@ -57,6 +69,14 @@ public record GameDetailDto(
         g.Footprint,
         g.Duration,
         g.Scalability.AsReadOnly(),
-        g.Sleeves.AsReadOnly()
+        g.Sleeves.AsReadOnly(),
+        g.Type,
+        g.BaseGameId,
+        parentGame,
+        g.ExpansionNecessity,
+        g.ImpactTags.AsReadOnly(),
+        g.WhatItBringsSummary,
+        g.ExtraPlayerCount,
+        g.ExtraDurationMinutes
     );
 }

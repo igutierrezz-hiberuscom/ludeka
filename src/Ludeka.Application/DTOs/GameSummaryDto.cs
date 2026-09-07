@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Ludeka.Core.Entities;
 using Ludeka.Core.Enums;
 
@@ -27,10 +27,16 @@ public record GameSummaryDto(
     int BoxAge,
     LanguageDependence Language,
     TableFootprint Footprint,
-    int EstimatedPerPlayerMinutes
+    int EstimatedPerPlayerMinutes,
+    GameType Type = GameType.BaseGame,
+    string? BaseGameTitle = null
 )
 {
-    public static GameSummaryDto FromEntity(Game g) => new(
+    public bool IsExpansion => Type == GameType.Expansion || Type == GameType.StandaloneExpansion;
+
+    public static GameSummaryDto FromEntity(Game g) => FromEntity(g, null);
+
+    public static GameSummaryDto FromEntity(Game g, string? baseGameTitle) => new(
         g.Id,
         g.BggId,
         g.Slug,
@@ -53,6 +59,8 @@ public record GameSummaryDto(
         g.Age.BoxAge,
         g.Language,
         g.Footprint,
-        g.Duration.EstimatedPerPlayerMinutes
+        g.Duration.EstimatedPerPlayerMinutes,
+        g.Type,
+        baseGameTitle
     );
 }

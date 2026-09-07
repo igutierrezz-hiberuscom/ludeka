@@ -1,0 +1,116 @@
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+
+@if (Sisters != null && Sisters.Count > 0)
+{
+    <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
+            <div>
+                <span class="text-[0.68rem] font-bold uppercase tracking-wider text-[var(--brand-primary)] block mb-1">
+                    Colección Relacionada
+                </span>
+                <h3 class="text-lg font-black text-[var(--text-primary)]">
+                    Otras Expansiones de @BaseGameTitle
+                </h3>
+            </div>
+            <span class="text-xs font-bold text-[var(--text-muted)] px-2.5 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
+                @Sisters.Count @(Sisters.Count == 1 ? "expansión hermana" : "expansiones hermanas")
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach (var sister in Sisters)
+            {
+                var synergy = GetSynergyWith(sister.Id);
+
+                <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-3 hover:border-[var(--border-highlight)] transition-colors">
+                    <div class="flex items-start gap-3">
+                        <div class="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                            @if (!string.IsNullOrWhiteSpace(sister.CoverImageUrl))
+                            {
+                                <img src="@sister.CoverImageUrl"
+                                     alt="Carátula de @sister.SpanishTitle"
+                                     class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center text-xs text-[var(--text-muted)] font-bold">
+                                    🎲
+                                </div>
+                            }
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[0.68rem] font-extrabold text-[var(--text-muted)] block">
+                                @sister.YearPublished &bull; ★ @sister.LudistRating.ToString("0.0")
+                            </span>
+                            <h4 class="text-sm font-bold text-[var(--text-primary)] truncate" title="@sister.SpanishTitle">
+                                @sister.SpanishTitle
+                            </h4>
+                            <p class="text-[0.72rem] text-[var(--text-secondary)] line-clamp-1">
+                                @sister.NecessityBadgeText
+                            </p>
+                        </div>
+                    </div>
+
+                    @* Indicador de Compatibilidad Directa con la Expansión Actual *@
+                    @if (synergy != null)
+                    {
+                        <div class="p-2.5 rounded-lg text-xs @GetSynergyBoxClass(synergy.Level) border">
+                            <span class="font-extrabold block text-[0.68rem] uppercase tracking-wider mb-0.5">
+                                @synergy.LevelTitle
+                            </span>
+                            <p class="text-[0.75rem] leading-snug">
+                                @synergy.Reason
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[0.72rem] text-[var(--text-muted)]">
+                            ⚪ Módulos ortogonales / Compatibles sin conflicto reportado.
+                        </div>
+                    }
+
+                    <div class="pt-1 flex justify-end">
+                        <a href="/juegos/@sister.Slug"
+                           class="px-3 py-1.5 rounded-lg bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] text-xs font-bold transition-colors inline-flex items-center gap-1.5 shadow-sm">
+                            <span>Ver ficha</span>
+                            <span>&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid CurrentExpansionId { get; set; }
+
+    [Parameter]
+    public string BaseGameTitle { get; set; } = string.Empty;
+
+    [Parameter]
+    public IReadOnlyList<ExpansionSummaryDto> Sisters { get; set; } = [];
+
+    [Parameter]
+    public IReadOnlyList<ExpansionSynergyDto> Synergies { get; set; } = [];
+
+    private ExpansionSynergyDto? GetSynergyWith(Guid sisterId)
+    {
+        return Synergies.FirstOrDefault(s =>
+            (s.ExpansionAId == CurrentExpansionId && s.ExpansionBId == sisterId) ||
+            (s.ExpansionAId == sisterId && s.ExpansionBId == CurrentExpansionId));
+    }
+
+    private static string GetSynergyBoxClass(ExpansionSynergyLevel level) => level switch
+    {
+        ExpansionSynergyLevel.PerfectCombo => "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+        ExpansionSynergyLevel.CompatibleWithCaution => "bg-amber-500/10 text-amber-300 border-amber-500/20",
+        ExpansionSynergyLevel.Incompatible => "bg-rose-500/10 text-rose-300 border-rose-500/20",
+        _ => "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
+    };
+}
