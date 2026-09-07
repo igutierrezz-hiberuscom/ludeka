@@ -6,16 +6,20 @@ using System.Threading.Tasks;
 using Ludeka.Application.Contracts;
 using Ludeka.Application.DTOs;
 using Ludeka.Core.Entities;
+using Ludeka.Core.Enums;
+using Ludeka.Core.ValueObjects;
 
 namespace Ludeka.Application.Features.Community;
 
 public class RuleQAService : IRuleQAService
 {
     private readonly IRuleQARepository _repository;
+    private readonly ICommunityNotificationQueue? _notificationQueue;
 
-    public RuleQAService(IRuleQARepository repository)
+    public RuleQAService(IRuleQARepository repository, ICommunityNotificationQueue? notificationQueue = null)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _notificationQueue = notificationQueue;
     }
 
     public async Task<IReadOnlyList<RuleQuestionDto>> GetQuestionsByGameIdAsync(Guid gameId, string? currentUserId = null, CancellationToken ct = default)
@@ -161,6 +165,30 @@ public class RuleQAService : IRuleQAService
         foreach (var ans in question.Answers)
         {
             await _repository.UpdateAnswerAsync(ans, ct);
+        }
+
+        if (_notificationQueue != null)
+        {
+            try
+            {
+                var acceptedAnswer = question.Answers.FirstOrDefault(a => a.Id == answerId);
+                var message = new CommunityNotificationMessage(
+                    NotificationEventType.RuleQuestionAnswered,
+                    $"💡 DUDA DE REGLAS RESUELTA: {question.Title}",
+                    $"Se ha aceptado una respuesta definitiva en Ludeka:\n\n\"{acceptedAnswer?.Body ?? "Respuesta de reglas"}\"",
+                    TargetUrl: "https://ludeka.es",
+                    Fields: new Dictionary<string, string>
+                    {
+                        { "Pregunta", question.Title },
+                        { "Resuelto por", acceptedAnswer?.UserName ?? "Comunidad" }
+                    });
+
+                await _notificationQueue.EnqueueAsync(message, ct);
+            }
+            catch
+            {
+                // No interrumpir la transacción principal
+            }
         }
 
         return MapQuestionToDto(question, new HashSet<Guid>(), new HashSet<Guid>());

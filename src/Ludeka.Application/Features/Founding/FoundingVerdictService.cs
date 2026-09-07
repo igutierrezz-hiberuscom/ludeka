@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,6 +17,7 @@ public class FoundingVerdictService : IFoundingVerdictService
     private readonly IGameRepository _gameRepository;
     private readonly IUserReviewRepository _reviewRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ICommunityNotificationQueue? _notificationQueue;
 
     public const int FoundingVoteWeight = 3;
 
@@ -24,12 +25,14 @@ public class FoundingVerdictService : IFoundingVerdictService
         IFoundingVerdictRepository verdictRepository,
         IGameRepository gameRepository,
         IUserReviewRepository reviewRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        ICommunityNotificationQueue? notificationQueue = null)
     {
         _verdictRepository = verdictRepository;
         _gameRepository = gameRepository;
         _reviewRepository = reviewRepository;
         _currentUserService = currentUserService;
+        _notificationQueue = notificationQueue;
     }
 
     public async Task<FoundingVerdictDto?> GetVerdictByGameIdAsync(Guid gameId, CancellationToken ct = default)
@@ -125,6 +128,34 @@ public class FoundingVerdictService : IFoundingVerdictService
 
         // Recalcular rating ponderado Ludist incorporando el veredicto fundador
         await RecalculateLudistRatingWithFoundingWeightAsync(game, existing, ct);
+
+        if (_notificationQueue != null)
+        {
+            try
+            {
+                var notificationMessage = new CommunityNotificationMessage(
+                    NotificationEventType.FoundingVerdictPublished,
+                    $"🛡️ NUEVO VEREDICTO FUNDADOR: {game.SpanishTitle}",
+                    $"La Mesa Fundadora ha emitido su análisis oficial para {game.SpanishTitle}: \"{existing.OverallVerdict}\"",
+                    TargetUrl: $"https://ludeka.es/juegos/{game.Slug}",
+                    ImageUrl: game.CoverImageUrl,
+                    Fields: new Dictionary<string, string>
+                    {
+                        { "Sello", existing.Recommendation switch {
+                            FoundingRecommendation.MustPlay => "🟢 Imprescindible",
+                            FoundingRecommendation.RecommendedWithAdaptations => "🟡 Recomendado con adaptaciones",
+                            _ => "🔴 Prescindible"
+                        }},
+                        { "Autor", existing.AuthorName }
+                    });
+
+                await _notificationQueue.EnqueueAsync(notificationMessage, ct);
+            }
+            catch
+            {
+                // La notificación no debe impedir guardar el veredicto
+            }
+        }
 
         return FoundingVerdictDto.FromEntity(existing);
     }

@@ -11,6 +11,8 @@ using Ludeka.Infrastructure.Data;
 using Ludeka.Infrastructure.Repositories;
 using Ludeka.Infrastructure.Seeding;
 using Ludeka.Infrastructure.Services;
+using Ludeka.Infrastructure.Notifications;
+using Ludeka.Application.Options;
 using Ludeka.Web.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -83,6 +85,15 @@ builder.Services.AddScoped<ISocialCardService, SocialCardService>();
 // Incremento 8: Expansiones, Sinergias y Mezclador de Mesa
 builder.Services.AddScoped<IExpansionRepository, SqliteExpansionRepository>();
 builder.Services.AddScoped<IExpansionService, ExpansionService>();
+
+// Incremento 9: Notificaciones y Webhooks de Comunidad (Discord y Telegram)
+builder.Services.Configure<CommunityNotificationOptions>(builder.Configuration.GetSection(CommunityNotificationOptions.SectionName));
+builder.Services.AddHttpClient<IDiscordWebhookClient, DiscordWebhookClient>();
+builder.Services.AddHttpClient<ITelegramBotClient, TelegramBotClient>();
+builder.Services.AddSingleton<ICommunityNotificationQueue, InMemoryCommunityNotificationQueue>();
+builder.Services.AddScoped<ICommunityNotificationRepository, SqliteCommunityNotificationRepository>();
+builder.Services.AddScoped<ICommunityNotificationService, CommunityNotificationService>();
+builder.Services.AddHostedService<CommunityNotificationDispatcherHostedService>();
 
 // Servicio de identidad en demo (Singleton para permitir alternancia interactiva de roles en la sesión)
 builder.Services.AddSingleton<ICurrentUserService, DefaultCurrentUserService>();

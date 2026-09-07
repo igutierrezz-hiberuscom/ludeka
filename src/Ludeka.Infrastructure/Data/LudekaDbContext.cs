@@ -19,6 +19,7 @@ public class LudekaDbContext : DbContext
     public DbSet<RuleVote> RuleVotes => Set<RuleVote>();
     public DbSet<ExpansionSynergy> ExpansionSynergies => Set<ExpansionSynergy>();
     public DbSet<ExpansionRecipe> ExpansionRecipes => Set<ExpansionRecipe>();
+    public DbSet<CommunityNotificationLog> NotificationLogs => Set<CommunityNotificationLog>();
 
     public LudekaDbContext(DbContextOptions<LudekaDbContext> options) : base(options)
     {
@@ -229,5 +230,13 @@ public class LudekaDbContext : DbContext
             .WithMany()
             .HasForeignKey(r => r.BaseGameId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // --- Configuración de CommunityNotificationLog ---
+        var notificationLog = modelBuilder.Entity<CommunityNotificationLog>();
+        notificationLog.ToTable("NotificationLogs");
+        notificationLog.HasKey(n => n.Id);
+        notificationLog.HasIndex(n => n.Status);
+        notificationLog.HasIndex(n => n.Channel);
+        notificationLog.HasIndex(n => n.CreatedAt);
     }
 }

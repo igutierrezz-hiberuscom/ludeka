@@ -1,0 +1,478 @@
+@page "/admin/notificaciones"
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@inject ICommunityNotificationService NotificationService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>Webhooks y Notificaciones de Comunidad — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 max-w-6xl mx-auto space-y-8">
+    @* Cabecera Editorial *@
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30">
+                    🛡️ PANEL FUNDADOR
+                </span>
+                <span class="text-xs text-[var(--text-secondary)]">Automatización Omnicanal</span>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
+                Notificaciones y Webhooks de Comunidad
+            </h1>
+            <p class="text-sm text-[var(--text-secondary)] mt-1">
+                Supervisión del despachador en segundo plano, estado de entrega en Discord y Telegram y disparadores manuales.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button type="button"
+                    @onclick="ReloadDataAsync"
+                    class="px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
+                <span>🔄</span>
+                <span>Refrescar</span>
+            </button>
+        </div>
+    </div>
+
+    @if (!CurrentUserService.IsFoundingTeam && !CurrentUserService.IsInRole("Moderator"))
+    {
+        <div class="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 space-y-2">
+            <div class="flex items-center gap-2 font-bold text-base">
+                <span>⚠️</span>
+                <span>Acceso Restringido a la Mesa Fundadora</span>
+            </div>
+            <p class="text-xs opacity-90">
+                Este panel contiene herramientas de difusión externa para Discord y Telegram. Para probar esta funcionalidad en modo de desarrollo, pulsa el botón <strong>"👤 Usuario / 🛡️ Mesa"</strong> en la cabecera superior para alternar a rol fundador.
+            </p>
+        </div>
+    }
+    else
+    {
+        @* Mensaje de acción temporal *@
+        @if (!string.IsNullOrEmpty(_feedbackMessage))
+        {
+            <div class="p-4 rounded-xl text-xs font-semibold flex items-center justify-between transition-all @(_isFeedbackError ? "bg-rose-500/15 text-rose-400 border border-rose-500/30" : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30")">
+                <div class="flex items-center gap-2">
+                    <span>@(_isFeedbackError ? "❌" : "✅")</span>
+                    <span>@_feedbackMessage</span>
+                </div>
+                <button type="button" @onclick="() => _feedbackMessage = null" class="opacity-60 hover:opacity-100 text-sm">✕</button>
+            </div>
+        }
+
+        @* Tarjetas de Estado de Canales *@
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @* Tarjeta Discord *@
+            <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm space-y-4">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#5865F2]/15 text-[#5865F2] flex items-center justify-center font-bold text-lg">
+                            💬
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base text-[var(--text-primary)]">Discord Webhook</h3>
+                            <p class="text-xs text-[var(--text-secondary)]">Difusión a servidores de asociaciones y canales lúdicos</p>
+                        </div>
+                    </div>
+                    @if (_discordStatus != null)
+                    {
+                        @if (_discordStatus.DryRun)
+                        {
+                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                🟡 Modo Simulado (DryRun)
+                            </span>
+                        }
+                        else if (_discordStatus.Configured)
+                        {
+                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                🟢 Activo
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-slate-500/15 text-slate-400 border border-slate-500/30">
+                                ⚪ Sin Configurar
+                            </span>
+                        }
+                    }
+                </div>
+
+                <div class="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-mono text-[0.75rem] text-[var(--text-secondary)] break-all">
+                    Destino: @(_discordStatus?.DestinationPreview ?? "Cargando...")
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button"
+                            disabled="@_isProcessing"
+                            @onclick="() => SendTestPingAsync(NotificationChannel.Discord)"
+                            class="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+                        <span>🔔</span>
+                        <span>Probar Discord</span>
+                    </button>
+                </div>
+            </div>
+
+            @* Tarjeta Telegram *@
+            <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm space-y-4">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#229ED9]/15 text-[#229ED9] flex items-center justify-center font-bold text-lg">
+                            ✈️
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base text-[var(--text-primary)]">Telegram Bot API</h3>
+                            <p class="text-xs text-[var(--text-secondary)]">Canal oficial de novedades, sorteos y ofertas</p>
+                        </div>
+                    </div>
+                    @if (_telegramStatus != null)
+                    {
+                        @if (_telegramStatus.DryRun)
+                        {
+                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                🟡 Modo Simulado (DryRun)
+                            </span>
+                        }
+                        else if (_telegramStatus.Configured)
+                        {
+                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                🟢 Activo
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-slate-500/15 text-slate-400 border border-slate-500/30">
+                                ⚪ Sin Configurar
+                            </span>
+                        }
+                    }
+                </div>
+
+                <div class="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-mono text-[0.75rem] text-[var(--text-secondary)] break-all">
+                    Destino: @(_telegramStatus?.DestinationPreview ?? "Cargando...")
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button"
+                            disabled="@_isProcessing"
+                            @onclick="() => SendTestPingAsync(NotificationChannel.Telegram)"
+                            class="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+                        <span>🔔</span>
+                        <span>Probar Telegram</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @* Barra de Disparadores Manuales *@
+        <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-bold text-base text-[var(--text-primary)]">Disparadores Manuales de Difusión</h2>
+                    <p class="text-xs text-[var(--text-secondary)]">Fuerza el escaneo de eventos sin esperar al cron de segundo plano.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button type="button"
+                            disabled="@_isProcessing"
+                            @onclick="TriggerGiveawaysScanAsync"
+                            class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:border-[var(--brand-primary)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+                        <span>⏳</span>
+                        <span>Escanear Sorteos (24h)</span>
+                    </button>
+                    <button type="button"
+                            disabled="@_isProcessing"
+                            @onclick="TriggerFridayBulletinAsync"
+                            class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:border-[var(--brand-primary)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+                        <span>🛍️</span>
+                        <span>Publicar Boletín de Viernes</span>
+                    </button>
+                    <button type="button"
+                            disabled="@_isProcessing"
+                            @onclick="() => SendTestPingAsync(null)"
+                            class="px-3.5 py-2 rounded-xl bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)] text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+                        <span>📢</span>
+                        <span>Ping Multicanal</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @* Historial de Notificaciones Auditadas *@
+        <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="font-bold text-base text-[var(--text-primary)]">Historial de Notificaciones y Entregas</h2>
+                    <p class="text-xs text-[var(--text-secondary)]">Registro de auditoría con estado, fecha y reintento en caso de fallo.</p>
+                </div>
+
+                @* Filtro de Estado *@
+                <div class="flex items-center gap-1 bg-[var(--bg-surface)] p-1 rounded-xl border border-[var(--border-subtle)] text-xs">
+                    <button type="button"
+                            @onclick='() => _statusFilter = null'
+                            class="px-2.5 py-1 rounded-lg font-semibold transition-all @(_statusFilter == null ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)]")">
+                        Todos (@_history.Count)
+                    </button>
+                    <button type="button"
+                            @onclick='() => _statusFilter = NotificationStatus.Sent'
+                            class="px-2.5 py-1 rounded-lg font-semibold transition-all @(_statusFilter == NotificationStatus.Sent ? "bg-[var(--bg-card)] text-emerald-400 shadow-sm" : "text-[var(--text-secondary)]")">
+                        Enviados (@_history.Count(h => h.Status == NotificationStatus.Sent))
+                    </button>
+                    <button type="button"
+                            @onclick='() => _statusFilter = NotificationStatus.DryRun'
+                            class="px-2.5 py-1 rounded-lg font-semibold transition-all @(_statusFilter == NotificationStatus.DryRun ? "bg-[var(--bg-card)] text-amber-400 shadow-sm" : "text-[var(--text-secondary)]")">
+                        Simulados (@_history.Count(h => h.Status == NotificationStatus.DryRun))
+                    </button>
+                    <button type="button"
+                            @onclick='() => _statusFilter = NotificationStatus.Failed'
+                            class="px-2.5 py-1 rounded-lg font-semibold transition-all @(_statusFilter == NotificationStatus.Failed ? "bg-[var(--bg-card)] text-rose-400 shadow-sm" : "text-[var(--text-secondary)]")">
+                        Fallidos (@_history.Count(h => h.Status == NotificationStatus.Failed))
+                    </button>
+                </div>
+            </div>
+
+            @if (FilteredHistory.Count == 0)
+            {
+                <div class="py-12 text-center text-[var(--text-muted)] space-y-2">
+                    <span class="text-3xl">📭</span>
+                    <p class="text-xs">No hay registros de notificación que coincidan con el filtro.</p>
+                </div>
+            }
+            else
+            {
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-[var(--border-subtle)] text-[var(--text-secondary)] font-semibold">
+                                <th class="pb-3 px-2">Canal</th>
+                                <th class="pb-3 px-2">Evento</th>
+                                <th class="pb-3 px-2">Título y Mensaje</th>
+                                <th class="pb-3 px-2">Estado</th>
+                                <th class="pb-3 px-2">Fecha</th>
+                                <th class="pb-3 px-2 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--border-subtle)]">
+                            @foreach (var item in FilteredHistory)
+                            {
+                                <tr class="hover:bg-[var(--bg-surface)]/50 transition-colors">
+                                    <td class="py-3 px-2 whitespace-nowrap">
+                                        @if (item.Channel == NotificationChannel.Discord)
+                                        {
+                                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-bold bg-[#5865F2]/15 text-[#5865F2] border border-[#5865F2]/30">
+                                                Discord
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-bold bg-[#229ED9]/15 text-[#229ED9] border border-[#229ED9]/30">
+                                                Telegram
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="py-3 px-2 whitespace-nowrap text-[var(--text-secondary)] font-medium">
+                                        @GetEventBadge(item.EventType)
+                                    </td>
+                                    <td class="py-3 px-2 max-w-md">
+                                        <div class="font-bold text-[var(--text-primary)] truncate">@item.Title</div>
+                                        <div class="text-[var(--text-secondary)] text-[0.7rem] line-clamp-1">@item.Summary</div>
+                                        @if (!string.IsNullOrEmpty(item.ErrorDetails))
+                                        {
+                                            <div class="text-rose-400 text-[0.65rem] mt-0.5 font-mono">Error: @item.ErrorDetails</div>
+                                        }
+                                    </td>
+                                    <td class="py-3 px-2 whitespace-nowrap">
+                                        @if (item.Status == NotificationStatus.Sent)
+                                        {
+                                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                                Enviado
+                                            </span>
+                                        }
+                                        else if (item.Status == NotificationStatus.DryRun)
+                                        {
+                                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                                Simulado
+                                            </span>
+                                        }
+                                        else if (item.Status == NotificationStatus.Failed)
+                                        {
+                                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                                                Fallido
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-slate-500/15 text-slate-400 border border-slate-500/30">
+                                                En cola
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="py-3 px-2 whitespace-nowrap text-[var(--text-muted)] text-[0.7rem]">
+                                        @(item.SentAt?.ToString("dd/MM HH:mm") ?? item.CreatedAt.ToString("dd/MM HH:mm"))
+                                    </td>
+                                    <td class="py-3 px-2 whitespace-nowrap text-right">
+                                        @if (item.Status == NotificationStatus.Failed)
+                                        {
+                                            <button type="button"
+                                                    disabled="@_isProcessing"
+                                                    @onclick="() => RetryNotificationAsync(item.Id)"
+                                                    class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[0.7rem] font-bold text-[var(--brand-primary)] hover:border-[var(--brand-primary)] transition-all">
+                                                Reintentar
+                                            </button>
+                                        }
+                                        else if (!string.IsNullOrEmpty(item.TargetUrl))
+                                        {
+                                            <a href="@item.TargetUrl" target="_blank" rel="noopener noreferrer" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors text-[0.7rem] font-semibold underline">
+                                                Ver enlace
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private IReadOnlyList<CommunityNotificationLogDto> _history = [];
+    private NotificationChannelStatusDto? _discordStatus;
+    private NotificationChannelStatusDto? _telegramStatus;
+    private NotificationStatus? _statusFilter;
+    private bool _isProcessing;
+    private string? _feedbackMessage;
+    private bool _isFeedbackError;
+
+    private IReadOnlyList<CommunityNotificationLogDto> FilteredHistory => _statusFilter.HasValue
+        ? _history.Where(h => h.Status == _statusFilter.Value).ToList()
+        : _history;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadDataAsync();
+    }
+
+    private async Task ReloadDataAsync()
+    {
+        _isProcessing = true;
+        try
+        {
+            var statuses = await NotificationService.GetChannelStatusesAsync();
+            _discordStatus = statuses.FirstOrDefault(s => s.Channel == NotificationChannel.Discord);
+            _telegramStatus = statuses.FirstOrDefault(s => s.Channel == NotificationChannel.Telegram);
+
+            _history = await NotificationService.GetHistoryAsync(limit: 50);
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private async Task SendTestPingAsync(NotificationChannel? channel)
+    {
+        _isProcessing = true;
+        try
+        {
+            await NotificationService.SendTestPingAsync(channel);
+            _feedbackMessage = channel.HasValue
+                ? $"Ping de prueba enviado a {channel.Value} con éxito."
+                : "Ping de prueba multicanal despachado.";
+            _isFeedbackError = false;
+            await ReloadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            _feedbackMessage = $"Error al emitir prueba: {ex.Message}";
+            _isFeedbackError = true;
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private async Task TriggerGiveawaysScanAsync()
+    {
+        _isProcessing = true;
+        try
+        {
+            await NotificationService.TriggerExpiringGiveawaysScanAsync();
+            _feedbackMessage = "Escaneo de sorteos próximos (24h) ejecutado.";
+            _isFeedbackError = false;
+            await ReloadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            _feedbackMessage = $"Error en escaneo de sorteos: {ex.Message}";
+            _isFeedbackError = true;
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private async Task TriggerFridayBulletinAsync()
+    {
+        _isProcessing = true;
+        try
+        {
+            await NotificationService.TriggerFridayReleasesBulletinAsync();
+            _feedbackMessage = "Boletín de novedades de los viernes publicado y emitido.";
+            _isFeedbackError = false;
+            await ReloadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            _feedbackMessage = $"Error al publicar boletín: {ex.Message}";
+            _isFeedbackError = true;
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private async Task RetryNotificationAsync(Guid logId)
+    {
+        _isProcessing = true;
+        try
+        {
+            var result = await NotificationService.RetryFailedNotificationAsync(logId);
+            if (result.Success)
+            {
+                _feedbackMessage = $"Reintento exitoso para {result.Channel}.";
+                _isFeedbackError = false;
+            }
+            else
+            {
+                _feedbackMessage = $"Fallo en reintento: {result.ErrorMessage}";
+                _isFeedbackError = true;
+            }
+            await ReloadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            _feedbackMessage = $"Error al reintentar: {ex.Message}";
+            _isFeedbackError = true;
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private static string GetEventBadge(NotificationEventType eventType) => eventType switch
+    {
+        NotificationEventType.GiveawayExpiring => "⏳ Sorteo 24h",
+        NotificationEventType.FridayReleasesSummary => "🛍️ Novedades Viernes",
+        NotificationEventType.FoundingVerdictPublished => "🛡️ Veredicto Fundador",
+        NotificationEventType.RuleQuestionAnswered => "💡 Duda Resuelta",
+        NotificationEventType.CustomTestPing => "🔔 Ping de Prueba",
+        _ => "📢 Comunidad"
+    };
+}

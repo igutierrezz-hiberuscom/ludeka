@@ -130,7 +130,7 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 ## Incremento 9: Sistema de Notificaciones y Webhooks de Comunidad (Discord & Telegram)
 - **Identificador SDD:** `change-09-notifications-webhooks`
 - **Objetivo Principal:** Difusión multicanal automatizada para dinamizar la comunidad avisando de eventos clave en Discord y Telegram sin intervención manual.
-- **Estado:** 📋 **Registrado (Pendiente de inicio)**
+- **Estado:** ✅ **Completado y Verificado** (189 tests en verde al 100%).
 - **Alcance Funcional y Técnico:**
   1. **Motor de Webhooks Multicanal (`ICommunityNotificationService`):** Integración con Discord Webhooks y Telegram Bot API con plantillas enriquecidas (Embeds con color de marca, portada del juego, enlaces directos y botones de acción).
   2. **Cola de Despacho en Segundo Plano (Outbox Pattern / `Channel<T>`):** Desacoplamiento asíncrono mediante `BackgroundService` para no penalizar la latencia de las peticiones HTTP del usuario.
