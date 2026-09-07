@@ -146,7 +146,7 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 ## Incremento 10: Despliegue, Empaquetado Docker y Configuración de Staging/Producción
 - **Identificador SDD:** `change-10-docker-deployment-staging`
 - **Objetivo Principal:** Empaquetado reproducible, seguro y listo para producción de toda la solución Ludeka para su despliegue en cualquier servidor VPS o entorno en la nube.
-- **Estado:** 📋 **Registrado (Pendiente de inicio)**
+- **Estado:** ✅ **Completado y Verificado** (195 tests en verde al 100%).
 - **Alcance Funcional y Técnico:**
   1. **Dockerfile Multi-Stage Optimizado:** Imagen de construcción .NET 10 SDK, compilación de frontend y runtime chiseled/alpine ultra-ligero y seguro ejecutándose con usuario no-root.
   2. **Orquestación con Docker Compose (`docker-compose.yml`):** Definición de servicios para entornos local, staging y producción, con volúmenes persistentes para la base de datos SQLite (`ludeka.db`), uploads de fotos de mesa y logs estructurados.

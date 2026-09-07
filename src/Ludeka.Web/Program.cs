@@ -16,6 +16,10 @@ using Ludeka.Application.Options;
 using Ludeka.Web.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using Ludeka.Web.Health;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,11 +103,30 @@ builder.Services.AddHostedService<CommunityNotificationDispatcherHostedService>(
 builder.Services.AddSingleton<ICurrentUserService, DefaultCurrentUserService>();
 builder.Services.AddScoped<IUserLibraryService, UserLibraryService>();
 
+// Incremento 10: Observabilidad con Health Checks Oficiales de ASP.NET Core
+builder.Services.AddHealthChecks()
+    .AddCheck<SqliteDatabaseHealthCheck>("sqlite_db", tags: ["ready"])
+    .AddCheck<StorageHealthCheck>("storage", tags: ["ready"])
+    .AddCheck<NotificationQueueHealthCheck>("notification_queue", tags: ["ready"]);
+
 var app = builder.Build();
 
-// Inicialización automática y siembra del catálogo Offline-First
+// Inicialización automática y siembra del catálogo Offline-First con resiliencia de directorios en Docker
 using (var scope = app.Services.CreateScope())
 {
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var connectionString = config.GetConnectionString("DefaultConnection") ?? "Data Source=ludeka.db";
+    var match = Regex.Match(connectionString, @"Data Source=([^;]+)", RegexOptions.IgnoreCase);
+    if (match.Success)
+    {
+        var rawPath = match.Groups[1].Value.Trim();
+        var dir = Path.GetDirectoryName(rawPath);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+    }
+
     var db = scope.ServiceProvider.GetRequiredService<LudekaDbContext>();
     await db.Database.EnsureCreatedAsync();
     await CatalogSeeder.SeedAsync(db);
@@ -120,6 +143,50 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.UseOutputCache();
+
+// Incremento 10: Endpoints de Diagnóstico y Salud
+// Liveness probe (/healthz): confirma que el host está activo sin penalizar dependencias
+app.MapHealthChecks("/healthz", new HealthCheckOptions
+{
+    Predicate = _ => false,
+    ResponseWriter = async (context, _) =>
+    {
+        context.Response.ContentType = "application/json";
+        var payload = new
+        {
+            status = "Healthy",
+            timestamp = DateTimeOffset.UtcNow,
+            mode = "liveness"
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(payload));
+    }
+});
+
+// Readiness probe (/ready): evalúa dependencias críticas (base de datos, almacenamiento y cola)
+app.MapHealthChecks("/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var payload = new
+        {
+            status = report.Status.ToString(),
+            totalDurationMs = report.TotalDuration.TotalMilliseconds,
+            timestamp = DateTimeOffset.UtcNow,
+            mode = "readiness",
+            entries = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                durationMs = e.Value.Duration.TotalMilliseconds,
+                data = e.Value.Data
+            })
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true }));
+    }
+});
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

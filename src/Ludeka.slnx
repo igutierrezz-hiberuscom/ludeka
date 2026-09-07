@@ -1,7 +1,0 @@
-<Solution>
-  <Project Path="../tests/Ludeka.UnitTests/Ludeka.UnitTests.csproj" />
-  <Project Path="Ludeka.Application/Ludeka.Application.csproj" />
-  <Project Path="Ludeka.Core/Ludeka.Core.csproj" />
-  <Project Path="Ludeka.Infrastructure/Ludeka.Infrastructure.csproj" />
-  <Project Path="Ludeka.Web/Ludeka.Web.csproj" />
-</Solution>

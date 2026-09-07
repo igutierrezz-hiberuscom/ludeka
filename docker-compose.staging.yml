@@ -1,0 +1,37 @@
+services:
+  ludeka-web-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ludeka-web-staging
+    restart: unless-stopped
+    ports:
+      - "${STAGING_PORT:-5082}:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/ludeka_staging.db
+    env_file:
+      - path: .env.staging
+        required: false
+    volumes:
+      - ludeka_staging_data:/app/data
+      - ludeka_staging_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ludeka-staging-network
+
+volumes:
+  ludeka_staging_data:
+    name: ludeka_staging_data
+  ludeka_staging_logs:
+    name: ludeka_staging_logs
+
+networks:
+  ludeka-staging-network:
+    name: ludeka_staging_network
+    driver: bridge
