@@ -25,7 +25,7 @@ Este proyecto se construye bajo la metodología **Spec-Driven Development (SDD)*
 ### Principios de la Máquina de Estados de SDD
 1. **File-System como Fuente de la Verdad:** El estado de las fases reside en `.openspec/` y `docs/specs/`. No confiar en la memoria volátil del chat.
 2. **Lossless Blocking Prompts:** Antes de pasar de `sdd-propose` a `sdd-spec` o de `sdd-design` a `sdd-apply`, presentar la propuesta o diseño al usuario en español y esperar aprobación explícita.
-3. **Delegación con Subagentes:** Emplear `define_subagent` e `invoke_subagent` para delegar exploraciones profundas, investigación externa y verificaciones independientes (recordando siempre el idioma español).
+3. **Delegación con Subagentes:** Usar la primitiva de delegación de la plataforma para delegar exploraciones profundas, investigación externa y verificaciones independientes, recordando siempre el idioma español (en OpenCode: herramienta `task` con los subagentes `sdd-*` del orquestador de Gentle AI; en Antigravity: `invoke_subagent`).
 4. **Presupuestos y CAS (Compare-And-Swap):** En `sdd-apply`, implementar exclusivamente contra los requerimientos acordados en la especificación y tareas definidas.
 5. **Sincronización Continua de Roadmap:** Todo incremento debe figurar y mantenerse actualizado en los registros centrales de roadmap: `docs/increments/ROADMAP.md` y `docs/specs/ROADMAP_MVP_SLICES.md`. Al proponer/iniciar pasa a `⏳ En progreso`, y al archivar a `✅ Archivado`.
 6. **Volcado Obligatorio a la Especificación Viva del Sistema (`sdd-archive`):** Al finalizar y verificar cada incremento, en la fase `sdd-archive` es terminantemente obligatorio:
