@@ -5,7 +5,8 @@ Este documento es el índice central de los paquetes de trabajo e incrementos (*
 > **Regla de Ciclo de Vida:**
 > 1. Cada incremento dispone de su documento individual con su alcance técnico y criterios.
 > 2. Los incrementos pendientes se ubican en `docs/increments/`.
-> 3. Al completarse y verificarse, el incremento se traslada a `docs/increments/archive/` y nutre la **Especificación Viva del Sistema** (`docs/specs/sistema/`).
+> 3. Todo incremento se desarrolla en su propio worktree y rama (`inc/<slug>` desde `main`), y se integra a `main` exclusivamente vía Pull Request (ver sección "Incrementos en Curso").
+> 4. Al completarse y verificarse, el incremento se traslada a `docs/increments/archive/` y nutre la **Especificación Viva del Sistema** (`docs/specs/sistema/`).
 
 ---
 
@@ -47,3 +48,11 @@ Este documento es el índice central de los paquetes de trabajo e incrementos (*
 | **INC-32** | Fix HTTP 500 en Fichas de Juego (ORDER BY DateTimeOffset en SQLite) | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 32) |
 | **INC-33** | Fix 500 Latente en Mi Ludoteca (ORDER BY DateTimeOffset en GetByUserIdAsync) | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 33) |
 | **INC-34** | Barrido Sistémico de ORDER BY DateTimeOffset en Repositorios SQLite | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 34) |
+
+## 🌿 Incrementos en Curso (Worktrees / PRs)
+
+Un incremento activo = un worktree en `C:\repos\ludeka-wt\<slug>` + rama `inc/<slug>` + PR a `main`. Crear con `scripts/sdd-worktree.ps1 new <slug>`, cerrar con `pr <slug>` y limpiar con `done <slug>` tras el merge. Un solo escritor por worktree; los artefactos del incremento (specs, roadmap) viven en su rama y entran al PR.
+
+| ID | Incremento | Slug / Rama | Worktree | PR |
+|---|---|---|---|---|
+| — | (ninguno activo) | — | — | — |

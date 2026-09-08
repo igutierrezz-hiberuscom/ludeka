@@ -35,6 +35,21 @@ Este proyecto se construye bajo la metodología **Spec-Driven Development (SDD)*
 
 ---
 
+## 1-bis. Flujo de Incrementos con Worktrees (Rama → PR)
+
+Todo incremento se desarrolla en un **worktree propio** sobre una **rama nueva**, y se integra a `main` exclusivamente vía **Pull Request**. Este flujo es obligatorio para cualquier herramienta o agente que trabaje en este repositorio.
+
+1. **Inicio del incremento:** ejecutar `scripts/sdd-worktree.ps1 new <slug>`: crea el worktree en `C:\repos\ludeka-wt\<slug>` y la rama `inc/<slug>` desde `main` actualizado. El slug va en kebab-case y minúsculas (ej. `portada-creadores`).
+2. **Trabajo aislado:** todos los agentes de implementación, verificación y revisión trabajan con ese worktree como directorio de trabajo. Un solo escritor por worktree.
+3. **Artefactos en la rama:** el código, los tests y TODOS los artefactos del incremento (`docs/specs/`, `.openspec/`, `docs/increments/ROADMAP.md`) viven en la rama `inc/<slug>` y entran al PR.
+4. **Cierre:** con la verificación en verde, ejecutar `scripts/sdd-worktree.ps1 pr <slug>`: pushea la rama y abre el PR a `main` (automático con `gh` CLI; si no está autenticado, imprime la URL para abrirlo a mano).
+5. **Post-merge:** ejecutar `scripts/sdd-worktree.ps1 done <slug>`: elimina el worktree y la rama local, y actualiza `main` local.
+6. **Orquestador SDD:** al lanzar `sdd-apply` y `sdd-verify` (y cualquier subagente que escriba código), el workdir DEBE ser el worktree del incremento; `sdd-archive` termina con el paso 4 y 5 (PR + cleanup).
+7. **Prohibido:** pushear directamente a `main` (además bloqueado por el ruleset de GitHub del repositorio) o mergear sin PR. Si el PR excede las 400 líneas, dividir en ramas apiladas desde el mismo worktree (PRs encadenados).
+8. **Paralelismo:** pueden coexistir N incrementos activos, cada uno en su worktree / rama / PR (ver `docs/increments/ROADMAP.md`, sección "Incrementos en Curso"). Los conflictos entre PRs se resuelven al mergear en orden.
+
+---
+
 ## 2. Protocolo de Memoria Persistente (Engram MCP)
 
 El proyecto cuenta con el servidor MCP de **Engram** conectado en `.tools/bin/engram.exe`.
