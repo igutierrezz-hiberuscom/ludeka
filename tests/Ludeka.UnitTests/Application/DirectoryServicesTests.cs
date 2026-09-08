@@ -256,38 +256,52 @@ public class DirectoryServicesTests
     }
 
     [Fact]
-    public async Task CreatorService_CRUD_And_CatalogMatching_Works()
+    public async Task CreatorService_CRUD_Works()
     {
         var creatorRepo = new FakeCreatorRepository();
-        var gameRepo = new FakeGameRepository();
-        gameRepo.Games.Add(CreateTestGame("Wingspan", "Maldito", "Elizabeth Hargrave"));
-
-        var service = new CreatorService(creatorRepo, gameRepo);
+        var service = new CreatorService(creatorRepo);
 
         // 1. Create
         var created = await service.CreateAsync(new CreateCreatorDto(
-            "Elizabeth Hargrave",
-            "elizabeth-hargrave",
-            "EEUU",
-            "Ornitóloga y diseñadora",
+            "Análisis Parálisis",
+            "analisis-paralisis",
+            "España",
+            "Referente de la divulgación lúdica en español",
             null,
-            104523,
-            "https://elizabethhargrave.com",
-            new List<SocialNetworkLinkDto> { new(SocialPlatform.Twitter, "https://twitter.com/elizhargrave", "@elizhargrave") }
+            null,
+            null,
+            new List<SocialNetworkLinkDto> { new(SocialPlatform.YouTube, "https://youtube.com/@AnalisisParalisis", "@AnalisisParalisis") }
         ));
 
-        Assert.Equal("Elizabeth Hargrave", created.Name);
+        Assert.Equal("Análisis Parálisis", created.Name);
 
-        // 2. GetAll
+        // 2. GetAll (sin cruce por Game.Designer: sin conteos de obras)
         var all = await service.GetAllAsync();
         Assert.Single(all);
-        Assert.Equal(1, all[0].GamesCount);
+        Assert.Equal("Análisis Parálisis", all[0].Name);
+        Assert.Contains(all[0].SocialLinks, l => l.Platform == SocialPlatform.YouTube);
 
-        // 3. GetBySlug
-        var detail = await service.GetBySlugAsync("elizabeth-hargrave");
+        // 3. GetBySlug (la ficha expone redes sociales, no obras)
+        var detail = await service.GetBySlugAsync("analisis-paralisis");
         Assert.NotNull(detail);
-        Assert.Single(detail.Games);
-        Assert.Equal("Wingspan", detail.Games[0].SpanishTitle);
+        Assert.Equal("Análisis Parálisis", detail.Name);
+        Assert.Contains(detail.SocialLinks, l => l.Url == "https://youtube.com/@AnalisisParalisis");
+
+        // 4. Update
+        var updated = await service.UpdateAsync(created.Id, new UpdateCreatorDto(
+            "Análisis Parálisis",
+            "España",
+            "Referente absoluto de la divulgación audiovisual lúdica",
+            null,
+            null,
+            "https://analisisparalisis.es",
+            new List<SocialNetworkLinkDto> { new(SocialPlatform.YouTube, "https://youtube.com/@APNuevo", "@APNuevo") }
+        ));
+        Assert.Equal("Referente absoluto de la divulgación audiovisual lúdica", updated.Bio);
+
+        // 5. Delete
+        await service.DeleteAsync(created.Id);
+        Assert.Empty(await service.GetAllAsync());
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-﻿# Tasks: Portada minimalista y reorientaciÃ³n Autores â†’ Creadores (`portada-minimalista-creadores`)
+# Tasks: Portada minimalista y reorientaciÃ³n Autores â†’ Creadores (`portada-minimalista-creadores`)
 
 > Idioma: espaÃ±ol castellano (regla suprema del repo). Fase: `sdd-tasks`. Modo: hybrid. Incremento: **INC-31**.
 > EjecuciÃ³n **strict TDD**: cada tarea GREEN va precedida de su test RED (se escribe el test, se comprueba fallando con su filtro, y solo entonces se implementa; el check de la tarea implica ambos pasos). Cada WU = 1 commit convencional compilable con suite verde.
@@ -45,10 +45,10 @@ Filtro compacto: `dotnet test Ludeka.sln --filter "FullyQualifiedName~X"`.
 
 ## Fase 2 Â· WU2 â€” Desacope de CreatorService (T5) [~85 lÃ­neas]
 
-- [ ] 2.1 **RED T5** â€” reescribir `CreatorService_CRUD_And_CatalogMatching_Works` â†’ `CreatorService_CRUD_Works` en `tests/Ludeka.UnitTests/Application/DirectoryServicesTests.cs` (L259): sin `FakeGameRepository` ni asserts de `GamesCount`/`Games`; CRUD Ã­ntegro y detalle que expone `SocialLinks`. Rojo por compilaciÃ³n (los DTOs aÃºn tienen los campos). Requisito: CDÂ·Sin Obras ni cruce (esc. Servicio sin matching). Done: rojo confirmado.
-- [ ] 2.2 **GREEN T5** â€” en `src/Ludeka.Application/Features/Directory/CreatorService.cs` (AD-6): constructor sin `IGameRepository`, `GetAllAsync` sin conteos, `GetBySlugAsync`/`GetByIdAsync` sin `gameSummaries`, `UpdateAsync` sin re-cuento, `MapToDto`/`MapToDetailDto` sin juegos; y en `src/Ludeka.Application/DTOs/DirectoryDtos.cs`: `CreatorDto` sin `GamesCount`, `CreatorDetailDto` sin `Games`. Nota: DI sin cambios (Program.cs L183 resuelve el ctor Ãºnico). Requisito: CDÂ·Ficha con redes + CDÂ·Sin cruce. Done: filtro `~DirectoryServicesTests` verde.
-- [ ] 2.3 **GREEN (accesorio T5)** â€” textos de auditorÃ­a en `src/Ludeka.Application/Features/Directory/CreatorService.cs` (L127/L140/L175/L202/L214 â†’ "creador de contenido") y ajuste mecÃ¡nico en `tests/Ludeka.UnitTests/Application/GranularPermissionsTests.cs` (L164/L177: `new CreatorService(creatorRepo, currentUser)`). Requisito: CDÂ·Reetiquetado (auditorÃ­a). Done: filtro `~GranularPermissionsTests` verde.
-- [ ] 2.4 **VerificaciÃ³n WU2** â€” suite verde; commit `refactor: desacoplar creatorservice del cruce por game.designer (INC-31)`.
+- [x] 2.1 **RED T5** â€” reescribir `CreatorService_CRUD_And_CatalogMatching_Works` â†’ `CreatorService_CRUD_Works` en `tests/Ludeka.UnitTests/Application/DirectoryServicesTests.cs` (L259): sin `FakeGameRepository` ni asserts de `GamesCount`/`Games`; CRUD Ã­ntegro y detalle que expone `SocialLinks`. Rojo por compilaciÃ³n (los DTOs aÃºn tienen los campos). Requisito: CDÂ·Sin Obras ni cruce (esc. Servicio sin matching). Done: rojo confirmado.
+- [x] 2.2 **GREEN T5** â€” en `src/Ludeka.Application/Features/Directory/CreatorService.cs` (AD-6): constructor sin `IGameRepository`, `GetAllAsync` sin conteos, `GetBySlugAsync`/`GetByIdAsync` sin `gameSummaries`, `UpdateAsync` sin re-cuento, `MapToDto`/`MapToDetailDto` sin juegos; y en `src/Ludeka.Application/DTOs/DirectoryDtos.cs`: `CreatorDto` sin `GamesCount`, `CreatorDetailDto` sin `Games`. Nota: DI sin cambios (Program.cs L183 resuelve el ctor Ãºnico). Requisito: CDÂ·Ficha con redes + CDÂ·Sin cruce. Done: filtro `~DirectoryServicesTests` verde. **Nota apply:** las remociones estructurales del ripple AD-6 (badge `GamesCount` en CreatorsDirectory y sección `Obras` en CreatorDetail) se adelantaron a WU2 para mantener la solución compilable; los textos quedan en WU3.
+- [x] 2.3 **GREEN (accesorio T5)** â€” textos de auditorÃ­a en `src/Ludeka.Application/Features/Directory/CreatorService.cs` (L127/L140/L175/L202/L214 â†’ "creador de contenido") y ajuste mecÃ¡nico en `tests/Ludeka.UnitTests/Application/GranularPermissionsTests.cs` (L164/L177: `new CreatorService(creatorRepo, currentUser)`). Requisito: CDÂ·Reetiquetado (auditorÃ­a). Done: filtro `~GranularPermissionsTests` verde.
+- [x] 2.4 **VerificaciÃ³n WU2** â€” suite verde; commit `refactor: desacoplar creatorservice del cruce por game.designer (INC-31)`.
 
 ## Fase 3 Â· WU3 â€” Fichas Web: diseÃ±ador plano y reetiquetado (T6a) [~115 lÃ­neas]
 

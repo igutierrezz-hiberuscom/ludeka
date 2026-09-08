@@ -123,37 +123,6 @@ else
                 </div>
             }
         </div>
-
-        @* Obras diseñadas en Ludeka *@
-        <div class="space-y-4">
-            <div class="flex items-baseline justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🎲</span>
-                    <h2 class="text-xl font-black text-[var(--text-primary)]">
-                        Obras de @_creator.Name en Ludeka
-                    </h2>
-                </div>
-                <span class="text-xs font-bold text-[var(--text-secondary)]">
-                    @_creator.Games.Count @(_creator.Games.Count == 1 ? "título en catálogo" : "títulos en catálogo")
-                </span>
-            </div>
-
-            @if (_creator.Games.Count == 0)
-            {
-                <div class="p-8 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-muted)]">
-                    Actualmente no hay títulos vinculados directamente a este autor en el catálogo activo de Ludeka.
-                </div>
-            }
-            else
-            {
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    @foreach (var game in _creator.Games)
-                    {
-                        <GameCard Game="@game" />
-                    }
-                </div>
-            }
-        </div>
     </div>
 
     @* Modal de Edición *@

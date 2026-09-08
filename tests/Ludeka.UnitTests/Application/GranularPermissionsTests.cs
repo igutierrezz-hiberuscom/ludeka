@@ -137,7 +137,7 @@ public class GranularPermissionsTests
         var service = new PublisherService(pubRepo, gameRepo, currentUser);
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            service.CreateAsync(new CreatePublisherDto("Devir", "devir", "España", null, null, null, null, null)));
+            service.CreateAsync(new CreatePublisherDto("Devir", "devir", "EspaÃ±a", null, null, null, null, null)));
     }
 
     [Fact]
@@ -149,7 +149,7 @@ public class GranularPermissionsTests
 
         var service = new PublisherService(pubRepo, gameRepo, currentUser);
 
-        var result = await service.CreateAsync(new CreatePublisherDto("Devir", "devir", "España", null, null, null, null, null));
+        var result = await service.CreateAsync(new CreatePublisherDto("Devir", "devir", "EspaÃ±a", null, null, null, null, null));
         Assert.NotNull(result);
         Assert.Equal("Devir", result.Name);
     }
@@ -158,10 +158,10 @@ public class GranularPermissionsTests
     public async Task CreatorService_WithoutCanManageCreators_ThrowsUnauthorized()
     {
         var creatorRepo = new FakeCreatorRepo();
-        var gameRepo = new FakeGameRepo();
+
         var currentUser = new TestCurrentUserService { Permissions = ModeratorPermission.None };
 
-        var service = new CreatorService(creatorRepo, gameRepo, currentUser);
+        var service = new CreatorService(creatorRepo, currentUser);
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             service.CreateAsync(new CreateCreatorDto("Klaus Teuber", "klaus-teuber", null, null, null, null, null, null)));
@@ -171,10 +171,10 @@ public class GranularPermissionsTests
     public async Task CreatorService_WithCanManageCreators_Succeeds()
     {
         var creatorRepo = new FakeCreatorRepo();
-        var gameRepo = new FakeGameRepo();
+
         var currentUser = new TestCurrentUserService { Permissions = ModeratorPermission.CanManageCreators };
 
-        var service = new CreatorService(creatorRepo, gameRepo, currentUser);
+        var service = new CreatorService(creatorRepo, currentUser);
 
         var result = await service.CreateAsync(new CreateCreatorDto("Klaus Teuber", "klaus-teuber", null, null, null, null, null, null));
         Assert.NotNull(result);

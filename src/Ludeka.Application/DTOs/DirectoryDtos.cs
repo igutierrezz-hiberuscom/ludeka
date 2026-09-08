@@ -74,7 +74,6 @@ public record CreatorDto(
     string? AvatarUrl,
     int? BggPersonId,
     string? WebsiteUrl,
-    int GamesCount,
     IReadOnlyList<SocialNetworkLinkDto> SocialLinks,
     DateTimeOffset CreatedAt
 );
@@ -89,7 +88,6 @@ public record CreatorDetailDto(
     int? BggPersonId,
     string? WebsiteUrl,
     IReadOnlyList<SocialNetworkLinkDto> SocialLinks,
-    IReadOnlyList<GameSummaryDto> Games,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt
 );

@@ -14,18 +14,15 @@ namespace Ludeka.Application.Features.Directory;
 public class CreatorService : ICreatorService
 {
     private readonly ICreatorRepository _creatorRepository;
-    private readonly IGameRepository _gameRepository;
     private readonly ICurrentUserService? _currentUserService;
     private readonly IAuditService? _auditService;
 
     public CreatorService(
         ICreatorRepository creatorRepository,
-        IGameRepository gameRepository,
         ICurrentUserService? currentUserService = null,
         IAuditService? auditService = null)
     {
         _creatorRepository = creatorRepository ?? throw new ArgumentNullException(nameof(creatorRepository));
-        _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
         _currentUserService = currentUserService;
         _auditService = auditService;
     }
@@ -33,7 +30,6 @@ public class CreatorService : ICreatorService
     public async Task<IReadOnlyList<CreatorDto>> GetAllAsync(string? search = null, CancellationToken ct = default)
     {
         var creators = await _creatorRepository.GetAllAsync(ct);
-        var allGames = await _gameRepository.GetAllGamesAsync(ct);
 
         var query = creators.AsEnumerable();
 
@@ -47,14 +43,7 @@ public class CreatorService : ICreatorService
 
         return query
             .OrderBy(c => c.Name)
-            .Select(c =>
-            {
-                var gamesCount = allGames.Count(g =>
-                    string.Equals(g.Designer, c.Name, StringComparison.OrdinalIgnoreCase) ||
-                    g.Designer.Contains(c.Name, StringComparison.OrdinalIgnoreCase));
-
-                return MapToDto(c, gamesCount);
-            })
+            .Select(MapToDto)
             .ToList();
     }
 
@@ -65,10 +54,7 @@ public class CreatorService : ICreatorService
         var creator = await _creatorRepository.GetBySlugAsync(slug.Trim().ToLowerInvariant(), ct);
         if (creator == null) return null;
 
-        var games = await _gameRepository.GetByDesignerAsync(creator.Name, ct);
-        var gameSummaries = games.Select(g => GameSummaryDto.FromEntity(g)).ToList();
-
-        return MapToDetailDto(creator, gameSummaries);
+        return MapToDetailDto(creator);
     }
 
     public async Task<CreatorDetailDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
@@ -76,10 +62,7 @@ public class CreatorService : ICreatorService
         var creator = await _creatorRepository.GetByIdAsync(id, ct);
         if (creator == null) return null;
 
-        var games = await _gameRepository.GetByDesignerAsync(creator.Name, ct);
-        var gameSummaries = games.Select(g => GameSummaryDto.FromEntity(g)).ToList();
-
-        return MapToDetailDto(creator, gameSummaries);
+        return MapToDetailDto(creator);
     }
 
     public async Task<CreatorDto> CreateAsync(CreateCreatorDto dto, CancellationToken ct = default)
@@ -124,11 +107,11 @@ public class CreatorService : ICreatorService
                 EntityType: AuditEntityType.Creator,
                 EntityId: creator.Slug,
                 EntityName: creator.Name,
-                Summary: $"Alta de autor/diseñador '{creator.Name}'"
+                Summary: $"Alta de creador de contenido '{creator.Name}'"
             ), ct);
         }
 
-        return MapToDto(creator, 0);
+        return MapToDto(creator);
     }
 
     public async Task<CreatorDto> UpdateAsync(Guid id, UpdateCreatorDto dto, CancellationToken ct = default)
@@ -137,7 +120,7 @@ public class CreatorService : ICreatorService
         EnsurePermission();
 
         var creator = await _creatorRepository.GetByIdAsync(id, ct)
-            ?? throw new KeyNotFoundException($"No se encontró el autor/creador con ID {id}.");
+            ?? throw new KeyNotFoundException($"No se encontró el creador de contenido con ID {id}.");
 
         var changes = new List<FieldChangeDto>();
         if (!string.Equals(creator.Name, dto.Name, StringComparison.Ordinal))
@@ -172,13 +155,12 @@ public class CreatorService : ICreatorService
                 EntityType: AuditEntityType.Creator,
                 EntityId: creator.Slug,
                 EntityName: creator.Name,
-                Summary: $"Modificación de autor '{creator.Name}'",
+                Summary: $"Modificación de creador de contenido '{creator.Name}'",
                 Changes: changes
             ), ct);
         }
 
-        var games = await _gameRepository.GetByDesignerAsync(creator.Name, ct);
-        return MapToDto(creator, games.Count);
+        return MapToDto(creator);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
@@ -199,7 +181,7 @@ public class CreatorService : ICreatorService
                     EntityType: AuditEntityType.Creator,
                     EntityId: creator.Slug,
                     EntityName: creator.Name,
-                    Summary: $"Eliminación de autor '{creator.Name}'"
+                    Summary: $"Eliminación de creador de contenido '{creator.Name}'"
                 ), ct);
             }
         }
@@ -211,11 +193,11 @@ public class CreatorService : ICreatorService
 
         if (!_currentUserService.IsFoundingTeam && !_currentUserService.HasPermission(ModeratorPermission.CanManageCreators))
         {
-            throw new UnauthorizedAccessException("Se requiere el permiso de moderación 'CanManageCreators' para dar de alta o editar autores y diseñadores.");
+            throw new UnauthorizedAccessException("Se requiere el permiso de moderación 'CanManageCreators' para dar de alta o editar creadores de contenido.");
         }
     }
 
-    private static CreatorDto MapToDto(Creator c, int gamesCount)
+    private static CreatorDto MapToDto(Creator c)
     {
         var socialDtos = c.SocialLinks.Select(l => new SocialNetworkLinkDto(
             l.Platform, l.Url, l.Handle, l.Title, l.PlatformIcon, l.PlatformName)).ToList();
@@ -229,13 +211,12 @@ public class CreatorService : ICreatorService
             c.AvatarUrl,
             c.BggPersonId,
             c.WebsiteUrl,
-            gamesCount,
             socialDtos,
             c.CreatedAt
         );
     }
 
-    private static CreatorDetailDto MapToDetailDto(Creator c, IReadOnlyList<GameSummaryDto> games)
+    private static CreatorDetailDto MapToDetailDto(Creator c)
     {
         var socialDtos = c.SocialLinks.Select(l => new SocialNetworkLinkDto(
             l.Platform, l.Url, l.Handle, l.Title, l.PlatformIcon, l.PlatformName)).ToList();
@@ -250,7 +231,6 @@ public class CreatorService : ICreatorService
             c.BggPersonId,
             c.WebsiteUrl,
             socialDtos,
-            games,
             c.CreatedAt,
             c.UpdatedAt
         );
