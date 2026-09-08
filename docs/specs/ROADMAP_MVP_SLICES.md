@@ -275,6 +275,15 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
+## Incremento 31: Portada Minimalista y Reorientación Autores → Creadores de Contenido
+- **Identificador SDD:** `portada-minimalista-creadores`
+- **Objetivo Principal:** Minimalizar el hero de la portada (sin badge ni titular visible; párrafo, buscador rápido y 4 píldoras de acceso — Catálogo Completo, Sorteos, Novedades y Eventos — con h1 accesible visualmente oculto conforme a WCAG 2.2 AA), corregir el enlace 'Ver todas las novedades' hacia /novedades y retirar el banner '¡Radar renovado!' manteniendo /radar como alias silencioso de /sorteos. Completa la reorientación del directorio Autores → Creadores de Contenido: sembrado con purga de los 6 diseñadores retirados y re-siembra aditiva desde el padrón estático de canales (incluido Análisis Parálisis), fichas con redes sociales sin sección 'Obras' ni cruce por Game.Designer, diseñador de juego como texto plano en fichas de juego (sin enlaces rotos), alias /autores operativo y reetiquetado transversal a 'Creadores'.
+- **Estado:** ⏳ **En progreso** (implementación de apply completada; 721 tests en verde al 100%).
+- **Documento:** [`portada-minimalista-creadores/proposal.md`](file:///c:/repos/Ludeka/openspec/changes/portada-minimalista-creadores/proposal.md)
+- **Módulo del Sistema:** pendiente de volcado en `sdd-archive`.
+
+---
+
 
 ## Convención de Trabajo para Cada Incremento (Ciclo SDD)
 
