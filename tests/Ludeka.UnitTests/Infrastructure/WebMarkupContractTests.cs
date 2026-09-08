@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
@@ -71,6 +72,16 @@ public class WebMarkupContractTests
         { "UserPermissionsModal (permiso)", "src/Ludeka.Web/Components/Shared/UserPermissionsModal.razor",
           new[] { "Gestionar Creadores de Contenido" },
           new[] { "Autores y Diseñadores" } },
+
+        // HomeDashboard: hero minimalista con h1 sr-only, sin badge ni titular, sin enlaces a /radar
+        { "HomeDashboard (hero minimalista)", "src/Ludeka.Web/Components/Pages/HomeDashboard.razor",
+          new[] { "sr-only", "<h1 class=\"sr-only\">Ludeka — Juegos de mesa en español</h1>" },
+          new[] { "PORTADA EDITORIAL", "href=\"/radar\"" } },
+
+        // Radar: sin banner legacy, alias silencioso con ambas rutas @page
+        { "Radar (sin banner legacy)", "src/Ludeka.Web/Components/Pages/Radar.razor",
+          new[] { "@page \"/sorteos\"", "@page \"/radar\"" },
+          new[] { "¡Radar renovado!", "IsLegacyRoute" } },
     };
 
     [Theory]
@@ -90,5 +101,39 @@ public class WebMarkupContractTests
             Assert.False(source.Contains(fragment, StringComparison.Ordinal),
                 $"{description}: el archivo {relativePath} no debe contener '{fragment}'.");
         }
+    }
+
+    [Fact]
+    public void HomeDashboard_Pills_AreExactlyTheFourD4PillsInOrder()
+    {
+        var source = ReadSource("src/Ludeka.Web/Components/Pages/HomeDashboard.razor");
+        var start = source.IndexOf("@* Píldoras de acceso directo *@", StringComparison.Ordinal);
+        var end = source.IndexOf("@if (_isLoading)", StringComparison.Ordinal);
+        Assert.True(start >= 0 && end > start, "No se encontró el bloque de píldoras del hero.");
+        var pillBlock = source[start..end];
+
+        // Exactamente 4 píldoras D4, en orden: Catálogo Completo, Sorteos, Novedades, Eventos
+        Assert.Equal(4, System.Text.RegularExpressions.Regex.Matches(pillBlock, "href=\"").Count);
+
+        var positions = new List<int>();
+        foreach (var destination in new[] { "/catalogo", "/sorteos", "/novedades", "/eventos" })
+        {
+            var pos = pillBlock.IndexOf($"href=\"{destination}\"", StringComparison.Ordinal);
+            Assert.True(pos >= 0, $"Falta la píldora con destino {destination}.");
+            positions.Add(pos);
+        }
+        Assert.Equal(positions.OrderBy(p => p).ToList(), positions);
+    }
+
+    [Fact]
+    public void HomeDashboard_VerTodasLasNovedades_LinkPointsToNovedades()
+    {
+        var source = ReadSource("src/Ludeka.Web/Components/Pages/HomeDashboard.razor");
+        var anchorPos = source.IndexOf("Ver todas las novedades", StringComparison.Ordinal);
+        Assert.True(anchorPos >= 0, "No se encontró el enlace 'Ver todas las novedades'.");
+
+        var hrefPos = source.LastIndexOf("href=\"", anchorPos, StringComparison.Ordinal);
+        Assert.True(hrefPos >= 0, "El enlace 'Ver todas las novedades' no tiene href.");
+        Assert.StartsWith("href=\"/novedades\"", source[hrefPos..]);
     }
 }
