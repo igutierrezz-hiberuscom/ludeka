@@ -305,6 +305,33 @@ public class DirectoryServicesTests
     }
 
     [Fact]
+    public async Task CreatorService_CreateWithoutSocialLinks_DetailExposesEmptyLinks()
+    {
+        var creatorRepo = new FakeCreatorRepository();
+        var service = new CreatorService(creatorRepo);
+
+        // Alta de un creador SIN redes sociales (spec creators-directory: "Ficha sin redes")
+        var created = await service.CreateAsync(new CreateCreatorDto(
+            "Creador Sin Redes",
+            "creador-sin-redes",
+            "Chile",
+            "Divulgador sin presencia en redes sociales",
+            null,
+            null,
+            null,
+            null
+        ));
+
+        Assert.Equal("Creador Sin Redes", created.Name);
+
+        // La ficha resultante expone la lista de redes vacía, sin error
+        var detail = await service.GetBySlugAsync("creador-sin-redes");
+        Assert.NotNull(detail);
+        Assert.Equal("Creador Sin Redes", detail.Name);
+        Assert.Empty(detail.SocialLinks);
+    }
+
+    [Fact]
     public async Task StoreService_CRUD_Filter_And_OffersExtraction_Works()
     {
         var storeRepo = new FakeStoreRepository();
