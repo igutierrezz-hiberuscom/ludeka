@@ -293,6 +293,14 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
+## Incremento 33: Fix 500 Latente en Mi Ludoteca (ORDER BY DateTimeOffset en GetByUserIdAsync)
+- **Identificador:** `fix-33-playlog-orderby-getbyuserid` (fix directo, sin ciclo SDD; segunda instancia del mismo defecto que INC-32)
+- **Objetivo Principal:** Corregir el error HTTP 500 latente en `/mi-ludoteca` (sección Diario de Partidas vía `GamePlayLogService.GetUserPlaysAsync`/`GetUserPlaysStatsAsync`), causado por `SqliteGamePlayLogRepository.GetByUserIdAsync`, que aplicaba `OrderByDescending` sobre `DateTimeOffset` (`PlayDate`, `CreatedAt`) en LINQ-to-EF. Mismo root cause que INC-32: EF Core SQLite no traduce ORDER BY sobre `DateTimeOffset`. El fix replica el patrón de INC-32 (`d6005cc`): materializar el query y ordenar en memoria preservando la semántica `PlayDate DESC, CreatedAt DESC`.
+- **Estado:** 🏆. **Completado y Archivado** (727 tests en verde al 100%: 725 previos + 2 nuevos por triangulación Strict TDD; test RED confirmado con `NotSupportedException`).
+- **Documento:** [`SqliteGamePlayLogRepositoryTests.cs` (tests rojo→verde del fix)](file:///c:/repos/Ludeka/tests/Ludeka.UnitTests/Infrastructure/SqliteGamePlayLogRepositoryTests.cs)
+- **Módulo del Sistema:** [`02-ludoteca-y-prestamos.md`](file:///c:/repos/Ludeka/docs/specs/sistema/02-ludoteca-y-prestamos.md)
+
+---
 
 ## Convención de Trabajo para Cada Incremento (Ciclo SDD)
 

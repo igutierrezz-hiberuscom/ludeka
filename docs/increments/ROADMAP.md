@@ -45,3 +45,4 @@ Este documento es el índice central de los paquetes de trabajo e incrementos (*
 | **INC-30** | Colección en 3 Estados, Estado 'Jugado' Independiente, Radar de Compra y Diario de Partidas | ✅ Archivado | [inc-30-played-independent-status.md](file:///c:/repos/Ludeka/docs/increments/archive/inc-30-played-independent-status.md) |
 | **INC-31** | Portada Minimalista y Reorientación Autores → Creadores de Contenido | ✅ Archivado | [portada-minimalista-creadores (archivo SDD)](file:///c:/repos/Ludeka/openspec/changes/archive/2026-09-08-portada-minimalista-creadores/proposal.md) |
 | **INC-32** | Fix HTTP 500 en Fichas de Juego (ORDER BY DateTimeOffset en SQLite) | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 32) |
+| **INC-33** | Fix 500 Latente en Mi Ludoteca (ORDER BY DateTimeOffset en GetByUserIdAsync) | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 33) |

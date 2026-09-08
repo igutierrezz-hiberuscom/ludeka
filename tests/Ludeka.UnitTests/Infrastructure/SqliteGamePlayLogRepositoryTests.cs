@@ -100,4 +100,59 @@ public class SqliteGamePlayLogRepositoryTests : IDisposable
         // Pareja usuario+juego sin logs: la consulta corrió y no encontró nada.
         Assert.Empty(emptyForPairWithoutLogs);
     }
+
+    [Fact]
+    public async Task GetByUserIdAsync_ShouldNotThrowAndOrderByPlayDateDescendingAcrossGames()
+    {
+        // Arrange: un usuario con partidas en VARIOS juegos (caso de uso de GetByUserIdAsync),
+        // dos partidas el mismo día en juegos distintos verifican el desempate por CreatedAt (desc),
+        // la tercera tiene una PlayDate anterior y debe quedar última.
+        // Los logs de otro usuario deben quedar excluidos.
+        var (gameA, gameB) = await SeedTwoGamesAsync();
+        const string userId = "auth0|user-1";
+        const string otherUserId = "auth0|user-2";
+
+        var earlier = new GamePlayLog(userId, gameB.Id, new DateTimeOffset(2024, 2, 20, 19, 0, 0, TimeSpan.Zero), "En casa", 3);
+        await _repository.AddAsync(earlier);
+
+        var sameDayFirst = new GamePlayLog(userId, gameA.Id, new DateTimeOffset(2024, 3, 5, 21, 30, 0, TimeSpan.Zero), "Club", 4);
+        await _repository.AddAsync(sameDayFirst);
+
+        // Garantiza CreatedAt estrictamente posterior para el desempate determinista.
+        await Task.Delay(5);
+
+        var sameDaySecond = new GamePlayLog(userId, gameB.Id, new DateTimeOffset(2024, 3, 5, 21, 30, 0, TimeSpan.Zero), "En casa", 5);
+        await _repository.AddAsync(sameDaySecond);
+
+        await _repository.AddAsync(new GamePlayLog(otherUserId, gameA.Id, new DateTimeOffset(2024, 3, 6, 21, 30, 0, TimeSpan.Zero), "Club", 4));
+
+        // Act
+        var result = await _repository.GetByUserIdAsync(userId);
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal(
+            new[] { sameDaySecond.Id, sameDayFirst.Id, earlier.Id },
+            result.Select(p => p.Id).ToArray());
+        // La navegación Game del Include debe estar materializada.
+        Assert.All(result, p => Assert.NotNull(p.Game));
+        Assert.DoesNotContain(result, p => p.UserId == otherUserId);
+    }
+
+    [Fact]
+    public async Task GetByUserIdAsync_ShouldReturnEmptyForUserWithoutLogs()
+    {
+        // Arrange: logs solo de otro usuario; el filtro por usuario no debe traer nada.
+        var (gameA, _) = await SeedTwoGamesAsync();
+        const string userId = "auth0|user-1";
+        const string otherUserId = "auth0|user-2";
+
+        await _repository.AddAsync(new GamePlayLog(otherUserId, gameA.Id, new DateTimeOffset(2024, 3, 5, 21, 30, 0, TimeSpan.Zero), "Club", 4));
+
+        // Act
+        var result = await _repository.GetByUserIdAsync(userId);
+
+        // Assert: la consulta corrió y filtró por usuario sin encontrar nada.
+        Assert.Empty(result);
+    }
 }
