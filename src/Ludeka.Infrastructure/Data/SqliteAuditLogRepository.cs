@@ -36,13 +36,28 @@ public class SqliteAuditLogRepository : IAuditLogRepository
         int take = 50,
         CancellationToken ct = default)
     {
-        var query = BuildQuery(userId, entityType, action, fromDate, toDate);
+        var query = BuildQuery(userId, entityType, action);
 
-        return await query
+        // EF Core SQLite no traduce ORDER BY ni las comparaciones de rango sobre DateTimeOffset:
+        // se materializa con los filtros traducibles y el rango de fechas y el orden se resuelven en memoria.
+        var logs = await query.ToListAsync(ct);
+
+        if (fromDate.HasValue)
+        {
+            logs = logs.Where(a => a.Timestamp >= fromDate.Value).ToList();
+        }
+
+        if (toDate.HasValue)
+        {
+            logs = logs.Where(a => a.Timestamp <= toDate.Value).ToList();
+        }
+
+        return logs
             .OrderByDescending(a => a.Timestamp)
+            .ThenByDescending(a => a.Id)
             .Skip(skip)
             .Take(take)
-            .ToListAsync(ct);
+            .ToList();
     }
 
     public async Task<int> CountLogsAsync(
@@ -53,16 +68,29 @@ public class SqliteAuditLogRepository : IAuditLogRepository
         DateTimeOffset? toDate = null,
         CancellationToken ct = default)
     {
-        var query = BuildQuery(userId, entityType, action, fromDate, toDate);
-        return await query.CountAsync(ct);
+        var query = BuildQuery(userId, entityType, action);
+
+        // Mismo defecto que GetLogsAsync: el rango de fechas sobre DateTimeOffset no es
+        // traducible por SQLite y se resuelve en memoria.
+        var logs = await query.ToListAsync(ct);
+
+        if (fromDate.HasValue)
+        {
+            logs = logs.Where(a => a.Timestamp >= fromDate.Value).ToList();
+        }
+
+        if (toDate.HasValue)
+        {
+            logs = logs.Where(a => a.Timestamp <= toDate.Value).ToList();
+        }
+
+        return logs.Count;
     }
 
     private IQueryable<AuditLogEntry> BuildQuery(
         string? userId,
         AuditEntityType? entityType,
-        AuditAction? action,
-        DateTimeOffset? fromDate,
-        DateTimeOffset? toDate)
+        AuditAction? action)
     {
         var query = _db.AuditLogs.AsQueryable();
 
@@ -80,16 +108,6 @@ public class SqliteAuditLogRepository : IAuditLogRepository
         if (action.HasValue)
         {
             query = query.Where(a => a.Action == action.Value);
-        }
-
-        if (fromDate.HasValue)
-        {
-            query = query.Where(a => a.Timestamp >= fromDate.Value);
-        }
-
-        if (toDate.HasValue)
-        {
-            query = query.Where(a => a.Timestamp <= toDate.Value);
         }
 
         return query;

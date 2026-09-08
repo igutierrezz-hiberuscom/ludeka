@@ -46,3 +46,4 @@ Este documento es el índice central de los paquetes de trabajo e incrementos (*
 | **INC-31** | Portada Minimalista y Reorientación Autores → Creadores de Contenido | ✅ Archivado | [portada-minimalista-creadores (archivo SDD)](file:///c:/repos/Ludeka/openspec/changes/archive/2026-09-08-portada-minimalista-creadores/proposal.md) |
 | **INC-32** | Fix HTTP 500 en Fichas de Juego (ORDER BY DateTimeOffset en SQLite) | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 32) |
 | **INC-33** | Fix 500 Latente en Mi Ludoteca (ORDER BY DateTimeOffset en GetByUserIdAsync) | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 33) |
+| **INC-34** | Barrido Sistémico de ORDER BY DateTimeOffset en Repositorios SQLite | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 34) |

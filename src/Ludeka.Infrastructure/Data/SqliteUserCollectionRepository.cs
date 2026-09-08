@@ -85,11 +85,16 @@ public class SqliteUserCollectionRepository : IUserCollectionRepository
 
     public async Task<List<UserCollectionItem>> GetPlayedByUserIdAsync(string userId, CancellationToken cancellationToken = default)
     {
-        return await _context.CollectionItems
+        // EF Core SQLite no traduce ORDER BY sobre DateTimeOffset: se materializa primero y se ordena en memoria.
+        var items = await _context.CollectionItems
             .Include(c => c.Game)
             .Where(c => c.UserId == userId && c.IsPlayed)
-            .OrderByDescending(c => c.AddedAt)
             .ToListAsync(cancellationToken);
+
+        return items
+            .OrderByDescending(c => c.AddedAt)
+            .ThenByDescending(c => c.Id)
+            .ToList();
     }
 
     public async Task<int> GetPlayedCountAsync(string userId, CancellationToken cancellationToken = default)

@@ -302,6 +302,15 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
+## Incremento 34: Barrido Sistémico de ORDER BY DateTimeOffset en Repositorios SQLite
+- **Identificador:** `fix-34-orderby-datetimeoffset-sweep` (fix directo, sin ciclo SDD; barrido final de la clase de defecto de INC-32/33)
+- **Objetivo Principal:** Matar de raíz la clase de bug «ORDER BY DateTimeOffset no traducible por SQLite → `NotSupportedException` → HTTP 500 latente» en los 5 repositorios restantes: `SqliteInstagramPostDraftRepository.GetDraftsAsync` (CreatedAt), `SqliteAuditLogRepository.GetLogsAsync` (Timestamp), `SqliteGameEditLogRepository.GetByGameIdAsync` (EditedAt), `SqliteNightlyCatalogingLogRepository.GetRecentLogsAsync`/`GetLatestLogAsync` (StartedAt, 2 sitios) y `SqliteUserCollectionRepository.GetPlayedByUserIdAsync` (AddedAt). El fix replica el patrón de INC-32/33: materializar con `ToListAsync` y ordenar en memoria (LINQ to Objects) con desempate determinista por `Id` (desc). La fase RED descubrió además el defecto hermano en el mismo repo de auditoría: los filtros de rango de fechas (`Timestamp >= fromDate` / `<= toDate`) tampoco son traducibles por SQLite, afectando a `GetLogsAsync` y `CountLogsAsync` (usados por `AuditService.GetAuditLogsAsync` con `FromDate`/`ToDate`); el fix mueve esos filtros a memoria. Se verificó que `SqliteCommunityNotificationRepository.GetRecentLogsAsync` ya ordena sobre lista materializada (seguro, sin tocar) y que los ORDER BY restantes sobre `StartDate`/`EndDate`/`ReleaseDate` son campos `DateOnly` traducibles.
+- **Estado:** 🏆. **Completado y Archivado** (739 tests en verde al 100%: 727 previos + 12 nuevos por triangulación Strict TDD; RED confirmado con `NotSupportedException` en los ORDER BY e `InvalidOperationException` en los WHERE de fechas; grep final sin sitios pendientes).
+- **Documento:** tests [`SqliteInstagramPostDraftRepositoryTests.cs`](file:///c:/repos/Ludeka/tests/Ludeka.UnitTests/Infrastructure/SqliteInstagramPostDraftRepositoryTests.cs), [`SqliteAuditLogRepositoryTests.cs`](file:///c:/repos/Ludeka/tests/Ludeka.UnitTests/Infrastructure/SqliteAuditLogRepositoryTests.cs), [`SqliteGameEditLogRepositoryTests.cs`](file:///c:/repos/Ludeka/tests/Ludeka.UnitTests/Infrastructure/SqliteGameEditLogRepositoryTests.cs), [`SqliteNightlyCatalogingLogRepositoryTests.cs`](file:///c:/repos/Ludeka/tests/Ludeka.UnitTests/Infrastructure/SqliteNightlyCatalogingLogRepositoryTests.cs), [`SqliteUserCollectionRepositoryTests.cs`](file:///c:/repos/Ludeka/tests/Ludeka.UnitTests/Infrastructure/SqliteUserCollectionRepositoryTests.cs) (rojo→verde del fix)
+- **Módulo del Sistema:** [`02-ludoteca-y-prestamos.md`](file:///c:/repos/Ludeka/docs/specs/sistema/02-ludoteca-y-prestamos.md)
+
+---
+
 ## Convención de Trabajo para Cada Incremento (Ciclo SDD)
 
 Cada incremento se ejecutará siguiendo estrictamente las 7 fases de Spec-Driven Development:

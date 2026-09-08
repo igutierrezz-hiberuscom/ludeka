@@ -37,18 +37,28 @@ public class SqliteNightlyCatalogingLogRepository : INightlyCatalogingLogReposit
 
     public async Task<IReadOnlyList<NightlyCatalogingExecutionLog>> GetRecentLogsAsync(int limit = 20, CancellationToken ct = default)
     {
-        return await _context.NightlyCatalogingExecutionLogs
+        // EF Core SQLite no traduce ORDER BY sobre DateTimeOffset: se materializa primero y se ordena en memoria.
+        var logs = await _context.NightlyCatalogingExecutionLogs
             .AsNoTracking()
-            .OrderByDescending(l => l.StartedAt)
-            .Take(limit)
             .ToListAsync(ct);
+
+        return logs
+            .OrderByDescending(l => l.StartedAt)
+            .ThenByDescending(l => l.Id)
+            .Take(limit)
+            .ToList();
     }
 
     public async Task<NightlyCatalogingExecutionLog?> GetLatestLogAsync(CancellationToken ct = default)
     {
-        return await _context.NightlyCatalogingExecutionLogs
+        // EF Core SQLite no traduce ORDER BY sobre DateTimeOffset: se materializa primero y se ordena en memoria.
+        var logs = await _context.NightlyCatalogingExecutionLogs
             .AsNoTracking()
+            .ToListAsync(ct);
+
+        return logs
             .OrderByDescending(l => l.StartedAt)
-            .FirstOrDefaultAsync(ct);
+            .ThenByDescending(l => l.Id)
+            .FirstOrDefault();
     }
 }

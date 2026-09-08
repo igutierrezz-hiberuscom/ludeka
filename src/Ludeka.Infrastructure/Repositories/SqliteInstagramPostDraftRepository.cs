@@ -31,9 +31,13 @@ public class SqliteInstagramPostDraftRepository : IInstagramPostDraftRepository
             query = query.Where(d => d.Status == status.Value);
         }
 
-        return await query
+        // EF Core SQLite no traduce ORDER BY sobre DateTimeOffset: se materializa primero y se ordena en memoria.
+        var drafts = await query.ToListAsync(ct);
+
+        return drafts
             .OrderByDescending(d => d.CreatedAt)
-            .ToListAsync(ct);
+            .ThenByDescending(d => d.Id)
+            .ToList();
     }
 
     public async Task<InstagramPostDraft?> GetByIdAsync(Guid id, CancellationToken ct = default)

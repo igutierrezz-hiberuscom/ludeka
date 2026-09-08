@@ -28,10 +28,15 @@ public class SqliteGameEditLogRepository : IGameEditLogRepository
 
     public async Task<IReadOnlyList<GameEditLog>> GetByGameIdAsync(Guid gameId, CancellationToken ct = default)
     {
-        return await _context.GameEditLogs
+        // EF Core SQLite no traduce ORDER BY sobre DateTimeOffset: se materializa primero y se ordena en memoria.
+        var logs = await _context.GameEditLogs
             .AsNoTracking()
             .Where(l => l.GameId == gameId)
-            .OrderByDescending(l => l.EditedAt)
             .ToListAsync(ct);
+
+        return logs
+            .OrderByDescending(l => l.EditedAt)
+            .ThenByDescending(l => l.Id)
+            .ToList();
     }
 }
