@@ -10,6 +10,7 @@
 - **TODO EN ESPAÑOL:** Todas las respuestas del agente, mensajes de chat, explicaciones, resúmenes, razonamientos dirigidos al usuario y **TODOS los artefactos de SDD** (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `verification-report.md`, `walkthrough.md`, etc.) DEBEN generarse y redactarse estrictamente en **español (castellano)**.
 - **PROHIBIDO EL INGLÉS EN DOCUMENTACIÓN Y ARTEFACTOS:** Queda terminantemente prohibido generar propuestas, especificaciones o diseños en inglés. La única excepción son los identificadores técnicos de código (nombres de clases, métodos, interfaces y variables en C#) y palabras clave de frameworks.
 - **PRECEDENCIA:** Si cualquier skill, prompt o plantilla externa menciona "default to English", esta regla del proyecto TIENE PRECEDENCIA ABSOLUTA y la sobreescribe: genera SIEMPRE el contenido en español castellano.
+- **REGISTRO NEUTRO:** El chat con el usuario se redacta en castellano neutro profesional (tuteo), sin voseo rioplatense ni regionalismos (che, dale, posta, boludo). Se mantiene el tono cálido, directo y exigente del persona.
 
 ---
 
@@ -32,6 +33,21 @@ Este proyecto se construye bajo la metodología **Spec-Driven Development (SDD)*
    - Volcar toda la información funcional, de dominio, arquitectura, persistencia, flujos y componentes en `docs/specs/sistema/` (creando `NN-nombre-modulo.md` o actualizando los módulos existentes impactados).
    - Actualizar el índice maestro `docs/specs/sistema/README.md` incorporando el enlace al módulo y el nuevo total de pruebas automáticas verificadas.
    - Trasladar el documento de incremento de `docs/increments/inc-XX.md` a `docs/increments/archive/inc-XX.md`.
+
+---
+
+## 1-bis. Flujo de Incrementos con Worktrees (Rama → PR)
+
+Todo incremento se desarrolla en un **worktree propio** sobre una **rama nueva**, y se integra a `main` exclusivamente vía **Pull Request**. Este flujo es obligatorio para cualquier herramienta o agente que trabaje en este repositorio.
+
+1. **Inicio del incremento:** ejecutar `scripts/sdd-worktree.ps1 new <slug>`: crea el worktree en `C:\repos\ludeka-wt\<slug>` y la rama `inc/<slug>` desde `main` actualizado. El slug va en kebab-case y minúsculas (ej. `portada-creadores`).
+2. **Trabajo aislado:** todos los agentes de implementación, verificación y revisión trabajan con ese worktree como directorio de trabajo. Un solo escritor por worktree.
+3. **Artefactos en la rama:** el código, los tests y TODOS los artefactos del incremento (`docs/specs/`, `.openspec/`, `docs/increments/ROADMAP.md`) viven en la rama `inc/<slug>` y entran al PR.
+4. **Cierre:** con la verificación en verde, ejecutar `scripts/sdd-worktree.ps1 pr <slug>`: pushea la rama y abre el PR a `main` (automático con `gh` CLI; si no está autenticado, imprime la URL para abrirlo a mano).
+5. **Post-merge:** ejecutar `scripts/sdd-worktree.ps1 done <slug>`: elimina el worktree y la rama local, y actualiza `main` local.
+6. **Orquestador SDD:** al lanzar `sdd-apply` y `sdd-verify` (y cualquier subagente que escriba código), el workdir DEBE ser el worktree del incremento; `sdd-archive` termina con el paso 4 y 5 (PR + cleanup).
+7. **Prohibido:** pushear directamente a `main` (además bloqueado por el ruleset de GitHub del repositorio) o mergear sin PR. Si el PR excede las 400 líneas, dividir en ramas apiladas desde el mismo worktree (PRs encadenados).
+8. **Paralelismo:** pueden coexistir N incrementos activos, cada uno en su worktree / rama / PR (ver `docs/increments/ROADMAP.md`, sección "Incrementos en Curso"). Los conflictos entre PRs se resuelven al mergear en orden.
 
 ---
 
