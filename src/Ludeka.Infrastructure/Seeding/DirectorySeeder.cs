@@ -7,12 +7,14 @@ using Ludeka.Core.Entities;
 using Ludeka.Core.Enums;
 using Ludeka.Core.ValueObjects;
 using Ludeka.Infrastructure.Data;
+using Ludeka.Infrastructure.YouTube;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ludeka.Infrastructure.Seeding;
 
 /// <summary>
-/// Sembrador aditivo de Editoriales, Creadores y Tiendas de referencia en el ecosistema hispanohablante.
+/// Sembrador aditivo de Editoriales, Creadores de contenido y Tiendas de referencia en el ecosistema hispanohablante.
+/// Purga los diseñadores de juegos retirados del directorio y siembra únicamente creadores de contenido (INC-31).
 /// </summary>
 public static class DirectorySeeder
 {
@@ -150,99 +152,60 @@ public static class DirectorySeeder
         }
     }
 
+    /// <summary>
+    /// Slugs de los diseñadores de juegos sembrados por el seed histórico del directorio (INC-31).
+    /// Lista cerrada: la purga solo elimina estas filas de semilla, jamás creators manuales.
+    /// </summary>
+    private static readonly string[] RetiredSeedCreatorSlugs =
+    [
+        "elizabeth-hargrave", "klaus-teuber", "uwe-rosenberg",
+        "bruno-cathala", "jacob-fryxelius", "jamey-stegmaier"
+    ];
+
     private static async Task SeedCreatorsAsync(LudekaDbContext db, CancellationToken ct)
     {
+        // 1. PURGA quirúrgica: elimina solo los diseñadores de la lista cerrada de semillas retiradas.
+        var retired = await db.Creators
+            .Where(c => RetiredSeedCreatorSlugs.Contains(c.Slug))
+            .ToListAsync(ct);
+        if (retired.Count > 0)
+        {
+            db.Creators.RemoveRange(retired);
+            await db.SaveChangesAsync(ct);
+        }
+
+        // 2. RE-SIEMBRA aditiva desde el padrón estático (fuente única), sin updates sobre existentes.
         var existingSlugs = await db.Creators.Select(c => c.Slug).ToListAsync(ct);
         var toAdd = new List<Creator>();
 
-        var elizabeth = new Creator(
-            "Elizabeth Hargrave",
-            "elizabeth-hargrave",
-            "Estados Unidos",
-            "Diseñadora de juegos de mesa y ornitóloga aficionada, creadora del aclamado y premiado Wingspan, Mariposas y Tussie Mussie.",
-            "/images/creators/elizabeth-hargrave.png",
-            104523,
-            "https://www.elizabethhargrave.com",
-            new[]
-            {
-                new SocialNetworkLink(SocialPlatform.Website, "https://www.elizabethhargrave.com"),
-                new SocialNetworkLink(SocialPlatform.Twitter, "https://twitter.com/elizhargrave", "@elizhargrave")
-            }
-        );
-
-        var klaus = new Creator(
-            "Klaus Teuber",
-            "klaus-teuber",
-            "Alemania",
-            "Leyenda del diseño de juegos de mesa moderno y cuatro veces galardonado con el Spiel des Jahres. Padre indiscutible de Catan (1995).",
-            "/images/creators/klaus-teuber.png",
-            84,
-            "https://catan.com"
-        );
-
-        var uwe = new Creator(
-            "Uwe Rosenberg",
-            "uwe-rosenberg",
-            "Alemania",
-            "Uno de los autores europeos más prolíficos y admirados de todos los tiempos. Creador de Agricola, Caverna, Patchwork, Le Havre y Feast for Odin.",
-            "/images/creators/uwe-rosenberg.png",
-            10
-        );
-
-        var bruno = new Creator(
-            "Bruno Cathala",
-            "bruno-cathala",
-            "Francia",
-            "Maestro del juego de mesa dinámico y la tensión a dos jugadores. Creador de 7 Wonders Duel, Kingdomino, Abyss y Five Tribes.",
-            "/images/creators/bruno-cathala.png",
-            1727,
-            "http://www.brunocathala.com"
-        );
-
-        var jacob = new Creator(
-            "Jacob Fryxelius",
-            "jacob-fryxelius",
-            "Suecia",
-            "Científico y autor sueco creador de Terraforming Mars y la saga espacial FryxGames.",
-            null,
-            47970
-        );
-
-        var jamey = new Creator(
-            "Jamey Stegmaier",
-            "jamey-stegmaier",
-            "Estados Unidos",
-            "Diseñador y cofundador de Stonemaier Games. Creador de Scythe, Viticulture y Euphoria, además de referente en divulgación de crowdfunding.",
-            "/images/creators/jamey-stegmaier.png",
-            61168,
-            "https://stonemaiergames.com",
-            new[]
-            {
-                new SocialNetworkLink(SocialPlatform.YouTube, "https://youtube.com/@jameystegmaier", "@jameystegmaier", "Stonemaier Games Channel")
-            }
-        );
-
-        var sergio = new Creator(
-            "Sergio (Análisis Parálisis)",
-            "analisis-paralisis",
-            "España",
-            "Referente absoluto de la divulgación audiovisual de juegos de mesa en español desde hace más de una década.",
-            "/images/creators/analisis-paralisis.png",
-            null,
-            "https://analisisparalisis.es",
-            new[]
-            {
-                new SocialNetworkLink(SocialPlatform.YouTube, "https://youtube.com/@AnalisisParalisis", "@AnalisisParalisis", "Canal Análisis Parálisis")
-            }
-        );
-
-        var allSeed = new[] { elizabeth, klaus, uwe, bruno, jacob, jamey, sergio };
-        foreach (var cr in allSeed)
+        foreach (var entry in ChannelFocusProvider.GetStaticCreators())
         {
-            if (!existingSlugs.Contains(cr.Slug))
+            var slug = Game.GenerateSlug(entry.ChannelName);
+            if (existingSlugs.Contains(slug))
             {
-                toAdd.Add(cr);
+                continue;
             }
+
+            var socialLinks = string.IsNullOrWhiteSpace(entry.Handle)
+                ? null
+                : new[]
+                {
+                    new SocialNetworkLink(
+                        SocialPlatform.YouTube,
+                        $"https://youtube.com/{entry.Handle}",
+                        entry.Handle)
+                };
+
+            toAdd.Add(new Creator(
+                name: entry.ChannelName,
+                slug: slug,
+                nationality: null,
+                bio: entry.Description,
+                avatarUrl: null,
+                bggPersonId: null,
+                websiteUrl: null,
+                socialLinks: socialLinks
+            ));
         }
 
         if (toAdd.Count > 0)

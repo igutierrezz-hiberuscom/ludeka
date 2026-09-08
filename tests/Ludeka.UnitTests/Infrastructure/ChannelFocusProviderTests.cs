@@ -9,6 +9,16 @@ public class ChannelFocusProviderTests
     private readonly ChannelFocusProvider _provider = new();
 
     [Fact]
+    public void GetStaticCreators_ReturnsTwelveContentCreators()
+    {
+        var creators = ChannelFocusProvider.GetStaticCreators();
+
+        Assert.Equal(12, creators.Count);
+        Assert.All(creators, c => Assert.Equal(ChannelCategory.Creator, c.Category));
+        Assert.Contains(creators, c => c.ChannelName == "Análisis Parálisis");
+    }
+
+    [Fact]
     public void GetReferenceChannels_ShouldContainPublishersCreatorsAndStores()
     {
         var channels = _provider.GetReferenceChannels();

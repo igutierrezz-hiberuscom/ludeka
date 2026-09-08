@@ -60,6 +60,13 @@ public class ChannelFocusProvider : IChannelFocusProvider
         new("JugarXJugar", ChannelCategory.Store, Handle: "@jugarxjugar", Description: "Tienda y espacio de divulgación lúdica", PriorityBonus: 45)
     ];
 
+    /// <summary>
+    /// Padrón estático de creadores de contenido (fuente única del sembrado del directorio).
+    /// No fusiona canales dinámicos: es el registro de referencia puro.
+    /// </summary>
+    public static IReadOnlyList<ChannelFocusEntry> GetStaticCreators()
+        => Channels.Where(c => c.Category == ChannelCategory.Creator).ToList();
+
     public IReadOnlyList<ChannelFocusEntry> GetReferenceChannels()
     {
         EnsureDynamicChannelsLoaded();
