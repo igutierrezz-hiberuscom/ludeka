@@ -26,7 +26,19 @@ $ErrorActionPreference = 'Stop'
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot  = Split-Path -Parent $scriptDir
-$wtRoot    = Join-Path -Path (Split-Path -Parent $repoRoot) -ChildPath 'ludeka-wt'
+
+# La raiz de worktrees vive junto al checkout PRINCIPAL del repo. Al ejecutar
+# desde un worktree, el padre de $repoRoot ya es la carpeta de worktrees, asi
+# que se deriva la raiz principal desde el git common dir (siempre apunta al
+# checkout principal).
+$commonDir = git -C $repoRoot rev-parse --path-format=absolute --git-common-dir
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($commonDir)) {
+    $cd = (git -C $repoRoot rev-parse --git-common-dir).Trim()
+    $commonDir = (Resolve-Path -LiteralPath (Join-Path $repoRoot $cd)).Path
+}
+$commonDir = $commonDir.Trim()
+$mainRoot  = Split-Path -Parent $commonDir
+$wtRoot    = Join-Path -Path (Split-Path -Parent $mainRoot) -ChildPath 'ludeka-wt'
 $branch    = "inc/$Slug"
 $wtPath    = Join-Path -Path $wtRoot -ChildPath $Slug
 
