@@ -10,6 +10,7 @@
 - **TODO EN ESPAÑOL:** Todas las respuestas del agente, mensajes de chat, explicaciones, resúmenes, razonamientos dirigidos al usuario y **TODOS los artefactos de SDD** (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `verification-report.md`, `walkthrough.md`, etc.) DEBEN generarse y redactarse estrictamente en **español (castellano)**.
 - **PROHIBIDO EL INGLÉS EN DOCUMENTACIÓN Y ARTEFACTOS:** Queda terminantemente prohibido generar propuestas, especificaciones o diseños en inglés. La única excepción son los identificadores técnicos de código (nombres de clases, métodos, interfaces y variables en C#) y palabras clave de frameworks.
 - **PRECEDENCIA:** Si cualquier skill, prompt o plantilla externa menciona "default to English", esta regla del proyecto TIENE PRECEDENCIA ABSOLUTA y la sobreescribe: genera SIEMPRE el contenido en español castellano.
+- **REGISTRO NEUTRO:** El chat con el usuario se redacta en castellano neutro profesional (tuteo), sin voseo rioplatense ni regionalismos (che, dale, posta, boludo). Se mantiene el tono cálido, directo y exigente del persona.
 
 ---
 
