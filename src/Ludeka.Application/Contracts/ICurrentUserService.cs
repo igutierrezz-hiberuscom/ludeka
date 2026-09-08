@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using Ludeka.Core.Enums;
 
 namespace Ludeka.Application.Contracts;
 
@@ -10,4 +11,14 @@ public interface ICurrentUserService
     bool IsFoundingTeam { get; }
     bool IsInRole(string role);
     void SwitchRole(string role);
+
+    bool HasPermission(ModeratorPermission permission)
+    {
+        if (IsFoundingTeam) return true;
+        return IsInRole("Moderator");
+    }
+
+    void SwitchUser(string userId)
+    {
+    }
 }

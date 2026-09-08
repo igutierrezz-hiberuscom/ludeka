@@ -75,6 +75,13 @@ public class SqliteMediaRepository : IMediaRepository
         return items.OrderByDescending(m => m.CreatedAt).ToList();
     }
 
+    public async Task<bool> ExistsByUrlAsync(string url, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return false;
+        var trimmed = url.Trim();
+        return await _context.MediaItems.AnyAsync(m => m.Url == trimmed, ct);
+    }
+
     public async Task AddAsync(MediaItem item, CancellationToken ct = default)
     {
         await _context.MediaItems.AddAsync(item, ct);

@@ -42,6 +42,18 @@ public static class CatalogSeeder
         public int EstimatedPerPlayerMinutes { get; set; }
         public List<SeedScalabilityModel>? Scalability { get; set; }
         public List<SeedSleeveModel>? Sleeves { get; set; }
+        public List<SeedPurchaseLinkModel>? PurchaseLinks { get; set; }
+    }
+
+    private class SeedPurchaseLinkModel
+    {
+        public string StoreName { get; set; } = string.Empty;
+        public string AffiliateUrl { get; set; } = string.Empty;
+        public decimal? Price { get; set; }
+        public string Currency { get; set; } = "€";
+        public bool InStock { get; set; } = true;
+        public string? Badge { get; set; }
+        public string? AffiliateTag { get; set; }
     }
 
     private class SeedScalabilityModel
@@ -67,90 +79,57 @@ public static class CatalogSeeder
     {
         int seededCount = 0;
 
-        if (!await db.Games.AnyAsync(ct))
+        string json = ReadSeedJson();
+        if (!string.IsNullOrWhiteSpace(json))
         {
-            string json = ReadSeedJson();
-            if (!string.IsNullOrWhiteSpace(json))
+            var items = JsonSerializer.Deserialize<List<SeedGameModel>>(json, new JsonSerializerOptions
             {
-                var items = JsonSerializer.Deserialize<List<SeedGameModel>>(json, new JsonSerializerOptions
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (items != null && items.Count > 0)
+            {
+                if (!await db.Games.AnyAsync(ct))
                 {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (items != null && items.Count > 0)
-                {
-                    var games = items.Select(m =>
-                    {
-                        var confrontation = Enum.TryParse<ConfrontationType>(m.Confrontation, true, out var c) ? c : ConfrontationType.Competitive;
-                        var style = Enum.TryParse<GameStyle>(m.Style, true, out var s) ? s : GameStyle.Eurogame;
-                        var language = Enum.TryParse<LanguageDependence>(m.Language, true, out var l) ? l : LanguageDependence.None;
-                        var footprint = Enum.TryParse<TableFootprint>(m.Footprint, true, out var f) ? f : TableFootprint.StandardTable;
-
-                        var scalabilityEntries = m.Scalability?.Select(sc =>
-                        {
-                            var status = Enum.TryParse<ScalabilityStatus>(sc.Status, true, out var st) ? st : ScalabilityStatus.Recommended;
-                            return new ScalabilityEntry(sc.PlayerCount, sc.DisplayCount, status, sc.BestVotes, sc.RecommendedVotes, sc.NotRecommendedVotes);
-                        }).ToList();
-
-                        var sleeves = m.Sleeves?.Select(sl =>
-                            new SleeveItem(sl.FormatName, sl.WidthMm, sl.HeightMm, sl.CardCount, sl.AffiliateUrl)
-                        ).ToList();
-
-                        return new Game(
-                            bggId: m.BggId,
-                            originalTitle: m.OriginalTitle,
-                            spanishTitle: m.SpanishTitle,
-                            designer: m.Designer,
-                            publisher: m.Publisher,
-                            yearPublished: m.YearPublished,
-                            coverImageUrl: m.CoverImageUrl,
-                            thumbnailUrl: m.ThumbnailUrl,
-                            description: m.Description,
-                            bggRating: m.BggRating,
-                            bggRank: m.BggRank,
-                            ludistRating: m.LudistRating,
-                            confrontation: confrontation,
-                            style: style,
-                            isOfficialSolo: m.IsOfficialSolo,
-                            age: new AgeRating(m.BoxAge, m.CommunityAge),
-                            language: language,
-                            footprint: footprint,
-                            duration: new GameDuration(m.MinMinutes, m.MaxMinutes, m.EstimatedPerPlayerMinutes),
-                            scalability: scalabilityEntries,
-                            sleeves: sleeves
-                        );
-                    }).ToList();
-
+                    var games = items.Select(MapToGame).ToList();
                     await db.Games.AddRangeAsync(games, ct);
                     await db.SaveChangesAsync(ct);
                     seededCount += games.Count;
                 }
-            }
-        }
-        else
-        {
-            // Sincronizar carátulas de juegos existentes para garantizar imágenes locales
-            string json = ReadSeedJson();
-            if (!string.IsNullOrWhiteSpace(json))
-            {
-                var items = JsonSerializer.Deserialize<List<SeedGameModel>>(json, new JsonSerializerOptions
+                else
                 {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (items != null && items.Count > 0)
-                {
+                    // Reconciliar base de datos existente: actualizar imágenes/enlaces y sembrar los nuevos juegos faltantes
                     var existingGames = await db.Games.ToListAsync(ct);
                     bool modified = false;
 
                     foreach (var m in items)
                     {
                         var match = existingGames.FirstOrDefault(g => g.BggId == m.BggId);
-                        if (match != null && (!string.Equals(match.CoverImageUrl, m.CoverImageUrl, StringComparison.OrdinalIgnoreCase) ||
-                                              !string.Equals(match.ThumbnailUrl, m.ThumbnailUrl, StringComparison.OrdinalIgnoreCase)))
+                        if (match != null)
                         {
-                            match.UpdateImages(m.CoverImageUrl, m.ThumbnailUrl ?? m.CoverImageUrl);
+                            if (!string.Equals(match.CoverImageUrl, m.CoverImageUrl, StringComparison.OrdinalIgnoreCase) ||
+                                !string.Equals(match.ThumbnailUrl, m.ThumbnailUrl, StringComparison.OrdinalIgnoreCase))
+                            {
+                                match.UpdateImages(m.CoverImageUrl, m.ThumbnailUrl ?? m.CoverImageUrl);
+                                modified = true;
+                            }
+
+                            if (m.PurchaseLinks != null && m.PurchaseLinks.Count > 0 && match.PurchaseLinks.Count == 0)
+                            {
+                                var links = m.PurchaseLinks.Select(pl =>
+                                    new GamePurchaseLink(pl.StoreName, pl.AffiliateUrl, pl.Price, pl.Currency, pl.InStock, pl.Badge, pl.AffiliateTag)
+                                ).ToList();
+                                match.UpdatePurchaseLinks(links);
+                                modified = true;
+                            }
+                        }
+                        else
+                        {
+                            var newGame = MapToGame(m);
+                            await db.Games.AddAsync(newGame, ct);
+                            existingGames.Add(newGame);
                             modified = true;
+                            seededCount++;
                         }
                     }
 
@@ -180,6 +159,53 @@ public static class CatalogSeeder
         await SeedExpansionsAndSynergiesAsync(db, ct);
 
         return seededCount;
+    }
+
+    private static Game MapToGame(SeedGameModel m)
+    {
+        var confrontation = Enum.TryParse<ConfrontationType>(m.Confrontation, true, out var c) ? c : ConfrontationType.Competitive;
+        var style = Enum.TryParse<GameStyle>(m.Style, true, out var s) ? s : GameStyle.Eurogame;
+        var language = Enum.TryParse<LanguageDependence>(m.Language, true, out var l) ? l : LanguageDependence.None;
+        var footprint = Enum.TryParse<TableFootprint>(m.Footprint, true, out var f) ? f : TableFootprint.StandardTable;
+
+        var scalabilityEntries = m.Scalability?.Select(sc =>
+        {
+            var status = Enum.TryParse<ScalabilityStatus>(sc.Status, true, out var st) ? st : ScalabilityStatus.Recommended;
+            return new ScalabilityEntry(sc.PlayerCount, sc.DisplayCount, status, sc.BestVotes, sc.RecommendedVotes, sc.NotRecommendedVotes);
+        }).ToList();
+
+        var sleeves = m.Sleeves?.Select(sl =>
+            new SleeveItem(sl.FormatName, sl.WidthMm, sl.HeightMm, sl.CardCount, sl.AffiliateUrl)
+        ).ToList();
+
+        var purchaseLinks = m.PurchaseLinks?.Select(pl =>
+            new GamePurchaseLink(pl.StoreName, pl.AffiliateUrl, pl.Price, pl.Currency, pl.InStock, pl.Badge, pl.AffiliateTag)
+        ).ToList();
+
+        return new Game(
+            bggId: m.BggId,
+            originalTitle: m.OriginalTitle,
+            spanishTitle: m.SpanishTitle,
+            designer: m.Designer,
+            publisher: m.Publisher,
+            yearPublished: m.YearPublished,
+            coverImageUrl: m.CoverImageUrl,
+            thumbnailUrl: m.ThumbnailUrl,
+            description: m.Description,
+            bggRating: m.BggRating,
+            bggRank: m.BggRank,
+            ludistRating: m.LudistRating,
+            confrontation: confrontation,
+            style: style,
+            isOfficialSolo: m.IsOfficialSolo,
+            age: new AgeRating(m.BoxAge, m.CommunityAge),
+            language: language,
+            footprint: footprint,
+            duration: new GameDuration(m.MinMinutes, m.MaxMinutes, m.EstimatedPerPlayerMinutes),
+            scalability: scalabilityEntries,
+            sleeves: sleeves,
+            purchaseLinks: purchaseLinks
+        );
     }
 
     private static async Task SeedFoundingVerdictsAsync(LudekaDbContext db, CancellationToken ct)
@@ -572,6 +598,7 @@ public static class CatalogSeeder
                 url: "https://www.instagram.com/p/maldito-brass-sorteo",
                 platform: GiveawayPlatform.Instagram,
                 deadlineAt: DateTimeOffset.UtcNow.AddDays(3),
+                country: "España",
                 gameId: brass?.Id,
                 gameTitle: "Brass: Birmingham",
                 collaborator: "Análisis Parálisis",
@@ -584,6 +611,7 @@ public static class CatalogSeeder
                 url: "https://www.instagram.com/p/devir-eldervale",
                 platform: GiveawayPlatform.Instagram,
                 deadlineAt: DateTimeOffset.UtcNow.AddDays(5),
+                country: "Internacional",
                 gameId: null,
                 gameTitle: "Dwellings of Eldervale",
                 collaborator: "El Rincón Legacy",
@@ -596,6 +624,7 @@ public static class CatalogSeeder
                 url: "https://x.com/zacatrus/status/wingspan-sorteo",
                 platform: GiveawayPlatform.TwitterX,
                 deadlineAt: DateTimeOffset.UtcNow.AddHours(18),
+                country: "España",
                 gameId: wingspan?.Id,
                 gameTitle: "Wingspan",
                 collaborator: null,
@@ -608,11 +637,25 @@ public static class CatalogSeeder
                 url: "https://ludeka.app/sorteos",
                 platform: GiveawayPlatform.Community,
                 deadlineAt: DateTimeOffset.UtcNow.AddDays(12),
+                country: "Internacional",
                 gameId: null,
                 gameTitle: "Ark Nova",
                 collaborator: null,
                 thumbnailUrl: "/images/games/ark-nova.jpg",
-                isCommunityExclusive: true)
+                isCommunityExclusive: true),
+
+            new(
+                title: "Sorteo Especial Novedades México: Catán Plus",
+                organizer: "Devir México",
+                url: "https://www.instagram.com/p/devirmx-catan",
+                platform: GiveawayPlatform.Instagram,
+                deadlineAt: DateTimeOffset.UtcNow.AddDays(7),
+                country: "México",
+                gameId: null,
+                gameTitle: "Catan",
+                collaborator: "Jugando Ando",
+                thumbnailUrl: "/images/games/catan.jpg",
+                isCommunityExclusive: false)
         };
 
         await db.Giveaways.AddRangeAsync(giveaways, ct);
@@ -751,17 +794,14 @@ public static class CatalogSeeder
 
     private static async Task SeedExpansionsAndSynergiesAsync(LudekaDbContext db, CancellationToken ct)
     {
-        if (await db.Games.AnyAsync(g => g.Type == GameType.Expansion, ct))
-        {
-            return; // Ya existen expansiones semilladas
-        }
-
         var allGames = await db.Games.ToListAsync(ct);
         if (allGames.Count == 0) return;
 
+        var existingExpansions = allGames.Where(g => g.Type == GameType.Expansion || g.Type == GameType.StandaloneExpansion).ToList();
+
         // 1. Expansiones de Wingspan
         var wingspan = allGames.FirstOrDefault(g => g.Slug == "wingspan");
-        if (wingspan != null)
+        if (wingspan != null && !existingExpansions.Any(g => g.BaseGameId == wingspan.Id))
         {
             var expEuropa = new Game(
                 bggId: 290448,
@@ -945,7 +985,7 @@ public static class CatalogSeeder
 
         // 2. Expansiones de Terraforming Mars
         var tm = allGames.FirstOrDefault(g => g.Slug == "terraforming-mars");
-        if (tm != null)
+        if (tm != null && !existingExpansions.Any(g => g.BaseGameId == tm.Id))
         {
             var expPreludio = new Game(
                 bggId: 247030,
@@ -1054,7 +1094,7 @@ public static class CatalogSeeder
 
         // 3. Expansiones de Carcassonne
         var carcassonne = allGames.FirstOrDefault(g => g.Slug == "carcassonne");
-        if (carcassonne != null)
+        if (carcassonne != null && !existingExpansions.Any(g => g.BaseGameId == carcassonne.Id))
         {
             var expPosadas = new Game(
                 bggId: 2993,
@@ -1136,6 +1176,153 @@ public static class CatalogSeeder
                 [expPosadas.Id, expConstructores.Id]
             );
             await db.ExpansionRecipes.AddAsync(recetaCarc, ct);
+        }
+
+        // 4. Expansión de 7 Wonders Duel
+        var duel = allGames.FirstOrDefault(g => g.Slug == "7-wonders-duel" || g.BggId == 173346);
+        if (duel != null && !existingExpansions.Any(g => g.BaseGameId == duel.Id))
+        {
+            var expPantheon = new Game(
+                bggId: 202976,
+                originalTitle: "7 Wonders Duel: Pantheon",
+                spanishTitle: "7 Wonders Duel: Pantheon",
+                designer: "Antoine Bauza, Bruno Cathala",
+                publisher: "Repos Production",
+                yearPublished: 2016,
+                coverImageUrl: "/images/games/7-wonders-duel.png",
+                thumbnailUrl: "/images/games/7-wonders-duel.png",
+                description: "Introduce las divinidades mitológicas de 5 panteones (griego, romano, egipcio, mesopotámico y fenicio). Permite activar favores divinos sin tomar cartas de la pirámide, dinamizando la estrategia.",
+                bggRating: 8.16,
+                bggRank: 68,
+                ludistRating: 8.6,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: false,
+                age: new AgeRating(10, 10),
+                language: LanguageDependence.None,
+                footprint: TableFootprint.SmallTable,
+                duration: new GameDuration(30, 30, 15),
+                scalability: CloneScalability(duel.Scalability),
+                sleeves: [new SleeveItem("Standard European", 59, 92, 16, null), new SleeveItem("Large / Tarot", 65, 100, 15, null)],
+                customSlug: "7-wonders-duel-pantheon",
+                type: GameType.Expansion,
+                baseGameId: duel.Id,
+                expansionNecessity: ExpansionNecessity.MustHave,
+                impactTags: [ExpansionImpactTag.FixesBalance, ExpansionImpactTag.ModularContent],
+                whatItBringsSummary: "Permite activar favores divinos sin robar cartas de la estructura piramidal, evitando jugadas forzadas y abriendo múltiples rutas hacia la victoria.",
+                extraPlayerCount: 0,
+                extraDurationMinutes: 5,
+                purchaseLinks: [new GamePurchaseLink("Zacatrus", "https://zacatrus.es/7-wonders-duel-pantheon.html?ref=ludeka", 22.95m, "€", true, "Envío 24h", "Direct")]
+            );
+
+            await db.Games.AddAsync(expPantheon, ct);
+
+            var recetaPantheon = new ExpansionRecipe(
+                duel.Id,
+                "La Era de los Dioses",
+                "La experiencia definitiva de 7 Wonders Duel: añade invocaciones mitológicas y templos grandiosos sin romper la tensión del duelo.",
+                "2 jugadores en 30-35 minutos",
+                [expPantheon.Id]
+            );
+            await db.ExpansionRecipes.AddAsync(recetaPantheon, ct);
+        }
+
+        // 5. Expansión de Dune: Imperium
+        var dune = allGames.FirstOrDefault(g => g.Slug == "dune-imperium" || g.BggId == 316554);
+        if (dune != null && !existingExpansions.Any(g => g.BaseGameId == dune.Id))
+        {
+            var expIx = new Game(
+                bggId: 342035,
+                originalTitle: "Dune: Imperium – Rise of Ix",
+                spanishTitle: "Dune: Imperium: El Auge de Ix",
+                designer: "Paul Dennen",
+                publisher: "Dire Wolf",
+                yearPublished: 2022,
+                coverImageUrl: "/images/games/dune-imperium.png",
+                thumbnailUrl: "/images/games/dune-imperium.png",
+                description: "La confederación de Ix entra en la liza por el control de Arrakis aportando innovaciones tecnológicas, poderosos acorazados de combate espacial y nuevos líderes de casa.",
+                bggRating: 8.67,
+                bggRank: 25,
+                ludistRating: 8.9,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: true,
+                age: new AgeRating(14, 13),
+                language: LanguageDependence.Low,
+                footprint: TableFootprint.StandardTable,
+                duration: new GameDuration(60, 120, 25),
+                scalability: CloneScalability(dune.Scalability),
+                sleeves: [new SleeveItem("Standard Card Game", 63.5, 88, 65, null), new SleeveItem("Mini USA", 41, 63, 20, null)],
+                customSlug: "dune-imperium-el-auge-de-ix",
+                type: GameType.Expansion,
+                baseGameId: dune.Id,
+                expansionNecessity: ExpansionNecessity.MustHave,
+                impactTags: [ExpansionImpactTag.FixesBalance, ExpansionImpactTag.ModularContent],
+                whatItBringsSummary: "Sustituye las casillas menos competitivas del tablero base por el fascinante mercado tecnológico de Ix e incorpora temibles acorazados en los conflictos de combate.",
+                extraPlayerCount: 0,
+                extraDurationMinutes: 10,
+                purchaseLinks: [new GamePurchaseLink("Zacatrus", "https://zacatrus.es/dune-imperium-rise-of-ix.html?ref=ludeka", 39.95m, "€", true, "Envío 24h", "Direct")]
+            );
+
+            await db.Games.AddAsync(expIx, ct);
+
+            var recetaIx = new ExpansionRecipe(
+                dune.Id,
+                "Guerra Tecnológica en Arrakis",
+                "La configuración preferida por la comunidad competitiva: introduce tecnología ixiana y acorazados estelares para un combate mucho más tenso y versátil.",
+                "3 a 4 jugadores en 90-120 minutos",
+                [expIx.Id]
+            );
+            await db.ExpansionRecipes.AddAsync(recetaIx, ct);
+        }
+
+        // 6. Expansión de Everdell
+        var everdell = allGames.FirstOrDefault(g => g.Slug == "everdell" || g.BggId == 199792);
+        if (everdell != null && !existingExpansions.Any(g => g.BaseGameId == everdell.Id))
+        {
+            var expBellfaire = new Game(
+                bggId: 265492,
+                originalTitle: "Everdell: Bellfaire",
+                spanishTitle: "Everdell: Bellfaire",
+                designer: "James A. Wilson",
+                publisher: "Maldito Games",
+                yearPublished: 2019,
+                coverImageUrl: "/images/games/everdell.png",
+                thumbnailUrl: "/images/games/everdell.png",
+                description: "Módulo festivo que conmemora los 100 años de la fundación de Everdell. Permite jugar con 5 y 6 comensales, introduce habilidades asimétricas de especie y añade un mercado de recursos alternativo.",
+                bggRating: 7.95,
+                bggRank: 115,
+                ludistRating: 8.2,
+                confrontation: ConfrontationType.Competitive,
+                style: GameStyle.Eurogame,
+                isOfficialSolo: true,
+                age: new AgeRating(13, 10),
+                language: LanguageDependence.Low,
+                footprint: TableFootprint.TableMonster,
+                duration: new GameDuration(40, 90, 20),
+                scalability: [new ScalabilityEntry(4, "4J", ScalabilityStatus.MustPlay, 620, 210, 20), new ScalabilityEntry(5, "5J", ScalabilityStatus.Recommended, 420, 310, 50), new ScalabilityEntry(6, "6J", ScalabilityStatus.Recommended, 350, 320, 60)],
+                sleeves: [new SleeveItem("Standard Card Game", 63.5, 88, 40, null)],
+                customSlug: "everdell-bellfaire",
+                type: GameType.Expansion,
+                baseGameId: everdell.Id,
+                expansionNecessity: ExpansionNecessity.HighlyRecommended,
+                impactTags: [ExpansionImpactTag.AddsPlayers, ExpansionImpactTag.AddsAsymmetry],
+                whatItBringsSummary: "Permite jugar a 5 y 6 personas, incorpora un tablero plano opcional que sustituye al gran árbol e introduce poderes asimétricos únicos para cada tipo de animal.",
+                extraPlayerCount: 2,
+                extraDurationMinutes: 15,
+                purchaseLinks: [new GamePurchaseLink("Cuarto de Juegos", "https://cuartodejuegos.es/everdell-bellfaire?ref=ludeka", 39.95m, "€", true, "Stock Real", "Direct")]
+            );
+
+            await db.Games.AddAsync(expBellfaire, ct);
+
+            var recetaBellfaire = new ExpansionRecipe(
+                everdell.Id,
+                "El Gran Festival de Bellfaire",
+                "Convierte Everdell en una fiesta multitudinaria: habilita partidas a 5-6 jugadores y otorga poderes asimétricos divertidos a cada especie del bosque.",
+                "3 a 6 jugadores en 60-90 minutos",
+                [expBellfaire.Id]
+            );
+            await db.ExpansionRecipes.AddAsync(recetaBellfaire, ct);
         }
 
         await db.SaveChangesAsync(ct);

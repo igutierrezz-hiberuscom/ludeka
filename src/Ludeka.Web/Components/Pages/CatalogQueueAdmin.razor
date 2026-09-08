@@ -1,0 +1,461 @@
+@page "/admin/cola-catalogacion"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@inject INightlyCatalogingService NightlyService
+@inject IBggCatalogQueueService QueueService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>Cola de Catalogación & Batch Nocturno — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @if (!CanManageQueue)
+    {
+        <div class="p-8 rounded-2xl bg-[var(--bg-card)] border border-rose-500/20 text-center space-y-4 max-w-lg mx-auto">
+            <span class="text-4xl block">🛡️</span>
+            <h2 class="text-xl font-bold text-[var(--text-primary)]">Acceso Exclusivo de Moderación</h2>
+            <p class="text-sm text-[var(--text-secondary)]">
+                Esta sección está reservada a la Mesa Fundadora y moderadores con permisos de edición de catálogo.
+            </p>
+            <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--brand-primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity">
+                Volver al Inicio
+            </a>
+        </div>
+    }
+    else
+    {
+        @* Encabezado de Página *@
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold mb-2">
+                    <span>🌙</span> Operaciones & Catálogo Automático
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                    Cola de Catalogación & Batch Nocturno
+                </h1>
+                <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
+                    Supervisión y control del pipeline inteligente de extracción de juegos en novedades editoriales, ingesta de cola comunitaria y relleno de cupo con el Top de BGG.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3 flex-wrap">
+                <button type="button"
+                        @onclick="ExecuteNightlyBatchAsync"
+                        disabled="@_isProcessing"
+                        class="px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (_isProcessing)
+                    {
+                        <span class="animate-spin">⚙️</span>
+                        <span>Ejecutando Batch Nocturno...</span>
+                    }
+                    else
+                    {
+                        <span>⚡</span>
+                        <span>Ejecutar Batch Nocturno Ahora</span>
+                    }
+                </button>
+
+                <button type="button"
+                        @onclick="LoadDataAsync"
+                        disabled="@_isProcessing"
+                        class="px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
+                    <span>🔄</span>
+                    <span>Refrescar</span>
+                </button>
+            </div>
+        </div>
+
+        @* Tarjetas de Métricas KPI *@
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1">
+                <span class="text-xs text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
+                    <span>🎯</span> Cupo Diario Configurado
+                </span>
+                <div class="text-2xl font-black text-[var(--text-primary)]">
+                    @(_options?.DailyCatalogingLimit ?? 20) <span class="text-xs font-normal text-[var(--text-muted)]">juegos / día</span>
+                </div>
+                <div class="text-[0.7rem] text-emerald-600 dark:text-emerald-400 font-medium">
+                    Pausa de cortesía: @(_options?.MinDelaySecondsBetweenCalls ?? 2.5)s activa
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1">
+                <span class="text-xs text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
+                    <span>⏳</span> En Cola de Espera
+                </span>
+                <div class="text-2xl font-black text-amber-500">
+                    @_totalQueueCount <span class="text-xs font-normal text-[var(--text-muted)]">títulos pendientes</span>
+                </div>
+                <div class="text-[0.7rem] text-[var(--text-secondary)]">
+                    Prioridad comunitaria y novedades
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1">
+                <span class="text-xs text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
+                    <span>📰</span> Origen Novedades
+                </span>
+                <div class="text-2xl font-black text-sky-500">
+                    @_newsDiscoveryCount <span class="text-xs font-normal text-[var(--text-muted)]">descubrimientos</span>
+                </div>
+                <div class="text-[0.7rem] text-[var(--text-secondary)]">
+                    Extraídos de anuncios editoriales
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1">
+                <span class="text-xs text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
+                    <span>📜</span> Última Ejecución
+                </span>
+                <div class="text-2xl font-black @GetStatusColor(_lastHistory?.Status)">
+                    @(_lastHistory?.Status ?? "Sin historial")
+                </div>
+                <div class="text-[0.7rem] text-[var(--text-secondary)]">
+                    @if (_lastHistory != null)
+                    {
+                        <span>@_lastHistory.TotalCatalogedCount catalogados (@_lastHistory.StartedAt.ToLocalTime().ToString("dd/MM HH:mm"))</span>
+                    }
+                    else
+                    {
+                        <span>Esperando primer ciclo</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* Notificación de Resultado en Vivo *@
+        @if (_lastResult != null)
+        {
+            <div class="p-5 rounded-2xl border @(_lastResult.FailedCount == 0 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-amber-500/10 border-amber-500/30") text-xs space-y-2">
+                <div class="flex items-center justify-between font-bold text-sm @(_lastResult.FailedCount == 0 ? "text-emerald-600 dark:text-emerald-300" : "text-amber-600 dark:text-amber-300")">
+                    <span class="flex items-center gap-2">
+                        <span>@(_lastResult.FailedCount == 0 ? "✅" : "⚠️")</span>
+                        <span>Ejecución del Lote Completada</span>
+                    </span>
+                    <button type="button" @onclick="() => _lastResult = null" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-base font-bold">&times;</button>
+                </div>
+                <p class="text-[var(--text-secondary)]">
+                    Se han catalogado <strong>@_lastResult.TotalCatalogedCount juegos nuevos</strong>:
+                    <strong>@_lastResult.QueueProcessedCount</strong> procedentes de la cola comunitaria/novedades y
+                    <strong>@_lastResult.TopBackfillCount</strong> incorporados del Top de BGG.
+                    @if (_lastResult.FailedCount > 0)
+                    {
+                        <span class="text-rose-500 font-semibold">(@_lastResult.FailedCount fallos registrados).</span>
+                    }
+                </p>
+                @if (_lastResult.CatalogedTitles.Count > 0)
+                {
+                    <div class="text-[var(--text-muted)] pt-1 border-t border-[var(--border-subtle)]">
+                        <strong>Títulos incorporados:</strong> @string.Join(", ", _lastResult.CatalogedTitles)
+                    </div>
+                }
+            </div>
+        }
+
+        @* Sección 1: Cola de Auto-Catalogación *@
+        <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-[var(--text-primary)]">
+                        Cola de Juegos Pendientes
+                    </h3>
+                    <p class="text-xs text-[var(--text-muted)] mt-0.5">
+                        Juegos solicitados para su catalogación oficial, organizados por origen y solicitudes.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap text-xs">
+                    <span class="text-[var(--text-muted)] font-semibold">Filtrar origen:</span>
+                    <button type="button"
+                            @onclick="() => _originFilter = null"
+                            class="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all @(_originFilter == null ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
+                        Todos
+                    </button>
+                    <button type="button"
+                            @onclick="() => _originFilter = CatalogQueueOrigin.NewsDiscovery"
+                            class="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all @(_originFilter == CatalogQueueOrigin.NewsDiscovery ? "bg-sky-600 text-white border-sky-600" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
+                        📰 Novedades
+                    </button>
+                    <button type="button"
+                            @onclick="() => _originFilter = CatalogQueueOrigin.UserImport"
+                            class="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all @(_originFilter == CatalogQueueOrigin.UserImport ? "bg-emerald-600 text-white border-emerald-600" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
+                        👤 Usuarios
+                    </button>
+                    <button type="button"
+                            @onclick="() => _originFilter = CatalogQueueOrigin.TopBggBackfill"
+                            class="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all @(_originFilter == CatalogQueueOrigin.TopBggBackfill ? "bg-amber-600 text-white border-amber-600" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
+                        🏆 Top BGG
+                    </button>
+                </div>
+            </div>
+
+            @if (_isLoading)
+            {
+                <div class="py-12 text-center text-[var(--text-muted)] space-y-2">
+                    <div class="inline-block animate-spin text-2xl">⏳</div>
+                    <p class="text-xs font-semibold">Cargando cola de catalogación...</p>
+                </div>
+            }
+            else if (FilteredQueueItems.Count == 0)
+            {
+                <div class="py-12 text-center text-[var(--text-muted)] space-y-2">
+                    <span class="text-3xl block">🎉</span>
+                    <p class="text-sm font-bold text-[var(--text-primary)]">La cola de espera está vacía</p>
+                    <p class="text-xs max-w-sm mx-auto">
+                        No hay juegos pendientes en este momento con el filtro seleccionado. El batch nocturno rellenará el cupo diario con los mejores juegos de BGG.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-[var(--text-secondary)]">
+                        <thead class="text-[0.7rem] uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+                            <tr>
+                                <th class="py-3 px-4 font-bold">Juego / Título</th>
+                                <th class="py-3 px-4 font-bold">BGG ID</th>
+                                <th class="py-3 px-4 font-bold">Origen</th>
+                                <th class="py-3 px-4 font-bold text-center">Solicitudes</th>
+                                <th class="py-3 px-4 font-bold">Estado</th>
+                                <th class="py-3 px-4 font-bold">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--border-subtle)]">
+                            @foreach (var item in FilteredQueueItems)
+                            {
+                                <tr class="hover:bg-[var(--bg-surface-elevated)] transition-colors">
+                                    <td class="py-3 px-4 font-bold text-[var(--text-primary)]">
+                                        <div class="flex items-center gap-2">
+                                            @if (!string.IsNullOrWhiteSpace(item.ThumbnailUrl))
+                                            {
+                                                <img src="@item.ThumbnailUrl" alt="Miniatura de @item.Title" class="w-7 h-7 rounded object-cover border border-[var(--border-subtle)]" />
+                                            }
+                                            <div>
+                                                <div>@item.Title</div>
+                                                @if (!string.IsNullOrWhiteSpace(item.ExtractedTitle) && item.ExtractedTitle != item.Title)
+                                                {
+                                                    <div class="text-[0.65rem] text-[var(--text-muted)] font-normal">
+                                                        Extraído: "@item.ExtractedTitle"
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-4 font-mono text-[var(--text-muted)]">
+                                        <a href="https://boardgamegeek.com/boardgame/@item.BggId" target="_blank" rel="noopener noreferrer" class="hover:text-[var(--brand-primary)] underline" title="Ver ficha en BoardGameGeek">
+                                            #@item.BggId ↗
+                                        </a>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        @switch (item.Origin)
+                                        {
+                                            case CatalogQueueOrigin.NewsDiscovery:
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                                                    <span>📰</span> Novedad Editorial
+                                                </span>
+                                                break;
+                                            case CatalogQueueOrigin.TopBggBackfill:
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                                    <span>🏆</span> Top BGG
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                    <span>👤</span> Usuario
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="py-3 px-4 text-center font-bold text-[var(--text-primary)]">
+                                        @item.RequestedCount
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        @switch (item.Status)
+                                        {
+                                            case CatalogQueueStatus.Processing:
+                                                <span class="inline-flex items-center gap-1 text-amber-400 font-bold text-[0.7rem]">
+                                                    <span class="animate-spin">⚙️</span> Procesando
+                                                </span>
+                                                break;
+                                            case CatalogQueueStatus.Completed:
+                                                <span class="inline-flex items-center gap-1 text-emerald-400 font-bold text-[0.7rem]">
+                                                    <span>✅</span> Completado
+                                                </span>
+                                                break;
+                                            case CatalogQueueStatus.Failed:
+                                                <span class="inline-flex items-center gap-1 text-rose-400 font-bold text-[0.7rem]" title="@item.ErrorMessage">
+                                                    <span>❌</span> Fallido
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="inline-flex items-center gap-1 text-[var(--text-muted)] font-semibold text-[0.7rem]">
+                                                    <span>⏳</span> Pendiente
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="py-3 px-4 text-[var(--text-muted)] whitespace-nowrap">
+                                        @item.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        @* Sección 2: Historial de Ejecuciones Nocturnas *@
+        <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-6">
+            <div class="border-b border-[var(--border-subtle)] pb-4">
+                <h3 class="text-lg font-bold text-[var(--text-primary)]">
+                    Bitácora Histórica de Lotes & Ejecuciones
+                </h3>
+                <p class="text-xs text-[var(--text-muted)] mt-0.5">
+                    Registro de cada disparo del batch con detalle de juegos incorporados, cuota y orígenes.
+                </p>
+            </div>
+
+            @if (_history.Count == 0)
+            {
+                <div class="py-8 text-center text-[var(--text-muted)] text-xs">
+                    No existen registros históricos de ejecuciones todavía.
+                </div>
+            }
+            else
+            {
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-[var(--text-secondary)]">
+                        <thead class="text-[0.7rem] uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+                            <tr>
+                                <th class="py-3 px-4 font-bold">Fecha / Hora</th>
+                                <th class="py-3 px-4 font-bold">Estado</th>
+                                <th class="py-3 px-4 font-bold text-center">Cola</th>
+                                <th class="py-3 px-4 font-bold text-center">Novedades</th>
+                                <th class="py-3 px-4 font-bold text-center">Top BGG</th>
+                                <th class="py-3 px-4 font-bold text-center">Total Nuevos</th>
+                                <th class="py-3 px-4 font-bold">Títulos Catalogados</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--border-subtle)]">
+                            @foreach (var log in _history)
+                            {
+                                <tr class="hover:bg-[var(--bg-surface-elevated)] transition-colors">
+                                    <td class="py-3 px-4 font-semibold text-[var(--text-primary)] whitespace-nowrap">
+                                        @log.StartedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center gap-1 font-bold @GetStatusColor(log.Status)">
+                                            @(log.Status == "Completed" ? "✅ Completado" : log.Status == "Running" ? "⚙️ En curso" : "❌ " + log.Status)
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-center font-bold text-[var(--text-primary)]">
+                                        @log.QueueProcessedCount
+                                    </td>
+                                    <td class="py-3 px-4 text-center font-bold text-sky-400">
+                                        @log.NewsDiscoveryCount
+                                    </td>
+                                    <td class="py-3 px-4 text-center font-bold text-amber-400">
+                                        @log.TopBackfillCount
+                                    </td>
+                                    <td class="py-3 px-4 text-center font-black text-emerald-400">
+                                        @log.TotalCatalogedCount
+                                    </td>
+                                    <td class="py-3 px-4 text-[var(--text-muted)] max-w-xs truncate" title="@string.Join(", ", log.CatalogedTitles)">
+                                        @(log.CatalogedTitles.Count > 0 ? string.Join(", ", log.CatalogedTitles) : "—")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isProcessing = false;
+    private int _totalQueueCount = 0;
+    private int _newsDiscoveryCount = 0;
+    private CatalogQueueOrigin? _originFilter = null;
+    private NightlyCatalogingOptions? _options;
+    private NightlyCatalogingResultDto? _lastResult;
+    private NightlyCatalogingExecutionLogDto? _lastHistory;
+    private IReadOnlyList<CatalogQueueItemDto> _queueItems = [];
+    private IReadOnlyList<NightlyCatalogingExecutionLogDto> _history = [];
+
+    private bool CanManageQueue =>
+        CurrentUserService.IsFoundingTeam ||
+        (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanEditGames));
+
+    private IReadOnlyList<CatalogQueueItemDto> FilteredQueueItems =>
+        _originFilter.HasValue
+            ? _queueItems.Where(i => i.Origin == _originFilter.Value).ToList()
+            : _queueItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _options = await NightlyService.GetOptionsAsync();
+            _queueItems = await QueueService.GetTopPendingQueueAsync(100);
+            _totalQueueCount = await QueueService.GetTotalPendingCountAsync();
+            _newsDiscoveryCount = _queueItems.Count(i => i.Origin == CatalogQueueOrigin.NewsDiscovery);
+            _history = await NightlyService.GetExecutionHistoryAsync(15);
+            _lastHistory = _history.FirstOrDefault();
+        }
+        catch (Exception)
+        {
+            // Salvaguarda
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task ExecuteNightlyBatchAsync()
+    {
+        if (_isProcessing) return;
+
+        _isProcessing = true;
+        _lastResult = null;
+
+        try
+        {
+            _lastResult = await NightlyService.ExecuteNightlyCatalogingAsync();
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            _lastResult = new NightlyCatalogingResultDto(
+                Guid.NewGuid(),
+                DateTimeOffset.UtcNow,
+                DateTimeOffset.UtcNow,
+                0, 0, 0, 0, 1, [], "Failed", ex.Message
+            );
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private static string GetStatusColor(string? status) => status switch
+    {
+        "Completed" => "text-emerald-500",
+        "Running" => "text-amber-500",
+        "Failed" => "text-rose-500",
+        _ => "text-[var(--text-muted)]"
+    };
+}

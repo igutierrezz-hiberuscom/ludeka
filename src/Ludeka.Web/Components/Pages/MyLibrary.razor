@@ -1,7 +1,14 @@
 @page "/mi-ludoteca"
 @rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Core.ValueObjects
 @inject IUserLibraryService LibraryService
+@inject ICurrentUserService CurrentUserService
+@inject IUserPreferenceService PreferenceService
+@inject IUserLocationService LocationService
+@inject IUserLibraryStatsService StatsService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Mi Ludoteca Personal — Ludeka</PageTitle>
 
@@ -13,7 +20,7 @@
                 <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
                     Tu Espacio Lúdico
                 </span>
-                <span class="text-xs text-[var(--text-secondary)]">Sesión activa como <strong class="text-[var(--text-primary)]">Mesa Fundadora</strong></span>
+                <span class="text-xs text-[var(--text-secondary)]">Sesión activa como <strong class="text-[var(--text-primary)]">@CurrentUserService.UserName</strong></span>
             </div>
             <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
                 Mi Ludoteca Personal
@@ -25,14 +32,18 @@
 
         <div class="flex flex-wrap items-center gap-2">
             <button type="button"
+                    disabled="@_isOfflineMode"
                     @onclick="() => _showBggImportModal = true"
-                    class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all inline-flex items-center gap-1.5 shadow-sm">
+                    class="px-4 py-2 rounded-xl text-xs font-bold @(_isOfflineMode ? "opacity-50 cursor-not-allowed bg-zinc-600 text-zinc-300" : "bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white") transition-all inline-flex items-center gap-1.5 shadow-sm"
+                    title="@(_isOfflineMode ? "La importación de BGG requiere conexión a internet" : "")">
                 <span>📥</span>
                 <span>Importar BGG</span>
             </button>
             <button type="button"
+                    disabled="@_isOfflineMode"
                     @onclick="() => _showBggSearchModal = true"
-                    class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] transition-colors inline-flex items-center gap-1.5 shadow-sm">
+                    class="px-4 py-2 rounded-xl text-xs font-bold @(_isOfflineMode ? "opacity-50 cursor-not-allowed bg-zinc-700 text-zinc-400" : "bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)]") transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                    title="@(_isOfflineMode ? "La búsqueda asistida requiere conexión a internet" : "")">
                 <span>🎲</span>
                 <span>+ Añadir por BGG</span>
             </button>
@@ -42,6 +53,28 @@
             </a>
         </div>
     </div>
+
+    @if (_isOfflineMode)
+    {
+        <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm" role="status">
+            <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-medium">
+                <span class="text-base">📡</span>
+                <span>
+                    <strong>Modo Consulta Offline activo:</strong> Mostrando los títulos guardados en este dispositivo
+                    @if (!string.IsNullOrWhiteSpace(_offlineTimestamp))
+                    {
+                        <span>(última sincronización: @_offlineTimestamp)</span>
+                    }.
+                </span>
+            </div>
+            <button type="button" 
+                    @onclick="LoadSummaryAsync"
+                    class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 font-bold self-start sm:self-auto transition-colors flex items-center gap-1.5 shadow-sm">
+                <span>🔄</span>
+                <span>Reconectar</span>
+            </button>
+        </div>
+    }
 
     @if (_isLoading)
     {
@@ -128,10 +161,322 @@
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Queue)">
                 <span>⏳ Cola comunitaria</span>
             </button>
+
+            <button type="button"
+                    id="tab-appearance"
+                    role="tab"
+                    aria-selected="@(_activeTab == TabType.Appearance ? "true" : "false")"
+                    aria-controls="panel-appearance"
+                    @onclick="() => _activeTab = TabType.Appearance"
+                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Appearance)">
+                <span>🎨 Apariencia & 🌍 País</span>
+            </button>
+
+            <button type="button"
+                    id="tab-stats"
+                    role="tab"
+                    aria-selected="@(_activeTab == TabType.Stats ? "true" : "false")"
+                    aria-controls="panel-stats"
+                    @onclick="SwitchToStatsAsync"
+                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Stats)">
+                <span>🧬 ADN y Estadísticas</span>
+            </button>
         </div>
 
         @* Contenido de la pestaña activa *@
-        @if (_activeTab == TabType.Queue)
+        @if (_activeTab == TabType.Appearance)
+        {
+            <div id="panel-appearance" role="tabpanel" aria-labelledby="tab-appearance" class="space-y-6">
+                <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xl">🎨</span>
+                                <h2 class="text-xl font-bold text-[var(--text-primary)]">
+                                    Estilo Visual y Paleta de tu Mesa
+                                </h2>
+                            </div>
+                            <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
+                                Personaliza los colores de Ludeka para tu usuario (<strong class="text-[var(--text-primary)]">@CurrentUserService.UserName</strong>). Tu selección se guardará en tu perfil y se cargará automáticamente en todas tus sesiones.
+                            </p>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(_saveMessage))
+                        {
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0">
+                                <span>✓</span>
+                                <span>@_saveMessage</span>
+                            </div>
+                        }
+                    </div>
+
+                    @* Grid de Temas *@
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                        @* 1. Papel *@
+                        <div class="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 cursor-pointer @(_userCurrentTheme == "editorial" ? "border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)] ring-2 ring-[var(--brand-primary)]/20" : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-highlight)]")"
+                             @onclick='() => SelectUserTheme("editorial")'>
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg">📖</span>
+                                        <h3 class="text-sm font-black text-[var(--text-primary)]">Papel & Tinta</h3>
+                                    </div>
+                                    @if (_userCurrentTheme == "editorial")
+                                    {
+                                        <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-black bg-[var(--brand-primary)] text-white">Activo</span>
+                                    }
+                                </div>
+                                <p class="text-xs text-[var(--text-secondary)] mb-4">
+                                    Editorial Claro. Inspirado en libros, reglamentos impresos y fanzines. Fondo blanco roto de máxima legibilidad y tinta oscura.
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full border border-black/10 inline-block shadow-sm" style="background-color: #F8F7F4;" title="Fondo Papel (#F8F7F4)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-black/10 inline-block shadow-sm" style="background-color: #FFFFFF;" title="Superficie (#FFFFFF)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-black/10 inline-block shadow-sm" style="background-color: #B8432F;" title="Tinta Roja (#B8432F)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-black/10 inline-block shadow-sm" style="background-color: #121417;" title="Texto (#121417)"></span>
+                                </div>
+                                <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold @(_userCurrentTheme == "editorial" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)]")">
+                                    @(_userCurrentTheme == "editorial" ? "En uso" : "Aplicar")
+                                </button>
+                            </div>
+                        </div>
+
+                        @* 2. Madera Clara (NUEVO) *@
+                        <div class="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 cursor-pointer @(_userCurrentTheme == "wood" ? "border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)] ring-2 ring-[var(--brand-primary)]/20" : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-highlight)]")"
+                             @onclick='() => SelectUserTheme("wood")'>
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg">🪵</span>
+                                        <h3 class="text-sm font-black text-[var(--text-primary)]">Madera Clara</h3>
+                                    </div>
+                                    @if (_userCurrentTheme == "wood")
+                                    {
+                                        <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-black bg-[var(--brand-primary)] text-white">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-black bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">Nuevo</span>
+                                    }
+                                </div>
+                                <p class="text-xs text-[var(--text-secondary)] mb-4">
+                                    Arce & Haya Lúdica. Inspirado en mesas nórdicas de juego y componentes de madera noble clara. Cálido, luminoso y acogedor.
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full border border-black/10 inline-block shadow-sm" style="background-color: #F5EFEB;" title="Fondo Madera Clara (#F5EFEB)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-black/10 inline-block shadow-sm" style="background-color: #FAF6F1;" title="Superficie (#FAF6F1)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-black/10 inline-block shadow-sm" style="background-color: #B85323;" title="Acento Ámbar Tostado (#B85323)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-black/10 inline-block shadow-sm" style="background-color: #2D2118;" title="Texto Nogal Oscuro (#2D2118)"></span>
+                                </div>
+                                <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold @(_userCurrentTheme == "wood" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)]")">
+                                    @(_userCurrentTheme == "wood" ? "En uso" : "Aplicar")
+                                </button>
+                            </div>
+                        </div>
+
+                        @* 3. Mesa Cálida *@
+                        <div class="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 cursor-pointer @(_userCurrentTheme == "tabletop" ? "border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)] ring-2 ring-[var(--brand-primary)]/20" : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-highlight)]")"
+                             @onclick='() => SelectUserTheme("tabletop")'>
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg">🎲</span>
+                                        <h3 class="text-sm font-black text-[var(--text-primary)]">Mesa Cálida</h3>
+                                    </div>
+                                    @if (_userCurrentTheme == "tabletop")
+                                    {
+                                        <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-black bg-[var(--brand-primary)] text-white">Activo</span>
+                                    }
+                                </div>
+                                <p class="text-xs text-[var(--text-secondary)] mb-4">
+                                    Madera Espresso & Tapete. Tono de mesa nocturna en club de juegos. Marrones chocolate profundo y texto pergamino cálido.
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #1A1412;" title="Fondo Espresso (#1A1412)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #28201B;" title="Superficie (#28201B)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #D97736;" title="Acento Caramelo (#D97736)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #F7EFE6;" title="Texto Crema (#F7EFE6)"></span>
+                                </div>
+                                <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold @(_userCurrentTheme == "tabletop" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)]")">
+                                    @(_userCurrentTheme == "tabletop" ? "En uso" : "Aplicar")
+                                </button>
+                            </div>
+                        </div>
+
+                        @* 4. Azul Medianoche *@
+                        <div class="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 cursor-pointer @(_userCurrentTheme == "midnight" ? "border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)] ring-2 ring-[var(--brand-primary)]/20" : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-highlight)]")"
+                             @onclick='() => SelectUserTheme("midnight")'>
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg">🌌</span>
+                                        <h3 class="text-sm font-black text-[var(--text-primary)]">Azul Medianoche</h3>
+                                    </div>
+                                    @if (_userCurrentTheme == "midnight")
+                                    {
+                                        <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-black bg-[var(--brand-primary)] text-white">Activo</span>
+                                    }
+                                </div>
+                                <p class="text-xs text-[var(--text-secondary)] mb-4">
+                                    Cian & Lima Digital. Alto contraste sobre azul espacial profundo. Ideal para sesiones nocturnas con aire contemporáneo.
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #090E1A;" title="Fondo Marino (#090E1A)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #121C34;" title="Superficie (#121C34)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #06B6D4;" title="Acento Cian (#06B6D4)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #F1F5F9;" title="Texto Blanco Hielo (#F1F5F9)"></span>
+                                </div>
+                                <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold @(_userCurrentTheme == "midnight" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)]")">
+                                    @(_userCurrentTheme == "midnight" ? "En uso" : "Aplicar")
+                                </button>
+                            </div>
+                        </div>
+
+                        @* 5. Carbón Oscuro *@
+                        <div class="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 cursor-pointer @(_userCurrentTheme == "charcoal" ? "border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)] ring-2 ring-[var(--brand-primary)]/20" : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-highlight)]")"
+                             @onclick='() => SelectUserTheme("charcoal")'>
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg">🌑</span>
+                                        <h3 class="text-sm font-black text-[var(--text-primary)]">Carbón Oscuro</h3>
+                                    </div>
+                                    @if (_userCurrentTheme == "charcoal")
+                                    {
+                                        <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-black bg-[var(--brand-primary)] text-white">Activo</span>
+                                    }
+                                </div>
+                                <p class="text-xs text-[var(--text-secondary)] mb-4">
+                                    Terracota & Pizarra. La estética insignia de Ludeka estilo Letterboxd. Sobriedad, elegancia y acento naranja cálido.
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #14181C;" title="Fondo Carbón (#14181C)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #1F262D;" title="Superficie (#1F262D)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #E05A38;" title="Acento Terracota (#E05A38)"></span>
+                                    <span class="w-5 h-5 rounded-full border border-white/10 inline-block shadow-sm" style="background-color: #FFFFFF;" title="Texto Blanco (#FFFFFF)"></span>
+                                </div>
+                                <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold @(_userCurrentTheme == "charcoal" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)]")">
+                                    @(_userCurrentTheme == "charcoal" ? "En uso" : "Aplicar")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* Tarjeta de Ubicación y Filtrado de País (Incremento 29) *@
+                <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xl">🌍</span>
+                                <h2 class="text-xl font-bold text-[var(--text-primary)]">
+                                    Ubicación y Filtrado Territorial
+                                </h2>
+                            </div>
+                            <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
+                                Define tu país de residencia para filtrar tiendas con envíos a tu territorio, sorteos y eventos lúdicos.
+                            </p>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(_countrySaveMessage))
+                        {
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0">
+                                <span>✓</span>
+                                <span>@_countrySaveMessage</span>
+                            </div>
+                        }
+                    </div>
+
+                    @* Advertencia Obligatoria *@
+                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 dark:text-amber-400 text-xs space-y-1.5">
+                        <div class="flex items-center gap-1.5 font-black text-sm">
+                            <span>⚠️</span>
+                            <span>Aviso Importante sobre el Filtrado por País</span>
+                        </div>
+                        <p class="leading-relaxed">
+                            Al seleccionar un país, los sorteos, eventos y tiendas se filtrarán automáticamente para mostrar únicamente los disponibles en tu territorio. Si prefieres explorar toda la información de la comunidad global sin filtrar, déjalo sin seleccionar.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
+                        <div>
+                            <label class="font-bold text-xs text-[var(--text-secondary)] block mb-1.5">
+                                País seleccionado para tu usuario:
+                            </label>
+                            <select @bind="_userCurrentCountry"
+                                    @bind:after="OnCountrySelectChangedAsync"
+                                    class="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]">
+                                <option value="">🌍 Sin país (Global - Todo visible sin filtrar)</option>
+                                @foreach (var c in CountryCatalog.GetAllCountries())
+                                {
+                                    <option value="@c.Name">@c.FlagEmoji @c.Name (@c.Code)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col justify-end sm:pt-6">
+                            <button type="button"
+                                    @onclick="AutoDetectCountryAsync"
+                                    class="px-4 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center justify-center gap-2 shadow-sm">
+                                <span>📍</span>
+                                <span>Detectar automáticamente por zona horaria</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (_activeTab == TabType.Stats)
+        {
+            <div id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" class="space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                    <div>
+                        <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+                            <span>🧬</span>
+                            <span>ADN de tu Estantería y Analíticas de Colección</span>
+                        </h2>
+                        <p class="text-xs text-[var(--text-secondary)] mt-0.5">
+                            Métricas calculadas en vivo a partir de tus títulos físicos en posesión («En mi ludoteca»).
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button"
+                                @onclick="CopyPublicProfileLinkAsync"
+                                class="px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] transition-all flex items-center gap-1.5 shadow-sm">
+                            <span>@(_copiedProfileLink ? "✓" : "📋")</span>
+                            <span>@(_copiedProfileLink ? "¡Enlace copiado!" : "Copiar enlace de mi perfil")</span>
+                        </button>
+                        <a href="/u/@CurrentUserService.UserId"
+                           target="_blank"
+                           class="px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all flex items-center gap-1.5 shadow-sm">
+                            <span>👁️</span>
+                            <span>Ver Perfil Público</span>
+                        </a>
+                    </div>
+                </div>
+
+                @if (_isLoadingStats)
+                {
+                    <div class="py-20 text-center text-[var(--text-secondary)]">
+                        <div class="inline-block animate-spin text-4xl mb-3">🧬</div>
+                        <p class="text-base font-semibold">Analizando el ADN de tu estantería...</p>
+                    </div>
+                }
+                else if (_stats != null)
+                {
+                    <LibraryStatsDashboard Stats="_stats" />
+                }
+            </div>
+        }
+        else if (_activeTab == TabType.Queue)
         {
             <div id="panel-queue" role="tabpanel" aria-labelledby="tab-queue">
                 <CatalogQueuePanel OnQueueProcessed="LoadSummaryAsync" />
@@ -161,11 +506,22 @@
                                     <a href="/juegos/@loan.GameSlug" class="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] block">
                                         @if (!string.IsNullOrWhiteSpace(loan.GameCoverUrl))
                                         {
-                                            <img src="@loan.GameCoverUrl" alt="@loan.GameTitle" loading="lazy" decoding="async" width="80" height="80" class="w-full h-full object-cover" />
+                                            <img src="@loan.GameCoverUrl"
+                                                 alt="@loan.GameTitle"
+                                                 loading="lazy"
+                                                 decoding="async"
+                                                 width="80"
+                                                 height="80"
+                                                 onerror="this.onerror=null; this.src='/images/game-placeholder.svg';"
+                                                 class="w-full h-full object-cover" />
                                         }
                                         else
                                         {
-                                            <div class="w-full h-full flex items-center justify-center text-xs text-[var(--text-muted)]">🎲</div>
+                                            <img src="/images/game-placeholder.svg"
+                                                 alt="Carátula no disponible"
+                                                 width="80"
+                                                 height="80"
+                                                 class="w-full h-full object-cover opacity-90" />
                                         }
                                     </a>
 
@@ -237,19 +593,41 @@
                         @foreach (var item in currentList)
                         {
                             <div class="group relative rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] overflow-hidden flex flex-col transition-all shadow-sm">
+                                @{
+                                    var placeholderUrl = item.IsExpansion ? "/images/expansion-placeholder.svg" : "/images/game-placeholder.svg";
+                                }
                                 @if (item.IsPendingCataloging)
                                 {
                                     <div class="block aspect-square w-full overflow-hidden bg-[var(--bg-surface-elevated)] relative">
                                         @if (!string.IsNullOrWhiteSpace(item.GameCoverUrl))
                                         {
-                                            <img src="@item.GameCoverUrl" alt="@item.GameTitle" loading="lazy" decoding="async" width="200" height="200" class="w-full h-full object-cover opacity-80" />
+                                            <img src="@item.GameCoverUrl"
+                                                 alt="@item.GameTitle"
+                                                 loading="lazy"
+                                                 decoding="async"
+                                                 width="200"
+                                                 height="200"
+                                                 onerror="this.onerror=null; this.src='@placeholderUrl';"
+                                                 class="w-full h-full object-cover opacity-80" />
                                         }
                                         else
                                         {
-                                            <div class="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-2xl font-bold">🎲</div>
+                                            <img src="@placeholderUrl"
+                                                 alt="@item.GameTitle"
+                                                 width="200"
+                                                 height="200"
+                                                 class="w-full h-full object-cover opacity-70" />
                                         }
 
-                                        <div class="absolute top-2 left-2 right-2 px-2 py-1 rounded-md bg-[var(--bg-nav)] text-[var(--brand-primary)] border border-[var(--border-subtle)] text-[0.6rem] font-bold uppercase tracking-wider backdrop-blur-sm z-10 flex items-center gap-1 shadow-sm">
+                                        @if (item.IsExpansion)
+                                        {
+                                            <div class="absolute top-2 right-2 z-20 px-2 py-0.5 rounded-md bg-purple-950/85 backdrop-blur-sm border border-purple-500/40 text-[0.62rem] font-black text-purple-200 shadow-md flex items-center gap-1">
+                                                <span>🧩</span>
+                                                <span>Expansión</span>
+                                            </div>
+                                        }
+
+                                        <div class="absolute bottom-2 left-2 right-2 px-2 py-1 rounded-md bg-[var(--bg-nav)] text-[var(--brand-primary)] border border-[var(--border-subtle)] text-[0.6rem] font-bold uppercase tracking-wider backdrop-blur-sm z-10 flex items-center gap-1 shadow-sm">
                                             <span>⏳</span>
                                             <span class="truncate">En cola de catalogación</span>
                                         </div>
@@ -260,11 +638,30 @@
                                     <a href="/juegos/@item.GameSlug" class="block aspect-square w-full overflow-hidden bg-[var(--bg-surface-elevated)] relative">
                                         @if (!string.IsNullOrWhiteSpace(item.GameCoverUrl))
                                         {
-                                            <img src="@item.GameCoverUrl" alt="@item.GameTitle" loading="lazy" decoding="async" width="200" height="200" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <img src="@item.GameCoverUrl"
+                                                 alt="@item.GameTitle"
+                                                 loading="lazy"
+                                                 decoding="async"
+                                                 width="200"
+                                                 height="200"
+                                                 onerror="this.onerror=null; this.src='@placeholderUrl';"
+                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                         }
                                         else
                                         {
-                                            <div class="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-2xl font-bold">🎲</div>
+                                            <img src="@placeholderUrl"
+                                                 alt="@item.GameTitle"
+                                                 width="200"
+                                                 height="200"
+                                                 class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-300" />
+                                        }
+
+                                        @if (item.IsExpansion)
+                                        {
+                                            <div class="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-md bg-purple-950/85 backdrop-blur-sm border border-purple-500/40 text-[0.62rem] font-black text-purple-200 shadow-md flex items-center gap-1">
+                                                <span>🧩</span>
+                                                <span>Expansión</span>
+                                            </div>
                                         }
 
                                         @if (item.IsCurrentlyLoaned)
@@ -324,31 +721,212 @@
         Wishlist,
         WantToBuy,
         Loans,
-        Queue
+        Queue,
+        Appearance,
+        Stats
     }
 
     private TabType _activeTab = TabType.InCollection;
     private UserLibrarySummaryDto? _summary;
+    private UserLibraryStatsDto? _stats;
     private bool _isLoading = true;
+    private bool _isLoadingStats = false;
+    private bool _copiedProfileLink = false;
     private bool _showBggImportModal = false;
     private bool _showBggSearchModal = false;
+    private string _userCurrentTheme = "charcoal";
+    private string? _saveMessage;
+    private string? _userCurrentCountry;
+    private string? _countrySaveMessage;
+    private bool _isOfflineMode = false;
+    private string? _offlineTimestamp;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadSummaryAsync();
+        try
+        {
+            _userCurrentTheme = await PreferenceService.GetUserThemeAsync(CurrentUserService.UserId);
+            _userCurrentCountry = await PreferenceService.GetUserCountryAsync(CurrentUserService.UserId);
+        }
+        catch
+        {
+        }
     }
 
     private async Task LoadSummaryAsync()
     {
         _isLoading = true;
-        _summary = await LibraryService.GetLibrarySummaryAsync();
-        _isLoading = false;
+        try
+        {
+            _summary = await LibraryService.GetLibrarySummaryAsync();
+            _isOfflineMode = false;
+
+            // Sincronizar instantánea offline en segundo plano
+            if (_summary != null)
+            {
+                var snapshot = OfflineLibrarySnapshotDto.FromSummary(CurrentUserService.UserId, _summary);
+                string json = System.Text.Json.JsonSerializer.Serialize(snapshot);
+                _ = JS.InvokeVoidAsync("LudekaOffline.saveLibrarySnapshot", CurrentUserService.UserId, json);
+            }
+        }
+        catch (Exception)
+        {
+            // Intentar recuperar de la caché local offline
+            try
+            {
+                string? raw = await JS.InvokeAsync<string?>("LudekaOffline.getLibrarySnapshot", CurrentUserService.UserId);
+                if (!string.IsNullOrWhiteSpace(raw))
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(raw);
+                    if (doc.RootElement.TryGetProperty("data", out var dataProp))
+                    {
+                        var snapshot = System.Text.Json.JsonSerializer.Deserialize<OfflineLibrarySnapshotDto>(dataProp.GetRawText());
+                        if (snapshot != null)
+                        {
+                            _summary = snapshot.ToSummary();
+                            _isOfflineMode = true;
+                            _offlineTimestamp = await JS.InvokeAsync<string?>("LudekaOffline.getLastSnapshotTimestamp", CurrentUserService.UserId);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+            _stats = null;
+            if (_activeTab == TabType.Stats)
+            {
+                await LoadStatsAsync();
+            }
+        }
+    }
+
+    private async Task SwitchToStatsAsync()
+    {
+        _activeTab = TabType.Stats;
+        if (_stats == null)
+        {
+            await LoadStatsAsync();
+        }
+    }
+
+    private async Task LoadStatsAsync()
+    {
+        _isLoadingStats = true;
+        StateHasChanged();
+        try
+        {
+            _stats = await StatsService.GetUserStatsAsync(CurrentUserService.UserId);
+        }
+        catch
+        {
+        }
+        finally
+        {
+            _isLoadingStats = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CopyPublicProfileLinkAsync()
+    {
+        try
+        {
+            string url = Navigation.ToAbsoluteUri($"/u/{CurrentUserService.UserId}").ToString();
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", url);
+            _copiedProfileLink = true;
+            StateHasChanged();
+            await Task.Delay(2500);
+            _copiedProfileLink = false;
+            StateHasChanged();
+        }
+        catch
+        {
+        }
     }
 
     private async Task HandleReturnLoan(Guid loanId)
     {
         await LibraryService.ReturnLoanAsync(loanId);
         await LoadSummaryAsync();
+    }
+
+    private async Task SelectUserTheme(string theme)
+    {
+        _userCurrentTheme = theme;
+        _saveMessage = null;
+        try
+        {
+            await JS.InvokeVoidAsync("setLudekaTheme", theme, CurrentUserService.UserId);
+            await PreferenceService.SetUserThemeAsync(CurrentUserService.UserId, theme);
+            _saveMessage = $"Tema '{GetThemeDisplayName(theme)}' guardado para {CurrentUserService.UserName}";
+        }
+        catch
+        {
+            _saveMessage = "Tema aplicado localmente";
+        }
+        StateHasChanged();
+    }
+
+    private static string GetThemeDisplayName(string theme) => theme switch
+    {
+        "editorial" => "Papel & Tinta",
+        "wood" => "Madera Clara",
+        "tabletop" => "Mesa Cálida",
+        "midnight" => "Azul Medianoche",
+        _ => "Carbón Oscuro"
+    };
+
+    private async Task OnCountrySelectChangedAsync()
+    {
+        string? country = string.IsNullOrWhiteSpace(_userCurrentCountry) ? null : _userCurrentCountry;
+        await SelectUserCountryAsync(country);
+    }
+
+    private async Task SelectUserCountryAsync(string? country)
+    {
+        _userCurrentCountry = country;
+        _countrySaveMessage = null;
+        try
+        {
+            await PreferenceService.SetUserCountryAsync(CurrentUserService.UserId, country);
+            LocationService.SetUserCountry(country);
+            await JS.InvokeVoidAsync("setStoredUserCountry", country, CurrentUserService.UserId);
+            _countrySaveMessage = country != null
+                ? $"País configurado a {CountryCatalog.GetFlag(country)} {country} para {CurrentUserService.UserName}."
+                : "Ámbito global restablecido (sin filtro). Todo el contenido es visible.";
+        }
+        catch (Exception ex)
+        {
+            _countrySaveMessage = $"Error al guardar país: {ex.Message}";
+        }
+        StateHasChanged();
+    }
+
+    private async Task AutoDetectCountryAsync()
+    {
+        try
+        {
+            var detected = await JS.InvokeAsync<string?>("detectUserCountry");
+            if (!string.IsNullOrWhiteSpace(detected))
+            {
+                await SelectUserCountryAsync(detected);
+            }
+            else
+            {
+                _countrySaveMessage = "No se pudo inferir el país desde la zona horaria del dispositivo.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _countrySaveMessage = $"Error al detectar: {ex.Message}";
+        }
+        StateHasChanged();
     }
 
     private List<UserCollectionItemDto> GetFilteredItems()
@@ -375,6 +953,8 @@
         TabType.WantToBuy => "«Quiero comprar»",
         TabType.Loans => "«Préstamos»",
         TabType.Queue => "«Cola comunitaria»",
+        TabType.Appearance => "«Apariencia y Tema»",
+        TabType.Stats => "«ADN y Estadísticas»",
         _ => ""
     };
 

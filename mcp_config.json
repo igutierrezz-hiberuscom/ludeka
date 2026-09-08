@@ -5,7 +5,14 @@
         "mcp",
         "--tools=agent"
       ],
-      "command": "C:\\repos\\Ludeca\\.tools\\bin\\engram.exe"
+      "command": "C:\\repos\\Ludeka\\.tools\\bin\\engram.exe"
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
     }
   }
 }

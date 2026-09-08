@@ -11,6 +11,8 @@ public class PendingBggImport
     public int? YearPublished { get; private set; }
     public string? ThumbnailUrl { get; private set; }
     public string? CoverImageUrl { get; private set; }
+    public CatalogQueueOrigin Origin { get; private set; } = CatalogQueueOrigin.UserImport;
+    public string? ExtractedTitle { get; private set; }
     public int RequestedCount { get; private set; } = 1;
     public CatalogQueueStatus Status { get; private set; } = CatalogQueueStatus.Pending;
     public string? ErrorMessage { get; private set; }
@@ -24,7 +26,9 @@ public class PendingBggImport
         string title,
         int? yearPublished = null,
         string? thumbnailUrl = null,
-        string? coverImageUrl = null)
+        string? coverImageUrl = null,
+        CatalogQueueOrigin origin = CatalogQueueOrigin.UserImport,
+        string? extractedTitle = null)
     {
         if (bggId <= 0)
             throw new ArgumentException("El identificador BGG debe ser mayor a cero.", nameof(bggId));
@@ -36,6 +40,8 @@ public class PendingBggImport
         YearPublished = yearPublished;
         ThumbnailUrl = thumbnailUrl?.Trim();
         CoverImageUrl = coverImageUrl?.Trim();
+        Origin = origin;
+        ExtractedTitle = string.IsNullOrWhiteSpace(extractedTitle) ? null : extractedTitle.Trim();
         RequestedCount = 1;
         Status = CatalogQueueStatus.Pending;
         CreatedAt = DateTimeOffset.UtcNow;

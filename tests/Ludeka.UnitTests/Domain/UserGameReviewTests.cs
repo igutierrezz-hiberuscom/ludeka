@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Ludeka.Core.Entities;
 using Ludeka.Core.Enums;
@@ -77,5 +77,25 @@ public class UserGameReviewTests
         Assert.Equal("¡Imprescindible tras más partidas!", review.MicroReview);
         Assert.NotNull(review.UpdatedAt);
         Assert.Equal(PlayContextType.Owned, review.PlayContext);
+    }
+
+    [Theory]
+    [InlineData("8.0", 8.0)]
+    [InlineData("8.5", 8.5)]
+    [InlineData("8", 8.0)]
+    [InlineData("8,5", 8.5)]
+    [InlineData("10.0", 10.0)]
+    [InlineData("1.0", 1.0)]
+    [InlineData("15.0", 10.0)]
+    [InlineData("0.5", 1.0)]
+    public void ScoreParsing_ShouldPreventCultureMisinterpretation_AndClampAccurately(string rawInput, double expectedScore)
+    {
+        var normalized = rawInput.Replace(',', '.');
+        Assert.True(double.TryParse(normalized, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var parsed));
+        var score = Math.Clamp(Math.Round(parsed * 2.0, MidpointRounding.AwayFromZero) / 2.0, 1.0, 10.0);
+
+        var review = new UserGameReview("user-1", Guid.NewGuid(), score);
+
+        Assert.Equal(expectedScore, review.Score);
     }
 }

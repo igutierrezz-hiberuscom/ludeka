@@ -1,18 +1,25 @@
 @using Ludeka.Application.DTOs
+@using System.Globalization
 
 <div class="rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-5 sm:p-6 shadow-sm">
-    @* Cabecera *@
+    @* Cabecera Editorial con Insignia de IA y Modelo *@
     <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border-subtle)]">
-        <div class="flex items-center gap-2.5">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                <span>📋</span> Síntesis Editorial
+        <div class="flex items-center flex-wrap gap-2.5">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-2xs">
+                <span>🤖</span> Síntesis generada por IA
             </span>
-            <span class="text-xs text-[var(--text-muted)] font-medium">
-                Consenso de la comunidad
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[0.68rem] font-semibold bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                <span>⚡</span> @Summary.Model
             </span>
+            @if (Summary.GeneratedAt.HasValue)
+            {
+                <span class="text-[0.68rem] text-[var(--text-muted)]">
+                    Generado el @Summary.GeneratedAt.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
+                </span>
+            }
         </div>
         <div class="text-[0.68rem] text-[var(--text-muted)] flex items-center gap-1">
-            <span>⚡ Análisis del hobby</span>
+            <span>🛡️ Análisis objetivo del hobby</span>
         </div>
     </div>
 
@@ -58,7 +65,7 @@
         <div class="p-3 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[0.72rem] text-[var(--text-muted)] flex items-start gap-2.5">
             <span class="text-base shrink-0">⏳</span>
             <p>
-                <strong class="text-[var(--text-secondary)]">Ciclo Editorial Ludeka:</strong> Síntesis preliminar del consenso lúdico internacional. En cuanto nuestro equipo publique su veredicto oficial con fotos de partida, este bloque será actualizado.
+                <strong class="text-[var(--text-secondary)]">Ciclo Editorial Ludeka:</strong> Síntesis objetiva provisional generada mediante IA o motor heurístico basada en el consenso internacional. En cuanto el equipo de la Mesa Fundadora publique su veredicto oficial con fotografías de sesión real, este bloque pasará a segundo plano.
             </p>
         </div>
     </div>

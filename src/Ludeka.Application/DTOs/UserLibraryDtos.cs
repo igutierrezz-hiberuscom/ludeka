@@ -15,7 +15,8 @@ public record UserCollectionItemDto(
     DateTimeOffset AddedAt,
     bool IsCurrentlyLoaned,
     int? BggId = null,
-    bool IsPendingCataloging = false
+    bool IsPendingCataloging = false,
+    bool IsExpansion = false
 );
 
 public record GameLoanDto(

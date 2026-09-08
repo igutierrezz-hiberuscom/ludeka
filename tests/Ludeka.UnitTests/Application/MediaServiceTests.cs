@@ -50,10 +50,13 @@ public class MediaServiceTests : IAsyncLifetime
         await _connection.DisposeAsync();
     }
 
-    private async Task<Game> SeedGameAsync(string title = "Terraforming Mars")
+    private static int _nextBggId = 167791;
+
+    private async Task<Game> SeedGameAsync(string title = "Terraforming Mars", int? bggId = null)
     {
+        var assignedBggId = bggId ?? System.Threading.Interlocked.Increment(ref _nextBggId);
         var game = new Game(
-            bggId: 167791,
+            bggId: assignedBggId,
             originalTitle: title,
             spanishTitle: title,
             designer: "Jacob Fryxelius",
@@ -315,5 +318,345 @@ public class MediaServiceTests : IAsyncLifetime
         Assert.Equal(1, report.BrokenCount);
         Assert.Single(report.BrokenItems);
         Assert.Equal("Enlace roto conocido", report.BrokenItems[0].Title);
+    }
+
+    [Fact]
+    public async Task UpdateMediaCategoryAsync_WhenItemExists_ShouldUpdateCategoryAndReturnDto()
+    {
+        var game = await SeedGameAsync("Root");
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Tutorial de Root",
+            "https://youtube.com/watch?v=root1",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game.Id,
+            category: MediaCategory.Tutorial
+        );
+        await _mediaRepository.AddAsync(item);
+
+        var updated = await _service.UpdateMediaCategoryAsync(item.Id, MediaCategory.QuickOverview);
+
+        Assert.NotNull(updated);
+        Assert.Equal(MediaCategory.QuickOverview, updated.Category);
+        Assert.Equal(game.SpanishTitle, updated.GameTitle);
+
+        var inDb = await _mediaRepository.GetByIdAsync(item.Id);
+        Assert.NotNull(inDb);
+        Assert.Equal(MediaCategory.QuickOverview, inDb.Category);
+    }
+
+    [Fact]
+    public async Task UpdateMediaCategoryAsync_WhenNotFound_ShouldReturnNull()
+    {
+        var result = await _service.UpdateMediaCategoryAsync(Guid.NewGuid(), MediaCategory.Gameplay);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task UpdateMediaCategoryAsync_WithAuditAndCurrentUser_ShouldRecordAuditLog()
+    {
+        var game = await SeedGameAsync("Scythe");
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Tutorial Scythe",
+            "https://youtube.com/watch?v=scythe1",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game.Id,
+            category: MediaCategory.Tutorial
+        );
+        await _mediaRepository.AddAsync(item);
+
+        var currentUser = new TestCurrentUserService { Permissions = ModeratorPermission.CanApproveMedia };
+        var auditService = new TestAuditService();
+        var serviceWithAudit = new MediaService(_mediaRepository, _gameRepository, _brokenLinkChecker, currentUser, auditService);
+
+        var updated = await serviceWithAudit.UpdateMediaCategoryAsync(item.Id, MediaCategory.ReviewOpinion);
+
+        Assert.NotNull(updated);
+        Assert.Equal(MediaCategory.ReviewOpinion, updated.Category);
+        Assert.Single(auditService.Commands);
+        var audit = auditService.Commands[0];
+        Assert.Equal(AuditEntityType.Media, audit.EntityType);
+        Assert.Equal(AuditAction.Updated, audit.Action);
+        Assert.Contains("ReviewOpinion", audit.Summary);
+    }
+
+    [Fact]
+    public async Task UpdateMediaCategoryAsync_WithoutPermission_ShouldThrowUnauthorized()
+    {
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Tutorial",
+            "https://youtube.com/watch?v=vid1",
+            "https://thumb.jpg",
+            "@canal"
+        );
+        await _mediaRepository.AddAsync(item);
+
+        var currentUser = new TestCurrentUserService { Permissions = ModeratorPermission.None };
+        var service = new MediaService(_mediaRepository, _gameRepository, _brokenLinkChecker, currentUser);
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            service.UpdateMediaCategoryAsync(item.Id, MediaCategory.Gameplay));
+    }
+
+    [Fact]
+    public async Task ReassignMediaGameAsync_WithValidGames_ShouldReassignAndReturnDto()
+    {
+        var game1 = await SeedGameAsync("Juego Original");
+        var game2 = await SeedGameAsync("Juego Destino");
+
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Vídeo mal asignado",
+            "https://youtube.com/watch?v=reassign1",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game1.Id
+        );
+        await _mediaRepository.AddAsync(item);
+
+        var result = await _service.ReassignMediaGameAsync(item.Id, game2.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal(game2.Id, result.GameId);
+        Assert.Equal(game2.SpanishTitle, result.GameTitle);
+
+        var inDb = await _mediaRepository.GetByIdAsync(item.Id);
+        Assert.NotNull(inDb);
+        Assert.Equal(game2.Id, inDb.GameId);
+    }
+
+    [Fact]
+    public async Task ReassignMediaGameAsync_WithNonExistentGame_ShouldThrowArgumentException()
+    {
+        var game = await SeedGameAsync("Juego Inicial");
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Vídeo",
+            "https://youtube.com/watch?v=reassign2",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game.Id
+        );
+        await _mediaRepository.AddAsync(item);
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _service.ReassignMediaGameAsync(item.Id, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task ReassignMediaGameAsync_WithAudit_ShouldRecordAuditLog()
+    {
+        var game1 = await SeedGameAsync("Juego Origen Audit");
+        var game2 = await SeedGameAsync("Juego Destino Audit");
+
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Vídeo Audit",
+            "https://youtube.com/watch?v=audit_reassign",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game1.Id
+        );
+        await _mediaRepository.AddAsync(item);
+
+        var currentUser = new TestCurrentUserService { Permissions = ModeratorPermission.CanApproveMedia };
+        var auditService = new TestAuditService();
+        var serviceWithAudit = new MediaService(_mediaRepository, _gameRepository, _brokenLinkChecker, currentUser, auditService);
+
+        var result = await serviceWithAudit.ReassignMediaGameAsync(item.Id, game2.Id);
+
+        Assert.NotNull(result);
+        Assert.Single(auditService.Commands);
+        var audit = auditService.Commands[0];
+        Assert.Equal(AuditEntityType.Media, audit.EntityType);
+        Assert.Equal(AuditAction.Updated, audit.Action);
+        Assert.Contains(game2.SpanishTitle, audit.Summary);
+    }
+
+    [Fact]
+    public async Task DeleteMediaAsync_WhenFound_ShouldDeleteAndReturnTrue()
+    {
+        var game = await SeedGameAsync("Juego Para Borrar");
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Vídeo a eliminar",
+            "https://youtube.com/watch?v=delete1",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game.Id
+        );
+        await _mediaRepository.AddAsync(item);
+
+        var currentUser = new TestCurrentUserService { Permissions = ModeratorPermission.CanApproveMedia };
+        var auditService = new TestAuditService();
+        var service = new MediaService(_mediaRepository, _gameRepository, _brokenLinkChecker, currentUser, auditService);
+
+        var success = await service.DeleteMediaAsync(item.Id);
+
+        Assert.True(success);
+        var inDb = await _mediaRepository.GetByIdAsync(item.Id);
+        Assert.Null(inDb);
+
+        Assert.Single(auditService.Commands);
+        var audit = auditService.Commands[0];
+        Assert.Equal(AuditEntityType.Media, audit.EntityType);
+        Assert.Equal(AuditAction.Deleted, audit.Action);
+    }
+
+    [Fact]
+    public async Task DeleteMediaAsync_WhenNotFound_ShouldReturnFalse()
+    {
+        var success = await _service.DeleteMediaAsync(Guid.NewGuid());
+        Assert.False(success);
+    }
+
+    [Fact]
+    public async Task DeleteMediaAsync_WithoutPermission_ShouldThrowUnauthorized()
+    {
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Vídeo sin permiso",
+            "https://youtube.com/watch?v=delete2",
+            "https://thumb.jpg",
+            "@canal"
+        );
+        await _mediaRepository.AddAsync(item);
+
+        var currentUser = new TestCurrentUserService { Permissions = ModeratorPermission.None };
+        var service = new MediaService(_mediaRepository, _gameRepository, _brokenLinkChecker, currentUser);
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            service.DeleteMediaAsync(item.Id));
+    }
+
+    [Fact]
+    public async Task ApproveMediaAsync_WithCategory_ShouldApproveAndChangeCategory()
+    {
+        var game = await SeedGameAsync("Juego Aprobación");
+        var item = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Vídeo con categoría errónea",
+            "https://youtube.com/watch?v=approve_cat",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game.Id,
+            category: MediaCategory.Tutorial,
+            status: ModerationStatus.PendingApproval
+        );
+        await _mediaRepository.AddAsync(item);
+
+        var currentUser = new TestCurrentUserService { Permissions = ModeratorPermission.CanApproveMedia };
+        var auditService = new TestAuditService();
+        var service = new MediaService(_mediaRepository, _gameRepository, _brokenLinkChecker, currentUser, auditService);
+
+        var result = await service.ApproveMediaAsync(item.Id, MediaCategory.ReviewOpinion);
+
+        Assert.NotNull(result);
+        Assert.Equal(ModerationStatus.Approved, result.Status);
+        Assert.Equal(MediaCategory.ReviewOpinion, result.Category);
+
+        Assert.Single(auditService.Commands);
+        var audit = auditService.Commands[0];
+        Assert.Equal(AuditEntityType.Media, audit.EntityType);
+        Assert.Equal(AuditAction.StatusChanged, audit.Action);
+        Assert.Contains("ReviewOpinion", audit.Summary);
+    }
+
+    [Fact]
+    public async Task GetGameMediaAsync_ShouldPopulateQuickOverviewsAndReviewsAndOpinions()
+    {
+        var game = await SeedGameAsync("Dune Imperium");
+
+        var overview = new MediaItem(
+            MediaType.QuickOverview,
+            MediaPlatform.YouTube,
+            "Dune Imperium en 2 minutos",
+            "https://youtube.com/watch?v=dune_overview",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game.Id,
+            category: MediaCategory.QuickOverview,
+            status: ModerationStatus.Approved
+        );
+
+        var review = new MediaItem(
+            MediaType.Tutorial,
+            MediaPlatform.YouTube,
+            "Reseña y veredicto de Dune Imperium",
+            "https://youtube.com/watch?v=dune_review",
+            "https://thumb.jpg",
+            "@canal",
+            gameId: game.Id,
+            category: MediaCategory.ReviewOpinion,
+            status: ModerationStatus.Approved
+        );
+
+        await _mediaRepository.AddAsync(overview);
+        await _mediaRepository.AddAsync(review);
+
+        var hub = await _service.GetGameMediaAsync(game.Id);
+
+        Assert.NotNull(hub);
+        Assert.Single(hub.QuickOverviews);
+        Assert.Equal("Dune Imperium en 2 minutos", hub.QuickOverviews[0].Title);
+        Assert.Single(hub.ReviewsAndOpinions);
+        Assert.Equal("Reseña y veredicto de Dune Imperium", hub.ReviewsAndOpinions[0].Title);
+        Assert.True(hub.HasQuickOverviews);
+        Assert.True(hub.HasSocial);
+        Assert.Equal(2, hub.TotalCount);
+    }
+
+    private class TestCurrentUserService : ICurrentUserService
+    {
+        public string UserId { get; set; } = "user_mod_1";
+        public string UserName { get; set; } = "Moderador Editorial";
+        public List<string> RolesList { get; set; } = ["Moderator"];
+        public ModeratorPermission Permissions { get; set; } = ModeratorPermission.CanApproveMedia;
+
+        public IReadOnlyList<string> Roles => RolesList;
+        public bool IsFoundingTeam => RolesList.Contains("FoundingTeam", StringComparer.OrdinalIgnoreCase);
+        public bool IsInRole(string role) => RolesList.Any(r => r.Equals(role, StringComparison.OrdinalIgnoreCase));
+        public bool HasPermission(ModeratorPermission permission)
+        {
+            if (IsFoundingTeam) return true;
+            return (Permissions & permission) == permission;
+        }
+
+        public void SwitchRole(string role)
+        {
+            RolesList.Clear();
+            RolesList.Add(role);
+        }
+
+        public void SwitchUser(string userId) => UserId = userId;
+    }
+
+    private class TestAuditService : IAuditService
+    {
+        public List<RecordAuditCommand> Commands { get; } = [];
+
+        public Task RecordChangeAsync(RecordAuditCommand command, CancellationToken ct = default)
+        {
+            Commands.Add(command);
+            return Task.CompletedTask;
+        }
+
+        public Task<AuditLogPageDto> GetAuditLogsAsync(AuditLogFilterDto filter, CancellationToken ct = default)
+        {
+            return Task.FromResult(new AuditLogPageDto([], 0, 1, 50, 0));
+        }
     }
 }

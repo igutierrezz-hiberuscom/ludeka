@@ -53,6 +53,8 @@ public class WeeklyReleaseService : IWeeklyReleaseService
             r.CoverImageUrl,
             r.EstimatedPvp,
             r.IsReprint,
-            r.Notes);
+            r.Notes,
+            r.InstagramPermalink,
+            r.IsPublishedOnInstagram);
     }
 }

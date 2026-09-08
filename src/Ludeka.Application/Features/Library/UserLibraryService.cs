@@ -49,7 +49,10 @@ public class UserLibraryService : IUserLibraryService
             game?.Slug ?? string.Empty,
             item.Status,
             item.AddedAt,
-            activeLoan != null
+            activeLoan != null,
+            item.BggId ?? game?.BggId,
+            false,
+            game?.IsExpansion ?? false
         );
     }
 
@@ -277,7 +280,8 @@ public class UserLibraryService : IUserLibraryService
                     item.AddedAt,
                     isLoaned,
                     item.BggId ?? game?.BggId,
-                    false
+                    false,
+                    game?.IsExpansion ?? false
                 ));
             }
         }
@@ -342,7 +346,8 @@ public class UserLibraryService : IUserLibraryService
             item.AddedAt,
             activeLoan != null,
             item.BggId ?? game?.BggId,
-            false
+            false,
+            game?.IsExpansion ?? false
         );
     }
 

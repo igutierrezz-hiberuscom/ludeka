@@ -1,0 +1,382 @@
+@page "/admin/usuarios"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@using Ludeka.Web.Components.Shared
+@inject IUserManagementService UserService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>Gestión de Usuarios y Permisos | Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-6">
+    @* Verificación de Rol *@
+    @if (!CurrentUserService.IsFoundingTeam)
+    {
+        <div class="max-w-md mx-auto py-16 text-center space-y-4">
+            <span class="text-5xl block">🛡️</span>
+            <h1 class="text-2xl font-bold text-[var(--text-primary)]">Acceso Exclusivo Mesa Fundadora</h1>
+            <p class="text-sm text-[var(--text-secondary)]">
+                La administración de cuentas, asignación de roles y configuración de permisos granulares está reservada a la Mesa Fundadora de Ludeka.
+            </p>
+            <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
+                <p class="mb-2">
+                    💡 Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
+                </p>
+                <button type="button"
+                        @onclick="SwitchToFounder"
+                        class="px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity">
+                    Activar Modo Fundador Ahora
+                </button>
+            </div>
+            <a href="/" class="inline-block text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] underline">
+                &larr; Volver al Catálogo
+            </a>
+        </div>
+    }
+    else
+    {
+        @* Cabecera Editorial *@
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-2xl">👥</span>
+                    <h1 class="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+                        Gestión de Usuarios & Permisos RBAC
+                    </h1>
+                </div>
+                <p class="text-xs text-[var(--text-muted)]">
+                    Administra roles comunitarios, asigna permisos específicos por área de moderación y audita privilegios.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+                <a href="/admin/auditoria"
+                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
+                    <span>📜</span>
+                    <span>Bitácora de Auditoría</span>
+                </a>
+                <a href="/moderacion/reportes"
+                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-amber-400 text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
+                    <span>🚩</span>
+                    <span>Reportes</span>
+                </a>
+            </div>
+        </div>
+
+        @* Notificación de Simulación en Vivo *@
+        @if (!string.IsNullOrWhiteSpace(_simulationMessage))
+        {
+            <div class="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between animate-fade-in">
+                <div class="flex items-center gap-2">
+                    <span class="text-base">🎭</span>
+                    <span>@_simulationMessage</span>
+                </div>
+                <button type="button" @onclick="() => _simulationMessage = null" class="text-amber-400 hover:text-white font-bold">&times;</button>
+            </div>
+        }
+
+        @* Barra de Filtros y Búsqueda *@
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs">
+            <div class="flex-1 max-w-md relative">
+                <input type="text"
+                       @bind="_searchTerm"
+                       @bind:event="oninput"
+                       placeholder="Buscar usuario por nombre o correo..."
+                       class="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] text-xs" />
+                <span class="absolute left-3 top-2.5 text-[var(--text-muted)]">🔍</span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                @* Filtro por Rol *@
+                <div class="flex items-center rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-1">
+                    <button type="button"
+                            @onclick="() => SetRoleFilter(null)"
+                            class="px-2.5 py-1 rounded-lg font-bold transition-all @(_selectedRoleFilter == null ? "bg-[var(--brand-primary)] text-white" : "text-[var(--text-secondary)]")">
+                        Todos
+                    </button>
+                    <button type="button"
+                            @onclick="() => SetRoleFilter(UserRole.FoundingTeam)"
+                            class="px-2.5 py-1 rounded-lg font-bold transition-all @(_selectedRoleFilter == UserRole.FoundingTeam ? "bg-amber-500/20 text-amber-300" : "text-[var(--text-secondary)]")">
+                        👑 Mesa
+                    </button>
+                    <button type="button"
+                            @onclick="() => SetRoleFilter(UserRole.Moderator)"
+                            class="px-2.5 py-1 rounded-lg font-bold transition-all @(_selectedRoleFilter == UserRole.Moderator ? "bg-sky-500/20 text-sky-300" : "text-[var(--text-secondary)]")">
+                        🛡️ Mods
+                    </button>
+                    <button type="button"
+                            @onclick="() => SetRoleFilter(UserRole.CommunityUser)"
+                            class="px-2.5 py-1 rounded-lg font-bold transition-all @(_selectedRoleFilter == UserRole.CommunityUser ? "bg-slate-500/20 text-slate-300" : "text-[var(--text-secondary)]")">
+                        👤 Comunidad
+                    </button>
+                </div>
+
+                @* Filtro por Estado *@
+                <select @bind="_selectedStatusFilter"
+                        @bind:after="ApplyFilter"
+                        class="px-3 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none text-xs">
+                    <option value="">Estado: Todos</option>
+                    <option value="Active">Activos</option>
+                    <option value="Suspended">Suspendidos</option>
+                </select>
+            </div>
+        </div>
+
+        @* Listado de Usuarios *@
+        @if (_isLoading)
+        {
+            <div class="p-12 text-center text-xs text-[var(--text-muted)] space-y-2">
+                <span class="animate-spin text-2xl block">⏳</span>
+                <span>Cargando padrón de usuarios...</span>
+            </div>
+        }
+        else if (FilteredUsers.Count == 0)
+        {
+            <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-2 text-xs text-[var(--text-muted)]">
+                <span class="text-3xl block">👤</span>
+                <p class="font-bold text-[var(--text-secondary)]">No se encontraron usuarios coincidentes</p>
+                <p>Prueba a modificar los filtros o el término de búsqueda.</p>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 gap-3">
+                @foreach (var user in FilteredUsers)
+                {
+                    <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs shadow-sm">
+                        @* Datos del usuario *@
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-base font-black shrink-0 @GetAvatarStyle(user)">
+                                @GetAvatarIcon(user)
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="font-bold text-sm text-[var(--text-primary)]">@user.UserName</span>
+                                    <span class="text-[0.7rem] px-2 py-0.5 rounded-full font-bold @GetRoleBadgeStyle(user.Role)">
+                                        @user.RoleDisplayName
+                                    </span>
+                                    <span class="text-[0.7rem] px-2 py-0.5 rounded-full font-semibold @(user.Status == UserStatus.Active ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20")">
+                                        @user.StatusDisplayName
+                                    </span>
+                                </div>
+                                <div class="text-[0.7rem] text-[var(--text-muted)] flex flex-wrap items-center gap-3">
+                                    <span>ID: <code class="font-mono text-[var(--text-secondary)]">@user.Id</code></span>
+                                    <span>•</span>
+                                    <span>@user.Email</span>
+                                    <span>•</span>
+                                    <span>Registro: @user.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                </div>
+
+                                @* Badges de Permisos *@
+                                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                                    @if (user.Role == UserRole.FoundingTeam)
+                                    {
+                                        <span class="px-2 py-0.5 rounded-md text-[0.65rem] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                                            ✨ Privilegios Plenos
+                                        </span>
+                                    }
+                                    else if (user.Role == UserRole.Moderator)
+                                    {
+                                        @if (user.PermissionNames.Count == 0)
+                                        {
+                                            <span class="text-[0.65rem] text-[var(--text-muted)] italic">Sin permisos activos</span>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var perm in user.PermissionNames)
+                                            {
+                                                <span class="px-2 py-0.5 rounded-md text-[0.65rem] font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/20">
+                                                    @perm
+                                                </span>
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-[0.65rem] text-[var(--text-muted)] italic">Acceso comunitario ordinario</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Acciones de la Mesa Fundadora *@
+                        <div class="flex flex-wrap items-center gap-2 self-end md:self-center shrink-0">
+                            <button type="button"
+                                    @onclick="() => SimulateUser(user)"
+                                    title="Simular navegación activa bajo este usuario"
+                                    class="px-2.5 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-amber-400 font-semibold border border-[var(--border-subtle)] transition-colors flex items-center gap-1">
+                                <span>🎭</span>
+                                <span>Simular</span>
+                            </button>
+
+                            <button type="button"
+                                    @onclick="() => OpenPermissionsModal(user)"
+                                    class="px-3 py-1.5 rounded-xl bg-[var(--brand-primary)]/15 hover:bg-[var(--brand-primary)]/25 text-[var(--brand-primary)] font-bold border border-[var(--brand-primary)]/30 transition-colors flex items-center gap-1">
+                                <span>⚙️</span>
+                                <span>Rol & Permisos</span>
+                            </button>
+
+                            @if (user.Status == UserStatus.Active)
+                            {
+                                <button type="button"
+                                        @onclick="() => ToggleStatus(user)"
+                                        title="Suspender cuenta de usuario"
+                                        class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/20 transition-colors">
+                                    🚫 Suspender
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        @onclick="() => ToggleStatus(user)"
+                                        title="Reactivar cuenta de usuario"
+                                        class="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/20 transition-colors">
+                                    🟢 Reactivar
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@* Modal de Edición de Permisos *@
+<UserPermissionsModal IsOpen="_isPermissionsModalOpen"
+                      User="_selectedUserForEdit"
+                      OnClose="ClosePermissionsModal"
+                      OnUserUpdated="HandleUserUpdated" />
+
+@code {
+    private List<AppUserDto> _users = [];
+    private bool _isLoading = true;
+    private string _searchTerm = string.Empty;
+    private UserRole? _selectedRoleFilter = null;
+    private string _selectedStatusFilter = string.Empty;
+
+    private bool _isPermissionsModalOpen;
+    private AppUserDto? _selectedUserForEdit;
+    private string? _simulationMessage;
+
+    private IReadOnlyList<AppUserDto> FilteredUsers
+    {
+        get
+        {
+            var q = _users.AsEnumerable();
+            if (_selectedRoleFilter.HasValue)
+                q = q.Where(u => u.Role == _selectedRoleFilter.Value);
+
+            if (!string.IsNullOrWhiteSpace(_selectedStatusFilter))
+            {
+                if (Enum.TryParse<UserStatus>(_selectedStatusFilter, out var st))
+                    q = q.Where(u => u.Status == st);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_searchTerm))
+            {
+                var clean = _searchTerm.Trim().ToLowerInvariant();
+                q = q.Where(u => u.UserName.ToLowerInvariant().Contains(clean) ||
+                                 u.Email.ToLowerInvariant().Contains(clean) ||
+                                 u.Id.ToLowerInvariant().Contains(clean));
+            }
+
+            return q.ToList();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            _isLoading = true;
+            if (CurrentUserService.IsFoundingTeam)
+            {
+                var list = await UserService.GetUsersAsync();
+                _users = list.ToList();
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void SetRoleFilter(UserRole? role)
+    {
+        _selectedRoleFilter = role;
+    }
+
+    private void ApplyFilter()
+    {
+        StateHasChanged();
+    }
+
+    private void OpenPermissionsModal(AppUserDto user)
+    {
+        _selectedUserForEdit = user;
+        _isPermissionsModalOpen = true;
+    }
+
+    private void ClosePermissionsModal()
+    {
+        _isPermissionsModalOpen = false;
+        _selectedUserForEdit = null;
+    }
+
+    private void HandleUserUpdated(AppUserDto updatedUser)
+    {
+        var idx = _users.FindIndex(u => u.Id.Equals(updatedUser.Id, StringComparison.OrdinalIgnoreCase));
+        if (idx >= 0)
+        {
+            _users[idx] = updatedUser;
+        }
+    }
+
+    private async Task ToggleStatus(AppUserDto user)
+    {
+        var newStatus = user.Status == UserStatus.Active ? UserStatus.Suspended : UserStatus.Active;
+        var updated = await UserService.UpdateUserStatusAsync(new UpdateUserStatusCommand(user.Id, newStatus));
+        HandleUserUpdated(updated);
+    }
+
+    private void SimulateUser(AppUserDto user)
+    {
+        CurrentUserService.SwitchUser(user.Id);
+        _simulationMessage = $"Sesión simulada activa como '{user.UserName}' ({user.RoleDisplayName}). Los controles de navegación y botones se adaptarán a sus permisos.";
+    }
+
+    private void SwitchToFounder()
+    {
+        CurrentUserService.SwitchRole("FoundingTeam");
+        Navigation.NavigateTo("/admin/usuarios", forceLoad: true);
+    }
+
+    private static string GetAvatarIcon(AppUserDto user) => user.Role switch
+    {
+        UserRole.FoundingTeam => "👑",
+        UserRole.Moderator => "🛡️",
+        _ => "👤"
+    };
+
+    private static string GetAvatarStyle(AppUserDto user) => user.Role switch
+    {
+        UserRole.FoundingTeam => "bg-amber-500/15 border border-amber-500/30 text-amber-300",
+        UserRole.Moderator => "bg-sky-500/15 border border-sky-500/30 text-sky-300",
+        _ => "bg-slate-500/15 border border-slate-500/30 text-slate-300"
+    };
+
+    private static string GetRoleBadgeStyle(UserRole role) => role switch
+    {
+        UserRole.FoundingTeam => "bg-amber-500/15 text-amber-300 border border-amber-500/30",
+        UserRole.Moderator => "bg-sky-500/15 text-sky-300 border border-sky-500/30",
+        _ => "bg-slate-500/15 text-slate-300 border border-slate-500/30"
+    };
+}

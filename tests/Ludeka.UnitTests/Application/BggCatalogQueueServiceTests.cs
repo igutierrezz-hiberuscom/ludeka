@@ -61,6 +61,9 @@ public class BggCatalogQueueServiceTests
 
         public Task<IReadOnlyList<BggSearchResultDto>> SearchGamesAsync(string query, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<BggSearchResultDto>>([]);
+
+        public Task<IReadOnlyList<BggTopGameDto>> FetchTopGamesAsync(int limit = 50, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<BggTopGameDto>>([]);
     }
 
     private class FakeGameRepo : IGameRepository
@@ -254,5 +257,62 @@ public class BggCatalogQueueServiceTests
         // Assert
         Assert.Equal(CatalogQueueStatus.Pending, pendingItem.Status);
         Assert.Null(pendingItem.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ProcessPendingQueueBatchAsync_WhenGameIsNew_GeneratesAndAttachesAiSummary()
+    {
+        // Arrange
+        var pendingRepo = new FakePendingRepo();
+        var pending = new PendingBggImport(13, "Catan");
+        pendingRepo.Items.Add(pending);
+
+        var bggClient = new FakeBggClient();
+        var game = CreateGame(13, "Catan");
+        bggClient.Games[13] = game;
+
+        var gameRepo = new FakeGameRepo();
+        var collectionRepo = new FakeCollectionRepo();
+        var aiService = new FakeAiSummaryService();
+
+        var service = new BggCatalogQueueService(pendingRepo, bggClient, gameRepo, collectionRepo, aiService);
+
+        // Act
+        var result = await service.ProcessPendingQueueBatchAsync(10);
+
+        // Assert
+        Assert.Equal(1, result.SuccessCount);
+        Assert.Single(gameRepo.Games);
+        var cataloged = gameRepo.Games[0];
+        Assert.NotNull(cataloged.AiSummary);
+        Assert.Equal("Síntesis generada para Catan", cataloged.AiSummary.GeneralVerdict);
+        Assert.Equal("Fake AI Model", cataloged.AiSummary.Model);
+    }
+
+    private class FakeAiSummaryService : IAiGameSummaryService
+    {
+        public Task<AiGameSummaryDto> GenerateSummaryAsync(Game game, CancellationToken ct = default)
+        {
+            return Task.FromResult(new AiGameSummaryDto(
+                game.Id,
+                game.SpanishTitle,
+                "Ideal a 4",
+                "Desde 10 años",
+                "Mesa estándar",
+                $"Síntesis generada para {game.SpanishTitle}",
+                "Fake AI Model",
+                DateTime.UtcNow
+            ));
+        }
+
+        public Task<AiGameSummaryDto> EnsureSummaryForGameAsync(Guid gameId, CancellationToken ct = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<AiBatchProcessingResultDto> ProcessPendingSummariesBatchAsync(int batchSize = 20, CancellationToken ct = default)
+        {
+            return Task.FromResult(new AiBatchProcessingResultDto(0, 0, 0, []));
+        }
     }
 }

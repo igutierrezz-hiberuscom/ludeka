@@ -5,5 +5,6 @@ public enum MediaType
     Tutorial,
     Playthrough,
     InstagramPost,
-    ShortReel
+    ShortReel,
+    QuickOverview
 }

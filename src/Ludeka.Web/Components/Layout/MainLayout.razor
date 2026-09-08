@@ -1,5 +1,10 @@
 @inherits LayoutComponentBase
+@using Ludeka.Application.Contracts
+@using Ludeka.Core.ValueObjects
+@using Ludeka.Web.Components.Shared
 @inject ICurrentUserService CurrentUserService
+@inject IUserPreferenceService PreferenceService
+@inject IUserLocationService LocationService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
@@ -9,49 +14,26 @@
     </a>
     <header class="header-nav">
         <div class="container-ludeka flex items-center justify-between h-16">
-            <a href="/" class="logo-badge flex items-center gap-2.5">
-                <img src="/images/logo.png" alt="Logotipo de Ludeka" width="36" height="36" decoding="async" class="h-9 w-auto object-contain drop-shadow" />
+            <a href="/" class="logo-badge flex items-center gap-2.5" title="Ludeka — Inicio">
+                <img src="/images/logo-dark.png" alt="Logotipo de Ludeka" width="36" height="36" decoding="async" class="h-9 w-auto object-contain drop-shadow logo-img-dark" />
+                <img src="/images/logo-light.png" alt="Logotipo de Ludeka" width="36" height="36" decoding="async" class="h-9 w-auto object-contain drop-shadow logo-img-light" />
                 <span class="font-extrabold tracking-tight text-xl text-[var(--text-primary)]">Ludeka<span class="dot text-[var(--brand-primary)]">.</span></span>
             </a>
 
             <div class="flex items-center gap-2 sm:gap-3">
-                @* Selector de paletas / temas (Opciones A, B, C y Carbón) *@
-                <div class="flex items-center bg-[var(--bg-surface-elevated)] p-0.5 rounded-full border border-[var(--border-subtle)]" role="group" aria-label="Selector de paleta de colores">
-                    <button type="button"
-                            @onclick='() => SwitchTheme("editorial")'
-                            title="Opción A: Editorial Claro (Papel & Tinta)"
-                            aria-label="Tema Editorial Claro"
-                            class="px-2 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 @(CurrentTheme == "editorial" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                        <span>📖</span>
-                        <span class="hidden lg:inline text-[0.7rem]">Papel</span>
-                    </button>
-                    <button type="button"
-                            @onclick='() => SwitchTheme("tabletop")'
-                            title="Opción B: Mesa Cálida (Madera & Tapete)"
-                            aria-label="Tema Mesa Cálida"
-                            class="px-2 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 @(CurrentTheme == "tabletop" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                        <span>🎲</span>
-                        <span class="hidden lg:inline text-[0.7rem]">Mesa</span>
-                    </button>
-                    <button type="button"
-                            @onclick='() => SwitchTheme("midnight")'
-                            title="Opción C: Azul Medianoche (Cian & Lima)"
-                            aria-label="Tema Azul Medianoche"
-                            class="px-2 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 @(CurrentTheme == "midnight" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                        <span>🌌</span>
-                        <span class="hidden lg:inline text-[0.7rem]">Noche</span>
-                    </button>
-                    <button type="button"
-                            @onclick='() => SwitchTheme("charcoal")'
-                            title="Original: Carbón Oscuro & Naranja"
-                            aria-label="Tema Carbón Oscuro"
-                            class="px-2 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 @(CurrentTheme == "charcoal" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                        <span>🌑</span>
-                        <span class="hidden lg:inline text-[0.7rem]">Carbón</span>
-                    </button>
-                </div>
+                <OfflineIndicator />
 
                 <nav class="flex items-center gap-2 sm:gap-3 text-sm font-medium">
+                    @* Selector de país / territorio *@
+                    <button type="button"
+                            @onclick="() => _showLocationModal = true"
+                            title="Configurar país para tiendas, eventos y sorteos"
+                            aria-label="Configurar país y ámbito territorial"
+                            class="px-2.5 py-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] hover:border-[var(--brand-primary)] text-xs font-bold transition-all flex items-center gap-1.5 text-[var(--text-primary)] shadow-sm">
+                        <span>@(string.IsNullOrWhiteSpace(_activeCountry) ? "🌍" : CountryCatalog.GetFlag(_activeCountry))</span>
+                        <span class="hidden sm:inline">@(string.IsNullOrWhiteSpace(_activeCountry) ? "Global" : _activeCountry)</span>
+                    </button>
+
                     @* Selector demostrativo de rol *@
                     <button type="button"
                             @onclick="ToggleUserRole"
@@ -62,26 +44,82 @@
                         <span class="text-[0.65rem] opacity-80 underline">Cambiar</span>
                     </button>
 
-                    <a href="/" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs sm:text-sm font-semibold">
+                    <a href="/catalogo" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs sm:text-sm font-semibold">
                         Catálogo
                     </a>
-                    <a href="/radar" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors text-xs sm:text-sm flex items-center gap-1 font-semibold">
-                        <span>📡</span>
-                        <span class="hidden sm:inline">Radar</span>
+                    <a href="/editoriales" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs sm:text-sm font-semibold hidden md:inline">
+                        Editoriales
+                    </a>
+                    <a href="/creadores" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs sm:text-sm font-semibold hidden md:inline">
+                        Autores
+                    </a>
+                    <a href="/tiendas" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs sm:text-sm font-semibold hidden md:inline">
+                        Tiendas
+                    </a>
+                    <a href="/sorteos" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors text-xs sm:text-sm flex items-center gap-1 font-semibold">
+                        <span>🎁</span>
+                        <span class="hidden sm:inline">Sorteos</span>
+                    </a>
+                    <a href="/novedades" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors text-xs sm:text-sm flex items-center gap-1 font-semibold">
+                        <span>📰</span>
+                        <span class="hidden sm:inline">Novedades</span>
+                    </a>
+                    <a href="/eventos" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors text-xs sm:text-sm flex items-center gap-1 font-semibold">
+                        <span>🎪</span>
+                        <span class="hidden sm:inline">Eventos</span>
                     </a>
                     <a href="/mi-ludoteca" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm">
                         <span>📚</span>
                         <span class="hidden sm:inline">Mi Ludoteca</span>
                     </a>
-                    @if (CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator"))
+                    @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanResolveReports)))
+                    {
+                        <a href="/moderacion/reportes" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-amber-400 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm" title="Bandeja de Reportes de Catálogo">
+                            <span>🚩</span>
+                            <span class="hidden sm:inline">Reportes</span>
+                        </a>
+                    }
+                    @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanEditGames)))
+                    {
+                        <a href="/admin/cola-catalogacion" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-indigo-400 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm" title="Supervisión de Cola de Catalogación & Batch Nocturno">
+                            <span>🌙</span>
+                            <span class="hidden sm:inline">Cola BGG</span>
+                        </a>
+                    }
+                    @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanApproveMedia)))
                     {
                         <a href="/moderacion-media" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm">
                             <span>🎬</span>
                             <span class="hidden sm:inline">Moderar</span>
                         </a>
+                    }
+                    @if (CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator"))
+                    {
+                        <a href="/admin/eventos" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-emerald-400 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm" title="Gestión Editorial de Eventos y Ferias">
+                            <span>🎪</span>
+                            <span class="hidden xl:inline">Eventos</span>
+                        </a>
                         <a href="/admin/notificaciones" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm" title="Panel de Notificaciones y Webhooks de Comunidad">
                             <span>🔔</span>
                             <span class="hidden sm:inline">Webhooks</span>
+                        </a>
+                    }
+                    @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanPublishInstagram)))
+                    {
+                        <a href="/admin/instagram" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-pink-400 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm" title="Publicador Oficial de Instagram">
+                            <span>📸</span>
+                            <span class="hidden sm:inline">Instagram</span>
+                        </a>
+                    }
+                    @if (CurrentUserService.IsFoundingTeam)
+                    {
+                        <a href="/admin/usuarios" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-purple-400 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm" title="Gestión de Usuarios y Permisos RBAC">
+                            <span>👥</span>
+                            <span class="hidden lg:inline">Usuarios</span>
+                        </a>
+                        <a href="/admin/auditoria" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-sky-400 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm" title="Bitácora de Auditoría Editorial">
+                            <span>📜</span>
+                            <span class="hidden lg:inline">Auditoría</span>
                         </a>
                     }
                 </nav>
@@ -99,13 +137,33 @@
                 <p class="font-bold text-[var(--text-primary)]">Ludeka &copy; 2026</p>
                 <p class="text-[var(--text-secondary)]">Catálogo y comunidad abierta de juegos de mesa en español.</p>
             </div>
-            <div class="flex items-center gap-4 text-xs font-semibold">
+            <div class="flex items-center gap-4 text-xs font-semibold flex-wrap">
+                <a href="/editoriales" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
+                    🏢 Editoriales
+                </a>
+                <span class="text-[var(--text-muted)]">&bull;</span>
+                <a href="/creadores" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
+                    ✍️ Autores
+                </a>
+                <span class="text-[var(--text-muted)]">&bull;</span>
+                <a href="/tiendas" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
+                    🛒 Tiendas
+                </a>
+                <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="/transparencia" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
                     🛡️ Transparencia
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
-                <a href="/radar" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
-                    📡 Radar de Sorteos
+                <a href="/sorteos" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
+                    🎁 Sorteos
+                </a>
+                <span class="text-[var(--text-muted)]">&bull;</span>
+                <a href="/novedades" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
+                    📰 Novedades
+                </a>
+                <span class="text-[var(--text-muted)]">&bull;</span>
+                <a href="/eventos" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
+                    🎪 Eventos
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="text-[var(--text-secondary)] hover:text-indigo-400 transition-colors">
@@ -116,6 +174,11 @@
     </footer>
 </div>
 
+<LocationSelectorModal
+    IsOpen="@_showLocationModal"
+    OnClose="() => _showLocationModal = false"
+    OnCountryChanged="HandleCountryChanged" />
+
 <div id="blazor-error-ui" class="hidden">
     Ha ocurrido un error inesperado.
     <a href="." class="reload">Recargar</a>
@@ -124,6 +187,8 @@
 
 @code {
     private string CurrentTheme = "charcoal";
+    private string? _activeCountry;
+    private bool _showLocationModal;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -131,16 +196,51 @@
         {
             try
             {
-                var stored = await JS.InvokeAsync<string>("getLudekaTheme");
-                if (!string.IsNullOrWhiteSpace(stored) && stored != CurrentTheme)
+                // Consultar tema guardado en la base de datos para el usuario actual
+                string userDbTheme = await PreferenceService.GetUserThemeAsync(CurrentUserService.UserId);
+
+                // Consultar tema almacenado en localStorage para este usuario
+                string stored = await JS.InvokeAsync<string>("getLudekaTheme", CurrentUserService.UserId);
+
+                // Priorizar preferencia persistida de usuario si existe y es válida
+                string effectiveTheme = !string.IsNullOrWhiteSpace(userDbTheme) && userDbTheme != "charcoal" 
+                    ? userDbTheme 
+                    : (!string.IsNullOrWhiteSpace(stored) ? stored : userDbTheme);
+
+                if (!string.IsNullOrWhiteSpace(effectiveTheme) && effectiveTheme != CurrentTheme)
                 {
-                    CurrentTheme = stored;
-                    StateHasChanged();
+                    CurrentTheme = effectiveTheme;
+                    await JS.InvokeVoidAsync("setLudekaTheme", effectiveTheme, CurrentUserService.UserId);
                 }
+
+                // Cargar país activo
+                _activeCountry = await LocationService.GetEffectiveCountryAsync();
+
+                // Si no hay país en BD, comprobar localStorage o zona horaria
+                if (string.IsNullOrWhiteSpace(_activeCountry))
+                {
+                    string? storedCountry = await JS.InvokeAsync<string?>("getStoredUserCountry", CurrentUserService.UserId);
+                    if (!string.IsNullOrWhiteSpace(storedCountry))
+                    {
+                        LocationService.SetUserCountry(storedCountry);
+                        _activeCountry = storedCountry;
+                    }
+                    else
+                    {
+                        string? detected = await JS.InvokeAsync<string?>("detectUserCountry");
+                        if (!string.IsNullOrWhiteSpace(detected))
+                        {
+                            LocationService.SetDetectedCountry(detected);
+                            // Solo como detección (no forzado a usuario)
+                        }
+                    }
+                }
+
+                StateHasChanged();
             }
             catch
             {
-                // Ignorar en entornos donde JS aún no esté disponible
+                // Ignorar en entornos donde JS o DB aún no estén listos en prerender
             }
         }
     }
@@ -150,22 +250,33 @@
         CurrentTheme = theme;
         try
         {
-            await JS.InvokeVoidAsync("setLudekaTheme", theme);
+            await JS.InvokeVoidAsync("setLudekaTheme", theme, CurrentUserService.UserId);
+            await PreferenceService.SetUserThemeAsync(CurrentUserService.UserId, theme);
         }
         catch
         {
         }
     }
 
-    private void ToggleUserRole()
+    private void HandleCountryChanged(string? country)
     {
-        if (CurrentUserService.IsFoundingTeam)
+        _activeCountry = country;
+        _showLocationModal = false;
+        StateHasChanged();
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private async Task ToggleUserRole()
+    {
+        string nextRole = CurrentUserService.IsFoundingTeam ? "User" : "FoundingTeam";
+        CurrentUserService.SwitchRole(nextRole);
+
+        try
         {
-            CurrentUserService.SwitchRole("User");
+            await JS.InvokeVoidAsync("setActiveUserTheme", CurrentUserService.UserId);
         }
-        else
+        catch
         {
-            CurrentUserService.SwitchRole("FoundingTeam");
         }
 
         Navigation.NavigateTo(Navigation.Uri, forceLoad: true);

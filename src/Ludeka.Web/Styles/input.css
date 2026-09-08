@@ -145,6 +145,41 @@
     color-scheme: dark;
 }
 
+/* Opción D: Madera Clara (Arce & Haya Lúdica - Inspirado en mesas nórdicas y tableros claros) */
+[data-theme="wood"] {
+    --bg-main: #F5EFEB;
+    --bg-surface: #FAF6F1;
+    --bg-surface-elevated: #ECE2D5;
+    --bg-card: #FFFFFF;
+    --bg-nav: rgba(245, 239, 235, 0.95);
+    --border-subtle: rgba(120, 80, 45, 0.12);
+    --border-highlight: rgba(120, 80, 45, 0.24);
+    
+    --text-primary: #2D2118;
+    --text-secondary: #5E4B3C;
+    --text-muted: #8E7766;
+    
+    --brand-primary: #B85323;
+    --brand-primary-hover: #9E4318;
+    --brand-accent: #D4743B;
+    --brand-glow: rgba(184, 83, 35, 0.16);
+    
+    --color-mustplay: #059669;
+    --color-mustplay-bg: rgba(5, 150, 105, 0.10);
+    --color-mustplay-border: rgba(5, 150, 105, 0.25);
+    
+    --color-recommended: #D97706;
+    --color-recommended-bg: rgba(217, 119, 6, 0.10);
+    --color-recommended-border: rgba(217, 119, 6, 0.25);
+    
+    --color-notrec: #E11D48;
+    --color-notrec-bg: rgba(225, 29, 72, 0.10);
+    --color-notrec-border: rgba(225, 29, 72, 0.25);
+
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color-scheme: light;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -217,6 +252,24 @@ a {
 
 .logo-badge span.dot {
     color: var(--brand-primary);
+}
+
+/* Logotipos adaptativos según tema (Zero-FOUC) */
+.logo-img-dark {
+    display: block;
+}
+.logo-img-light {
+    display: none;
+}
+
+[data-theme="editorial"] .logo-img-dark,
+[data-theme="wood"] .logo-img-dark {
+    display: none !important;
+}
+
+[data-theme="editorial"] .logo-img-light,
+[data-theme="wood"] .logo-img-light {
+    display: block !important;
 }
 
 /* ADN Badges (3-second visual intake) */

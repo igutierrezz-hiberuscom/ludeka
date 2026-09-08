@@ -43,6 +43,11 @@ public class BggImportServiceTests
         {
             return Task.FromResult<IReadOnlyList<BggSearchResultDto>>([]);
         }
+
+        public Task<IReadOnlyList<BggTopGameDto>> FetchTopGamesAsync(int limit = 50, CancellationToken ct = default)
+        {
+            return Task.FromResult<IReadOnlyList<BggTopGameDto>>([]);
+        }
     }
 
     private class FakeGameRepository : IGameRepository

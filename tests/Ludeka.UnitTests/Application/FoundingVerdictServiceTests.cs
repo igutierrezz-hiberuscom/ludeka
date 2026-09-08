@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Ludeka.Application.Contracts;
@@ -91,19 +91,66 @@ public class FoundingVerdictServiceTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetAiSummaryForGameAsync_ShouldReturnStructuredSynthesis()
+    public async Task GetAiSummaryForGameAsync_WhenGameHasNoSummary_ShouldReturnNullWithoutCallingAi()
     {
         var game = await SeedGameAsync();
+
+        var aiSummary = await _service.GetAiSummaryForGameAsync(game.Id);
+
+        Assert.Null(aiSummary);
+    }
+
+    [Fact]
+    public async Task GetAiSummaryForGameAsync_WhenGameHasPersistedSummary_ShouldReturnSummaryDto()
+    {
+        var game = await SeedGameAsync();
+        var persistedVo = new AiGameSummary(
+            "Veredicto persistido de prueba",
+            "Ideal: 2 jugadores",
+            "14+ años",
+            "Monstruo de mesa",
+            "Google Gemini (gemini-3.6-flash)",
+            DateTime.UtcNow
+        );
+        game.SetAiSummary(persistedVo);
+        await _gameRepository.UpdateAsync(game);
 
         var aiSummary = await _service.GetAiSummaryForGameAsync(game.Id);
 
         Assert.NotNull(aiSummary);
         Assert.Equal(game.Id, aiSummary.GameId);
         Assert.Equal("Ark Nova", aiSummary.GameTitle);
-        Assert.Contains("Ideal: 2 jugadores", aiSummary.ScalabilitySummary);
-        Assert.Contains("14+", aiSummary.AgeSummary);
-        Assert.Contains("Monstruo de mesa", aiSummary.FootprintSummary);
-        Assert.Contains("Síntesis objetiva generada automáticamente por IA", aiSummary.GeneralVerdict);
+        Assert.Equal("Veredicto persistido de prueba", aiSummary.GeneralVerdict);
+        Assert.Equal("Google Gemini (gemini-3.6-flash)", aiSummary.Model);
+    }
+
+    [Fact]
+    public async Task RequestAiSummaryGenerationAsync_WhenUserLacksModerationRole_ShouldThrowUnauthorized()
+    {
+        var game = await SeedGameAsync();
+        _currentUserService.SwitchRole("User");
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _service.RequestAiSummaryGenerationAsync(game.Id));
+    }
+
+    [Fact]
+    public async Task RequestAiSummaryGenerationAsync_WhenUserIsFoundingOrModerator_ShouldGenerateAndPersistSummary()
+    {
+        var game = await SeedGameAsync();
+        _currentUserService.SwitchRole("Moderator");
+
+        var result = await _service.RequestAiSummaryGenerationAsync(game.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal(game.Id, result.GameId);
+        Assert.Equal("Ark Nova", result.GameTitle);
+        Assert.False(string.IsNullOrWhiteSpace(result.GeneralVerdict));
+
+        // Verificar que quedó guardado en BD
+        var updatedGame = await _gameRepository.GetByIdAsync(game.Id);
+        Assert.NotNull(updatedGame?.AiSummary);
+        Assert.Equal(result.GeneralVerdict, updatedGame.AiSummary.GeneralVerdict);
     }
 
     [Fact]

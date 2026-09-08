@@ -18,16 +18,35 @@ public class GiveawayService : IGiveawayService
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
-    public async Task<IReadOnlyList<GiveawayDto>> GetGiveawaysAsync(bool includeExpired = false, CancellationToken ct = default)
+    public async Task<IReadOnlyList<GiveawayDto>> GetGiveawaysAsync(bool includeExpired = false, string? country = null, CancellationToken ct = default)
     {
         var giveaways = await _repository.GetGiveawaysAsync(includeExpired, ct);
-        return giveaways.Select(MapToDto).ToList();
+
+        if (!string.IsNullOrWhiteSpace(country))
+        {
+            giveaways = giveaways.Where(g => g.IsAvailableInCountry(country)).ToList();
+        }
+
+        return giveaways
+            .OrderByDescending(g => g.IsPromoted)
+            .ThenBy(g => g.DeadlineAt)
+            .Select(MapToDto)
+            .ToList();
     }
 
     public async Task<GiveawayDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         var giveaway = await _repository.GetByIdAsync(id, ct);
         return giveaway != null ? MapToDto(giveaway) : null;
+    }
+
+    public async Task SetPromotedAsync(Guid id, bool isPromoted, CancellationToken ct = default)
+    {
+        var giveaway = await _repository.GetByIdAsync(id, ct)
+            ?? throw new KeyNotFoundException($"No se encontró ningún sorteo con el identificador '{id}'.");
+
+        giveaway.SetPromoted(isPromoted);
+        await _repository.UpdateAsync(giveaway, ct);
     }
 
     public async Task<GiveawayDto> CreateOrMergeGiveawayAsync(CreateGiveawayRequest request, CancellationToken ct = default)
@@ -59,11 +78,13 @@ public class GiveawayService : IGiveawayService
             url: request.Url,
             platform: request.Platform,
             deadlineAt: request.DeadlineAt,
+            country: request.Country,
             gameId: request.GameId,
             gameTitle: request.GameTitle,
             collaborator: request.Collaborator,
             thumbnailUrl: request.ThumbnailUrl,
-            isCommunityExclusive: request.IsCommunityExclusive);
+            isCommunityExclusive: request.IsCommunityExclusive,
+            isPromoted: request.IsPromoted);
 
         await _repository.AddAsync(newGiveaway, ct);
         return MapToDto(newGiveaway);
@@ -88,7 +109,13 @@ public class GiveawayService : IGiveawayService
             g.GameTitle,
             g.ThumbnailUrl,
             g.IsCommunityExclusive,
-            g.CreatedAt);
+            g.CreatedAt,
+            g.IsPromoted,
+            g.Country,
+            Ludeka.Core.ValueObjects.CountryCatalog.GetFlag(g.Country),
+            g.IsInternational,
+            g.InstagramPermalink,
+            g.IsPublishedOnInstagram);
     }
 
     private static string CalculateRemainingTime(DateTimeOffset deadline, bool isExpired)

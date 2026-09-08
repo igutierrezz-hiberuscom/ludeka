@@ -5,7 +5,7 @@
     <div class="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border-2 border-[var(--border-highlight)] shadow-md mb-6">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
-                <div class="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+                <div class="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-card)] relative">
                     @if (!string.IsNullOrWhiteSpace(ParentGame.CoverImageUrl))
                     {
                         <img src="@ParentGame.CoverImageUrl"
@@ -15,10 +15,13 @@
                     }
                     else
                     {
-                        <div class="w-full h-full flex items-center justify-center text-xs text-[var(--text-muted)] font-bold">
-                            🎲
-                        </div>
+                        <img src="/images/game-placeholder.svg"
+                             alt="Carátula de @ParentGame.SpanishTitle no disponible"
+                             class="w-full h-full object-cover opacity-90" />
                     }
+                    <div class="absolute top-1 left-1 px-1 py-0.5 rounded bg-slate-900/85 backdrop-blur-sm border border-slate-700 text-[0.55rem] font-bold text-amber-400 shadow-sm leading-none">
+                        🎲 Base
+                    </div>
                 </div>
 
                 <div>

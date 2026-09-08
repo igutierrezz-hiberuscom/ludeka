@@ -1,0 +1,216 @@
+@page "/creadores"
+@page "/autores"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Web.Components.Shared
+@inject ICreatorService CreatorService
+@inject ICurrentUserService CurrentUserService
+
+<PageTitle>Directorio de Creadores y Autores de Juegos de Mesa — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Cabecera con Buscador y Acción de Moderación *@
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+        <div class="space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold">
+                <span>✍️</span> Autoría Lúdica &bull; Diseñadores y Divulgadores
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                Creadores y Autores
+            </h1>
+            <p class="text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+                Descubre a las mentes detrás de los juegos de mesa: diseñadores, ilustradores y divulgadores referentes del hobby.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanManageCreators)))
+            {
+                <button type="button"
+                        @onclick="OpenCreateModal"
+                        class="px-4 py-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                    <span>➕</span> Nuevo Creador
+                </button>
+            }
+        </div>
+    </div>
+
+    @* Buscador reactivo *@
+    <div class="max-w-md">
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base">🔍</span>
+            <input type="text"
+                   @bind="_searchTerm"
+                   @bind:event="oninput"
+                   @bind:after="FilterCreators"
+                   placeholder="Buscar por nombre o nacionalidad..."
+                   class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors shadow-sm" />
+        </div>
+    </div>
+
+    @* Listado en Grid *@
+    @if (_loading)
+    {
+        <div class="py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
+            <span class="animate-spin text-xl">🎲</span>
+            <span>Cargando directorio de creadores...</span>
+        </div>
+    }
+    else if (_creators.Count == 0)
+    {
+        <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3">
+            <span class="text-4xl block">👤</span>
+            <h2 class="text-base font-bold text-[var(--text-primary)]">No se encontraron creadores</h2>
+            <p class="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+                No hay resultados para el término de búsqueda introducido.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @foreach (var creator in _creators)
+            {
+                <div class="p-5 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all flex flex-col justify-between gap-4 group">
+                    <div class="space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                @if (!string.IsNullOrWhiteSpace(creator.AvatarUrl))
+                                {
+                                    <img src="@creator.AvatarUrl"
+                                         alt="Avatar de @creator.Name"
+                                         loading="lazy"
+                                         class="w-12 h-12 rounded-full object-cover bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]"
+                                         onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                                }
+                                else
+                                {
+                                    <div class="w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-lg text-purple-400 font-black">
+                                        @creator.Name[..Math.Min(2, creator.Name.Length)].ToUpper()
+                                    </div>
+                                }
+                                <div>
+                                    <a href="/creadores/@creator.Slug"
+                                       class="font-black text-base text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] transition-colors line-clamp-1">
+                                        @creator.Name
+                                    </a>
+                                    @if (!string.IsNullOrWhiteSpace(creator.Nationality))
+                                    {
+                                        <span class="text-xs text-[var(--text-muted)] block">
+                                            🌍 @creator.Nationality
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <span class="px-2.5 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--brand-primary)] text-xs font-black shrink-0">
+                                @creator.GamesCount @(creator.GamesCount == 1 ? "obra" : "obras")
+                            </span>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(creator.Bio))
+                        {
+                            <p class="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                                @creator.Bio
+                            </p>
+                        }
+
+                        @if (creator.SocialLinks != null && creator.SocialLinks.Count > 0)
+                        {
+                            <SocialLinksList Links="@creator.SocialLinks" />
+                        }
+                    </div>
+
+                    <div class="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                        <a href="/creadores/@creator.Slug" class="font-bold text-[var(--brand-primary)] hover:underline flex items-center gap-1">
+                            <span>Ver obras diseñadas</span>
+                            <span>&rarr;</span>
+                        </a>
+
+                        @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanManageCreators)))
+                        {
+                            <button type="button"
+                                    @onclick="() => OpenEditModal(creator)"
+                                    class="text-[var(--text-muted)] hover:text-purple-400 font-semibold text-[0.7rem] px-2 py-1 rounded bg-[var(--bg-surface-elevated)] transition-colors">
+                                ✏️ Editar
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@* Modal de Edición / Creación *@
+<CreatorEditModal
+    IsOpen="@_isModalOpen"
+    CreatorId="@_selectedId"
+    Name="@_modalName"
+    Nationality="@_modalNationality"
+    Bio="@_modalBio"
+    AvatarUrl="@_modalAvatarUrl"
+    BggPersonId="@_modalBggPersonId"
+    WebsiteUrl="@_modalWebsiteUrl"
+    InitialSocialLinks="@_modalSocialLinks"
+    OnClose="() => _isModalOpen = false"
+    OnSaved="LoadCreatorsAsync" />
+
+@code {
+    private bool _loading = true;
+    private string _searchTerm = string.Empty;
+    private IReadOnlyList<CreatorDto> _creators = [];
+    private bool _isModalOpen = false;
+    private Guid? _selectedId;
+    private string _modalName = string.Empty;
+    private string? _modalNationality;
+    private string? _modalBio;
+    private string? _modalAvatarUrl;
+    private int? _modalBggPersonId;
+    private string? _modalWebsiteUrl;
+    private List<SocialNetworkLinkDto>? _modalSocialLinks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCreatorsAsync();
+    }
+
+    private async Task LoadCreatorsAsync()
+    {
+        _loading = true;
+        _creators = await CreatorService.GetAllAsync(_searchTerm);
+        _loading = false;
+    }
+
+    private async Task FilterCreators()
+    {
+        _creators = await CreatorService.GetAllAsync(_searchTerm);
+    }
+
+    private void OpenCreateModal()
+    {
+        _selectedId = null;
+        _modalName = string.Empty;
+        _modalNationality = null;
+        _modalBio = null;
+        _modalAvatarUrl = null;
+        _modalBggPersonId = null;
+        _modalWebsiteUrl = null;
+        _modalSocialLinks = new List<SocialNetworkLinkDto>();
+        _isModalOpen = true;
+    }
+
+    private void OpenEditModal(CreatorDto creator)
+    {
+        _selectedId = creator.Id;
+        _modalName = creator.Name;
+        _modalNationality = creator.Nationality;
+        _modalBio = creator.Bio;
+        _modalAvatarUrl = creator.AvatarUrl;
+        _modalBggPersonId = creator.BggPersonId;
+        _modalWebsiteUrl = creator.WebsiteUrl;
+        _modalSocialLinks = creator.SocialLinks.ToList();
+        _isModalOpen = true;
+    }
+}

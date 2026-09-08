@@ -1,979 +1,2301 @@
 [
-    {
-        "BggId":  266192,
-        "OriginalTitle":  "Wingspan",
-        "SpanishTitle":  "Wingspan",
-        "Designer":  "Elizabeth Hargrave",
-        "Publisher":  "Maldito Games",
-        "YearPublished":  2019,
-        "CoverImageUrl":  "/images/games/wingspan.png",
-        "ThumbnailUrl":  "/images/games/wingspan.png",
-        "Description":  "Wingspan es un juego de mesa de construcción de motores impulsado por cartas en el que compites para atraer a las mejores aves a tus reservas de fauna silvestre.",
-        "BggRating":  8.05,
-        "BggRank":  28,
-        "LudistRating":  8.4,
-        "Confrontation":  "Competitive",
-        "Style":  "Eurogame",
-        "IsOfficialSolo":  true,
-        "BoxAge":  10,
-        "CommunityAge":  9,
-        "Language":  "Low",
-        "Footprint":  "StandardTable",
-        "MinMinutes":  40,
-        "MaxMinutes":  70,
-        "EstimatedPerPlayerMinutes":  25,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  1,
-                                "DisplayCount":  "1J",
-                                "Status":  "Recommended",
-                                "BestVotes":  210,
-                                "RecommendedVotes":  580,
-                                "NotRecommendedVotes":  95
-                            },
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  850,
-                                "RecommendedVotes":  390,
-                                "NotRecommendedVotes":  35
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  920,
-                                "RecommendedVotes":  310,
-                                "NotRecommendedVotes":  20
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  420,
-                                "RecommendedVotes":  680,
-                                "NotRecommendedVotes":  90
-                            },
-                            {
-                                "PlayerCount":  5,
-                                "DisplayCount":  "5J",
-                                "Status":  "NotRecommended",
-                                "BestVotes":  70,
-                                "RecommendedVotes":  340,
-                                "NotRecommendedVotes":  620
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Estándar USA",
-                            "WidthMm":  57.0,
-                            "HeightMm":  89.0,
-                            "CardCount":  212,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  173346,
-        "OriginalTitle":  "7 Wonders Duel",
-        "SpanishTitle":  "7 Wonders: Duel",
-        "Designer":  "Antoine Bauza, Bruno Cathala",
-        "Publisher":  "Repos Production / Asmodee",
-        "YearPublished":  2015,
-        "CoverImageUrl":  "/images/games/7-wonders-duel.png",
-        "ThumbnailUrl":  "/images/games/7-wonders-duel.png",
-        "Description":  "Desarrolla tu civilización militar, científica y culturalmente en este duelo frente a frente exclusivamente para 2 jugadores.",
-        "BggRating":  8.1,
-        "BggRank":  19,
-        "LudistRating":  8.8,
-        "Confrontation":  "Competitive",
-        "Style":  "Eurogame",
-        "IsOfficialSolo":  false,
-        "BoxAge":  10,
-        "CommunityAge":  9,
-        "Language":  "None",
-        "Footprint":  "SmallTable",
-        "MinMinutes":  30,
-        "MaxMinutes":  30,
-        "EstimatedPerPlayerMinutes":  15,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  1450,
-                                "RecommendedVotes":  60,
-                                "NotRecommendedVotes":  8
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Mini Europeo",
-                            "WidthMm":  44.0,
-                            "HeightMm":  68.0,
-                            "CardCount":  73,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        },
-                        {
-                            "FormatName":  "Grande / Tarots",
-                            "WidthMm":  65.0,
-                            "HeightMm":  100.0,
-                            "CardCount":  12,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  13,
-        "OriginalTitle":  "Catan",
-        "SpanishTitle":  "Catán",
-        "Designer":  "Klaus Teuber",
-        "Publisher":  "Devir",
-        "YearPublished":  1995,
-        "CoverImageUrl":  "/images/games/catan.jpg",
-        "ThumbnailUrl":  "/images/games/catan.jpg",
-        "Description":  "Comercia, construye y coloniza la isla de Catán en este clásico imperecedero del hobby.",
-        "BggRating":  7.1,
-        "BggRank":  450,
-        "LudistRating":  7.6,
-        "Confrontation":  "Competitive",
-        "Style":  "Eurogame",
-        "IsOfficialSolo":  false,
-        "BoxAge":  10,
-        "CommunityAge":  8,
-        "Language":  "None",
-        "Footprint":  "StandardTable",
-        "MinMinutes":  60,
-        "MaxMinutes":  90,
-        "EstimatedPerPlayerMinutes":  20,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "Recommended",
-                                "BestVotes":  420,
-                                "RecommendedVotes":  680,
-                                "NotRecommendedVotes":  110
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  1180,
-                                "RecommendedVotes":  320,
-                                "NotRecommendedVotes":  45
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Mini Europeo",
-                            "WidthMm":  44.0,
-                            "HeightMm":  68.0,
-                            "CardCount":  120,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  822,
-        "OriginalTitle":  "Carcassonne",
-        "SpanishTitle":  "Carcassonne",
-        "Designer":  "Klaus-Jürgen Wrede",
-        "Publisher":  "Devir",
-        "YearPublished":  2000,
-        "CoverImageUrl":  "/images/games/carcassonne.jpg",
-        "ThumbnailUrl":  "/images/games/carcassonne.jpg",
-        "Description":  "Colocación de losetas para construir caminos, ciudades y abadías medievales con tus seguidores.",
-        "BggRating":  7.4,
-        "BggRank":  210,
-        "LudistRating":  8.0,
-        "Confrontation":  "Competitive",
-        "Style":  "FillerAbstract",
-        "IsOfficialSolo":  false,
-        "BoxAge":  7,
-        "CommunityAge":  7,
-        "Language":  "None",
-        "Footprint":  "StandardTable",
-        "MinMinutes":  35,
-        "MaxMinutes":  45,
-        "EstimatedPerPlayerMinutes":  15,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  1200,
-                                "RecommendedVotes":  450,
-                                "NotRecommendedVotes":  30
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "Recommended",
-                                "BestVotes":  610,
-                                "RecommendedVotes":  720,
-                                "NotRecommendedVotes":  40
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  320,
-                                "RecommendedVotes":  680,
-                                "NotRecommendedVotes":  120
-                            },
-                            {
-                                "PlayerCount":  5,
-                                "DisplayCount":  "5J",
-                                "Status":  "NotRecommended",
-                                "BestVotes":  90,
-                                "RecommendedVotes":  380,
-                                "NotRecommendedVotes":  450
-                            }
-                        ],
-        "Sleeves":  [
-
-                    ]
-    },
-    {
-        "BggId":  167791,
-        "OriginalTitle":  "Terraforming Mars",
-        "SpanishTitle":  "Terraforming Mars",
-        "Designer":  "Jacob Fryxelius",
-        "Publisher":  "Maldito Games",
-        "YearPublished":  2016,
-        "CoverImageUrl":  "/images/games/terraforming-mars.jpg",
-        "ThumbnailUrl":  "/images/games/terraforming-mars.jpg",
-        "Description":  "Grandes corporaciones compiten para transformar el planeta rojo en un hogar habitable para la humanidad.",
-        "BggRating":  8.36,
-        "BggRank":  7,
-        "LudistRating":  8.9,
-        "Confrontation":  "Competitive",
-        "Style":  "Eurogame",
-        "IsOfficialSolo":  true,
-        "BoxAge":  12,
-        "CommunityAge":  11,
-        "Language":  "High",
-        "Footprint":  "TableMonster",
-        "MinMinutes":  90,
-        "MaxMinutes":  150,
-        "EstimatedPerPlayerMinutes":  35,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  1,
-                                "DisplayCount":  "1J",
-                                "Status":  "Recommended",
-                                "BestVotes":  240,
-                                "RecommendedVotes":  580,
-                                "NotRecommendedVotes":  90
-                            },
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "Recommended",
-                                "BestVotes":  450,
-                                "RecommendedVotes":  690,
-                                "NotRecommendedVotes":  50
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  1120,
-                                "RecommendedVotes":  310,
-                                "NotRecommendedVotes":  15
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  480,
-                                "RecommendedVotes":  620,
-                                "NotRecommendedVotes":  110
-                            },
-                            {
-                                "PlayerCount":  5,
-                                "DisplayCount":  "5J",
-                                "Status":  "NotRecommended",
-                                "BestVotes":  60,
-                                "RecommendedVotes":  320,
-                                "NotRecommendedVotes":  640
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Estándar USA",
-                            "WidthMm":  63.5,
-                            "HeightMm":  88.0,
-                            "CardCount":  208,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  230802,
-        "OriginalTitle":  "Azul",
-        "SpanishTitle":  "Azul",
-        "Designer":  "Michael Kiesling",
-        "Publisher":  "Asmodee",
-        "YearPublished":  2017,
-        "CoverImageUrl":  "/images/games/azul.jpg",
-        "ThumbnailUrl":  "/images/games/azul.jpg",
-        "Description":  "Decora las paredes del Palacio Real de Évora con mosaicos azulejeros de la más alta elegancia.",
-        "BggRating":  7.76,
-        "BggRank":  75,
-        "LudistRating":  8.1,
-        "Confrontation":  "Competitive",
-        "Style":  "FillerAbstract",
-        "IsOfficialSolo":  false,
-        "BoxAge":  8,
-        "CommunityAge":  8,
-        "Language":  "None",
-        "Footprint":  "SmallTable",
-        "MinMinutes":  30,
-        "MaxMinutes":  45,
-        "EstimatedPerPlayerMinutes":  15,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  1050,
-                                "RecommendedVotes":  390,
-                                "NotRecommendedVotes":  15
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "Recommended",
-                                "BestVotes":  380,
-                                "RecommendedVotes":  710,
-                                "NotRecommendedVotes":  35
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  240,
-                                "RecommendedVotes":  620,
-                                "NotRecommendedVotes":  95
-                            }
-                        ],
-        "Sleeves":  [
-
-                    ]
-    },
-    {
-        "BggId":  174430,
-        "OriginalTitle":  "Gloomhaven",
-        "SpanishTitle":  "Gloomhaven",
-        "Designer":  "Isaac Childres",
-        "Publisher":  "Cephalofair / Asmodee",
-        "YearPublished":  2017,
-        "CoverImageUrl":  "/images/games/gloomhaven.jpg",
-        "ThumbnailUrl":  "/images/games/gloomhaven.jpg",
-        "Description":  "Campaña colosal cooperativa de combate táctico por cartas en un mundo de fantasía oscura y cambiante.",
-        "BggRating":  8.58,
-        "BggRank":  3,
-        "LudistRating":  9.1,
-        "Confrontation":  "Cooperative",
-        "Style":  "NarrativeCampaign",
-        "IsOfficialSolo":  true,
-        "BoxAge":  14,
-        "CommunityAge":  13,
-        "Language":  "High",
-        "Footprint":  "TableMonster",
-        "MinMinutes":  60,
-        "MaxMinutes":  150,
-        "EstimatedPerPlayerMinutes":  35,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  1,
-                                "DisplayCount":  "1J",
-                                "Status":  "Recommended",
-                                "BestVotes":  310,
-                                "RecommendedVotes":  610,
-                                "NotRecommendedVotes":  110
-                            },
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "Recommended",
-                                "BestVotes":  650,
-                                "RecommendedVotes":  720,
-                                "NotRecommendedVotes":  40
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  1250,
-                                "RecommendedVotes":  340,
-                                "NotRecommendedVotes":  15
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  520,
-                                "RecommendedVotes":  640,
-                                "NotRecommendedVotes":  140
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Estándar Europeo",
-                            "WidthMm":  59.0,
-                            "HeightMm":  92.0,
-                            "CardCount":  727,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        },
-                        {
-                            "FormatName":  "Mini Europeo",
-                            "WidthMm":  44.0,
-                            "HeightMm":  68.0,
-                            "CardCount":  975,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  295947,
-        "OriginalTitle":  "Cascadia",
-        "SpanishTitle":  "Cascadia",
-        "Designer":  "Randy Flynn",
-        "Publisher":  "Delirium Games",
-        "YearPublished":  2021,
-        "CoverImageUrl":  "/images/games/cascadia.jpg",
-        "ThumbnailUrl":  "/images/games/cascadia.jpg",
-        "Description":  "Crea los hábitats más armoniosos del Pacífico Noroeste y empareja la fauna salvaje con sus terrenos.",
-        "BggRating":  7.97,
-        "BggRank":  45,
-        "LudistRating":  8.3,
-        "Confrontation":  "Competitive",
-        "Style":  "FillerAbstract",
-        "IsOfficialSolo":  true,
-        "BoxAge":  10,
-        "CommunityAge":  8,
-        "Language":  "Low",
-        "Footprint":  "StandardTable",
-        "MinMinutes":  30,
-        "MaxMinutes":  45,
-        "EstimatedPerPlayerMinutes":  15,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  1,
-                                "DisplayCount":  "1J",
-                                "Status":  "Recommended",
-                                "BestVotes":  140,
-                                "RecommendedVotes":  310,
-                                "NotRecommendedVotes":  25
-                            },
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  620,
-                                "RecommendedVotes":  240,
-                                "NotRecommendedVotes":  10
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  590,
-                                "RecommendedVotes":  230,
-                                "NotRecommendedVotes":  10
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  190,
-                                "RecommendedVotes":  410,
-                                "NotRecommendedVotes":  60
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Tarot / Grande",
-                            "WidthMm":  70.0,
-                            "HeightMm":  120.0,
-                            "CardCount":  21,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  316554,
-        "OriginalTitle":  "Dune: Imperium",
-        "SpanishTitle":  "Dune: Imperium",
-        "Designer":  "Paul Dennen",
-        "Publisher":  "Asmodee",
-        "YearPublished":  2020,
-        "CoverImageUrl":  "/images/games/dune-imperium.webp",
-        "ThumbnailUrl":  "/images/games/dune-imperium.webp",
-        "Description":  "Colocación de trabajadores y construcción de mazos en el despiadado planeta Arrakis.",
-        "BggRating":  8.42,
-        "BggRank":  6,
-        "LudistRating":  8.9,
-        "Confrontation":  "Competitive",
-        "Style":  "Eurogame",
-        "IsOfficialSolo":  true,
-        "BoxAge":  14,
-        "CommunityAge":  12,
-        "Language":  "High",
-        "Footprint":  "StandardTable",
-        "MinMinutes":  60,
-        "MaxMinutes":  120,
-        "EstimatedPerPlayerMinutes":  30,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  1,
-                                "DisplayCount":  "1J",
-                                "Status":  "Recommended",
-                                "BestVotes":  120,
-                                "RecommendedVotes":  280,
-                                "NotRecommendedVotes":  40
-                            },
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "Recommended",
-                                "BestVotes":  180,
-                                "RecommendedVotes":  410,
-                                "NotRecommendedVotes":  90
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  590,
-                                "RecommendedVotes":  290,
-                                "NotRecommendedVotes":  20
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  850,
-                                "RecommendedVotes":  180,
-                                "NotRecommendedVotes":  15
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Estándar USA",
-                            "WidthMm":  63.5,
-                            "HeightMm":  88.0,
-                            "CardCount":  162,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        },
-                        {
-                            "FormatName":  "Mini USA",
-                            "WidthMm":  44.0,
-                            "HeightMm":  67.0,
-                            "CardCount":  58,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  324856,
-        "OriginalTitle":  "The Crew: Mission Deep Sea",
-        "SpanishTitle":  "La Tripulación: Misión Mar Profundo",
-        "Designer":  "Thomas Sing",
-        "Publisher":  "Devir",
-        "YearPublished":  2021,
-        "CoverImageUrl":  "/images/games/la-tripulacion-mision-mar-profundo.jpg",
-        "ThumbnailUrl":  "/images/games/la-tripulacion-mision-mar-profundo.jpg",
-        "Description":  "Juego cooperativo de bazas con información limitada y misiones de profundidad creciente.",
-        "BggRating":  8.16,
-        "BggRank":  33,
-        "LudistRating":  8.5,
-        "Confrontation":  "Cooperative",
-        "Style":  "FillerAbstract",
-        "IsOfficialSolo":  false,
-        "BoxAge":  10,
-        "CommunityAge":  9,
-        "Language":  "None",
-        "Footprint":  "SmallTable",
-        "MinMinutes":  20,
-        "MaxMinutes":  30,
-        "EstimatedPerPlayerMinutes":  10,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "Recommended",
-                                "BestVotes":  110,
-                                "RecommendedVotes":  240,
-                                "NotRecommendedVotes":  70
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "Recommended",
-                                "BestVotes":  290,
-                                "RecommendedVotes":  380,
-                                "NotRecommendedVotes":  20
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  680,
-                                "RecommendedVotes":  140,
-                                "NotRecommendedVotes":  10
-                            },
-                            {
-                                "PlayerCount":  5,
-                                "DisplayCount":  "5J",
-                                "Status":  "Recommended",
-                                "BestVotes":  180,
-                                "RecommendedVotes":  320,
-                                "NotRecommendedVotes":  85
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Estándar USA",
-                            "WidthMm":  56.0,
-                            "HeightMm":  87.0,
-                            "CardCount":  45,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        },
-                        {
-                            "FormatName":  "Mini USA",
-                            "WidthMm":  44.0,
-                            "HeightMm":  67.0,
-                            "CardCount":  96,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  271629,
-        "OriginalTitle":  "The Castles of Burgundy",
-        "SpanishTitle":  "Los Castillos de Borgoña",
-        "Designer":  "Stefan Feld",
-        "Publisher":  "Maldito Games / Ravensburger",
-        "YearPublished":  2019,
-        "CoverImageUrl":  "/images/games/los-castillos-de-borgona.jpg",
-        "ThumbnailUrl":  "/images/games/los-castillos-de-borgona.jpg",
-        "Description":  "Gestiona dados y losetas para expandir tu principado del siglo XV en el valle del Loira.",
-        "BggRating":  8.12,
-        "BggRank":  17,
-        "LudistRating":  8.7,
-        "Confrontation":  "Competitive",
-        "Style":  "Eurogame",
-        "IsOfficialSolo":  true,
-        "BoxAge":  12,
-        "CommunityAge":  10,
-        "Language":  "None",
-        "Footprint":  "StandardTable",
-        "MinMinutes":  60,
-        "MaxMinutes":  90,
-        "EstimatedPerPlayerMinutes":  30,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  1,
-                                "DisplayCount":  "1J",
-                                "Status":  "Recommended",
-                                "BestVotes":  80,
-                                "RecommendedVotes":  140,
-                                "NotRecommendedVotes":  50
-                            },
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  980,
-                                "RecommendedVotes":  180,
-                                "NotRecommendedVotes":  10
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "Recommended",
-                                "BestVotes":  310,
-                                "RecommendedVotes":  490,
-                                "NotRecommendedVotes":  40
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  160,
-                                "RecommendedVotes":  420,
-                                "NotRecommendedVotes":  180
-                            }
-                        ],
-        "Sleeves":  [
-
-                    ]
-    },
-    {
-        "BggId":  342942,
-        "OriginalTitle":  "Ark Nova",
-        "SpanishTitle":  "Ark Nova",
-        "Designer":  "Mathias Wigge",
-        "Publisher":  "Maldito Games",
-        "YearPublished":  2021,
-        "CoverImageUrl":  "/images/games/ark-nova.jpg",
-        "ThumbnailUrl":  "/images/games/ark-nova.jpg",
-        "Description":  "Diseña y gestiona un zoológico moderno y científicamente avanzado con proyectos de conservación.",
-        "BggRating":  8.52,
-        "BggRank":  4,
-        "LudistRating":  9.0,
-        "Confrontation":  "Competitive",
-        "Style":  "Eurogame",
-        "IsOfficialSolo":  true,
-        "BoxAge":  14,
-        "CommunityAge":  12,
-        "Language":  "High",
-        "Footprint":  "TableMonster",
-        "MinMinutes":  90,
-        "MaxMinutes":  150,
-        "EstimatedPerPlayerMinutes":  45,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  1,
-                                "DisplayCount":  "1J",
-                                "Status":  "Recommended",
-                                "BestVotes":  210,
-                                "RecommendedVotes":  390,
-                                "NotRecommendedVotes":  50
-                            },
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  920,
-                                "RecommendedVotes":  210,
-                                "NotRecommendedVotes":  15
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "Recommended",
-                                "BestVotes":  380,
-                                "RecommendedVotes":  490,
-                                "NotRecommendedVotes":  60
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "NotRecommended",
-                                "BestVotes":  70,
-                                "RecommendedVotes":  260,
-                                "NotRecommendedVotes":  420
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Estándar USA",
-                            "WidthMm":  63.5,
-                            "HeightMm":  88.0,
-                            "CardCount":  255,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  178900,
-        "OriginalTitle":  "Codenames",
-        "SpanishTitle":  "Código Secreto",
-        "Designer":  "Vlaada Chvátil",
-        "Publisher":  "Devir",
-        "YearPublished":  2015,
-        "CoverImageUrl":  "/images/games/codigo-secreto.webp",
-        "ThumbnailUrl":  "/images/games/codigo-secreto.webp",
-        "Description":  "Dos jefes de espías conocen la identidad secreta de cada agente. Sus compañeros solo conocen a los agentes por su nombre en clave.",
-        "BggRating":  7.56,
-        "BggRank":  120,
-        "LudistRating":  8.0,
-        "Confrontation":  "HiddenRolesOrTeams",
-        "Style":  "PartyGame",
-        "IsOfficialSolo":  false,
-        "BoxAge":  14,
-        "CommunityAge":  9,
-        "Language":  "Low",
-        "Footprint":  "SmallTable",
-        "MinMinutes":  15,
-        "MaxMinutes":  20,
-        "EstimatedPerPlayerMinutes":  5,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  210,
-                                "RecommendedVotes":  520,
-                                "NotRecommendedVotes":  60
-                            },
-                            {
-                                "PlayerCount":  5,
-                                "DisplayCount":  "5J",
-                                "Status":  "Recommended",
-                                "BestVotes":  180,
-                                "RecommendedVotes":  480,
-                                "NotRecommendedVotes":  70
-                            },
-                            {
-                                "PlayerCount":  6,
-                                "DisplayCount":  "6J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  850,
-                                "RecommendedVotes":  240,
-                                "NotRecommendedVotes":  10
-                            },
-                            {
-                                "PlayerCount":  7,
-                                "DisplayCount":  "7J+",
-                                "Status":  "MustPlay",
-                                "BestVotes":  780,
-                                "RecommendedVotes":  280,
-                                "NotRecommendedVotes":  20
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Estándar USA",
-                            "WidthMm":  44.0,
-                            "HeightMm":  68.0,
-                            "CardCount":  200,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  39856,
-        "OriginalTitle":  "Dixit",
-        "SpanishTitle":  "Dixit",
-        "Designer":  "Jean-Louis Roubira",
-        "Publisher":  "Asmodee",
-        "YearPublished":  2008,
-        "CoverImageUrl":  "/images/games/dixit.jpg",
-        "ThumbnailUrl":  "/images/games/dixit.jpg",
-        "Description":  "Un juego bellamente ilustrado de deducción creativa donde tu imaginación desbloquea la historia.",
-        "BggRating":  7.22,
-        "BggRank":  310,
-        "LudistRating":  7.8,
-        "Confrontation":  "Competitive",
-        "Style":  "PartyGame",
-        "IsOfficialSolo":  false,
-        "BoxAge":  8,
-        "CommunityAge":  7,
-        "Language":  "None",
-        "Footprint":  "StandardTable",
-        "MinMinutes":  30,
-        "MaxMinutes":  45,
-        "EstimatedPerPlayerMinutes":  8,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "NotRecommended",
-                                "BestVotes":  30,
-                                "RecommendedVotes":  180,
-                                "NotRecommendedVotes":  320
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  140,
-                                "RecommendedVotes":  490,
-                                "NotRecommendedVotes":  80
-                            },
-                            {
-                                "PlayerCount":  5,
-                                "DisplayCount":  "5J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  590,
-                                "RecommendedVotes":  290,
-                                "NotRecommendedVotes":  15
-                            },
-                            {
-                                "PlayerCount":  6,
-                                "DisplayCount":  "6J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  720,
-                                "RecommendedVotes":  210,
-                                "NotRecommendedVotes":  10
-                            }
-                        ],
-        "Sleeves":  [
-                        {
-                            "FormatName":  "Magnum Dixit",
-                            "WidthMm":  80.0,
-                            "HeightMm":  120.0,
-                            "CardCount":  84,
-                            "AffiliateUrl":  "https://zacatrus.es/fundas?ref=ludeka"
-                        }
-                    ]
-    },
-    {
-        "BggId":  257766,
-        "OriginalTitle":  "The Color Monster",
-        "SpanishTitle":  "El Monstruo de Colores",
-        "Designer":  "Dani Gómez, Josep M. Allué",
-        "Publisher":  "Devir",
-        "YearPublished":  2018,
-        "CoverImageUrl":  "/images/games/el-monstruo-de-colores.jpg",
-        "ThumbnailUrl":  "/images/games/el-monstruo-de-colores.jpg",
-        "Description":  "Un juego cooperativo para niños que les ayuda a entender y expresar sus emociones según el popular cuento infantil.",
-        "BggRating":  7.02,
-        "BggRank":  1450,
-        "LudistRating":  8.2,
-        "Confrontation":  "Cooperative",
-        "Style":  "PartyGame",
-        "IsOfficialSolo":  false,
-        "BoxAge":  4,
-        "CommunityAge":  4,
-        "Language":  "None",
-        "Footprint":  "SmallTable",
-        "MinMinutes":  20,
-        "MaxMinutes":  25,
-        "EstimatedPerPlayerMinutes":  6,
-        "Scalability":  [
-                            {
-                                "PlayerCount":  2,
-                                "DisplayCount":  "2J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  85,
-                                "RecommendedVotes":  30,
-                                "NotRecommendedVotes":  5
-                            },
-                            {
-                                "PlayerCount":  3,
-                                "DisplayCount":  "3J",
-                                "Status":  "MustPlay",
-                                "BestVotes":  95,
-                                "RecommendedVotes":  25,
-                                "NotRecommendedVotes":  3
-                            },
-                            {
-                                "PlayerCount":  4,
-                                "DisplayCount":  "4J",
-                                "Status":  "Recommended",
-                                "BestVotes":  40,
-                                "RecommendedVotes":  65,
-                                "NotRecommendedVotes":  10
-                            },
-                            {
-                                "PlayerCount":  5,
-                                "DisplayCount":  "5J",
-                                "Status":  "Recommended",
-                                "BestVotes":  20,
-                                "RecommendedVotes":  55,
-                                "NotRecommendedVotes":  15
-                            }
-                        ],
-        "Sleeves":  [
-
-                    ]
-    }
+  {
+    "BggId": 13,
+    "OriginalTitle": "Catan",
+    "SpanishTitle": "Catán",
+    "Designer": "Klaus Teuber",
+    "Publisher": "Devir",
+    "YearPublished": 1995,
+    "CoverImageUrl": "/images/games/catan.png",
+    "ThumbnailUrl": "/images/games/catan.png",
+    "Description": "El clásico revolucionario de comercio, colonización y gestión de recursos en la isla de Catán.",
+    "BggRating": 7.14,
+    "BggRank": 450,
+    "LudistRating": 7.3,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": false,
+    "BoxAge": 10,
+    "CommunityAge": 10,
+    "Language": "None",
+    "Footprint": "StandardTable",
+    "MinMinutes": 60,
+    "MaxMinutes": 90,
+    "EstimatedPerPlayerMinutes": 25,
+    "Scalability": [
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 620,
+        "RecommendedVotes": 310,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 890,
+        "RecommendedVotes": 150,
+        "NotRecommendedVotes": 25
+      }
+    ],
+    "Sleeves": [],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/catan.html?ref=ludeka",
+        "Price": 42.00,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 822,
+    "OriginalTitle": "Carcassonne",
+    "SpanishTitle": "Carcassonne",
+    "Designer": "Klaus-Jürgen Wrede",
+    "Publisher": "Devir",
+    "YearPublished": 2000,
+    "CoverImageUrl": "/images/games/carcassonne.png",
+    "ThumbnailUrl": "/images/games/carcassonne.png",
+    "Description": "Obra maestra de colocación de losetas donde creas el paisaje medieval del sur de Francia.",
+    "BggRating": 7.42,
+    "BggRank": 210,
+    "LudistRating": 7.9,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": false,
+    "BoxAge": 8,
+    "CommunityAge": 8,
+    "Language": "None",
+    "Footprint": "StandardTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 45,
+    "EstimatedPerPlayerMinutes": 10,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 850,
+        "RecommendedVotes": 220,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 410,
+        "RecommendedVotes": 520,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 300,
+        "RecommendedVotes": 560,
+        "NotRecommendedVotes": 65
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "Recommended",
+        "BestVotes": 150,
+        "RecommendedVotes": 420,
+        "NotRecommendedVotes": 120
+      }
+    ],
+    "Sleeves": [],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/carcassonne?ref=ludeka",
+        "Price": 27.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Stock Real",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 266192,
+    "OriginalTitle": "Wingspan",
+    "SpanishTitle": "Wingspan",
+    "Designer": "Elizabeth Hargrave",
+    "Publisher": "Maldito Games",
+    "YearPublished": 2019,
+    "CoverImageUrl": "/images/games/wingspan.png",
+    "ThumbnailUrl": "/images/games/wingspan.png",
+    "Description": "Juego competitivo de construcción de motores impulsado por cartas ornitológicas con una producción excelsa.",
+    "BggRating": 8.05,
+    "BggRank": 28,
+    "LudistRating": 8.4,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 10,
+    "CommunityAge": 9,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 40,
+    "MaxMinutes": 70,
+    "EstimatedPerPlayerMinutes": 25,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 210,
+        "RecommendedVotes": 580,
+        "NotRecommendedVotes": 95
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 850,
+        "RecommendedVotes": 390,
+        "NotRecommendedVotes": 35
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 920,
+        "RecommendedVotes": 310,
+        "NotRecommendedVotes": 20
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 420,
+        "RecommendedVotes": 680,
+        "NotRecommendedVotes": 90
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "NotRecommended",
+        "BestVotes": 85,
+        "RecommendedVotes": 290,
+        "NotRecommendedVotes": 480
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Chimera Standard",
+        "WidthMm": 57,
+        "HeightMm": 89,
+        "CardCount": 212,
+        "AffiliateUrl": "https://zacatrus.es/fundas-chimera.html?ref=ludeka"
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/wingspan.html?ref=ludeka",
+        "Price": 49.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 167791,
+    "OriginalTitle": "Terraforming Mars",
+    "SpanishTitle": "Terraforming Mars",
+    "Designer": "Jacob Fryxelius",
+    "Publisher": "Maldito Games",
+    "YearPublished": 2016,
+    "CoverImageUrl": "/images/games/terraforming-mars.png",
+    "ThumbnailUrl": "/images/games/terraforming-mars.png",
+    "Description": "Gigantescas corporaciones compiten por transformar el planeta rojo haciéndolo habitable.",
+    "BggRating": 8.38,
+    "BggRank": 7,
+    "LudistRating": 8.8,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 12,
+    "CommunityAge": 12,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 90,
+    "MaxMinutes": 120,
+    "EstimatedPerPlayerMinutes": 30,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 320,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 70
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 540,
+        "RecommendedVotes": 590,
+        "NotRecommendedVotes": 60
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 1100,
+        "RecommendedVotes": 240,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 450,
+        "RecommendedVotes": 620,
+        "NotRecommendedVotes": 110
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "NotRecommended",
+        "BestVotes": 90,
+        "RecommendedVotes": 280,
+        "NotRecommendedVotes": 520
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 208,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/terraforming-mars.html?ref=ludeka",
+        "Price": 62.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 173346,
+    "OriginalTitle": "7 Wonders Duel",
+    "SpanishTitle": "7 Wonders: Duel",
+    "Designer": "Antoine Bauza, Bruno Cathala",
+    "Publisher": "Repos Production",
+    "YearPublished": 2015,
+    "CoverImageUrl": "/images/games/7-wonders-duel.png",
+    "ThumbnailUrl": "/images/games/7-wonders-duel.png",
+    "Description": "Uno de los mejores juegos exclusivos para 2 personas: draft piramidal de cartas con 3 condiciones de victoria.",
+    "BggRating": 8.11,
+    "BggRank": 19,
+    "LudistRating": 8.5,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": false,
+    "BoxAge": 10,
+    "CommunityAge": 10,
+    "Language": "None",
+    "Footprint": "SmallTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 30,
+    "EstimatedPerPlayerMinutes": 15,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 2100,
+        "RecommendedVotes": 110,
+        "NotRecommendedVotes": 12
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard European",
+        "WidthMm": 59,
+        "HeightMm": 92,
+        "CardCount": 73,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/7-wonders-duel?ref=ludeka",
+        "Price": 24.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Stock Real",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 342942,
+    "OriginalTitle": "Ark Nova",
+    "SpanishTitle": "Ark Nova",
+    "Designer": "Mathias Wigge",
+    "Publisher": "Maldito Games",
+    "YearPublished": 2021,
+    "CoverImageUrl": "/images/games/ark-nova.png",
+    "ThumbnailUrl": "/images/games/ark-nova.png",
+    "Description": "Planifica y construye un zoológico moderno gestionando recintos, programas de conservación y patrocinadores.",
+    "BggRating": 8.51,
+    "BggRank": 4,
+    "LudistRating": 8.9,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 14,
+    "CommunityAge": 13,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 90,
+    "MaxMinutes": 150,
+    "EstimatedPerPlayerMinutes": 45,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 410,
+        "RecommendedVotes": 510,
+        "NotRecommendedVotes": 45
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 1450,
+        "RecommendedVotes": 310,
+        "NotRecommendedVotes": 20
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 620,
+        "RecommendedVotes": 680,
+        "NotRecommendedVotes": 80
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "NotRecommended",
+        "BestVotes": 110,
+        "RecommendedVotes": 320,
+        "NotRecommendedVotes": 610
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 255,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/ark-nova.html?ref=ludeka",
+        "Price": 67.50,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 230802,
+    "OriginalTitle": "Azul",
+    "SpanishTitle": "Azul",
+    "Designer": "Michael Kiesling",
+    "Publisher": "Asmodee",
+    "YearPublished": 2017,
+    "CoverImageUrl": "/images/games/azul.png",
+    "ThumbnailUrl": "/images/games/azul.png",
+    "Description": "Emula a los artesanos moriscos vistiendo los muros del Palacio Real de Évora con azulejos portugueses.",
+    "BggRating": 7.75,
+    "BggRank": 72,
+    "LudistRating": 8,
+    "Confrontation": "Competitive",
+    "Style": "FillerAbstract",
+    "IsOfficialSolo": false,
+    "BoxAge": 8,
+    "CommunityAge": 8,
+    "Language": "None",
+    "Footprint": "SmallTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 45,
+    "EstimatedPerPlayerMinutes": 10,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 1200,
+        "RecommendedVotes": 350,
+        "NotRecommendedVotes": 25
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 890,
+        "RecommendedVotes": 410,
+        "NotRecommendedVotes": 30
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 420,
+        "RecommendedVotes": 610,
+        "NotRecommendedVotes": 85
+      }
+    ],
+    "Sleeves": [],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/azul?ref=ludeka",
+        "Price": 39.99,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío Rápido",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 295947,
+    "OriginalTitle": "Cascadia",
+    "SpanishTitle": "Cascadia",
+    "Designer": "Randy Flynn",
+    "Publisher": "Delirium Games",
+    "YearPublished": 2021,
+    "CoverImageUrl": "/images/games/cascadia.png",
+    "ThumbnailUrl": "/images/games/cascadia.png",
+    "Description": "Juego relajante y táctico de colocación de hábitats y patrones de fauna salvaje del Pacífico Noroeste.",
+    "BggRating": 7.96,
+    "BggRank": 45,
+    "LudistRating": 8.3,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 10,
+    "CommunityAge": 9,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 45,
+    "EstimatedPerPlayerMinutes": 12,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 310,
+        "RecommendedVotes": 420,
+        "NotRecommendedVotes": 30
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 980,
+        "RecommendedVotes": 240,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 850,
+        "RecommendedVotes": 290,
+        "NotRecommendedVotes": 20
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 410,
+        "RecommendedVotes": 520,
+        "NotRecommendedVotes": 45
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Tarot",
+        "WidthMm": 70,
+        "HeightMm": 120,
+        "CardCount": 25,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/cascadia.html?ref=ludeka",
+        "Price": 37.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 316554,
+    "OriginalTitle": "Dune: Imperium",
+    "SpanishTitle": "Dune: Imperium",
+    "Designer": "Paul Dennen",
+    "Publisher": "Dire Wolf",
+    "YearPublished": 2020,
+    "CoverImageUrl": "/images/games/dune-imperium.png",
+    "ThumbnailUrl": "/images/games/dune-imperium.png",
+    "Description": "Construcción de mazos, colocación de trabajadores e intriga política y militar en el planeta Arrakis.",
+    "BggRating": 8.36,
+    "BggRank": 12,
+    "LudistRating": 8.7,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 14,
+    "CommunityAge": 13,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 60,
+    "MaxMinutes": 120,
+    "EstimatedPerPlayerMinutes": 25,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 210,
+        "RecommendedVotes": 390,
+        "NotRecommendedVotes": 60
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 320,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 85
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 950,
+        "RecommendedVotes": 310,
+        "NotRecommendedVotes": 25
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 1350,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 20
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 162,
+        "AffiliateUrl": null
+      },
+      {
+        "FormatName": "Mini USA",
+        "WidthMm": 41,
+        "HeightMm": 63,
+        "CardCount": 58,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/dune-imperium.html?ref=ludeka",
+        "Price": 49.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 199792,
+    "OriginalTitle": "Everdell",
+    "SpanishTitle": "Everdell",
+    "Designer": "James A. Wilson",
+    "Publisher": "Maldito Games",
+    "YearPublished": 2018,
+    "CoverImageUrl": "/images/games/everdell.png",
+    "ThumbnailUrl": "/images/games/everdell.png",
+    "Description": "Construye una encantadora ciudad de animalitos del bosque bajo las ramas del gran Árbol Perenne.",
+    "BggRating": 8.06,
+    "BggRank": 35,
+    "LudistRating": 8.3,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 13,
+    "CommunityAge": 10,
+    "Language": "Low",
+    "Footprint": "TableMonster",
+    "MinMinutes": 40,
+    "MaxMinutes": 80,
+    "EstimatedPerPlayerMinutes": 20,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 190,
+        "RecommendedVotes": 380,
+        "NotRecommendedVotes": 70
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 820,
+        "RecommendedVotes": 310,
+        "NotRecommendedVotes": 35
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 890,
+        "RecommendedVotes": 280,
+        "NotRecommendedVotes": 30
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 390,
+        "RecommendedVotes": 520,
+        "NotRecommendedVotes": 95
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 128,
+        "AffiliateUrl": null
+      },
+      {
+        "FormatName": "Mini USA",
+        "WidthMm": 41,
+        "HeightMm": 63,
+        "CardCount": 30,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/everdell?ref=ludeka",
+        "Price": 59.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío Rápido",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 174430,
+    "OriginalTitle": "Gloomhaven",
+    "SpanishTitle": "Gloomhaven",
+    "Designer": "Isaac Childres",
+    "Publisher": "Cephalofair Games",
+    "YearPublished": 2017,
+    "CoverImageUrl": "/images/games/gloomhaven.png",
+    "ThumbnailUrl": "/images/games/gloomhaven.png",
+    "Description": "Monstruosa campaña cooperativa de combate táctico eurogame en un mundo oscuro en constante evolución.",
+    "BggRating": 8.61,
+    "BggRank": 3,
+    "LudistRating": 8.9,
+    "Confrontation": "Cooperative",
+    "Style": "Ameritrash",
+    "IsOfficialSolo": true,
+    "BoxAge": 14,
+    "CommunityAge": 14,
+    "Language": "High",
+    "Footprint": "TableMonster",
+    "MinMinutes": 60,
+    "MaxMinutes": 150,
+    "EstimatedPerPlayerMinutes": 40,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 410,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 60
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 1100,
+        "RecommendedVotes": 320,
+        "NotRecommendedVotes": 25
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 1250,
+        "RecommendedVotes": 280,
+        "NotRecommendedVotes": 20
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 620,
+        "RecommendedVotes": 510,
+        "NotRecommendedVotes": 95
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 727,
+        "AffiliateUrl": null
+      },
+      {
+        "FormatName": "Mini European",
+        "WidthMm": 44,
+        "HeightMm": 68,
+        "CardCount": 975,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/gloomhaven.html?ref=ludeka",
+        "Price": 139.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío Gratis",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 366013,
+    "OriginalTitle": "Heat: Pedal to the Metal",
+    "SpanishTitle": "Heat: Pedal to the Metal",
+    "Designer": "Asger Harding Granerud, Daniel Skjold Pedersen",
+    "Publisher": "Days of Wonder",
+    "YearPublished": 2022,
+    "CoverImageUrl": "/images/games/heat.png",
+    "ThumbnailUrl": "/images/games/heat.png",
+    "Description": "Emocionantes carreras de bólidos de los años 60 donde gestionas el calor del motor y entras derrapando a las curvas.",
+    "BggRating": 8.12,
+    "BggRank": 38,
+    "LudistRating": 8.5,
+    "Confrontation": "Competitive",
+    "Style": "Ameritrash",
+    "IsOfficialSolo": true,
+    "BoxAge": 10,
+    "CommunityAge": 10,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 45,
+    "MaxMinutes": 60,
+    "EstimatedPerPlayerMinutes": 12,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 220,
+        "RecommendedVotes": 380,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 310,
+        "RecommendedVotes": 450,
+        "NotRecommendedVotes": 60
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 420,
+        "RecommendedVotes": 490,
+        "NotRecommendedVotes": 30
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 850,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "MustPlay",
+        "BestVotes": 920,
+        "RecommendedVotes": 180,
+        "NotRecommendedVotes": 10
+      },
+      {
+        "PlayerCount": 6,
+        "DisplayCount": "6J",
+        "Status": "MustPlay",
+        "BestVotes": 1050,
+        "RecommendedVotes": 150,
+        "NotRecommendedVotes": 10
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 330,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/heat.html?ref=ludeka",
+        "Price": 64.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 169786,
+    "OriginalTitle": "Scythe",
+    "SpanishTitle": "Scythe",
+    "Designer": "Jamey Stegmaier",
+    "Publisher": "Maldito Games",
+    "YearPublished": 2016,
+    "CoverImageUrl": "/images/games/scythe.png",
+    "ThumbnailUrl": "/images/games/scythe.png",
+    "Description": "Ucronía dieselpunk europea de los años 20: mecanoides agrícolas y militares en una tensa carrera por la prosperidad.",
+    "BggRating": 8.17,
+    "BggRank": 16,
+    "LudistRating": 8.4,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 14,
+    "CommunityAge": 12,
+    "Language": "Low",
+    "Footprint": "TableMonster",
+    "MinMinutes": 90,
+    "MaxMinutes": 120,
+    "EstimatedPerPlayerMinutes": 25,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 280,
+        "RecommendedVotes": 420,
+        "NotRecommendedVotes": 70
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 390,
+        "RecommendedVotes": 510,
+        "NotRecommendedVotes": 80
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 550,
+        "RecommendedVotes": 490,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 1150,
+        "RecommendedVotes": 280,
+        "NotRecommendedVotes": 20
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "Recommended",
+        "BestVotes": 620,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 95
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 106,
+        "AffiliateUrl": null
+      },
+      {
+        "FormatName": "Mini USA",
+        "WidthMm": 41,
+        "HeightMm": 63,
+        "CardCount": 54,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/scythe?ref=ludeka",
+        "Price": 79.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío Rápido",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 162886,
+    "OriginalTitle": "Spirit Island",
+    "SpanishTitle": "Spirit Island",
+    "Designer": "R. Eric Reuss",
+    "Publisher": "Arrakis Games",
+    "YearPublished": 2017,
+    "CoverImageUrl": "/images/games/spirit-island.png",
+    "ThumbnailUrl": "/images/games/spirit-island.png",
+    "Description": "Defiende una isla mágica poniéndote en la piel de espíritus ancestrales y expulsando a los invasores colonizadores.",
+    "BggRating": 8.34,
+    "BggRank": 11,
+    "LudistRating": 8.8,
+    "Confrontation": "Cooperative",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 14,
+    "CommunityAge": 13,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 90,
+    "MaxMinutes": 120,
+    "EstimatedPerPlayerMinutes": 35,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "MustPlay",
+        "BestVotes": 980,
+        "RecommendedVotes": 320,
+        "NotRecommendedVotes": 25
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 1420,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 620,
+        "RecommendedVotes": 450,
+        "NotRecommendedVotes": 50
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 310,
+        "RecommendedVotes": 420,
+        "NotRecommendedVotes": 95
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 119,
+        "AffiliateUrl": null
+      },
+      {
+        "FormatName": "Mini USA",
+        "WidthMm": 41,
+        "HeightMm": 63,
+        "CardCount": 15,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/spirit-island.html?ref=ludeka",
+        "Price": 74.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 148228,
+    "OriginalTitle": "Splendor",
+    "SpanishTitle": "Splendor",
+    "Designer": "Marc André",
+    "Publisher": "Space Cowboys",
+    "YearPublished": 2014,
+    "CoverImageUrl": "/images/games/splendor.png",
+    "ThumbnailUrl": "/images/games/splendor.png",
+    "Description": "Elegante juego de gemas donde mercaderes renacentistas adquieren minas, rutas y la visita de nobles ilustres.",
+    "BggRating": 7.42,
+    "BggRank": 195,
+    "LudistRating": 7.6,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": false,
+    "BoxAge": 10,
+    "CommunityAge": 8,
+    "Language": "None",
+    "Footprint": "SmallTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 30,
+    "EstimatedPerPlayerMinutes": 10,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 820,
+        "RecommendedVotes": 310,
+        "NotRecommendedVotes": 30
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 950,
+        "RecommendedVotes": 250,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 480,
+        "RecommendedVotes": 520,
+        "NotRecommendedVotes": 60
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 90,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/splendor?ref=ludeka",
+        "Price": 32.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Stock Real",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 324856,
+    "OriginalTitle": "The Crew: Mission Deep Sea",
+    "SpanishTitle": "La Tripulación: Misión Mar Profundo",
+    "Designer": "Thomas Sing",
+    "Publisher": "Devir",
+    "YearPublished": 2021,
+    "CoverImageUrl": "/images/games/the-crew.png",
+    "ThumbnailUrl": "/images/games/the-crew.png",
+    "Description": "Juego cooperativo de bazas con comunicación limitada en una inmersión abisal inolvidable.",
+    "BggRating": 8.19,
+    "BggRank": 36,
+    "LudistRating": 8.4,
+    "Confrontation": "Cooperative",
+    "Style": "PartyGame",
+    "IsOfficialSolo": false,
+    "BoxAge": 10,
+    "CommunityAge": 9,
+    "Language": "Low",
+    "Footprint": "SmallTable",
+    "MinMinutes": 20,
+    "MaxMinutes": 20,
+    "EstimatedPerPlayerMinutes": 5,
+    "Scalability": [
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 410,
+        "RecommendedVotes": 380,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 1120,
+        "RecommendedVotes": 190,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "Recommended",
+        "BestVotes": 380,
+        "RecommendedVotes": 450,
+        "NotRecommendedVotes": 70
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard European",
+        "WidthMm": 59,
+        "HeightMm": 92,
+        "CardCount": 45,
+        "AffiliateUrl": null
+      },
+      {
+        "FormatName": "Mini European",
+        "WidthMm": 44,
+        "HeightMm": 68,
+        "CardCount": 96,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/la-tripulacion-mision-mar-profundo.html?ref=ludeka",
+        "Price": 15.00,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 224517,
+    "OriginalTitle": "Brass: Birmingham",
+    "SpanishTitle": "Brass: Birmingham",
+    "Designer": "Gavan Brown, Matt Tolman, Martin Wallace",
+    "Publisher": "Maldito Games",
+    "YearPublished": 2018,
+    "CoverImageUrl": "/images/games/brass-birmingham.png",
+    "ThumbnailUrl": "/images/games/brass-birmingham.png",
+    "Description": "La cúspide de la estrategia económica industrial en Inglaterra: canales, ferrocarriles, carbón, hierro y cerveza.",
+    "BggRating": 8.6,
+    "BggRank": 1,
+    "LudistRating": 9.1,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": false,
+    "BoxAge": 14,
+    "CommunityAge": 13,
+    "Language": "None",
+    "Footprint": "StandardTable",
+    "MinMinutes": 60,
+    "MaxMinutes": 120,
+    "EstimatedPerPlayerMinutes": 30,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 450,
+        "RecommendedVotes": 510,
+        "NotRecommendedVotes": 50
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 1200,
+        "RecommendedVotes": 250,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 1850,
+        "RecommendedVotes": 190,
+        "NotRecommendedVotes": 10
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Chimera Standard",
+        "WidthMm": 57,
+        "HeightMm": 89,
+        "CardCount": 70,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/brass-birmingham.html?ref=ludeka",
+        "Price": 79.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío Gratis",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 201808,
+    "OriginalTitle": "Clank!: A Deck-Building Adventure",
+    "SpanishTitle": "Clank!",
+    "Designer": "Paul Dennen",
+    "Publisher": "Devir",
+    "YearPublished": 2016,
+    "CoverImageUrl": "/images/games/clank.png",
+    "ThumbnailUrl": "/images/games/clank.png",
+    "Description": "Saquea la mazmorra subterránea del dragón en una divertida carrera de construcción de mazos sin hacer ruido.",
+    "BggRating": 7.75,
+    "BggRank": 78,
+    "LudistRating": 8.1,
+    "Confrontation": "Competitive",
+    "Style": "Ameritrash",
+    "IsOfficialSolo": false,
+    "BoxAge": 12,
+    "CommunityAge": 10,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 60,
+    "EstimatedPerPlayerMinutes": 15,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 390,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 55
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 890,
+        "RecommendedVotes": 240,
+        "NotRecommendedVotes": 20
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 980,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 15
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 183,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/clank?ref=ludeka",
+        "Price": 54.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío Rápido",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 30549,
+    "OriginalTitle": "Pandemic",
+    "SpanishTitle": "Pandemic",
+    "Designer": "Matt Leacock",
+    "Publisher": "Z-Man Games",
+    "YearPublished": 2008,
+    "CoverImageUrl": "/images/games/pandemic.png",
+    "ThumbnailUrl": "/images/games/pandemic.png",
+    "Description": "Coopera como equipo de especialistas de salud para contener y erradicar cuatro plagas globales mortales.",
+    "BggRating": 7.53,
+    "BggRank": 130,
+    "LudistRating": 7.8,
+    "Confrontation": "Cooperative",
+    "Style": "Ameritrash",
+    "IsOfficialSolo": false,
+    "BoxAge": 8,
+    "CommunityAge": 9,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 45,
+    "MaxMinutes": 45,
+    "EstimatedPerPlayerMinutes": 12,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 420,
+        "RecommendedVotes": 510,
+        "NotRecommendedVotes": 45
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 850,
+        "RecommendedVotes": 280,
+        "NotRecommendedVotes": 20
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 920,
+        "RecommendedVotes": 240,
+        "NotRecommendedVotes": 25
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 118,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/pandemic.html?ref=ludeka",
+        "Price": 39.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 237182,
+    "OriginalTitle": "Root",
+    "SpanishTitle": "Root",
+    "Designer": "Cole Wehrle",
+    "Publisher": "2 Tomatoes Games",
+    "YearPublished": 2018,
+    "CoverImageUrl": "/images/games/root.png",
+    "ThumbnailUrl": "/images/games/root.png",
+    "Description": "Juego asimétrico de poder y guerra en el bosque: marqueses felinos, dinastías de aves y el astuto vagabundo.",
+    "BggRating": 8.07,
+    "BggRank": 30,
+    "LudistRating": 8.6,
+    "Confrontation": "Competitive",
+    "Style": "Ameritrash",
+    "IsOfficialSolo": true,
+    "BoxAge": 14,
+    "CommunityAge": 12,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 60,
+    "MaxMinutes": 90,
+    "EstimatedPerPlayerMinutes": 25,
+    "Scalability": [
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 480,
+        "RecommendedVotes": 520,
+        "NotRecommendedVotes": 50
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 1420,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 15
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 98,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/root.html?ref=ludeka",
+        "Price": 59.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 163412,
+    "OriginalTitle": "Patchwork",
+    "SpanishTitle": "Patchwork",
+    "Designer": "Uwe Rosenberg",
+    "Publisher": "Maldito Games",
+    "YearPublished": 2014,
+    "CoverImageUrl": "/images/games/patchwork.png",
+    "ThumbnailUrl": "/images/games/patchwork.png",
+    "Description": "El rey de los duelos de retales: encaja piezas de tipo tetris y optimiza botones y tiempo en tu colcha.",
+    "BggRating": 7.61,
+    "BggRank": 105,
+    "LudistRating": 8,
+    "Confrontation": "Competitive",
+    "Style": "FillerAbstract",
+    "IsOfficialSolo": false,
+    "BoxAge": 8,
+    "CommunityAge": 8,
+    "Language": "None",
+    "Footprint": "SmallTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 30,
+    "EstimatedPerPlayerMinutes": 15,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 1650,
+        "RecommendedVotes": 120,
+        "NotRecommendedVotes": 10
+      }
+    ],
+    "Sleeves": [],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/patchwork?ref=ludeka",
+        "Price": 22.50,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Stock Real",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 9209,
+    "OriginalTitle": "Ticket to Ride",
+    "SpanishTitle": "¡Aventureros al Tren!",
+    "Designer": "Alan R. Moon",
+    "Publisher": "Days of Wonder",
+    "YearPublished": 2004,
+    "CoverImageUrl": "/images/games/ticket-to-ride.png",
+    "ThumbnailUrl": "/images/games/ticket-to-ride.png",
+    "Description": "Reclama rutas ferroviarias conectando ciudades icónicas en una carrera familiar repleta de emoción.",
+    "BggRating": 7.4,
+    "BggRank": 230,
+    "LudistRating": 7.5,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": false,
+    "BoxAge": 8,
+    "CommunityAge": 8,
+    "Language": "None",
+    "Footprint": "StandardTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 60,
+    "EstimatedPerPlayerMinutes": 10,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 310,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 80
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 420,
+        "RecommendedVotes": 510,
+        "NotRecommendedVotes": 35
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 980,
+        "RecommendedVotes": 240,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "MustPlay",
+        "BestVotes": 910,
+        "RecommendedVotes": 280,
+        "NotRecommendedVotes": 20
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Mini USA",
+        "WidthMm": 41,
+        "HeightMm": 63,
+        "CardCount": 144,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/aventureros-al-tren.html?ref=ludeka",
+        "Price": 44.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 138076,
+    "OriginalTitle": "Concordia",
+    "SpanishTitle": "Concordia",
+    "Designer": "Mac Gerdts",
+    "Publisher": "Ediciones MasQueOca",
+    "YearPublished": 2013,
+    "CoverImageUrl": "/images/games/concordia.png",
+    "ThumbnailUrl": "/images/games/concordia.png",
+    "Description": "Elegante juego económico de cartas de acción y comercio pacífico en las provincias del Imperio Romano.",
+    "BggRating": 8.11,
+    "BggRank": 22,
+    "LudistRating": 8.6,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": false,
+    "BoxAge": 13,
+    "CommunityAge": 11,
+    "Language": "None",
+    "Footprint": "StandardTable",
+    "MinMinutes": 100,
+    "MaxMinutes": 100,
+    "EstimatedPerPlayerMinutes": 25,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 390,
+        "RecommendedVotes": 450,
+        "NotRecommendedVotes": 60
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 850,
+        "RecommendedVotes": 280,
+        "NotRecommendedVotes": 20
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 1100,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "Recommended",
+        "BestVotes": 420,
+        "RecommendedVotes": 490,
+        "NotRecommendedVotes": 70
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 72,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/concordia?ref=ludeka",
+        "Price": 59.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Stock Real",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 129622,
+    "OriginalTitle": "Love Letter",
+    "SpanishTitle": "Love Letter",
+    "Designer": "Seiji Kanai",
+    "Publisher": "Z-Man Games",
+    "YearPublished": 2012,
+    "CoverImageUrl": "/images/games/love-letter.png",
+    "ThumbnailUrl": "/images/games/love-letter.png",
+    "Description": "Roba una carta, juega una carta. Deducción y faroleo condensados en apenas 16 cartas en la corte de Tempest.",
+    "BggRating": 7.21,
+    "BggRank": 350,
+    "LudistRating": 7.4,
+    "Confrontation": "Competitive",
+    "Style": "PartyGame",
+    "IsOfficialSolo": false,
+    "BoxAge": 10,
+    "CommunityAge": 8,
+    "Language": "Low",
+    "Footprint": "SmallTable",
+    "MinMinutes": 20,
+    "MaxMinutes": 20,
+    "EstimatedPerPlayerMinutes": 5,
+    "Scalability": [
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 410,
+        "RecommendedVotes": 390,
+        "NotRecommendedVotes": 30
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 1150,
+        "RecommendedVotes": 180,
+        "NotRecommendedVotes": 15
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 27,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/love-letter.html?ref=ludeka",
+        "Price": 12.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 180263,
+    "OriginalTitle": "Viticulture Essential Edition",
+    "SpanishTitle": "Viticulture",
+    "Designer": "Jamey Stegmaier, Alan Stone, Uwe Rosenberg",
+    "Publisher": "Maldito Games",
+    "YearPublished": 2015,
+    "CoverImageUrl": "/images/games/viticulture.png",
+    "ThumbnailUrl": "/images/games/viticulture.png",
+    "Description": "Crea y gestiona tu propio viñedo en la Toscana cultivando vides, envejeciendo vino y atendiendo visitantes.",
+    "BggRating": 8.03,
+    "BggRank": 40,
+    "LudistRating": 8.4,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 13,
+    "CommunityAge": 11,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 60,
+    "MaxMinutes": 90,
+    "EstimatedPerPlayerMinutes": 20,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 280,
+        "RecommendedVotes": 390,
+        "NotRecommendedVotes": 45
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 450,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 910,
+        "RecommendedVotes": 240,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 980,
+        "RecommendedVotes": 220,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "Recommended",
+        "BestVotes": 390,
+        "RecommendedVotes": 490,
+        "NotRecommendedVotes": 75
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 154,
+        "AffiliateUrl": null
+      },
+      {
+        "FormatName": "Mini European",
+        "WidthMm": 44,
+        "HeightMm": 68,
+        "CardCount": 78,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/viticulture-essential.html?ref=ludeka",
+        "Price": 59.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 31260,
+    "OriginalTitle": "Agricola",
+    "SpanishTitle": "Agrícola",
+    "Designer": "Uwe Rosenberg",
+    "Publisher": "Homoludicus / Lookout",
+    "YearPublished": 2007,
+    "CoverImageUrl": "/images/games/agricola.png",
+    "ThumbnailUrl": "/images/games/agricola.png",
+    "Description": "El clásico absoluto de colocación de trabajadores: gestiona tu granja familiar del siglo XVII y alimenta a los tuyos.",
+    "BggRating": 7.92,
+    "BggRank": 42,
+    "LudistRating": 8.5,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 12,
+    "CommunityAge": 12,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 150,
+    "EstimatedPerPlayerMinutes": 30,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 350,
+        "RecommendedVotes": 410,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 480,
+        "RecommendedVotes": 490,
+        "NotRecommendedVotes": 35
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 980,
+        "RecommendedVotes": 220,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "MustPlay",
+        "BestVotes": 1150,
+        "RecommendedVotes": 190,
+        "NotRecommendedVotes": 15
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard European",
+        "WidthMm": 59,
+        "HeightMm": 92,
+        "CardCount": 120,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/agricola?ref=ludeka",
+        "Price": 54.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío Rápido",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 312484,
+    "OriginalTitle": "Lost Ruins of Arnak",
+    "SpanishTitle": "Las Ruinas Perdidas de Arnak",
+    "Designer": "Min & Elwen",
+    "Publisher": "Devir",
+    "YearPublished": 2020,
+    "CoverImageUrl": "/images/games/arnak.png",
+    "ThumbnailUrl": "/images/games/arnak.png",
+    "Description": "Exploración de templos antiguos combinando colocación de trabajadores, construcción de mazos y gestión de recursos.",
+    "BggRating": 8.13,
+    "BggRank": 29,
+    "LudistRating": 8.5,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 12,
+    "CommunityAge": 11,
+    "Language": "Low",
+    "Footprint": "StandardTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 120,
+    "EstimatedPerPlayerMinutes": 25,
+    "Scalability": [
+      {
+        "PlayerCount": 1,
+        "DisplayCount": "1J",
+        "Status": "Recommended",
+        "BestVotes": 290,
+        "RecommendedVotes": 380,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 490,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 30
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 950,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 410,
+        "RecommendedVotes": 520,
+        "NotRecommendedVotes": 60
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Standard Card Game",
+        "WidthMm": 63.5,
+        "HeightMm": 88,
+        "CardCount": 110,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/las-ruinas-perdidas-de-arnak.html?ref=ludeka",
+        "Price": 54.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 39856,
+    "OriginalTitle": "Dixit",
+    "SpanishTitle": "Dixit",
+    "Designer": "Jean-Louis Roubira",
+    "Publisher": "Libellud",
+    "YearPublished": 2008,
+    "CoverImageUrl": "/images/games/dixit.png",
+    "ThumbnailUrl": "/images/games/dixit.png",
+    "Description": "Juego familiar y social de pistas poéticas y votación secreta con cartas de ilustración onírica.",
+    "BggRating": 7.21,
+    "BggRank": 380,
+    "LudistRating": 7.3,
+    "Confrontation": "Competitive",
+    "Style": "PartyGame",
+    "IsOfficialSolo": false,
+    "BoxAge": 8,
+    "CommunityAge": 8,
+    "Language": "None",
+    "Footprint": "SmallTable",
+    "MinMinutes": 30,
+    "MaxMinutes": 30,
+    "EstimatedPerPlayerMinutes": 10,
+    "Scalability": [
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 390,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 45
+      },
+      {
+        "PlayerCount": 5,
+        "DisplayCount": "5J",
+        "Status": "MustPlay",
+        "BestVotes": 890,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 6,
+        "DisplayCount": "6J",
+        "Status": "MustPlay",
+        "BestVotes": 1050,
+        "RecommendedVotes": 180,
+        "NotRecommendedVotes": 10
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Tarot",
+        "WidthMm": 70,
+        "HeightMm": 120,
+        "CardCount": 84,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Cuarto de Juegos",
+        "AffiliateUrl": "https://cuartodejuegos.es/dixit?ref=ludeka",
+        "Price": 32.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Stock Real",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 178900,
+    "OriginalTitle": "Codenames",
+    "SpanishTitle": "Código Secreto",
+    "Designer": "Vlaada Chvátil",
+    "Publisher": "Devir",
+    "YearPublished": 2015,
+    "CoverImageUrl": "/images/games/codigo-secreto.png",
+    "ThumbnailUrl": "/images/games/codigo-secreto.png",
+    "Description": "Dos jefes de espías rivales conocen la identidad secreta de 25 agentes y dan pistas de una sola palabra.",
+    "BggRating": 7.56,
+    "BggRank": 125,
+    "LudistRating": 7.8,
+    "Confrontation": "Competitive",
+    "Style": "PartyGame",
+    "IsOfficialSolo": false,
+    "BoxAge": 14,
+    "CommunityAge": 10,
+    "Language": "High",
+    "Footprint": "SmallTable",
+    "MinMinutes": 15,
+    "MaxMinutes": 15,
+    "EstimatedPerPlayerMinutes": 5,
+    "Scalability": [
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 420,
+        "RecommendedVotes": 490,
+        "NotRecommendedVotes": 45
+      },
+      {
+        "PlayerCount": 6,
+        "DisplayCount": "6J",
+        "Status": "MustPlay",
+        "BestVotes": 1250,
+        "RecommendedVotes": 180,
+        "NotRecommendedVotes": 10
+      },
+      {
+        "PlayerCount": 8,
+        "DisplayCount": "8J+",
+        "Status": "MustPlay",
+        "BestVotes": 980,
+        "RecommendedVotes": 240,
+        "NotRecommendedVotes": 20
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Mini European",
+        "WidthMm": 44,
+        "HeightMm": 68,
+        "CardCount": 200,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/codigo-secreto.html?ref=ludeka",
+        "Price": 22.00,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 193738,
+    "OriginalTitle": "Great Western Trail",
+    "SpanishTitle": "Great Western Trail",
+    "Designer": "Alexander Pfister",
+    "Publisher": "Ediciones MasQueOca",
+    "YearPublished": 2016,
+    "CoverImageUrl": "/images/games/great-western-trail.png",
+    "ThumbnailUrl": "/images/games/great-western-trail.png",
+    "Description": "Conduce tu ganado de Texas a Kansas City mejorando tu mazo de reses, contratando vaqueros y construyendo paradas.",
+    "BggRating": 8.27,
+    "BggRank": 15,
+    "LudistRating": 8.7,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": true,
+    "BoxAge": 12,
+    "CommunityAge": 12,
+    "Language": "None",
+    "Footprint": "StandardTable",
+    "MinMinutes": 75,
+    "MaxMinutes": 150,
+    "EstimatedPerPlayerMinutes": 30,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "Recommended",
+        "BestVotes": 480,
+        "RecommendedVotes": 490,
+        "NotRecommendedVotes": 35
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "MustPlay",
+        "BestVotes": 1150,
+        "RecommendedVotes": 210,
+        "NotRecommendedVotes": 15
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 520,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 65
+      }
+    ],
+    "Sleeves": [
+      {
+        "FormatName": "Mini USA",
+        "WidthMm": 41,
+        "HeightMm": 63,
+        "CardCount": 120,
+        "AffiliateUrl": null
+      }
+    ],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/great-western-trail.html?ref=ludeka",
+        "Price": 59.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  },
+  {
+    "BggId": 271629,
+    "OriginalTitle": "The Castles of Burgundy",
+    "SpanishTitle": "Los Castillos de Borgoña",
+    "Designer": "Stefan Feld",
+    "Publisher": "alea / Ravensburger",
+    "YearPublished": 2019,
+    "CoverImageUrl": "/images/games/castles-of-burgundy.png",
+    "ThumbnailUrl": "/images/games/castles-of-burgundy.png",
+    "Description": "El clásico de draft de dados de Stefan Feld: construye y expande tu principado en el valle del Loira del siglo XV con comercio y ganadería.",
+    "BggRating": 8.12,
+    "BggRank": 17,
+    "LudistRating": 8.6,
+    "Confrontation": "Competitive",
+    "Style": "Eurogame",
+    "IsOfficialSolo": false,
+    "BoxAge": 12,
+    "CommunityAge": 12,
+    "Language": "None",
+    "Footprint": "StandardTable",
+    "MinMinutes": 70,
+    "MaxMinutes": 120,
+    "EstimatedPerPlayerMinutes": 25,
+    "Scalability": [
+      {
+        "PlayerCount": 2,
+        "DisplayCount": "2J",
+        "Status": "MustPlay",
+        "BestVotes": 1450,
+        "RecommendedVotes": 120,
+        "NotRecommendedVotes": 10
+      },
+      {
+        "PlayerCount": 3,
+        "DisplayCount": "3J",
+        "Status": "Recommended",
+        "BestVotes": 620,
+        "RecommendedVotes": 480,
+        "NotRecommendedVotes": 40
+      },
+      {
+        "PlayerCount": 4,
+        "DisplayCount": "4J",
+        "Status": "Recommended",
+        "BestVotes": 410,
+        "RecommendedVotes": 510,
+        "NotRecommendedVotes": 80
+      }
+    ],
+    "Sleeves": [],
+    "PurchaseLinks": [
+      {
+        "StoreName": "Zacatrus",
+        "AffiliateUrl": "https://zacatrus.es/los-castillos-de-borgona.html?ref=ludeka",
+        "Price": 49.95,
+        "Currency": "€",
+        "InStock": true,
+        "Badge": "Envío 24h",
+        "AffiliateTag": "Direct"
+      }
+    ]
+  }
 ]

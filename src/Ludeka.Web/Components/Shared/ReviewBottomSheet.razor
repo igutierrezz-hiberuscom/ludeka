@@ -40,19 +40,20 @@
                 <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex flex-col items-center gap-2">
                     <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)]">Puntuación General</span>
                     <div class="flex items-baseline gap-1.5 text-amber-500">
-                        <span class="text-3xl font-black">★ @_score.ToString("0.0")</span>
+                        <span class="text-3xl font-black">★ @_score.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)</span>
                         <span class="text-xs text-[var(--text-muted)]">/ 10</span>
                     </div>
-                    <input type="range" min="1.0" max="10.0" step="0.5"
-                           @bind="_score"
-                           @bind:event="oninput"
+                    <input type="range" min="1" max="10" step="0.5"
+                           value="@_score.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)"
+                           @oninput="HandleScoreInput"
+                           @onchange="HandleScoreInput"
                            aria-label="Puntuación general del juego del 1 al 10"
                            class="w-full accent-amber-500 cursor-pointer" />
                     <div class="w-full flex justify-between text-[0.62rem] text-[var(--text-muted)] font-bold px-1">
-                        <span>1 (Malo)</span>
-                        <span>5 (Pasable)</span>
-                        <span>8 (Notable)</span>
-                        <span>10 (Obra Maestra)</span>
+                        <button type="button" @onclick="() => SetScore(1.0)" class="hover:text-[var(--text-primary)] transition-colors">1 (Malo)</button>
+                        <button type="button" @onclick="() => SetScore(5.0)" class="hover:text-[var(--text-primary)] transition-colors">5 (Pasable)</button>
+                        <button type="button" @onclick="() => SetScore(8.0)" class="hover:text-[var(--text-primary)] transition-colors">8 (Notable)</button>
+                        <button type="button" @onclick="() => SetScore(10.0)" class="hover:text-[var(--text-primary)] transition-colors">10 (Obra Maestra)</button>
                     </div>
                 </div>
 
@@ -230,7 +231,7 @@
     {
         if (ExistingReview != null)
         {
-            _score = ExistingReview.Score;
+            SetScore(ExistingReview.Score);
             _microReview = ExistingReview.MicroReview ?? string.Empty;
             _playerVotes = ExistingReview.PlayerCountRatings.ToDictionary(v => v.PlayerCount, v => v.Status);
 
@@ -242,6 +243,24 @@
             }
 
             _playContext = ExistingReview.PlayContext;
+        }
+    }
+
+    private void SetScore(double score)
+    {
+        _score = Math.Clamp(Math.Round(score * 2.0, MidpointRounding.AwayFromZero) / 2.0, 1.0, 10.0);
+    }
+
+    private void HandleScoreInput(ChangeEventArgs e)
+    {
+        var raw = e.Value?.ToString();
+        if (!string.IsNullOrWhiteSpace(raw))
+        {
+            raw = raw.Replace(',', '.');
+            if (double.TryParse(raw, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var parsed))
+            {
+                SetScore(parsed);
+            }
         }
     }
 

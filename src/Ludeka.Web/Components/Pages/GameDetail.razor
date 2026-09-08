@@ -25,7 +25,7 @@ else if (Game == null)
         <p class="text-sm text-slate-400 mb-6">
             El juego que buscas con identificador <code class="text-orange-400">@Slug</code> aún no está en nuestro catálogo base.
         </p>
-        <a href="/" class="filter-btn active inline-block text-sm">
+        <a href="/catalogo" class="filter-btn active inline-block text-sm">
             &larr; Volver al Catálogo
         </a>
     </div>
@@ -35,15 +35,63 @@ else
     @* Back bar y Acciones de Cabecera *@
     <div class="border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
         <div class="container-ludeka py-3 flex items-center justify-between">
-            <a href="/" class="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors inline-flex items-center gap-1.5">
+            <a href="/catalogo" class="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors inline-flex items-center gap-1.5">
                 <span>&larr;</span> Volver al catálogo
             </a>
             <div class="flex items-center gap-3">
+                @if (Game.BggId > 0)
+                {
+                    <a href="https://boardgamegeek.com/boardgame/@Game.BggId"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       title="Ver en BoardGameGeek"
+                       class="px-3 py-1 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                        <span>🌐</span> Ver en BoardGameGeek
+                    </a>
+                }
+                <button type="button"
+                        @onclick="() => _isReportModalOpen = true"
+                        title="Reportar una errata, imagen incorrecta o problema en esta ficha"
+                        class="px-3 py-1 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30 text-[var(--text-secondary)] border border-[var(--border-subtle)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                    <span>🚩</span> Reportar problema
+                </button>
                 <button type="button"
                         @onclick="OpenSocialCardModal"
                         class="px-3 py-1 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
                     <span>🎨</span> Cartel para Redes
                 </button>
+                @if (Game.PurchaseLinks != null && Game.PurchaseLinks.Count > 0)
+                {
+                    <a href="#donde-comprar"
+                       class="px-3 py-1 rounded-lg bg-[var(--brand-primary)]/10 hover:bg-[var(--brand-primary)]/20 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                        <span>🛒</span> Comprar (@Game.PurchaseLinks.Count)
+                    </a>
+                }
+                @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanEditGames)))
+                {
+                    <button type="button"
+                            @onclick="() => _isEditorModalOpen = true"
+                            title="Editar ficha del catálogo y carátula"
+                            class="px-3 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                        <span>✏️</span> Editar Ficha
+                    </button>
+                    <button type="button"
+                            @onclick="HandleRequestAiSummary"
+                            disabled="@_isGeneratingAiSummary"
+                            title="@(_aiSummary != null ? "Regenerar la síntesis con IA para esta ficha" : "Generar la síntesis con IA bajo demanda")"
+                            class="px-3 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+                        @if (_isGeneratingAiSummary)
+                        {
+                            <span class="animate-spin">⚙️</span>
+                            <span>Sintetizando...</span>
+                        }
+                        else
+                        {
+                            <span>🤖</span>
+                            <span>@(_aiSummary != null ? "Regenerar con IA" : "Generar con IA")</span>
+                        }
+                    </button>
+                }
                 @if (CurrentUserService.IsFoundingTeam)
                 {
                     <button type="button"
@@ -71,7 +119,20 @@ else
         <div class="container-ludeka">
             <div class="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 @* Carátula oficial BGG *@
-                <div class="w-full sm:w-64 md:w-72 shrink-0 aspect-square rounded-2xl overflow-hidden border-2 border-[var(--border-highlight)] shadow-2xl bg-[var(--bg-surface-elevated)]">
+                <div class="w-full sm:w-64 md:w-72 shrink-0 aspect-square rounded-2xl overflow-hidden border-2 border-[var(--border-highlight)] shadow-2xl bg-[var(--bg-surface-elevated)] relative">
+                    @{
+                        var placeholderUrl = Game.IsExpansion ? "/images/expansion-placeholder.svg" : "/images/game-placeholder.svg";
+                    }
+
+                    @* Badge flotante en carátula para reconocimiento instantáneo *@
+                    @if (Game.IsExpansion)
+                    {
+                        <div class="absolute top-3 left-3 z-10 px-3 py-1 rounded-lg bg-purple-950/85 backdrop-blur-md border border-purple-500/40 text-xs font-black text-purple-200 shadow-lg flex items-center gap-1.5">
+                            <span>🧩</span>
+                            <span>Expansión Oficial</span>
+                        </div>
+                    }
+
                     @if (!string.IsNullOrWhiteSpace(Game.CoverImageUrl))
                     {
                         <img src="@Game.CoverImageUrl"
@@ -80,14 +141,16 @@ else
                              decoding="async"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='/images/game-placeholder.svg';"
+                             onerror="this.onerror=null; this.src='@placeholderUrl';"
                              class="w-full h-full object-cover" />
                     }
                     else
                     {
-                        <div class="w-full h-full flex items-center justify-center text-[var(--text-muted)] font-bold">
-                            Sin carátula disponible
-                        </div>
+                        <img src="@placeholderUrl"
+                             alt="Carátula de @Game.SpanishTitle no disponible"
+                             width="320"
+                             height="320"
+                             class="w-full h-full object-cover opacity-90" />
                     }
                 </div>
 
@@ -110,6 +173,16 @@ else
                                     🏆 #@Game.BggRank Global BGG
                                 </span>
                             }
+                            @if (Game.BggId > 0)
+                            {
+                                <a href="https://boardgamegeek.com/boardgame/@Game.BggId"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   title="Ver en BoardGameGeek"
+                                   class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--brand-primary)] border border-[var(--border-subtle)] transition-colors inline-flex items-center gap-1">
+                                    <span>🌐</span> Ver en BGG
+                                </a>
+                            }
                         </div>
 
                         <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
@@ -124,7 +197,30 @@ else
                         }
 
                         <p class="text-xs text-[var(--text-secondary)] mt-1">
-                            Diseñado por <strong class="text-[var(--text-primary)]">@Game.Designer</strong> &bull; Publicado en España por <strong class="text-[var(--text-primary)]">@Game.Publisher</strong>
+                            Diseñado por
+                            @if (!string.IsNullOrWhiteSpace(Game.Designer))
+                            {
+                                var creatorSlug = Ludeka.Core.Entities.Game.GenerateSlug(Game.Designer);
+                                <a href="@($"/creadores/{creatorSlug}")" class="text-[var(--text-primary)] font-bold hover:text-[var(--brand-primary)] hover:underline" title="Ver ficha del autor @Game.Designer">
+                                    @Game.Designer
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-[var(--text-primary)] font-bold">Desconocido</span>
+                            }
+                            &bull; Publicado en España por
+                            @if (!string.IsNullOrWhiteSpace(Game.Publisher))
+                            {
+                                var pubSlug = Ludeka.Core.Entities.Game.GenerateSlug(Game.Publisher);
+                                <a href="@($"/editoriales/{pubSlug}")" class="text-[var(--text-primary)] font-bold hover:text-[var(--brand-primary)] hover:underline" title="Ver catálogo de la editorial @Game.Publisher">
+                                    @Game.Publisher
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-[var(--text-primary)] font-bold">Varios</span>
+                            }
                         </p>
                     </div>
 
@@ -192,6 +288,17 @@ else
 
     @* Bloque de Análisis Editorial y Consenso *@
     <div class="container-ludeka py-6 space-y-8">
+        @if (!string.IsNullOrWhiteSpace(_aiSummaryMessage))
+        {
+            <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-xs text-indigo-300 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <span>🤖</span>
+                    <span>@_aiSummaryMessage</span>
+                </div>
+                <button type="button" @onclick="() => _aiSummaryMessage = null" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+        }
+
         @* 1. Bloque Editorial: Veredicto Fundador (Fase 2) o Resumen IA (Fase 1) *@
         @if (_foundingVerdict != null)
         {
@@ -200,6 +307,31 @@ else
         else if (_aiSummary != null)
         {
             <AiSummaryCard Summary="@_aiSummary" />
+        }
+        else if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanEditGames)))
+        {
+            <div class="rounded-xl bg-[var(--bg-card)] border border-dashed border-[var(--border-subtle)] p-5 text-center space-y-3">
+                <div class="text-2xl">🤖</div>
+                <h3 class="text-sm font-bold text-[var(--text-primary)]">Ficha pendiente de síntesis editorial</h3>
+                <p class="text-xs text-[var(--text-muted)] max-w-md mx-auto">
+                    Este título aún no cuenta con síntesis de IA ni veredicto de la mesa fundadora. Puedes generar su síntesis ahora bajo demanda.
+                </p>
+                <button type="button"
+                        @onclick="HandleRequestAiSummary"
+                        disabled="@_isGeneratingAiSummary"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity shadow-sm disabled:opacity-50">
+                    @if (_isGeneratingAiSummary)
+                    {
+                        <span class="animate-spin">⚙️</span>
+                        <span>Generando síntesis con IA...</span>
+                    }
+                    else
+                    {
+                        <span>⚡</span>
+                        <span>Generar Síntesis con IA Ahora</span>
+                    }
+                </button>
+            </div>
         }
 
         @* MÓDULO DE EXPANSIÓN: ¿Qué aporta al Juego Base? *@
@@ -245,16 +377,19 @@ else
                 Synergies="@_sisterSynergies" />
         }
 
-        @* 4. Guía de Fundas *@
+        @* 4. Dónde Comprar (Tiendas Especializadas y Afiliados) *@
+        <StoreOffersCard Offers="@Game.PurchaseLinks" GameTitle="@Game.SpanishTitle" />
+
+        @* 5. Guía de Fundas *@
         <SleeveGuideCard Sleeves="@Game.Sleeves" />
 
-        @* 5. Hub Multimedia (YouTube e Instagram) *@
-        <MultimediaHub MediaHub="@_mediaHub" GameTitle="@Game.SpanishTitle" />
+        @* 6. Hub Multimedia (YouTube e Instagram) *@
+        <MultimediaHub MediaHub="@_mediaHub" GameTitle="@Game.SpanishTitle" OnMediaChanged="ReloadMediaAsync" />
 
-        @* 6. Consultorio de Reglas Q&A *@
+        @* 7. Consultorio de Reglas Q&A *@
         <RuleQuestionsSection GameId="@Game.Id" GameTitle="@Game.SpanishTitle" />
 
-        @* 7. Sinopsis / Descripción *@
+        @* 8. Sinopsis / Descripción *@
         @if (!string.IsNullOrWhiteSpace(Game.Description))
         {
             <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
@@ -292,6 +427,18 @@ else
         ExistingVerdict="@_foundingVerdict"
         OnSaveVerdict="HandleSaveFoundingVerdict"
         OnClose="() => _isFoundingModalOpen = false" />
+
+    <GameReportModal
+        IsOpen="@_isReportModalOpen"
+        GameId="@Game.Id"
+        GameSlug="@Game.Slug"
+        GameTitle="@Game.SpanishTitle"
+        OnClose="() => _isReportModalOpen = false" />
+
+    <GameEditorModal
+        @bind-IsOpen="_isEditorModalOpen"
+        Game="@Game"
+        OnGameUpdated="HandleGameUpdated" />
 }
 
 @code {
@@ -317,7 +464,17 @@ else
     private bool _isReviewModalOpen;
     private bool _isFoundingModalOpen;
     private bool _isSocialCardModalOpen;
+    private bool _isReportModalOpen;
+    private bool _isEditorModalOpen;
     private SocialCardDataDto? _socialCardData;
+    private bool _isGeneratingAiSummary;
+    private string? _aiSummaryMessage;
+
+    private void HandleGameUpdated(GameDetailDto updated)
+    {
+        Game = updated;
+        StateHasChanged();
+    }
 
     private void OpenSocialCardModal()
     {
@@ -458,5 +615,37 @@ else
         // Refrescar ficha y datos del veredicto
         Game = await CatalogService.GetGameBySlugAsync(Slug);
         await LoadUserDataAsync();
+    }
+
+    private async Task HandleRequestAiSummary()
+    {
+        if (Game == null || _isGeneratingAiSummary) return;
+
+        _isGeneratingAiSummary = true;
+        _aiSummaryMessage = null;
+
+        try
+        {
+            _aiSummary = await FoundingService.RequestAiSummaryGenerationAsync(Game.Id);
+            _aiSummaryMessage = "Síntesis estructurada generada y guardada correctamente con IA.";
+            Game = await CatalogService.GetGameBySlugAsync(Slug);
+        }
+        catch (Exception ex)
+        {
+            _aiSummaryMessage = $"No se pudo generar la síntesis: {ex.Message}";
+        }
+        finally
+        {
+            _isGeneratingAiSummary = false;
+        }
+    }
+
+    private async Task ReloadMediaAsync()
+    {
+        if (Game != null)
+        {
+            _mediaHub = await MediaService.GetGameMediaAsync(Game.Id);
+            StateHasChanged();
+        }
     }
 }

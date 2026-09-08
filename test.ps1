@@ -1,4 +1,4 @@
-# Script de ejecución de tests para Ludeka (.NET 10)
+ï»¿# Script de ejecucion de tests para Ludeka (.NET 10)
 $ErrorActionPreference = "Stop"
 
 $userDotnet = "$env:USERPROFILE\.dotnet"
@@ -8,4 +8,4 @@ if (Test-Path "$userDotnet\dotnet.exe") {
 }
 
 Write-Host "Ejecutando suite de pruebas unitarias..." -ForegroundColor Cyan
-dotnet test src/Ludeka.slnx
+dotnet test Ludeka.sln

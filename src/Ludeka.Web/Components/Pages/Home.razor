@@ -1,11 +1,10 @@
-@page "/"
 @page "/catalogo"
 @rendermode InteractiveServer
 @using Ludeka.Core.Enums
 @inject ICatalogService CatalogService
 @inject NavigationManager Navigation
 
-<PageTitle>Ludeka — Descubre tu próxima partida</PageTitle>
+<PageTitle>Catálogo de Juegos de Mesa — Ludeka</PageTitle>
 
 <div class="container-ludeka py-6">
     @* Cabecera y buscador principal *@
@@ -93,6 +92,11 @@
         // Leer query params si vienen de navegación externa
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("q", out var qVal) && !string.IsNullOrWhiteSpace(qVal))
+        {
+            _searchTerm = qVal.ToString();
+        }
 
         if (query.ContainsKey("parejas"))
         {

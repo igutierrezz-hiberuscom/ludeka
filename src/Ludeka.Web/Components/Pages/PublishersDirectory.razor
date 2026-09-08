@@ -1,0 +1,213 @@
+@page "/editoriales"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Web.Components.Shared
+@inject IPublisherService PublisherService
+@inject ICurrentUserService CurrentUserService
+
+<PageTitle>Directorio de Editoriales de Juegos de Mesa — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Cabecera con Buscador y Acción de Moderación *@
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+        <div class="space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold">
+                <span>🏢</span> Ecosistema Lúdico &bull; Casas de Edición
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                Editoriales
+            </h1>
+            <p class="text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+                Explora las editoriales del hobby, sus catálogos publicados en España, enlaces a webs oficiales y canales didácticos de YouTube.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanManagePublishers)))
+            {
+                <button type="button"
+                        @onclick="OpenCreateModal"
+                        class="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                    <span>➕</span> Nueva Editorial
+                </button>
+            }
+        </div>
+    </div>
+
+    @* Buscador reactivo *@
+    <div class="max-w-md">
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base">🔍</span>
+            <input type="text"
+                   @bind="_searchTerm"
+                   @bind:event="oninput"
+                   @bind:after="FilterPublishers"
+                   placeholder="Buscar editorial por nombre, país o ciudad..."
+                   class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors shadow-sm" />
+        </div>
+    </div>
+
+    @* Listado de Editoriales en Grid *@
+    @if (_loading)
+    {
+        <div class="py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
+            <span class="animate-spin text-xl">🎲</span>
+            <span>Cargando directorio de editoriales...</span>
+        </div>
+    }
+    else if (_publishers.Count == 0)
+    {
+        <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3">
+            <span class="text-4xl block">📦</span>
+            <h2 class="text-base font-bold text-[var(--text-primary)]">No se encontraron editoriales</h2>
+            <p class="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+                No hay resultados para la búsqueda actual. Puedes reiniciar el filtro o dar de alta una nueva editorial si eres moderador.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @foreach (var pub in _publishers)
+            {
+                <div class="p-5 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all flex flex-col justify-between gap-4 group">
+                    <div class="space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                @if (!string.IsNullOrWhiteSpace(pub.LogoUrl))
+                                {
+                                    <img src="@pub.LogoUrl"
+                                         alt="Logo de @pub.Name"
+                                         loading="lazy"
+                                         class="w-12 h-12 rounded-2xl object-contain bg-[var(--bg-surface-elevated)] p-1.5 border border-[var(--border-subtle)]"
+                                         onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                                }
+                                else
+                                {
+                                    <div class="w-12 h-12 rounded-2xl bg-[var(--brand-primary)]/10 border border-[var(--brand-primary)]/20 flex items-center justify-center text-xl text-[var(--brand-primary)] font-black">
+                                        @pub.Name[..Math.Min(2, pub.Name.Length)].ToUpper()
+                                    </div>
+                                }
+                                <div>
+                                    <a href="/editoriales/@pub.Slug"
+                                       class="font-black text-base text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] transition-colors line-clamp-1">
+                                        @pub.Name
+                                    </a>
+                                    <span class="text-xs text-[var(--text-muted)] block">
+                                        📍 @pub.Country @(!string.IsNullOrWhiteSpace(pub.City) ? $"({pub.City})" : "")
+                                    </span>
+                                </div>
+                            </div>
+
+                            <span class="px-2.5 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--brand-primary)] text-xs font-black shrink-0">
+                                @pub.GamesCount @(pub.GamesCount == 1 ? "título" : "títulos")
+                            </span>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(pub.Description))
+                        {
+                            <p class="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                                @pub.Description
+                            </p>
+                        }
+
+                        @* Redes sociales *@
+                        @if (pub.SocialLinks != null && pub.SocialLinks.Count > 0)
+                        {
+                            <SocialLinksList Links="@pub.SocialLinks" />
+                        }
+                    </div>
+
+                    <div class="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                        <a href="/editoriales/@pub.Slug" class="font-bold text-[var(--brand-primary)] hover:underline flex items-center gap-1">
+                            <span>Ver catálogo editorial</span>
+                            <span>&rarr;</span>
+                        </a>
+
+                        @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanManagePublishers)))
+                        {
+                            <button type="button"
+                                    @onclick="() => OpenEditModal(pub)"
+                                    class="text-[var(--text-muted)] hover:text-amber-400 font-semibold text-[0.7rem] px-2 py-1 rounded bg-[var(--bg-surface-elevated)] transition-colors">
+                                ✏️ Editar
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@* Modal de Edición / Creación *@
+<PublisherEditModal
+    IsOpen="@_isModalOpen"
+    PublisherId="@_selectedId"
+    Name="@_modalName"
+    Country="@_modalCountry"
+    City="@_modalCity"
+    Description="@_modalDescription"
+    LogoUrl="@_modalLogoUrl"
+    WebsiteUrl="@_modalWebsiteUrl"
+    InitialSocialLinks="@_modalSocialLinks"
+    OnClose="() => _isModalOpen = false"
+    OnSaved="LoadPublishersAsync" />
+
+@code {
+    private bool _loading = true;
+    private string _searchTerm = string.Empty;
+    private IReadOnlyList<PublisherDto> _publishers = [];
+    private bool _isModalOpen = false;
+    private Guid? _selectedId;
+    private string _modalName = string.Empty;
+    private string _modalCountry = "España";
+    private string? _modalCity;
+    private string? _modalDescription;
+    private string? _modalLogoUrl;
+    private string? _modalWebsiteUrl;
+    private List<SocialNetworkLinkDto>? _modalSocialLinks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPublishersAsync();
+    }
+
+    private async Task LoadPublishersAsync()
+    {
+        _loading = true;
+        _publishers = await PublisherService.GetAllAsync(_searchTerm);
+        _loading = false;
+    }
+
+    private async Task FilterPublishers()
+    {
+        _publishers = await PublisherService.GetAllAsync(_searchTerm);
+    }
+
+    private void OpenCreateModal()
+    {
+        _selectedId = null;
+        _modalName = string.Empty;
+        _modalCountry = "España";
+        _modalCity = null;
+        _modalDescription = null;
+        _modalLogoUrl = null;
+        _modalWebsiteUrl = null;
+        _modalSocialLinks = new List<SocialNetworkLinkDto>();
+        _isModalOpen = true;
+    }
+
+    private void OpenEditModal(PublisherDto pub)
+    {
+        _selectedId = pub.Id;
+        _modalName = pub.Name;
+        _modalCountry = pub.Country;
+        _modalCity = pub.City;
+        _modalDescription = pub.Description;
+        _modalLogoUrl = pub.LogoUrl;
+        _modalWebsiteUrl = pub.WebsiteUrl;
+        _modalSocialLinks = pub.SocialLinks.ToList();
+        _isModalOpen = true;
+    }
+}

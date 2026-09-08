@@ -20,6 +20,17 @@ public class LudekaDbContext : DbContext
     public DbSet<ExpansionSynergy> ExpansionSynergies => Set<ExpansionSynergy>();
     public DbSet<ExpansionRecipe> ExpansionRecipes => Set<ExpansionRecipe>();
     public DbSet<CommunityNotificationLog> NotificationLogs => Set<CommunityNotificationLog>();
+    public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
+    public DbSet<GameIssueReport> IssueReports => Set<GameIssueReport>();
+    public DbSet<GameEditLog> GameEditLogs => Set<GameEditLog>();
+    public DbSet<Publisher> Publishers => Set<Publisher>();
+    public DbSet<Creator> Creators => Set<Creator>();
+    public DbSet<Store> Stores => Set<Store>();
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<AuditLogEntry> AuditLogs => Set<AuditLogEntry>();
+    public DbSet<BoardGameEvent> BoardGameEvents => Set<BoardGameEvent>();
+    public DbSet<NightlyCatalogingExecutionLog> NightlyCatalogingExecutionLogs => Set<NightlyCatalogingExecutionLog>();
+    public DbSet<InstagramPostDraft> InstagramPostDrafts => Set<InstagramPostDraft>();
 
     public LudekaDbContext(DbContextOptions<LudekaDbContext> options) : base(options)
     {
@@ -48,7 +59,11 @@ public class LudekaDbContext : DbContext
         // Mapeo JSON nativo en EF Core 10 para colecciones de Value Objects y primitivas
         game.OwnsMany(g => g.Scalability, b => b.ToJson());
         game.OwnsMany(g => g.Sleeves, b => b.ToJson());
+        game.OwnsMany(g => g.PurchaseLinks, b => b.ToJson());
         game.PrimitiveCollection(g => g.ImpactTags);
+
+        // Mapeo de Síntesis Inteligente con IA (Incremento 13)
+        game.OwnsOne(g => g.AiSummary, b => b.ToJson());
 
         // Relación reflexiva para juego base y expansiones
         game.HasOne(g => g.BaseGame)
@@ -127,6 +142,7 @@ public class LudekaDbContext : DbContext
         media.HasIndex(m => m.GameId);
         media.HasIndex(m => m.Status);
         media.HasIndex(m => m.Type);
+        media.HasIndex(m => m.Category);
         media.HasIndex(m => m.Platform);
         media.HasIndex(m => new { m.GameId, m.Status });
 
@@ -143,6 +159,8 @@ public class LudekaDbContext : DbContext
         giveaway.HasIndex(g => g.DeadlineAt);
         giveaway.HasIndex(g => g.Platform);
         giveaway.HasIndex(g => g.IsCommunityExclusive);
+        giveaway.HasIndex(g => g.Country);
+        giveaway.Property(g => g.Country).HasMaxLength(100).IsRequired();
 
         giveaway.HasOne(g => g.Game)
             .WithMany()
@@ -238,5 +256,137 @@ public class LudekaDbContext : DbContext
         notificationLog.HasIndex(n => n.Status);
         notificationLog.HasIndex(n => n.Channel);
         notificationLog.HasIndex(n => n.CreatedAt);
+
+        // --- Configuración de UserPreference ---
+        var userPref = modelBuilder.Entity<UserPreference>();
+        userPref.ToTable("UserPreferences");
+        userPref.HasKey(u => u.UserId);
+        userPref.Property(u => u.PreferredTheme).HasMaxLength(32).IsRequired();
+        userPref.Property(u => u.Country).HasMaxLength(100);
+        userPref.Property(u => u.UpdatedAt).IsRequired();
+
+        // --- Configuración de GameIssueReport (Incremento 17) ---
+        var report = modelBuilder.Entity<GameIssueReport>();
+        report.ToTable("GameIssueReports");
+        report.HasKey(r => r.Id);
+
+        report.HasIndex(r => r.GameId);
+        report.HasIndex(r => r.Status);
+        report.HasIndex(r => r.IssueType);
+        report.HasIndex(r => r.CreatedAt);
+        report.HasIndex(r => new { r.Status, r.CreatedAt });
+
+        report.Property(r => r.GameSlug).IsRequired().HasMaxLength(200);
+        report.Property(r => r.GameTitle).IsRequired().HasMaxLength(250);
+        report.Property(r => r.Details).HasMaxLength(1000);
+        report.Property(r => r.ReporterNameOrAlias).HasMaxLength(100);
+        report.Property(r => r.ModeratorNotes).HasMaxLength(1000);
+        report.Property(r => r.ResolvedByUserId).HasMaxLength(100);
+        report.Property(r => r.ReportedByUserId).HasMaxLength(100);
+
+        // --- Configuración de GameEditLog (Incremento 18) ---
+        var editLog = modelBuilder.Entity<GameEditLog>();
+        editLog.ToTable("GameEditLogs");
+        editLog.HasKey(l => l.Id);
+
+        editLog.HasIndex(l => l.GameId);
+        editLog.HasIndex(l => l.EditedAt);
+
+        editLog.Property(l => l.EditorUserId).IsRequired().HasMaxLength(100);
+        editLog.Property(l => l.EditorName).IsRequired().HasMaxLength(100);
+        editLog.Property(l => l.SummaryOfChanges).IsRequired().HasMaxLength(1000);
+
+        // --- Configuración de Publisher (Incremento 19) ---
+        var publisher = modelBuilder.Entity<Publisher>();
+        publisher.ToTable("Publishers");
+        publisher.HasKey(p => p.Id);
+        publisher.HasIndex(p => p.Slug).IsUnique();
+        publisher.HasIndex(p => p.Name);
+        publisher.Property(p => p.Name).IsRequired().HasMaxLength(200);
+        publisher.Property(p => p.Slug).IsRequired().HasMaxLength(200);
+        publisher.OwnsMany(p => p.SocialLinks, b => b.ToJson());
+
+        // --- Configuración de Creator (Incremento 19) ---
+        var creator = modelBuilder.Entity<Creator>();
+        creator.ToTable("Creators");
+        creator.HasKey(c => c.Id);
+        creator.HasIndex(c => c.Slug).IsUnique();
+        creator.HasIndex(c => c.Name);
+        creator.Property(c => c.Name).IsRequired().HasMaxLength(200);
+        creator.Property(c => c.Slug).IsRequired().HasMaxLength(200);
+        creator.OwnsMany(c => c.SocialLinks, b => b.ToJson());
+
+        // --- Configuración de Store (Incremento 19) ---
+        var store = modelBuilder.Entity<Store>();
+        store.ToTable("Stores");
+        store.HasKey(s => s.Id);
+        store.HasIndex(s => s.Slug).IsUnique();
+        store.HasIndex(s => s.Name);
+        store.HasIndex(s => s.Country);
+        store.Property(s => s.Name).IsRequired().HasMaxLength(200);
+        store.Property(s => s.Slug).IsRequired().HasMaxLength(200);
+        store.Property(s => s.Country).IsRequired().HasMaxLength(100);
+        store.PrimitiveCollection(s => s.ShippingCountries);
+        store.OwnsMany(s => s.SocialLinks, b => b.ToJson());
+
+        // --- Configuración de AppUser (Incremento 20) ---
+        var user = modelBuilder.Entity<AppUser>();
+        user.ToTable("AppUsers");
+        user.HasKey(u => u.Id);
+        user.HasIndex(u => u.Email).IsUnique();
+        user.HasIndex(u => u.Role);
+        user.HasIndex(u => u.Status);
+        user.Property(u => u.Id).IsRequired().HasMaxLength(100);
+        user.Property(u => u.UserName).IsRequired().HasMaxLength(150);
+        user.Property(u => u.Email).IsRequired().HasMaxLength(200);
+        user.Property(u => u.Country).HasMaxLength(100);
+
+        // --- Configuración de AuditLogEntry (Incremento 20) ---
+        var audit = modelBuilder.Entity<AuditLogEntry>();
+        audit.ToTable("AuditLogs");
+        audit.HasKey(a => a.Id);
+        audit.HasIndex(a => a.UserId);
+        audit.HasIndex(a => a.Timestamp);
+        audit.HasIndex(a => a.EntityType);
+        audit.HasIndex(a => a.Action);
+        audit.HasIndex(a => new { a.EntityType, a.EntityId });
+        audit.Property(a => a.UserId).IsRequired().HasMaxLength(100);
+        audit.Property(a => a.UserName).IsRequired().HasMaxLength(150);
+        audit.Property(a => a.EntityId).IsRequired().HasMaxLength(100);
+        audit.Property(a => a.EntityName).IsRequired().HasMaxLength(200);
+        audit.Property(a => a.Summary).IsRequired().HasMaxLength(500);
+        audit.OwnsMany(a => a.Changes, b => b.ToJson());
+
+        // --- Configuración de BoardGameEvent (Incremento 21) ---
+        var evt = modelBuilder.Entity<BoardGameEvent>();
+        evt.ToTable("BoardGameEvents");
+        evt.HasKey(e => e.Id);
+        evt.HasIndex(e => e.StartDate);
+        evt.HasIndex(e => e.IsOfficial);
+        evt.HasIndex(e => e.Country);
+        evt.Property(e => e.Title).IsRequired().HasMaxLength(200);
+        evt.Property(e => e.ImageUrl).IsRequired().HasMaxLength(500);
+        evt.Property(e => e.Location).IsRequired().HasMaxLength(200);
+        evt.Property(e => e.Country).IsRequired().HasMaxLength(100);
+
+        // --- Configuración de NightlyCatalogingExecutionLog (Incremento 24) ---
+        var nightlyLog = modelBuilder.Entity<NightlyCatalogingExecutionLog>();
+        nightlyLog.ToTable("NightlyCatalogingExecutionLogs");
+        nightlyLog.HasKey(l => l.Id);
+        nightlyLog.HasIndex(l => l.StartedAt);
+        nightlyLog.Property(l => l.Status).IsRequired().HasMaxLength(50);
+        nightlyLog.Property(l => l.CatalogedTitlesJson).IsRequired();
+
+        // --- Configuración de InstagramPostDraft (Incremento 28) ---
+        var instagramDraft = modelBuilder.Entity<InstagramPostDraft>();
+        instagramDraft.ToTable("InstagramPostDrafts");
+        instagramDraft.HasKey(d => d.Id);
+        instagramDraft.HasIndex(d => d.Status);
+        instagramDraft.HasIndex(d => new { d.SourceType, d.SourceId });
+        instagramDraft.HasIndex(d => d.CreatedAt);
+        instagramDraft.Property(d => d.Title).IsRequired().HasMaxLength(250);
+        instagramDraft.Property(d => d.Caption).IsRequired().HasMaxLength(4000);
+        instagramDraft.Property(d => d.Theme).IsRequired().HasMaxLength(20);
+        instagramDraft.Property(d => d.CreatedByUserId).IsRequired().HasMaxLength(100);
     }
 }

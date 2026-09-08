@@ -1,12 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
-  <rect width="240" height="240" fill="#141B26"/>
-  <rect x="20" y="20" width="200" height="200" rx="16" fill="#182232" stroke="#2A364F" stroke-width="2"/>
-  <circle cx="120" cy="105" r="32" fill="#1D2636"/>
-  <!-- Dado / Juego de mesa -->
-  <path d="M105 92 L120 83 L135 92 L135 110 L120 119 L105 110 Z" fill="none" stroke="#FF5A36" stroke-width="2.5" stroke-linejoin="round"/>
-  <line x1="120" y1="83" x2="120" y2="119" stroke="#FF5A36" stroke-width="2"/>
-  <line x1="120" y1="101" x2="105" y2="92" stroke="#FF5A36" stroke-width="2"/>
-  <line x1="120" y1="101" x2="135" y2="92" stroke="#FF5A36" stroke-width="2"/>
-  <text x="120" y="155" text-anchor="middle" fill="#94A3B8" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700">LUDEKA</text>
-  <text x="120" y="172" text-anchor="middle" fill="#64748B" font-family="Plus Jakarta Sans, sans-serif" font-size="10">Ficha en cat�logo</text>
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F17"/>
+      <stop offset="100%" stop-color="#141B26"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#182232"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo base -->
+  <rect width="400" height="400" fill="url(#bgGrad)"/>
+
+  <!-- Glow ambiental cálido -->
+  <circle cx="200" cy="190" r="110" fill="#F97316" opacity="0.08"/>
+
+  <!-- Tarjeta interior con bisel -->
+  <rect x="24" y="24" width="352" height="352" rx="20" fill="url(#cardGrad)" stroke="#2A364F" stroke-width="2"/>
+
+  <!-- Cabecera de Marca: Logotipo Ludeka -->
+  <g transform="translate(200, 68)">
+    <text text-anchor="middle" fill="#FFFFFF" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="22" font-weight="900" letter-spacing="-0.5">
+      Ludeka<tspan fill="#F97316">.</tspan>
+    </text>
+    <text y="18" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="9" font-weight="700" letter-spacing="1.5">
+      CATÁLOGO OFICIAL
+    </text>
+  </g>
+
+  <!-- Isotipo central: Dado 3D y componentes de mesa -->
+  <g transform="translate(200, 185)">
+    <!-- Círculo de fondo del icono -->
+    <circle cx="0" cy="0" r="54" fill="#0F172A" stroke="#334155" stroke-width="1.5"/>
+
+    <!-- Dado 3D isométrico -->
+    <g transform="translate(0, -6)">
+      <!-- Cara superior -->
+      <polygon points="0,-32 28,-16 0,0 -28,-16" fill="#FF7849" stroke="#EA580C" stroke-width="1.5" stroke-linejoin="round"/>
+      <!-- Cara izquierda -->
+      <polygon points="-28,-16 0,0 0,34 -28,18" fill="#D9480F" stroke="#EA580C" stroke-width="1.5" stroke-linejoin="round"/>
+      <!-- Cara derecha -->
+      <polygon points="0,0 28,-16 28,18 0,34" fill="#B63E0B" stroke="#EA580C" stroke-width="1.5" stroke-linejoin="round"/>
+
+      <!-- Puntos del dado -->
+      <circle cx="0" cy="-16" r="3.2" fill="#FFFFFF" opacity="0.95"/>
+      <circle cx="-14" cy="4" r="2.8" fill="#FFE8DF"/>
+      <circle cx="-14" cy="22" r="2.8" fill="#FFE8DF"/>
+      <circle cx="14" cy="-4" r="2.8" fill="#FFE8DF"/>
+      <circle cx="14" cy="14" r="2.8" fill="#FFE8DF"/>
+    </g>
+  </g>
+
+  <!-- Badge distintivo: Juego Base -->
+  <g transform="translate(200, 282)">
+    <rect x="-75" y="-15" width="150" height="30" rx="15" fill="#0F172A" stroke="#F97316" stroke-width="1.5"/>
+    <text text-anchor="middle" y="5" fill="#FED7AA" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11" font-weight="800" letter-spacing="0.5">
+      🎲 JUEGO BASE
+    </text>
+  </g>
+
+  <!-- Pie de placeholder -->
+  <text x="200" y="336" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11" font-weight="600">
+    Carátula en actualización
+  </text>
 </svg>

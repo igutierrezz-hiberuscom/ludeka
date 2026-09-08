@@ -65,7 +65,9 @@ public static class SqliteSchemaMigrator
                 ("ImpactTags", "TEXT NOT NULL DEFAULT '[]'"),
                 ("WhatItBringsSummary", "TEXT NULL"),
                 ("ExtraPlayerCount", "INTEGER NULL"),
-                ("ExtraDurationMinutes", "INTEGER NULL")
+                ("ExtraDurationMinutes", "INTEGER NULL"),
+                ("PurchaseLinks", "TEXT NOT NULL DEFAULT '[]'"),
+                ("AiSummary", "TEXT NULL")
             };
 
             foreach (var (colName, colDef) in columnsToAdd)
@@ -83,6 +85,7 @@ public static class SqliteSchemaMigrator
             {
                 fixCmd.CommandText = """
                     UPDATE "Games" SET "ImpactTags" = '[]' WHERE "ImpactTags" IS NULL;
+                    UPDATE "Games" SET "PurchaseLinks" = '[]' WHERE "PurchaseLinks" IS NULL;
                     UPDATE "Games" SET "Type" = 0 WHERE "Type" IS NULL;
                     """;
                 await fixCmd.ExecuteNonQueryAsync(ct);
@@ -163,6 +166,420 @@ public static class SqliteSchemaMigrator
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
             }
+
+            // 6. Crear tabla UserPreferences si no existe
+            if (!existingTables.Contains("UserPreferences"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "UserPreferences" (
+                        "UserId" TEXT NOT NULL CONSTRAINT "PK_UserPreferences" PRIMARY KEY,
+                        "PreferredTheme" TEXT NOT NULL,
+                        "UpdatedAt" TEXT NOT NULL
+                    );
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 7. Crear tabla GameEditLogs si no existe (Incremento 18)
+            if (!existingTables.Contains("GameEditLogs"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "GameEditLogs" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_GameEditLogs" PRIMARY KEY,
+                        "GameId" TEXT NOT NULL,
+                        "EditorUserId" TEXT NOT NULL,
+                        "EditorName" TEXT NOT NULL,
+                        "SummaryOfChanges" TEXT NOT NULL,
+                        "AssociatedReportId" TEXT NULL,
+                        "EditedAt" TEXT NOT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS "IX_GameEditLogs_GameId" ON "GameEditLogs" ("GameId");
+                    CREATE INDEX IF NOT EXISTS "IX_GameEditLogs_EditedAt" ON "GameEditLogs" ("EditedAt");
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 8. Crear tabla Publishers si no existe (Incremento 19)
+            if (!existingTables.Contains("Publishers"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "Publishers" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_Publishers" PRIMARY KEY,
+                        "Name" TEXT NOT NULL,
+                        "Slug" TEXT NOT NULL,
+                        "Country" TEXT NOT NULL,
+                        "City" TEXT NULL,
+                        "Description" TEXT NULL,
+                        "LogoUrl" TEXT NULL,
+                        "WebsiteUrl" TEXT NULL,
+                        "SocialLinks" TEXT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        "UpdatedAt" TEXT NULL
+                    );
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IX_Publishers_Slug" ON "Publishers" ("Slug");
+                    CREATE INDEX IF NOT EXISTS "IX_Publishers_Name" ON "Publishers" ("Name");
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 9. Crear tabla Creators si no existe (Incremento 19)
+            if (!existingTables.Contains("Creators"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "Creators" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_Creators" PRIMARY KEY,
+                        "Name" TEXT NOT NULL,
+                        "Slug" TEXT NOT NULL,
+                        "Nationality" TEXT NULL,
+                        "Bio" TEXT NULL,
+                        "AvatarUrl" TEXT NULL,
+                        "BggPersonId" INTEGER NULL,
+                        "WebsiteUrl" TEXT NULL,
+                        "SocialLinks" TEXT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        "UpdatedAt" TEXT NULL
+                    );
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IX_Creators_Slug" ON "Creators" ("Slug");
+                    CREATE INDEX IF NOT EXISTS "IX_Creators_Name" ON "Creators" ("Name");
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 10. Crear tabla Stores si no existe (Incremento 19)
+            if (!existingTables.Contains("Stores"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "Stores" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_Stores" PRIMARY KEY,
+                        "Name" TEXT NOT NULL,
+                        "Slug" TEXT NOT NULL,
+                        "Type" INTEGER NOT NULL,
+                        "City" TEXT NULL,
+                        "Address" TEXT NULL,
+                        "Description" TEXT NULL,
+                        "LogoUrl" TEXT NULL,
+                        "WebsiteUrl" TEXT NULL,
+                        "AffiliateCode" TEXT NULL,
+                        "HasLoyaltyProgram" INTEGER NOT NULL,
+                        "SocialLinks" TEXT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        "UpdatedAt" TEXT NULL
+                    );
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IX_Stores_Slug" ON "Stores" ("Slug");
+                    CREATE INDEX IF NOT EXISTS "IX_Stores_Name" ON "Stores" ("Name");
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 11. Crear tabla AppUsers si no existe (Incremento 20)
+            if (!existingTables.Contains("AppUsers"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "AppUsers" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_AppUsers" PRIMARY KEY,
+                        "UserName" TEXT NOT NULL,
+                        "Email" TEXT NOT NULL,
+                        "Role" INTEGER NOT NULL,
+                        "Status" INTEGER NOT NULL,
+                        "Permissions" INTEGER NOT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        "UpdatedAt" TEXT NULL
+                    );
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IX_AppUsers_Email" ON "AppUsers" ("Email");
+                    CREATE INDEX IF NOT EXISTS "IX_AppUsers_Role" ON "AppUsers" ("Role");
+                    CREATE INDEX IF NOT EXISTS "IX_AppUsers_Status" ON "AppUsers" ("Status");
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 12. Crear tabla AuditLogs si no existe (Incremento 20)
+            if (!existingTables.Contains("AuditLogs"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "AuditLogs" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_AuditLogs" PRIMARY KEY,
+                        "UserId" TEXT NOT NULL,
+                        "UserName" TEXT NOT NULL,
+                        "Timestamp" TEXT NOT NULL,
+                        "Action" INTEGER NOT NULL,
+                        "EntityType" INTEGER NOT NULL,
+                        "EntityId" TEXT NOT NULL,
+                        "EntityName" TEXT NOT NULL,
+                        "Summary" TEXT NOT NULL,
+                        "Changes" TEXT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS "IX_AuditLogs_UserId" ON "AuditLogs" ("UserId");
+                    CREATE INDEX IF NOT EXISTS "IX_AuditLogs_Timestamp" ON "AuditLogs" ("Timestamp");
+                    CREATE INDEX IF NOT EXISTS "IX_AuditLogs_EntityType" ON "AuditLogs" ("EntityType");
+                    CREATE INDEX IF NOT EXISTS "IX_AuditLogs_Action" ON "AuditLogs" ("Action");
+                    CREATE INDEX IF NOT EXISTS "IX_AuditLogs_EntityType_EntityId" ON "AuditLogs" ("EntityType", "EntityId");
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 13. Reconciliar columna IsPromoted en tabla Giveaways (Incremento 21)
+            if (existingTables.Contains("Giveaways"))
+            {
+                var giveawayColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                using (var colsCmd = connection.CreateCommand())
+                {
+                    colsCmd.CommandText = "PRAGMA table_info('Giveaways');";
+                    using var reader = await colsCmd.ExecuteReaderAsync(ct);
+                    while (await reader.ReadAsync(ct))
+                    {
+                        giveawayColumns.Add(reader.GetString(1));
+                    }
+                }
+
+                if (!giveawayColumns.Contains("IsPromoted"))
+                {
+                    using var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = "ALTER TABLE \"Giveaways\" ADD COLUMN \"IsPromoted\" INTEGER NOT NULL DEFAULT 0;";
+                    await alterCmd.ExecuteNonQueryAsync(ct);
+                }
+            }
+
+            // 14. Crear tabla BoardGameEvents si no existe (Incremento 21)
+            if (!existingTables.Contains("BoardGameEvents"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "BoardGameEvents" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_BoardGameEvents" PRIMARY KEY,
+                        "Title" TEXT NOT NULL,
+                        "Description" TEXT NOT NULL,
+                        "ImageUrl" TEXT NOT NULL,
+                        "StartDate" TEXT NOT NULL,
+                        "EndDate" TEXT NOT NULL,
+                        "Location" TEXT NOT NULL,
+                        "WebsiteUrl" TEXT NULL,
+                        "Organizer" TEXT NOT NULL,
+                        "IsOfficial" INTEGER NOT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        "UpdatedAt" TEXT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS "IX_BoardGameEvents_StartDate" ON "BoardGameEvents" ("StartDate");
+                    CREATE INDEX IF NOT EXISTS "IX_BoardGameEvents_IsOfficial" ON "BoardGameEvents" ("IsOfficial");
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 15. Reconciliar columna Category en tabla MediaItems (Incremento 23)
+            if (existingTables.Contains("MediaItems"))
+            {
+                var mediaColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                using (var colsCmd = connection.CreateCommand())
+                {
+                    colsCmd.CommandText = "PRAGMA table_info('MediaItems');";
+                    using var reader = await colsCmd.ExecuteReaderAsync(ct);
+                    while (await reader.ReadAsync(ct))
+                    {
+                        mediaColumns.Add(reader.GetString(1));
+                    }
+                }
+
+                if (!mediaColumns.Contains("Category"))
+                {
+                    using var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = "ALTER TABLE \"MediaItems\" ADD COLUMN \"Category\" INTEGER NOT NULL DEFAULT 0;";
+                    await alterCmd.ExecuteNonQueryAsync(ct);
+                }
+
+                using var idxCmd = connection.CreateCommand();
+                idxCmd.CommandText = "CREATE INDEX IF NOT EXISTS \"IX_MediaItems_Category\" ON \"MediaItems\" (\"Category\");";
+                await idxCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // 16. Reconciliar Country y ShippingCountries en Stores, Giveaways, BoardGameEvents, AppUsers, UserPreferences (Incremento 29)
+            if (existingTables.Contains("Stores"))
+            {
+                var cols = await GetTableColumnsAsync(connection, "Stores", ct);
+                if (!cols.Contains("Country"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"Stores\" ADD COLUMN \"Country\" TEXT NOT NULL DEFAULT 'España';";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+                if (!cols.Contains("ShippingCountries"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"Stores\" ADD COLUMN \"ShippingCountries\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+                using var idxCmd = connection.CreateCommand();
+                idxCmd.CommandText = "CREATE INDEX IF NOT EXISTS \"IX_Stores_Country\" ON \"Stores\" (\"Country\");";
+                await idxCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            if (existingTables.Contains("Giveaways"))
+            {
+                var cols = await GetTableColumnsAsync(connection, "Giveaways", ct);
+                if (!cols.Contains("Country"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"Giveaways\" ADD COLUMN \"Country\" TEXT NOT NULL DEFAULT 'España';";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+                using var idxCmd = connection.CreateCommand();
+                idxCmd.CommandText = "CREATE INDEX IF NOT EXISTS \"IX_Giveaways_Country\" ON \"Giveaways\" (\"Country\");";
+                await idxCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            if (existingTables.Contains("BoardGameEvents"))
+            {
+                var cols = await GetTableColumnsAsync(connection, "BoardGameEvents", ct);
+                if (!cols.Contains("Country"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"BoardGameEvents\" ADD COLUMN \"Country\" TEXT NOT NULL DEFAULT 'España';";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+                using var idxCmd = connection.CreateCommand();
+                idxCmd.CommandText = "CREATE INDEX IF NOT EXISTS \"IX_BoardGameEvents_Country\" ON \"BoardGameEvents\" (\"Country\");";
+                await idxCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            if (existingTables.Contains("AppUsers"))
+            {
+                var cols = await GetTableColumnsAsync(connection, "AppUsers", ct);
+                if (!cols.Contains("Country"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"AppUsers\" ADD COLUMN \"Country\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+            }
+
+            if (existingTables.Contains("UserPreferences"))
+            {
+                var cols = await GetTableColumnsAsync(connection, "UserPreferences", ct);
+                if (!cols.Contains("Country"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"UserPreferences\" ADD COLUMN \"Country\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+            }
+
+            // --- Incremento 24: Detección Automática y Cola Nocturna Inteligente ---
+            if (existingTables.Contains("PendingBggImports"))
+            {
+                var cols = await GetTableColumnsAsync(connection, "PendingBggImports", ct);
+                if (!cols.Contains("Origin"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"PendingBggImports\" ADD COLUMN \"Origin\" INTEGER NOT NULL DEFAULT 0;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+                if (!cols.Contains("ExtractedTitle"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"PendingBggImports\" ADD COLUMN \"ExtractedTitle\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+            }
+
+            if (!existingTables.Contains("NightlyCatalogingExecutionLogs"))
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "NightlyCatalogingExecutionLogs" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_NightlyCatalogingExecutionLogs" PRIMARY KEY,
+                        "StartedAt" TEXT NOT NULL,
+                        "CompletedAt" TEXT NULL,
+                        "QueueProcessedCount" INTEGER NOT NULL,
+                        "NewsDiscoveryCount" INTEGER NOT NULL,
+                        "TopBackfillCount" INTEGER NOT NULL,
+                        "TotalCatalogedCount" INTEGER NOT NULL,
+                        "FailedCount" INTEGER NOT NULL,
+                        "CatalogedTitlesJson" TEXT NOT NULL,
+                        "Status" TEXT NOT NULL,
+                        "ErrorMessage" TEXT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS "IX_NightlyCatalogingExecutionLogs_StartedAt" ON "NightlyCatalogingExecutionLogs" ("StartedAt");
+                """;
+                await cmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // Reconciliar columnas de Giveaways para Instagram (Incremento 28)
+            if (existingTables.Contains("Giveaways"))
+            {
+                var giveawayCols = await GetTableColumnsAsync(connection, "Giveaways", ct);
+                if (!giveawayCols.Contains("InstagramMediaId"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"Giveaways\" ADD COLUMN \"InstagramMediaId\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+                if (!giveawayCols.Contains("InstagramPermalink"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"Giveaways\" ADD COLUMN \"InstagramPermalink\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+            }
+
+            // Reconciliar columnas de WeeklyReleases para Instagram (Incremento 28)
+            if (existingTables.Contains("WeeklyReleases"))
+            {
+                var releaseCols = await GetTableColumnsAsync(connection, "WeeklyReleases", ct);
+                if (!releaseCols.Contains("InstagramMediaId"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"WeeklyReleases\" ADD COLUMN \"InstagramMediaId\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+                if (!releaseCols.Contains("InstagramPermalink"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"WeeklyReleases\" ADD COLUMN \"InstagramPermalink\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+                if (!releaseCols.Contains("UpdatedAt"))
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "ALTER TABLE \"WeeklyReleases\" ADD COLUMN \"UpdatedAt\" TEXT NULL;";
+                    await cmd.ExecuteNonQueryAsync(ct);
+                }
+            }
+
+            // Crear tabla InstagramPostDrafts si no existe (Incremento 28)
+            if (!existingTables.Contains("InstagramPostDrafts"))
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "InstagramPostDrafts" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_InstagramPostDrafts" PRIMARY KEY,
+                        "SourceType" INTEGER NOT NULL,
+                        "SourceId" TEXT NOT NULL,
+                        "Title" TEXT NOT NULL,
+                        "Caption" TEXT NOT NULL,
+                        "ImageUrl" TEXT NULL,
+                        "SvgContent" TEXT NULL,
+                        "Theme" TEXT NOT NULL,
+                        "Status" INTEGER NOT NULL,
+                        "InstagramMediaId" TEXT NULL,
+                        "InstagramPermalink" TEXT NULL,
+                        "ErrorMessage" TEXT NULL,
+                        "CreatedByUserId" TEXT NOT NULL,
+                        "CreatedByUserName" TEXT NOT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        "PublishedAt" TEXT NULL,
+                        "UpdatedAt" TEXT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS "IX_InstagramPostDrafts_Status" ON "InstagramPostDrafts" ("Status");
+                    CREATE INDEX IF NOT EXISTS "IX_InstagramPostDrafts_SourceType_SourceId" ON "InstagramPostDrafts" ("SourceType", "SourceId");
+                    CREATE INDEX IF NOT EXISTS "IX_InstagramPostDrafts_CreatedAt" ON "InstagramPostDrafts" ("CreatedAt");
+                """;
+                await cmd.ExecuteNonQueryAsync(ct);
+            }
         }
         finally
         {
@@ -171,5 +588,18 @@ public static class SqliteSchemaMigrator
                 await connection.CloseAsync();
             }
         }
+    }
+
+    private static async Task<HashSet<string>> GetTableColumnsAsync(System.Data.Common.DbConnection connection, string tableName, CancellationToken ct)
+    {
+        var cols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = $"PRAGMA table_info('{tableName}');";
+        using var reader = await cmd.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            cols.Add(reader.GetString(1));
+        }
+        return cols;
     }
 }

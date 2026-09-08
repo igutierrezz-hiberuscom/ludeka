@@ -142,7 +142,38 @@ public class SqliteGameRepository : IGameRepository
         var existing = await _context.Games.FirstOrDefaultAsync(g => g.Id == game.Id, ct);
         if (existing != null)
         {
-            existing.UpdateLudistRating(game.LudistRating);
+            if (!ReferenceEquals(existing, game))
+            {
+                existing.UpdateLudistRating(game.LudistRating);
+                if (game.AiSummary != null)
+                {
+                    existing.SetAiSummary(game.AiSummary);
+                }
+
+                int minPlayers = game.Scalability.Count > 0 ? game.Scalability.Min(s => s.PlayerCount) : 1;
+                int maxPlayers = game.Scalability.Count > 0 ? game.Scalability.Max(s => s.PlayerCount) : 4;
+
+                existing.UpdateCatalogInformation(
+                    game.SpanishTitle,
+                    game.OriginalTitle,
+                    game.Designer,
+                    game.Publisher,
+                    game.YearPublished,
+                    game.Description,
+                    game.Confrontation,
+                    game.Style,
+                    game.IsOfficialSolo,
+                    game.Age,
+                    game.Language,
+                    game.Footprint,
+                    game.Duration,
+                    minPlayers,
+                    maxPlayers
+                );
+
+                existing.UpdateImages(game.CoverImageUrl, game.ThumbnailUrl);
+            }
+
             await _context.SaveChangesAsync(ct);
         }
     }
@@ -150,5 +181,45 @@ public class SqliteGameRepository : IGameRepository
     public async Task<bool> HasAnyAsync(CancellationToken ct = default)
     {
         return await _context.Games.AnyAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<Game>> GetGamesWithoutAiSummaryAsync(int limit = 20, CancellationToken ct = default)
+    {
+        return await _context.Games
+            .Where(g => g.AiSummary == null)
+            .Take(limit)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<Game>> GetByPublisherAsync(string publisherName, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(publisherName)) return Array.Empty<Game>();
+
+        var clean = publisherName.Trim();
+        return await _context.Games
+            .AsNoTracking()
+            .Where(g => EF.Functions.Like(g.Publisher, $"%{clean}%"))
+            .OrderBy(g => g.SpanishTitle)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<Game>> GetByDesignerAsync(string designerName, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(designerName)) return Array.Empty<Game>();
+
+        var clean = designerName.Trim();
+        return await _context.Games
+            .AsNoTracking()
+            .Where(g => EF.Functions.Like(g.Designer, $"%{clean}%"))
+            .OrderBy(g => g.SpanishTitle)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<Game>> GetAllGamesAsync(CancellationToken ct = default)
+    {
+        return await _context.Games
+            .AsNoTracking()
+            .OrderBy(g => g.SpanishTitle)
+            .ToListAsync(ct);
     }
 }

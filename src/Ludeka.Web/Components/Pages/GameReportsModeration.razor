@@ -1,0 +1,601 @@
+@page "/moderacion/reportes"
+@page "/admin/reportes"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@inject IGameIssueReportService ReportService
+@inject ICurrentUserService CurrentUserService
+@inject ICatalogService CatalogService
+@inject NavigationManager Navigation
+
+<PageTitle>Bandeja de Reportes de Catálogo | Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-6">
+    @* Verificación de Rol y Permisos *@
+    @if (!CurrentUserService.IsFoundingTeam && !(CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanResolveReports)))
+    {
+        <div class="max-w-md mx-auto py-16 text-center space-y-4">
+            <span class="text-5xl block">🛡️</span>
+            <h1 class="text-2xl font-bold text-[var(--text-primary)]">Acceso Restringido</h1>
+            <p class="text-sm text-[var(--text-secondary)]">
+                Esta sección está reservada para moderadores y el equipo fundador de Ludeka.
+            </p>
+            <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
+                <p class="mb-2">
+                    💡 Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
+                </p>
+                <button type="button"
+                        @onclick="SwitchToFounder"
+                        class="px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity">
+                    Activar Modo Fundador Ahora
+                </button>
+            </div>
+            <a href="/" class="inline-block text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] underline">
+                &larr; Volver al Catálogo
+            </a>
+        </div>
+    }
+    else
+    {
+        @* Cabecera *@
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-2xl">🚩</span>
+                    <h1 class="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+                        Bandeja de Reportes de Catálogo
+                    </h1>
+                </div>
+                <p class="text-xs text-[var(--text-muted)]">
+                    Triaje de erratas, imágenes desactualizadas y sugerencias enviadas por la comunidad.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="/moderacion-media"
+                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
+                    <span>🎬</span>
+                    <span>Moderación Multimedia</span>
+                </a>
+                <a href="/"
+                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors border border-[var(--border-subtle)]">
+                    &larr; Ir a la Web
+                </a>
+            </div>
+        </div>
+
+        @* Tarjetas de Métricas / KPI *@
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center text-xl shrink-0">
+                    ⏳
+                </div>
+                <div>
+                    <span class="text-xs text-[var(--text-muted)] block font-semibold">Pendientes</span>
+                    <span class="text-xl font-extrabold text-[var(--text-primary)]">@(_summary?.PendingCount ?? 0)</span>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center text-xl shrink-0">
+                    🔍
+                </div>
+                <div>
+                    <span class="text-xs text-[var(--text-muted)] block font-semibold">En Revisión</span>
+                    <span class="text-xl font-extrabold text-[var(--text-primary)]">@(_summary?.InReviewCount ?? 0)</span>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center text-xl shrink-0">
+                    ✅
+                </div>
+                <div>
+                    <span class="text-xs text-[var(--text-muted)] block font-semibold">Resueltos</span>
+                    <span class="text-xl font-extrabold text-[var(--text-primary)]">@(_summary?.ResolvedCount ?? 0)</span>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-muted)] flex items-center justify-center text-xl shrink-0">
+                    📁
+                </div>
+                <div>
+                    <span class="text-xs text-[var(--text-muted)] block font-semibold">Total Reportes</span>
+                    <span class="text-xl font-extrabold text-[var(--text-primary)]">@(_summary?.TotalCount ?? 0)</span>
+                </div>
+            </div>
+        </div>
+
+        @* Barra de Filtros *@
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm">
+            @* Pestañas por Estado *@
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+                <button type="button"
+                        @onclick="() => SetStatusFilter(null)"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all @(_selectedStatus == null ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]")">
+                    Todos (@(_summary?.TotalCount ?? 0))
+                </button>
+                <button type="button"
+                        @onclick="() => SetStatusFilter(GameReportStatus.Pending)"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 @(_selectedStatus == GameReportStatus.Pending ? "bg-amber-600 text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]")">
+                    <span>⏳ Pendientes</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] bg-black/20">@(_summary?.PendingCount ?? 0)</span>
+                </button>
+                <button type="button"
+                        @onclick="() => SetStatusFilter(GameReportStatus.InReview)"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 @(_selectedStatus == GameReportStatus.InReview ? "bg-blue-600 text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]")">
+                    <span>🔍 En Revisión</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] bg-black/20">@(_summary?.InReviewCount ?? 0)</span>
+                </button>
+                <button type="button"
+                        @onclick="() => SetStatusFilter(GameReportStatus.Resolved)"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all @(_selectedStatus == GameReportStatus.Resolved ? "bg-emerald-600 text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]")">
+                    ✅ Resueltos
+                </button>
+                <button type="button"
+                        @onclick="() => SetStatusFilter(GameReportStatus.Dismissed)"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all @(_selectedStatus == GameReportStatus.Dismissed ? "bg-stone-600 text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]")">
+                    Descartados
+                </button>
+            </div>
+
+            @* Filtro por Tipología y Buscador *@
+            <div class="flex items-center gap-3">
+                <select @bind="_selectedIssueType"
+                        @bind:after="LoadReportsAsync"
+                        class="px-3 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs font-semibold focus:outline-none focus:border-[var(--brand-primary)]">
+                    <option value="">Todas las incidencias</option>
+                    <option value="@GameIssueType.WrongImage">🖼️ Imagen incorrecta</option>
+                    <option value="@GameIssueType.BrokenImage">🚫 Imagen rota</option>
+                    <option value="@GameIssueType.IncorrectPlayerCount">👥 Nº jugadores / semáforo</option>
+                    <option value="@GameIssueType.IncorrectDuration">⏱️ Duración</option>
+                    <option value="@GameIssueType.IncorrectAge">🎂 Edad</option>
+                    <option value="@GameIssueType.ErroneousMetadata">📝 Metadatos</option>
+                    <option value="@GameIssueType.BrokenPurchaseLink">🛒 Enlace de compra</option>
+                    <option value="@GameIssueType.Other">💬 Otros</option>
+                </select>
+
+                <div class="relative">
+                    <input type="text"
+                           placeholder="Buscar por juego o texto..."
+                           @bind="_searchTerm"
+                           @bind:event="oninput"
+                           @bind:after="LoadReportsAsync"
+                           class="w-48 sm:w-60 px-3 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--brand-primary)]" />
+                    @if (!string.IsNullOrWhiteSpace(_searchTerm))
+                    {
+                        <button type="button"
+                                @onclick="ClearSearch"
+                                class="absolute right-2.5 top-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                            ✕
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* Lista de Reportes *@
+        @if (_isLoading)
+        {
+            <div class="p-12 text-center text-slate-400">
+                <div class="inline-block animate-spin text-3xl mb-2">🎲</div>
+                <p class="text-xs font-semibold">Cargando reportes de catálogo...</p>
+            </div>
+        }
+        else if (_reports.Count == 0)
+        {
+            <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3">
+                <span class="text-4xl block">✨</span>
+                <h3 class="text-base font-bold text-[var(--text-primary)]">No hay reportes en esta sección</h3>
+                <p class="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+                    El catálogo está impecable o no hay incidencias pendientes con los filtros seleccionados.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="space-y-3">
+                @foreach (var r in _reports)
+                {
+                    <div class="p-5 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm space-y-3 transition-all hover:border-[var(--border-highlight)]">
+                        @* Cabecera de la Tarjeta *@
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <a href="/juegos/@r.GameSlug"
+                                   target="_blank"
+                                   class="text-base font-black text-[var(--text-primary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                                    <span>@r.GameTitle</span>
+                                    <span class="text-xs opacity-60">↗</span>
+                                </a>
+
+                                @* Badge de Tipo de Incidencia *@
+                                <span class="px-2.5 py-0.5 rounded-full text-[0.7rem] font-bold @GetIssueBadgeClass(r.IssueType)">
+                                    @GetIssueIcon(r.IssueType) @r.IssueTypeName
+                                </span>
+
+                                @* Badge de Estado *@
+                                <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-extrabold @GetStatusBadgeClass(r.Status)">
+                                    @r.StatusName
+                                </span>
+                            </div>
+
+                            <span class="text-[0.7rem] text-[var(--text-muted)] font-mono">
+                                @r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </span>
+                        </div>
+
+                        @* Detalle aportado por el usuario *@
+                        @if (!string.IsNullOrWhiteSpace(r.Details))
+                        {
+                            <div class="p-3 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] leading-relaxed">
+                                <span class="text-[0.65rem] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                                    Detalles aportados:
+                                </span>
+                                @r.Details
+                            </div>
+                        }
+
+                        @* Notas del moderador si las hay *@
+                        @if (!string.IsNullOrWhiteSpace(r.ModeratorNotes))
+                        {
+                            <div class="p-3 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-200/90 leading-relaxed">
+                                <span class="text-[0.65rem] font-bold uppercase tracking-wider text-amber-400 block mb-1">
+                                    Nota de Moderación (@r.ResolvedByUserId):
+                                </span>
+                                @r.ModeratorNotes
+                            </div>
+                        }
+
+                        @* Pie de tarjeta: Autoría y Acciones *@
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[var(--border-subtle)]/60 text-xs">
+                            <div class="flex items-center gap-2 text-[var(--text-muted)] text-[0.7rem]">
+                                <span>Reportado por:</span>
+                                <strong class="text-[var(--text-secondary)]">@r.ReporterNameOrAlias</strong>
+                                @if (!string.IsNullOrEmpty(r.ReportedByUserId))
+                                {
+                                    <span class="px-1.5 py-0.2 rounded bg-[var(--bg-surface-elevated)] text-[0.62rem] font-bold">Usuario</span>
+                                }
+                            </div>
+
+                            @* Acciones de Moderación *@
+                            <div class="flex items-center gap-2">
+                                @if (r.Status == GameReportStatus.Pending)
+                                {
+                                    <button type="button"
+                                            @onclick="() => TakeInReview(r.Id)"
+                                            class="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold transition-all">
+                                        🔍 Tomar en revisión
+                                    </button>
+                                }
+
+                                @if (r.Status == GameReportStatus.Pending || r.Status == GameReportStatus.InReview)
+                                {
+                                    <button type="button"
+                                            @onclick="() => OpenEditorForReport(r)"
+                                            class="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1">
+                                        <span>✏️</span> Corregir Ficha y Resolver
+                                    </button>
+                                    <button type="button"
+                                            @onclick="() => OpenResolveModal(r)"
+                                            class="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all">
+                                        ✅ Resolver
+                                    </button>
+                                    <button type="button"
+                                            @onclick="() => OpenDismissModal(r)"
+                                            class="px-3 py-1.5 rounded-xl bg-stone-500/10 hover:bg-stone-500/20 text-stone-400 border border-stone-500/30 text-xs font-bold transition-all">
+                                        ✕ Descartar
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            @onclick="() => ReopenReport(r.Id)"
+                                            class="px-3 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] text-xs font-bold transition-all">
+                                        🔄 Reabrir
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@* Modal para Resolver Reporte *@
+@if (_reportToResolve != null)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true">
+        <div class="w-full max-w-lg rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+                <h3 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>✅</span>
+                    <span>Marcar como Resuelto</span>
+                </h3>
+                <button type="button" @onclick="() => _reportToResolve = null" class="text-2xl text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                    &times;
+                </button>
+            </div>
+
+            <p class="text-xs text-[var(--text-secondary)]">
+                Indica la acción realizada para subsanar la errata en <strong>@_reportToResolve.GameTitle</strong>.
+            </p>
+
+            <textarea rows="3"
+                      placeholder="Ej. Carátula oficial actualizada a edición en español / Rango de jugadores corregido a 2-4..."
+                      @bind="_actionNotes"
+                      class="w-full p-3 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs resize-none focus:outline-none focus:border-[var(--brand-primary)]">
+            </textarea>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button"
+                        @onclick="() => _reportToResolve = null"
+                        class="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                    Cancelar
+                </button>
+                <button type="button"
+                        @onclick="ConfirmResolve"
+                        class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md">
+                    Confirmar Resolución
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@* Modal para Descartar Reporte *@
+@if (_reportToDismiss != null)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true">
+        <div class="w-full max-w-lg rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+                <h3 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>✕</span>
+                    <span>Descartar Reporte</span>
+                </h3>
+                <button type="button" @onclick="() => _reportToDismiss = null" class="text-2xl text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                    &times;
+                </button>
+            </div>
+
+            <p class="text-xs text-[var(--text-secondary)]">
+                Indica el motivo del descarte para <strong>@_reportToDismiss.GameTitle</strong> (requerido).
+            </p>
+
+            <textarea rows="3"
+                      placeholder="Ej. El dato es conforme a la edición oficial / No procede / Reporte duplicado..."
+                      @bind="_actionNotes"
+                      class="w-full p-3 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs resize-none focus:outline-none focus:border-[var(--brand-primary)]">
+            </textarea>
+
+            @if (!string.IsNullOrEmpty(_actionError))
+            {
+                <span class="text-xs text-rose-400 font-semibold block">⚠️ @_actionError</span>
+            }
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button"
+                        @onclick="() => _reportToDismiss = null"
+                        class="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                    Cancelar
+                </button>
+                <button type="button"
+                        @onclick="ConfirmDismiss"
+                        class="px-4 py-2 rounded-xl bg-stone-600 hover:bg-stone-500 text-white text-xs font-bold transition-all shadow-md">
+                    Confirmar Descarte
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_isEditorModalOpen && _gameToEdit != null)
+{
+    <GameEditorModal
+        @bind-IsOpen="_isEditorModalOpen"
+        Game="@_gameToEdit"
+        AssociatedReportId="@_editingReport?.Id"
+        AssociatedReportIssueTitle="@_editingReport?.IssueTypeName"
+        AssociatedReportDetails="@_editingReport?.Details"
+        OnGameUpdated="HandleReportGameUpdated" />
+}
+
+@code {
+    private bool _isLoading = true;
+    private IReadOnlyList<GameIssueReportDto> _reports = [];
+    private GameIssueReportSummaryDto? _summary;
+
+    private GameReportStatus? _selectedStatus = GameReportStatus.Pending;
+    private string? _selectedIssueType;
+    private string? _searchTerm;
+
+    private GameIssueReportDto? _reportToResolve;
+    private GameIssueReportDto? _reportToDismiss;
+    private string? _actionNotes;
+    private string? _actionError;
+
+    private bool _isEditorModalOpen;
+    private GameDetailDto? _gameToEdit;
+    private GameIssueReportDto? _editingReport;
+
+    private async Task OpenEditorForReport(GameIssueReportDto report)
+    {
+        _editingReport = report;
+        _gameToEdit = await CatalogService.GetGameBySlugAsync(report.GameSlug);
+        if (_gameToEdit != null)
+        {
+            _isEditorModalOpen = true;
+        }
+    }
+
+    private async Task HandleReportGameUpdated(GameDetailDto updated)
+    {
+        _isEditorModalOpen = false;
+        _gameToEdit = null;
+        _editingReport = null;
+        await LoadDataAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        _summary = await ReportService.GetSummaryAsync();
+        await LoadReportsAsync();
+        _isLoading = false;
+    }
+
+    private async Task LoadReportsAsync()
+    {
+        GameIssueType? issueType = null;
+        if (!string.IsNullOrEmpty(_selectedIssueType) && Enum.TryParse<GameIssueType>(_selectedIssueType, out var parsedType))
+        {
+            issueType = parsedType;
+        }
+
+        var filter = new GameReportFilter(
+            Status: _selectedStatus,
+            IssueType: issueType,
+            SearchTerm: _searchTerm,
+            PageSize: 100
+        );
+
+        _reports = await ReportService.GetReportsAsync(filter);
+    }
+
+    private async Task SetStatusFilter(GameReportStatus? status)
+    {
+        _selectedStatus = status;
+        await LoadReportsAsync();
+    }
+
+    private async Task ClearSearch()
+    {
+        _searchTerm = null;
+        await LoadReportsAsync();
+    }
+
+    private async Task TakeInReview(Guid id)
+    {
+        var modId = CurrentUserService.UserName;
+        await ReportService.ChangeStatusAsync(id, new UpdateGameReportStatusCommand(
+            NewStatus: GameReportStatus.InReview,
+            ModeratorId: modId,
+            Notes: "Tomado en revisión"
+        ));
+
+        await LoadDataAsync();
+    }
+
+    private void OpenResolveModal(GameIssueReportDto r)
+    {
+        _reportToResolve = r;
+        _actionNotes = "Incidencia solventada";
+        _actionError = null;
+    }
+
+    private async Task ConfirmResolve()
+    {
+        if (_reportToResolve == null) return;
+
+        var modId = CurrentUserService.UserName;
+        await ReportService.ChangeStatusAsync(_reportToResolve.Id, new UpdateGameReportStatusCommand(
+            NewStatus: GameReportStatus.Resolved,
+            ModeratorId: modId,
+            Notes: _actionNotes
+        ));
+
+        _reportToResolve = null;
+        _actionNotes = null;
+        await LoadDataAsync();
+    }
+
+    private void OpenDismissModal(GameIssueReportDto r)
+    {
+        _reportToDismiss = r;
+        _actionNotes = null;
+        _actionError = null;
+    }
+
+    private async Task ConfirmDismiss()
+    {
+        if (_reportToDismiss == null) return;
+
+        if (string.IsNullOrWhiteSpace(_actionNotes))
+        {
+            _actionError = "Por favor, indica el motivo del descarte.";
+            return;
+        }
+
+        var modId = CurrentUserService.UserName;
+        await ReportService.ChangeStatusAsync(_reportToDismiss.Id, new UpdateGameReportStatusCommand(
+            NewStatus: GameReportStatus.Dismissed,
+            ModeratorId: modId,
+            Notes: _actionNotes.Trim()
+        ));
+
+        _reportToDismiss = null;
+        _actionNotes = null;
+        _actionError = null;
+        await LoadDataAsync();
+    }
+
+    private async Task ReopenReport(Guid id)
+    {
+        var modId = CurrentUserService.UserName;
+        await ReportService.ChangeStatusAsync(id, new UpdateGameReportStatusCommand(
+            NewStatus: GameReportStatus.Pending,
+            ModeratorId: modId,
+            Notes: "Reporte reabierto"
+        ));
+
+        await LoadDataAsync();
+    }
+
+    private void SwitchToFounder()
+    {
+        CurrentUserService.SwitchRole("FoundingTeam");
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private static string GetIssueIcon(GameIssueType type) => type switch
+    {
+        GameIssueType.WrongImage => "🖼️",
+        GameIssueType.BrokenImage => "🚫",
+        GameIssueType.IncorrectPlayerCount => "👥",
+        GameIssueType.IncorrectDuration => "⏱️",
+        GameIssueType.IncorrectAge => "🎂",
+        GameIssueType.ErroneousMetadata => "📝",
+        GameIssueType.BrokenPurchaseLink => "🛒",
+        GameIssueType.Other => "💬",
+        _ => "🚩"
+    };
+
+    private static string GetIssueBadgeClass(GameIssueType type) => type switch
+    {
+        GameIssueType.WrongImage or GameIssueType.BrokenImage => "bg-rose-500/15 text-rose-300 border border-rose-500/30",
+        GameIssueType.IncorrectPlayerCount or GameIssueType.IncorrectDuration => "bg-blue-500/15 text-blue-300 border border-blue-500/30",
+        GameIssueType.BrokenPurchaseLink => "bg-amber-500/15 text-amber-300 border border-amber-500/30",
+        _ => "bg-purple-500/15 text-purple-300 border border-purple-500/30"
+    };
+
+    private static string GetStatusBadgeClass(GameReportStatus status) => status switch
+    {
+        GameReportStatus.Pending => "bg-amber-500/20 text-amber-300 border border-amber-500/40",
+        GameReportStatus.InReview => "bg-blue-500/20 text-blue-300 border border-blue-500/40",
+        GameReportStatus.Resolved => "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40",
+        GameReportStatus.Dismissed => "bg-stone-500/20 text-stone-400 border border-stone-500/40",
+        _ => "bg-slate-500/20 text-slate-300"
+    };
+}

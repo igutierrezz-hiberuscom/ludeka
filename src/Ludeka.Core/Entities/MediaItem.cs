@@ -8,6 +8,7 @@ public class MediaItem
     public Guid Id { get; private set; } = Guid.NewGuid();
     public Guid? GameId { get; private set; }
     public MediaType Type { get; private set; }
+    public MediaCategory Category { get; private set; }
     public MediaPlatform Platform { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string Url { get; private set; } = string.Empty;
@@ -48,7 +49,8 @@ public class MediaItem
         int? likesCount = null,
         string? excerpt = null,
         ModerationStatus status = ModerationStatus.PendingApproval,
-        DateTimeOffset? publishedAt = null)
+        DateTimeOffset? publishedAt = null,
+        MediaCategory? category = null)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("El título no puede estar vacío.", nameof(title));
@@ -72,6 +74,7 @@ public class MediaItem
             throw new ArgumentOutOfRangeException(nameof(likesCount), "El contador de likes no puede ser negativo.");
 
         Type = type;
+        Category = category ?? InferCategoryFromType(type);
         Platform = platform;
         Title = title.Trim();
         Url = url.Trim();
@@ -93,11 +96,55 @@ public class MediaItem
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 
-    public void Approve()
+    public void Approve(MediaCategory? category = null)
     {
         Status = ModerationStatus.Approved;
+        if (category.HasValue)
+        {
+            ChangeCategory(category.Value);
+        }
         UpdatedAt = DateTimeOffset.UtcNow;
     }
+
+    public void ChangeCategory(MediaCategory newCategory)
+    {
+        Category = newCategory;
+        if (newCategory == MediaCategory.QuickOverview && Platform == MediaPlatform.YouTube)
+        {
+            Type = MediaType.QuickOverview;
+        }
+        else if (newCategory == MediaCategory.Tutorial && Platform == MediaPlatform.YouTube)
+        {
+            Type = MediaType.Tutorial;
+        }
+        else if (newCategory == MediaCategory.Gameplay && Platform == MediaPlatform.YouTube)
+        {
+            Type = MediaType.Playthrough;
+            if (string.IsNullOrWhiteSpace(PlayerCountBadge))
+            {
+                PlayerCountBadge = "Partida a 2";
+            }
+        }
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void ReassignGame(Guid newGameId)
+    {
+        if (newGameId == Guid.Empty)
+            throw new ArgumentException("El identificador del juego no puede estar vacío.", nameof(newGameId));
+
+        GameId = newGameId;
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public static MediaCategory InferCategoryFromType(MediaType type) => type switch
+    {
+        MediaType.QuickOverview => MediaCategory.QuickOverview,
+        MediaType.Tutorial => MediaCategory.Tutorial,
+        MediaType.Playthrough => MediaCategory.Gameplay,
+        MediaType.InstagramPost or MediaType.ShortReel => MediaCategory.ReviewOpinion,
+        _ => MediaCategory.Tutorial
+    };
 
     public void Reject()
     {

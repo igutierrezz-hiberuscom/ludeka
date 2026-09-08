@@ -31,17 +31,35 @@ public class BggImportService : IBggImportService
         _currentUserService = currentUserService;
     }
 
-    public async Task<BggImportResultDto> ImportUserCollectionAsync(BggImportRequest request, CancellationToken ct = default)
+    public Task<BggImportResultDto> ImportUserCollectionAsync(BggImportRequest request, CancellationToken ct = default)
+    {
+        return ImportUserCollectionAsync(request, null, ct);
+    }
+
+    public async Task<BggImportResultDto> ImportUserCollectionAsync(
+        BggImportRequest request,
+        IProgress<BggImportProgressReport>? progress,
+        CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(request.Username))
             throw new ArgumentException("El nombre de usuario de BGG no puede estar vacío.", nameof(request.Username));
 
         string userId = _currentUserService.UserId;
-        var bggItems = await _bggClient.FetchUserCollectionAsync(request.Username.Trim(), ct);
+        progress?.Report(new BggImportProgressReport(BggImportPhase.Initializing, "Iniciando proceso de importación..."));
+
+        var bggItems = await _bggClient.FetchUserCollectionAsync(request.Username.Trim(), progress, ct);
 
         int importedCount = 0;
         int enqueuedCount = 0;
         var errors = new List<string>();
+
+        if (bggItems.Count > 0)
+        {
+            progress?.Report(new BggImportProgressReport(
+                BggImportPhase.ProcessingItems,
+                $"Cruzando {bggItems.Count} títulos de BGG con el catálogo oficial de Ludeka...",
+                ItemsFound: bggItems.Count));
+        }
 
         foreach (var bggItem in bggItems)
         {
@@ -128,6 +146,11 @@ public class BggImportService : IBggImportService
                 errors.Add($"Error al importar {bggItem.Title} (BggId: {bggItem.BggId}): {ex.Message}");
             }
         }
+
+        progress?.Report(new BggImportProgressReport(
+            BggImportPhase.Completed,
+            $"Importación finalizada. Total: {bggItems.Count} (En ludoteca: {importedCount}, En cola: {enqueuedCount})",
+            ItemsFound: bggItems.Count));
 
         return new BggImportResultDto(
             TotalProcessed: bggItems.Count,

@@ -27,6 +27,11 @@ Este proyecto se construye bajo la metodología **Spec-Driven Development (SDD)*
 2. **Lossless Blocking Prompts:** Antes de pasar de `sdd-propose` a `sdd-spec` o de `sdd-design` a `sdd-apply`, presentar la propuesta o diseño al usuario en español y esperar aprobación explícita.
 3. **Delegación con Subagentes:** Emplear `define_subagent` e `invoke_subagent` para delegar exploraciones profundas, investigación externa y verificaciones independientes (recordando siempre el idioma español).
 4. **Presupuestos y CAS (Compare-And-Swap):** En `sdd-apply`, implementar exclusivamente contra los requerimientos acordados en la especificación y tareas definidas.
+5. **Sincronización Continua de Roadmap:** Todo incremento debe figurar y mantenerse actualizado en los registros centrales de roadmap: `docs/increments/ROADMAP.md` y `docs/specs/ROADMAP_MVP_SLICES.md`. Al proponer/iniciar pasa a `⏳ En progreso`, y al archivar a `✅ Archivado`.
+6. **Volcado Obligatorio a la Especificación Viva del Sistema (`sdd-archive`):** Al finalizar y verificar cada incremento, en la fase `sdd-archive` es terminantemente obligatorio:
+   - Volcar toda la información funcional, de dominio, arquitectura, persistencia, flujos y componentes en `docs/specs/sistema/` (creando `NN-nombre-modulo.md` o actualizando los módulos existentes impactados).
+   - Actualizar el índice maestro `docs/specs/sistema/README.md` incorporando el enlace al módulo y el nuevo total de pruebas automáticas verificadas.
+   - Trasladar el documento de incremento de `docs/increments/inc-XX.md` a `docs/increments/archive/inc-XX.md`.
 
 ---
 

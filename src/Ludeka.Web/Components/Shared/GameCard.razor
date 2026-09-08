@@ -5,6 +5,9 @@
 {
     <a href="/juegos/@Game.Slug" class="game-card-editorial group" aria-label="Ver ficha de @Game.SpanishTitle">
         <div class="cover-wrapper">
+            @{
+                var placeholderUrl = Game.IsExpansion ? "/images/expansion-placeholder.svg" : "/images/game-placeholder.svg";
+            }
             @if (!string.IsNullOrWhiteSpace(Game.CoverImageUrl))
             {
                 <img src="@Game.CoverImageUrl"
@@ -13,21 +16,26 @@
                      decoding="async"
                      width="240"
                      height="240"
-                     onerror="this.onerror=null; this.src='/images/game-placeholder.svg';"
+                     onerror="this.onerror=null; this.src='@placeholderUrl';"
                      class="w-full h-full object-cover" />
             }
             else
             {
-                <div class="w-full h-full flex items-center justify-center bg-slate-900 text-slate-600 font-bold text-sm">
-                    Sin carátula
-                </div>
+                <img src="@placeholderUrl"
+                     alt="Carátula de @Game.SpanishTitle no disponible"
+                     loading="lazy"
+                     decoding="async"
+                     width="240"
+                     height="240"
+                     class="w-full h-full object-cover opacity-90" />
             }
 
             @* Badge de Expansión *@
             @if (Game.IsExpansion)
             {
-                <div class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-sm border border-[var(--border-subtle)] text-[0.68rem] font-black text-white shadow-sm">
-                    🧩 Expansión
+                <div class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md bg-purple-950/85 backdrop-blur-sm border border-purple-500/40 text-[0.68rem] font-black text-purple-200 shadow-md flex items-center gap-1">
+                    <span>🧩</span>
+                    <span>Expansión</span>
                 </div>
             }
 

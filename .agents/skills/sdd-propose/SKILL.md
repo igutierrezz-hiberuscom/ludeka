@@ -63,6 +63,12 @@ openspec/changes/{change-name}/
 
 **IF mode is `engram` or `none`:** Do NOT create any `openspec/` directories. Skip this step.
 
+### Step 2b: Registro y Sincronización en Roadmap (MANDATORIO)
+
+1. **Verificar y Registrar en `docs/increments/ROADMAP.md`:** Comprobar que el incremento o cambio figure en la tabla central de incrementos. Si no existe, registrarlo. Actualizar su estado a `⏳ En progreso` (o `⏳ En propuesta`) con su enlace a `docs/increments/inc-XX-<nombre>.md`.
+2. **Crear o Comprobar Documento de Incremento:** Asegurar la existencia de `docs/increments/inc-XX-<nombre>.md` con el identificador SDD, alcance funcional y criterios de aceptación.
+3. **Verificar y Actualizar `docs/specs/ROADMAP_MVP_SLICES.md`:** Asegurar que el incremento esté catalogado en la hoja de ruta maestra con su alcance funcional y estado en progreso.
+
 ### Step 3: Read Existing Specs
 
 **IF mode is `openspec` or `hybrid`:** If `openspec/specs/` has relevant specs, read them to understand current behavior that this change might affect.
@@ -185,4 +191,5 @@ Ready for specs (sdd-spec) or design (sdd-design).
 - Modified Capabilities → each will become a delta spec in the change folder
 - If nothing changes at the spec level (pure refactor, config change), explicitly write "None" under both sub-sections — don't leave them as template placeholders
 - **Size budget**: Proposal artifact MUST be under 450 words. Use bullet points and tables over prose. Headers organize, not explain.
+- **ALWAYS synchronize the Roadmap:** Ensure the increment is registered in `docs/increments/ROADMAP.md` and `docs/specs/ROADMAP_MVP_SLICES.md` with status `⏳ En progreso` / `⏳ En propuesta`, and ensure its definition file exists in `docs/increments/inc-XX-<nombre>.md`.
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.

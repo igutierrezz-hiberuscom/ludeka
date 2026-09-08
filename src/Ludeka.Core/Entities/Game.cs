@@ -34,6 +34,7 @@ public partial class Game
     public GameDuration Duration { get; private set; } = null!;
     public List<ScalabilityEntry> Scalability { get; private set; } = [];
     public List<SleeveItem> Sleeves { get; private set; } = [];
+    public List<GamePurchaseLink> PurchaseLinks { get; private set; } = [];
 
     // --- Soporte de Expansiones y Ecosistema (Incremento 8) ---
     public GameType Type { get; private set; } = GameType.BaseGame;
@@ -45,6 +46,9 @@ public partial class Game
     public string? WhatItBringsSummary { get; private set; }
     public int? ExtraPlayerCount { get; private set; }
     public int? ExtraDurationMinutes { get; private set; }
+
+    // --- Síntesis Inteligente con IA (Incremento 13) ---
+    public AiGameSummary? AiSummary { get; private set; }
 
     public bool IsExpansion => Type == GameType.Expansion || Type == GameType.StandaloneExpansion;
 
@@ -73,6 +77,7 @@ public partial class Game
         GameDuration duration,
         IEnumerable<ScalabilityEntry>? scalability = null,
         IEnumerable<SleeveItem>? sleeves = null,
+        IEnumerable<GamePurchaseLink>? purchaseLinks = null,
         string? customSlug = null,
         GameType type = GameType.BaseGame,
         Guid? baseGameId = null,
@@ -107,6 +112,7 @@ public partial class Game
 
         if (scalability != null) Scalability.AddRange(scalability);
         if (sleeves != null) Sleeves.AddRange(sleeves);
+        if (purchaseLinks != null) PurchaseLinks.AddRange(purchaseLinks);
 
         Slug = string.IsNullOrWhiteSpace(customSlug)
             ? GenerateSlug(SpanishTitle)
@@ -175,6 +181,75 @@ public partial class Game
         ThumbnailUrl = thumbnailUrl?.Trim();
     }
 
+    public void UpdateCatalogInformation(
+        string spanishTitle,
+        string originalTitle,
+        string designer,
+        string publisher,
+        int yearPublished,
+        string? description,
+        ConfrontationType confrontation,
+        GameStyle style,
+        bool isOfficialSolo,
+        AgeRating age,
+        LanguageDependence language,
+        TableFootprint footprint,
+        GameDuration duration,
+        int minPlayers,
+        int maxPlayers)
+    {
+        if (string.IsNullOrWhiteSpace(spanishTitle))
+            throw new ArgumentException("El título en español no puede estar vacío.", nameof(spanishTitle));
+        if (string.IsNullOrWhiteSpace(originalTitle))
+            throw new ArgumentException("El título original no puede estar vacío.", nameof(originalTitle));
+        if (yearPublished < 1900 || yearPublished > 2100)
+            throw new ArgumentOutOfRangeException(nameof(yearPublished), "El año de publicación debe estar entre 1900 y 2100.");
+        if (minPlayers <= 0)
+            throw new ArgumentOutOfRangeException(nameof(minPlayers), "El número mínimo de jugadores debe ser mayor a 0.");
+        if (maxPlayers < minPlayers)
+            throw new ArgumentException("El número máximo de jugadores no puede ser menor al mínimo.", nameof(maxPlayers));
+
+        SpanishTitle = spanishTitle.Trim();
+        OriginalTitle = originalTitle.Trim();
+        Designer = designer?.Trim() ?? string.Empty;
+        Publisher = publisher?.Trim() ?? string.Empty;
+        YearPublished = yearPublished;
+        Description = description?.Trim();
+        Confrontation = confrontation;
+        Style = style;
+        IsOfficialSolo = isOfficialSolo;
+        Age = age ?? throw new ArgumentNullException(nameof(age));
+        Language = language;
+        Footprint = footprint;
+        Duration = duration ?? throw new ArgumentNullException(nameof(duration));
+
+        AdjustScalability(minPlayers, maxPlayers);
+    }
+
+    public void AdjustScalability(int minPlayers, int maxPlayers)
+    {
+        if (minPlayers <= 0 || maxPlayers < minPlayers) return;
+
+        var existingDict = Scalability.ToDictionary(s => s.PlayerCount);
+        var updated = new List<ScalabilityEntry>();
+
+        for (int p = minPlayers; p <= maxPlayers; p++)
+        {
+            if (existingDict.TryGetValue(p, out var existingEntry))
+            {
+                updated.Add(existingEntry);
+            }
+            else
+            {
+                string display = p >= 7 ? "7+" : p.ToString();
+                updated.Add(new ScalabilityEntry(p, display, ScalabilityStatus.Recommended));
+            }
+        }
+
+        Scalability.Clear();
+        Scalability.AddRange(updated);
+    }
+
     public void ConfigureExpansion(
         Guid baseGameId,
         ExpansionNecessity necessity,
@@ -193,6 +268,48 @@ public partial class Game
         WhatItBringsSummary = whatItBringsSummary?.Trim();
         ExtraPlayerCount = extraPlayerCount;
         ExtraDurationMinutes = extraDurationMinutes;
+    }
+
+    public void AddPurchaseLink(GamePurchaseLink link)
+    {
+        ArgumentNullException.ThrowIfNull(link);
+        PurchaseLinks.Add(link);
+    }
+
+    public void UpdatePurchaseLinks(IEnumerable<GamePurchaseLink> links)
+    {
+        ArgumentNullException.ThrowIfNull(links);
+        PurchaseLinks.Clear();
+        PurchaseLinks.AddRange(links);
+    }
+
+    public void ClearPurchaseLinks()
+    {
+        PurchaseLinks.Clear();
+    }
+
+    public void AddSleeve(SleeveItem sleeve)
+    {
+        ArgumentNullException.ThrowIfNull(sleeve);
+        Sleeves.Add(sleeve);
+    }
+
+    public void UpdateSleeves(IEnumerable<SleeveItem> sleeves)
+    {
+        ArgumentNullException.ThrowIfNull(sleeves);
+        Sleeves.Clear();
+        Sleeves.AddRange(sleeves);
+    }
+
+    public void ClearSleeves()
+    {
+        Sleeves.Clear();
+    }
+
+    public void SetAiSummary(AiGameSummary summary)
+    {
+        ArgumentNullException.ThrowIfNull(summary);
+        AiSummary = summary;
     }
 
     public static string GenerateSlug(string input)

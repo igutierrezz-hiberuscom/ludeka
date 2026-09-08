@@ -1,0 +1,812 @@
+@using System.IO
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@using Ludeka.Core.ValueObjects
+@inject IGameEditorService GameEditorService
+@inject IImageStorageService ImageStorageService
+@inject ICurrentUserService CurrentUserService
+
+@if (IsOpen && Game != null)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="game-editor-modal-title"
+         @onkeydown="HandleKeyDown">
+        <div class="w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
+             @onclick:stopPropagation="true">
+
+            @* Cabecera del Modal *@
+            <div class="p-5 sm:p-6 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-surface-elevated)]/50">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-[0.65rem] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                            🛡️ Panel Editorial
+                        </span>
+                        @if (AssociatedReportId.HasValue)
+                        {
+                            <span class="px-2 py-0.5 rounded text-[0.65rem] font-black uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                                🚩 Resolviendo Incidencia
+                            </span>
+                        }
+                    </div>
+                    <h2 id="game-editor-modal-title" class="text-lg sm:text-xl font-black text-[var(--text-primary)] tracking-tight">
+                        Editar Ficha: @Game.SpanishTitle
+                    </h2>
+                </div>
+                <button type="button"
+                        @onclick="Close"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--bg-surface-elevated)] transition-colors"
+                        aria-label="Cerrar modal de edición">
+                    &times;
+                </button>
+            </div>
+
+            @* Banner Contextual si proviene de Reporte Comunitario *@
+            @if (AssociatedReportId.HasValue)
+            {
+                <div class="px-5 py-3 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-200/90 flex items-start gap-2.5 shrink-0">
+                    <span class="text-amber-400 text-base">⚠️</span>
+                    <div class="flex-1 leading-snug">
+                        <strong class="text-amber-300 font-bold block">Incidencia Comunitaria Asociada:</strong>
+                        <p class="text-amber-100/80 mt-0.5">
+                            @(!string.IsNullOrWhiteSpace(AssociatedReportDetails) ? AssociatedReportDetails : "El usuario reportó un dato inexacto en esta ficha.")
+                        </p>
+                    </div>
+                </div>
+            }
+
+            @* Pestañas de Navegación Editorial *@
+            <div class="flex border-b border-[var(--border-subtle)] bg-[var(--bg-card)] px-5 pt-3 gap-2 overflow-x-auto shrink-0">
+                <button type="button"
+                        @onclick="() => _activeTab = EditorTab.Metadata"
+                        class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Metadata ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
+                    <span>📝</span> Metadatos
+                </button>
+                <button type="button"
+                        @onclick="() => _activeTab = EditorTab.Table"
+                        class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Table ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
+                    <span>🎲</span> Mesa y ADN
+                </button>
+                <button type="button"
+                        @onclick="() => _activeTab = EditorTab.Synopsis"
+                        class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Synopsis ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
+                    <span>📄</span> Sinopsis
+                </button>
+                <button type="button"
+                        @onclick="() => _activeTab = EditorTab.Cover"
+                        class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Cover ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
+                    <span>🖼️</span> Carátula
+                </button>
+                <button type="button"
+                        @onclick="() => _activeTab = EditorTab.Sleeves"
+                        class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Sleeves ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
+                    <span>🛡️</span> Fundas (@_sleeves.Count)
+                </button>
+            </div>
+
+            @* Contenido del Formulario (Scrolleable) *@
+            <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4">
+                @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                {
+                    <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold flex items-center gap-2">
+                        <span>⚠️</span>
+                        <span>@_errorMessage</span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(_successMessage))
+                {
+                    <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">
+                        <span>✅</span>
+                        <span>@_successMessage</span>
+                    </div>
+                }
+
+                @* PESTAÑA 1: METADATOS *@
+                @if (_activeTab == EditorTab.Metadata)
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-2">
+                            <label for="input-spanish-title" class="text-xs font-bold text-[var(--text-secondary)] block mb-1">
+                                Título en Español *
+                            </label>
+                            <input id="input-spanish-title"
+                                   type="text"
+                                   @bind="_spanishTitle"
+                                   class="w-full px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-sm focus:border-[var(--brand-primary)] focus:outline-none" />
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="input-original-title" class="text-xs font-bold text-[var(--text-secondary)] block mb-1">
+                                Título Original *
+                            </label>
+                            <input id="input-original-title"
+                                   type="text"
+                                   @bind="_originalTitle"
+                                   class="w-full px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-sm focus:border-[var(--brand-primary)] focus:outline-none" />
+                        </div>
+
+                        <div>
+                            <label for="input-designer" class="text-xs font-bold text-[var(--text-secondary)] block mb-1">
+                                Diseñador / Autor *
+                            </label>
+                            <input id="input-designer"
+                                   type="text"
+                                   @bind="_designer"
+                                   class="w-full px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-sm focus:border-[var(--brand-primary)] focus:outline-none" />
+                        </div>
+
+                        <div>
+                            <label for="input-publisher" class="text-xs font-bold text-[var(--text-secondary)] block mb-1">
+                                Editorial Licenciataria (España) *
+                            </label>
+                            <input id="input-publisher"
+                                   type="text"
+                                   @bind="_publisher"
+                                   class="w-full px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-sm focus:border-[var(--brand-primary)] focus:outline-none" />
+                        </div>
+
+                        <div>
+                            <label for="input-year" class="text-xs font-bold text-[var(--text-secondary)] block mb-1">
+                                Año de Publicación *
+                            </label>
+                            <input id="input-year"
+                                   type="number"
+                                   min="1900"
+                                   max="2100"
+                                   @bind="_yearPublished"
+                                   class="w-full px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-sm focus:border-[var(--brand-primary)] focus:outline-none" />
+                        </div>
+                    </div>
+                }
+
+                @* PESTAÑA 2: MESA Y ADN LÚDICO *@
+                @if (_activeTab == EditorTab.Table)
+                {
+                    <div class="space-y-4">
+                        @* Comensales y Modo Solitario *@
+                        <div class="p-3.5 rounded-2xl bg-[var(--bg-surface-elevated)]/60 border border-[var(--border-subtle)] space-y-3">
+                            <span class="text-xs uppercase font-extrabold tracking-wider text-[var(--text-muted)] block">
+                                Rango de Comensales
+                            </span>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                                <div>
+                                    <label for="input-min-players" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Mín. Jugadores</label>
+                                    <input id="input-min-players" type="number" min="1" max="10" @bind="_minPlayers"
+                                           class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]" />
+                                </div>
+                                <div>
+                                    <label for="input-max-players" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Máx. Jugadores</label>
+                                    <input id="input-max-players" type="number" min="1" max="12" @bind="_maxPlayers"
+                                           class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]" />
+                                </div>
+                                <div class="pt-4 flex items-center gap-2">
+                                    <input id="input-solo-mode" type="checkbox" @bind="_isOfficialSolo"
+                                           class="rounded border-[var(--border-subtle)] text-[var(--brand-primary)] focus:ring-0" />
+                                    <label for="input-solo-mode" class="text-xs font-bold text-[var(--text-primary)] cursor-pointer">
+                                        Modo Solitario Oficial
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Tiempos y Edades *@
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label for="input-min-duration" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Duración Mín (min)</label>
+                                <input id="input-min-duration" type="number" min="1" @bind="_minDurationMinutes"
+                                       class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]" />
+                            </div>
+                            <div>
+                                <label for="input-max-duration" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Duración Máx (min)</label>
+                                <input id="input-max-duration" type="number" min="1" @bind="_maxDurationMinutes"
+                                       class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]" />
+                            </div>
+                            <div>
+                                <label for="input-per-player-duration" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Min / Jugador</label>
+                                <input id="input-per-player-duration" type="number" min="1" @bind="_estimatedPerPlayerMinutes"
+                                       class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]" />
+                            </div>
+                            <div>
+                                <label for="input-box-age" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Edad Caja (+)</label>
+                                <input id="input-box-age" type="number" min="0" @bind="_boxAge"
+                                       class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]" />
+                            </div>
+                            <div>
+                                <label for="input-comm-age" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Edad Comunidad (+)</label>
+                                <input id="input-comm-age" type="number" min="0" @bind="_communityAge"
+                                       class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]" />
+                            </div>
+                        </div>
+
+                        @* ADN Lúdico *@
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <div>
+                                <label for="select-game-style" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Estilo de Juego</label>
+                                <select id="select-game-style" @bind="_style"
+                                        class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]">
+                                    <option value="@GameStyle.Eurogame">Eurogame</option>
+                                    <option value="@GameStyle.Ameritrash">Ameritrash / Temático</option>
+                                    <option value="@GameStyle.PartyGame">Party Game</option>
+                                    <option value="@GameStyle.FillerAbstract">Filler / Abstracto</option>
+                                    <option value="@GameStyle.NarrativeCampaign">Narrativo / Campaña</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="select-confrontation" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Confrontación</label>
+                                <select id="select-confrontation" @bind="_confrontation"
+                                        class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]">
+                                    <option value="@ConfrontationType.Competitive">Competitivo</option>
+                                    <option value="@ConfrontationType.Cooperative">Cooperativo</option>
+                                    <option value="@ConfrontationType.HiddenRolesOrTeams">Roles Ocultos / Equipos</option>
+                                    <option value="@ConfrontationType.SemiCooperative">Semi-Cooperativo</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="select-language" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Dependencia de Idioma</label>
+                                <select id="select-language" @bind="_language"
+                                        class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]">
+                                    <option value="@LanguageDependence.None">🟢 Nula (solo iconografía)</option>
+                                    <option value="@LanguageDependence.Low">🟡 Baja (frases cortas)</option>
+                                    <option value="@LanguageDependence.High">🔴 Alta (texto continuo/denso)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="select-footprint" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Espacio en Mesa</label>
+                                <select id="select-footprint" @bind="_footprint"
+                                        class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]">
+                                    <option value="@TableFootprint.SmallTable">🪑 Mesa pequeña / Cafetería</option>
+                                    <option value="@TableFootprint.StandardTable">🍽️ Mesa estándar de comedor</option>
+                                    <option value="@TableFootprint.TableMonster">🏰 Monstruo de mesa / Despliegue masivo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @* PESTAÑA 3: SINOPSIS *@
+                @if (_activeTab == EditorTab.Synopsis)
+                {
+                    <div class="space-y-2">
+                        <label for="textarea-description" class="text-xs font-bold text-[var(--text-secondary)] block">
+                            Descripción / Sinopsis Editorial en Español
+                        </label>
+                        <textarea id="textarea-description"
+                                  rows="9"
+                                  @bind="_description"
+                                  placeholder="Escribe la sinopsis del juego en español con redacción lúdica limpia..."
+                                  class="w-full p-3.5 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs leading-relaxed focus:border-[var(--brand-primary)] focus:outline-none"></textarea>
+                    </div>
+                }
+
+                @* PESTAÑA 4: CARÁTULA E IMÁGENES *@
+                @if (_activeTab == EditorTab.Cover)
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                        @* Vista Previa *@
+                        <div class="w-full aspect-square rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] overflow-hidden relative flex items-center justify-center">
+                            @if (!string.IsNullOrWhiteSpace(_coverImageUrl))
+                            {
+                                <img src="@_coverImageUrl"
+                                     alt="Vista previa de carátula"
+                                     class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                            }
+                            else
+                            {
+                                <img src="/images/game-placeholder.svg"
+                                     alt="Placeholder"
+                                     class="w-20 h-20 opacity-40" />
+                            }
+
+                            <div class="absolute bottom-2 left-2 right-2 px-2 py-1 rounded bg-black/60 backdrop-blur-sm text-[0.62rem] text-center text-white/90 truncate">
+                                @(!string.IsNullOrWhiteSpace(_coverImageUrl) ? _coverImageUrl : "Sin carátula")
+                            </div>
+                        </div>
+
+                        @* Controles de Carga *@
+                        <div class="sm:col-span-2 space-y-4">
+                            @* Opción 1: Subida de archivo físico *@
+                            <div class="p-3.5 rounded-2xl bg-[var(--bg-surface-elevated)]/60 border border-[var(--border-subtle)] space-y-2">
+                                <label for="input-cover-file" class="text-xs font-extrabold text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer">
+                                    <span>📁</span> Subir Archivo Local (.jpg, .png, .webp &le; 5 MB)
+                                </label>
+                                <InputFile id="input-cover-file"
+                                           OnChange="HandleFileSelected"
+                                           accept=".jpg,.jpeg,.png,.webp"
+                                           class="text-xs text-[var(--text-secondary)] file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[var(--brand-primary)] file:text-white hover:file:opacity-90 cursor-pointer" />
+                                
+                                @if (_isUploadingImage)
+                                {
+                                    <div class="flex items-center gap-2 text-xs text-amber-400">
+                                        <span class="animate-spin">⚙️</span>
+                                        <span>Procesando y guardando imagen...</span>
+                                    </div>
+                                }
+                            </div>
+
+                            @* Opción 2: URL Externa *@
+                            <div class="p-3.5 rounded-2xl bg-[var(--bg-surface-elevated)]/60 border border-[var(--border-subtle)] space-y-2">
+                                <label for="input-cover-url" class="text-xs font-extrabold text-[var(--text-primary)] flex items-center gap-1.5">
+                                    <span>🔗</span> O especificar URL de Imagen Remota
+                                </label>
+                                <div class="flex gap-2">
+                                    <input id="input-cover-url"
+                                           type="url"
+                                           @bind="_customCoverUrl"
+                                           placeholder="https://cf.geekdo-images.com/..."
+                                           class="flex-1 px-3 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none" />
+                                    <button type="button"
+                                            @onclick="ApplyCoverUrl"
+                                            class="px-3 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-subtle)]">
+                                        Aplicar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @* PESTAÑA: FUNDAS (SLEEVES) *@
+                @if (_activeTab == EditorTab.Sleeves)
+                {
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-xs font-bold text-[var(--text-primary)]">Formatos de Fundas y Medidas</h3>
+                            <p class="text-[0.7rem] text-[var(--text-secondary)]">Especifica los tipos de cartas y sus medidas en milímetros para calcular paquetes y enlaces de compra.</p>
+                        </div>
+
+                        @* Listado de fundas configuradas *@
+                        @if (_sleeves.Count > 0)
+                        {
+                            <div class="space-y-2">
+                                @for (int i = 0; i < _sleeves.Count; i++)
+                                {
+                                    int idx = i;
+                                    var sl = _sleeves[idx];
+                                    <div class="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-lg">🃏</span>
+                                            <div>
+                                                <div class="font-bold text-xs text-[var(--text-primary)]">@sl.FormatName</div>
+                                                <div class="text-[0.7rem] text-[var(--text-secondary)]">
+                                                    <strong>@sl.DimensionText</strong> &bull; <strong>@sl.CardCount</strong> cartas &bull; 
+                                                    @(sl.PacksNeeded50) packs de 50 (o @(sl.PacksNeeded100) de 100)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button"
+                                                @onclick="() => RemoveSleeve(idx)"
+                                                class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs transition-colors"
+                                                title="Eliminar este formato de funda">
+                                            🗑️ Eliminar
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-dashed border-[var(--border-subtle)] text-xs text-[var(--text-muted)] text-center">
+                                Este juego aún no tiene fundas configuradas (o no contiene componentes enfundables).
+                            </div>
+                        }
+
+                        @* Formulario para añadir nueva funda *@
+                        <div class="p-3.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-3">
+                            <h4 class="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                                <span>➕</span> Añadir Formato de Funda
+                            </h4>
+
+                            @* Selector de Presets de Catálogo Estándar *@
+                            <div>
+                                <label for="select-sleeve-preset" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">
+                                    Tamaños Estándar más Comunes (Preset Rápido)
+                                </label>
+                                <select id="select-sleeve-preset" 
+                                        @onchange="HandlePresetSelected"
+                                        class="w-full px-3 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none">
+                                    <option value="">-- Seleccionar formato estándar o escribir a mano --</option>
+                                    @foreach (var format in StandardSleeveCatalog.Formats)
+                                    {
+                                        <option value="@format.Name">@format.Name (@format.DimensionText) — @format.PopularGamesExample</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                                <div class="sm:col-span-2">
+                                    <label class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-0.5">Nombre / Formato</label>
+                                    <input type="text"
+                                           @bind="_newSleeveFormatName"
+                                           placeholder="Ej. Cartas de Proyecto"
+                                           class="w-full px-2.5 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none" />
+                                </div>
+                                <div>
+                                    <label class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-0.5">Ancho (mm)</label>
+                                    <input type="number"
+                                           step="0.5"
+                                           @bind="_newSleeveWidth"
+                                           class="w-full px-2.5 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none" />
+                                </div>
+                                <div>
+                                    <label class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-0.5">Alto (mm)</label>
+                                    <input type="number"
+                                           step="0.5"
+                                           @bind="_newSleeveHeight"
+                                           class="w-full px-2.5 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-0.5">Nº de Cartas (uds)</label>
+                                    <input type="number"
+                                           @bind="_newSleeveCardCount"
+                                           min="1"
+                                           class="w-full px-2.5 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none" />
+                                </div>
+                                <div>
+                                    <label class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-0.5">URL de Compra / Afiliado (opcional)</label>
+                                    <input type="url"
+                                           @bind="_newSleeveAffiliateUrl"
+                                           placeholder="https://..."
+                                           class="w-full px-2.5 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <button type="button"
+                                    @onclick="AddSleeve"
+                                    class="w-full py-2 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-colors flex items-center justify-center gap-1.5">
+                                <span>➕</span> Añadir Formato a la Ficha
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                @* Campo de Nota de Resolución si viene de Reporte *@
+                @if (AssociatedReportId.HasValue)
+                {
+                    <div class="p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-1.5">
+                        <label for="input-resolution-notes" class="text-xs font-bold text-amber-300 block">
+                            Nota de Resolución del Moderador (para el historial del reporte)
+                        </label>
+                        <input id="input-resolution-notes"
+                               type="text"
+                               @bind="_resolutionNotes"
+                               placeholder="Ej. Corregida autora Elizabeth Hargrave y ampliado rango a 5 jugadores..."
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-card)] border border-amber-500/30 text-xs text-[var(--text-primary)] focus:outline-none" />
+                    </div>
+                }
+            </div>
+
+            @* Pie del Modal: Acciones *@
+            <div class="p-5 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)]/50 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+                <div class="text-[0.7rem] text-[var(--text-muted)]">
+                    Editando como: <strong class="text-[var(--text-secondary)]">@CurrentUserService.UserName</strong>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button type="button"
+                            @onclick="Close"
+                            disabled="@_isSaving"
+                            class="px-4 py-2 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] text-xs font-bold text-[var(--text-secondary)] border border-[var(--border-subtle)] transition-colors">
+                        Cancelar
+                    </button>
+
+                    <button type="button"
+                            @onclick="SaveChanges"
+                            disabled="@_isSaving"
+                            class="px-5 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 disabled:opacity-50">
+                        @if (_isSaving)
+                        {
+                            <span class="animate-spin">⚙️</span>
+                            <span>Guardando...</span>
+                        }
+                        else if (AssociatedReportId.HasValue)
+                        {
+                            <span>💾</span>
+                            <span>Guardar Ficha y Resolver Reporte</span>
+                        }
+                        else
+                        {
+                            <span>💾</span>
+                            <span>Guardar Cambios</span>
+                        }
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public GameDetailDto? Game { get; set; }
+    [Parameter] public Guid? AssociatedReportId { get; set; }
+    [Parameter] public string? AssociatedReportIssueTitle { get; set; }
+    [Parameter] public string? AssociatedReportDetails { get; set; }
+    [Parameter] public EventCallback<GameDetailDto> OnGameUpdated { get; set; }
+
+    private enum EditorTab { Metadata, Table, Synopsis, Cover, Sleeves }
+    private EditorTab _activeTab = EditorTab.Metadata;
+
+    private List<SleeveItem> _sleeves = [];
+    private string _newSleeveFormatName = string.Empty;
+    private double _newSleeveWidth = 63.5;
+    private double _newSleeveHeight = 88.0;
+    private int _newSleeveCardCount = 50;
+    private string? _newSleeveAffiliateUrl;
+
+    private string _spanishTitle = string.Empty;
+    private string _originalTitle = string.Empty;
+    private string _designer = string.Empty;
+    private string _publisher = string.Empty;
+    private int _yearPublished = 2020;
+    private string? _description;
+
+    private int _minPlayers = 1;
+    private int _maxPlayers = 4;
+    private bool _isOfficialSolo;
+    private int _minDurationMinutes = 30;
+    private int _maxDurationMinutes = 60;
+    private int _estimatedPerPlayerMinutes = 15;
+    private int _boxAge = 10;
+    private int _communityAge = 10;
+
+    private GameStyle _style = GameStyle.Eurogame;
+    private ConfrontationType _confrontation = ConfrontationType.Competitive;
+    private LanguageDependence _language = LanguageDependence.None;
+    private TableFootprint _footprint = TableFootprint.StandardTable;
+
+    private string? _coverImageUrl;
+    private string _customCoverUrl = string.Empty;
+    private string? _resolutionNotes;
+
+    private bool _isSaving;
+    private bool _isUploadingImage;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    protected override void OnParametersSet()
+    {
+        if (Game != null)
+        {
+            _spanishTitle = Game.SpanishTitle;
+            _originalTitle = Game.OriginalTitle;
+            _designer = Game.Designer;
+            _publisher = Game.Publisher;
+            _yearPublished = Game.YearPublished;
+            _description = Game.Description;
+
+            _minPlayers = Game.Scalability.Count > 0 ? Game.Scalability.Min(s => s.PlayerCount) : 1;
+            _maxPlayers = Game.Scalability.Count > 0 ? Game.Scalability.Max(s => s.PlayerCount) : 4;
+            _isOfficialSolo = Game.IsOfficialSolo;
+
+            _minDurationMinutes = Game.Duration.MinMinutes;
+            _maxDurationMinutes = Game.Duration.MaxMinutes;
+            _estimatedPerPlayerMinutes = Game.Duration.EstimatedPerPlayerMinutes;
+
+            _boxAge = Game.Age.BoxAge;
+            _communityAge = Game.Age.CommunityAge;
+
+            _style = Game.Style;
+            _confrontation = Game.Confrontation;
+            _language = Game.Language;
+            _footprint = Game.Footprint;
+
+            _coverImageUrl = Game.CoverImageUrl;
+            _customCoverUrl = Game.CoverImageUrl ?? string.Empty;
+
+            _sleeves = Game.Sleeves != null ? new List<SleeveItem>(Game.Sleeves) : [];
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await Close();
+        }
+    }
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        _errorMessage = null;
+        _successMessage = null;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private void ApplyCoverUrl()
+    {
+        if (!string.IsNullOrWhiteSpace(_customCoverUrl))
+        {
+            _coverImageUrl = _customCoverUrl.Trim();
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null || Game == null) return;
+
+        _isUploadingImage = true;
+        _errorMessage = null;
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            var result = await ImageStorageService.SaveGameCoverAsync(
+                Game.Slug,
+                stream,
+                file.Name,
+                file.ContentType
+            );
+
+            if (result.Success && !string.IsNullOrWhiteSpace(result.RelativePath))
+            {
+                _coverImageUrl = result.RelativePath;
+                _customCoverUrl = result.RelativePath;
+            }
+            else
+            {
+                _errorMessage = result.ErrorMessage ?? "Error al procesar la imagen.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al cargar archivo: {ex.Message}";
+        }
+        finally
+        {
+            _isUploadingImage = false;
+        }
+    }
+
+    private void HandlePresetSelected(ChangeEventArgs e)
+    {
+        var name = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(name)) return;
+
+        var format = StandardSleeveCatalog.FindByName(name);
+        if (format != null)
+        {
+            _newSleeveFormatName = format.Name;
+            _newSleeveWidth = format.WidthMm;
+            _newSleeveHeight = format.HeightMm;
+        }
+    }
+
+    private void AddSleeve()
+    {
+        if (string.IsNullOrWhiteSpace(_newSleeveFormatName))
+        {
+            _errorMessage = "Debes indicar un nombre o formato para la funda.";
+            return;
+        }
+
+        if (_newSleeveWidth <= 0 || _newSleeveHeight <= 0)
+        {
+            _errorMessage = "Las dimensiones de la funda deben ser mayores a 0 mm.";
+            return;
+        }
+
+        if (_newSleeveCardCount <= 0)
+        {
+            _errorMessage = "El número de cartas debe ser al menos 1.";
+            return;
+        }
+
+        _sleeves.Add(new SleeveItem(
+            FormatName: _newSleeveFormatName.Trim(),
+            WidthMm: _newSleeveWidth,
+            HeightMm: _newSleeveHeight,
+            CardCount: _newSleeveCardCount,
+            AffiliateUrl: string.IsNullOrWhiteSpace(_newSleeveAffiliateUrl) ? null : _newSleeveAffiliateUrl.Trim()
+        ));
+
+        _newSleeveFormatName = string.Empty;
+        _newSleeveAffiliateUrl = null;
+        _errorMessage = null;
+    }
+
+    private void RemoveSleeve(int index)
+    {
+        if (index >= 0 && index < _sleeves.Count)
+        {
+            _sleeves.RemoveAt(index);
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        _errorMessage = null;
+        _successMessage = null;
+
+        if (Game == null) return;
+
+        if (string.IsNullOrWhiteSpace(_spanishTitle))
+        {
+            _errorMessage = "El título en español es obligatorio.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_originalTitle))
+        {
+            _errorMessage = "El título original es obligatorio.";
+            return;
+        }
+
+        if (_minPlayers <= 0)
+        {
+            _errorMessage = "El mínimo de jugadores debe ser al menos 1.";
+            return;
+        }
+
+        if (_maxPlayers < _minPlayers)
+        {
+            _errorMessage = "El máximo de jugadores no puede ser inferior al mínimo.";
+            return;
+        }
+
+        if (_minDurationMinutes <= 0 || _maxDurationMinutes < _minDurationMinutes)
+        {
+            _errorMessage = "La duración mínima debe ser mayor que 0 y menor o igual a la máxima.";
+            return;
+        }
+
+        _isSaving = true;
+
+        try
+        {
+            var cmd = new UpdateGameDetailsCommand(
+                GameId: Game.Id,
+                SpanishTitle: _spanishTitle,
+                OriginalTitle: _originalTitle,
+                Designer: _designer,
+                Publisher: _publisher,
+                YearPublished: _yearPublished,
+                Description: _description,
+                MinPlayers: _minPlayers,
+                MaxPlayers: _maxPlayers,
+                MinDurationMinutes: _minDurationMinutes,
+                MaxDurationMinutes: _maxDurationMinutes,
+                EstimatedPerPlayerMinutes: _estimatedPerPlayerMinutes,
+                BoxAge: _boxAge,
+                CommunityAge: _communityAge,
+                Confrontation: _confrontation,
+                Style: _style,
+                IsOfficialSolo: _isOfficialSolo,
+                Language: _language,
+                Footprint: _footprint,
+                CoverImageUrl: _coverImageUrl,
+                AssociatedReportId: AssociatedReportId,
+                ResolutionNotes: _resolutionNotes,
+                Sleeves: _sleeves
+            );
+
+            var updatedGame = await GameEditorService.UpdateGameAsync(cmd);
+            _successMessage = "Ficha actualizada con éxito.";
+
+            await OnGameUpdated.InvokeAsync(updatedGame);
+            await Task.Delay(400);
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+}

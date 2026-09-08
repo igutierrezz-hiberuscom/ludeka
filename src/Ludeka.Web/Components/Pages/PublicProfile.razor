@@ -1,0 +1,272 @@
+@page "/u/{UserId}"
+@page "/perfil/{UserId}"
+@rendermode InteractiveServer
+@inject IUserLibraryStatsService StatsService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>@(_profile != null ? $"{_profile.UserName} — Perfil y Ludoteca" : "Perfil de Jugador") — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @if (_isLoading)
+    {
+        <div class="py-24 text-center text-[var(--text-secondary)]">
+            <div class="inline-block animate-spin text-4xl mb-3">🎲</div>
+            <p class="text-base font-semibold">Cargando perfil público de ludoteca...</p>
+        </div>
+    }
+    else if (_profile == null)
+    {
+        <div class="py-20 text-center max-w-lg mx-auto p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-4">
+            <span class="text-5xl block">🔍</span>
+            <h1 class="text-2xl font-black text-[var(--text-primary)]">Perfil no encontrado</h1>
+            <p class="text-sm text-[var(--text-secondary)]">
+                El usuario «@UserId» aún no ha registrado títulos en su colección de Ludeka o el enlace no es válido.
+            </p>
+            <div class="pt-4 flex justify-center gap-3">
+                <a href="/" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)] transition-all inline-flex items-center gap-2">
+                    <span>🎲</span>
+                    <span>Explorar Catálogo</span>
+                </a>
+                <a href="/mi-ludoteca" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] transition-colors inline-flex items-center gap-2">
+                    <span>📚</span>
+                    <span>Mi Ludoteca</span>
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        @* Cabecera del Perfil Público *@
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[var(--border-subtle)] pb-6">
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] border border-[var(--brand-primary)]/20">
+                        Perfil Público de Jugador
+                    </span>
+                    @if (IsOwnProfile)
+                    {
+                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                            <span>●</span>
+                            <span>Es tu perfil</span>
+                        </span>
+                    }
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-3">
+                    <span>@_profile.UserName</span>
+                    <span class="text-2xl sm:text-3xl">@_profile.Stats.Badge.IconEmoji</span>
+                </h1>
+                <p class="text-sm text-[var(--text-secondary)] mt-1">
+                    Estantería física, desglose de ADN lúdico y títulos disponibles para jugar de @_profile.UserName.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <button type="button"
+                        @onclick="CopyProfileUrlAsync"
+                        class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] transition-all inline-flex items-center gap-1.5 shadow-sm">
+                    <span>@(_copied ? "✓" : "📋")</span>
+                    <span>@(_copied ? "¡Enlace copiado!" : "Copiar enlace de perfil")</span>
+                </button>
+
+                @if (IsOwnProfile)
+                {
+                    <a href="/mi-ludoteca" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all inline-flex items-center gap-1.5 shadow-sm">
+                        <span>⚙️</span>
+                        <span>Gestionar Mi Ludoteca</span>
+                    </a>
+                }
+                else
+                {
+                    <a href="/" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all inline-flex items-center gap-1.5 shadow-sm">
+                        <span>🎲</span>
+                        <span>Explorar Ludeka</span>
+                    </a>
+                }
+            </div>
+        </div>
+
+        @* Dashboard de Métricas y ADN Lúdico *@
+        <LibraryStatsDashboard Stats="_profile.Stats" />
+
+        @* Vitrina Pública de Títulos en Estantería *@
+        <div class="space-y-6 pt-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-[var(--text-primary)] flex items-center gap-2">
+                        <span>📚</span>
+                        <span>Estantería Física (@_profile.ShelfGames.Count títulos)</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5">
+                        Juegos en propiedad física disponibles en la mesa de @_profile.UserName.
+                    </p>
+                </div>
+
+                @* Buscador / Filtro rápido *@
+                <div class="w-full sm:w-72">
+                    <input type="text"
+                           @bind="_searchQuery"
+                           @bind:event="oninput"
+                           placeholder="Filtrar por título..."
+                           class="w-full px-3.5 py-2 rounded-xl text-xs bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" />
+                </div>
+            </div>
+
+            @{
+                var filteredGames = FilteredShelfGames;
+            }
+
+            @if (filteredGames.Count == 0)
+            {
+                <div class="p-12 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
+                    @if (string.IsNullOrWhiteSpace(_searchQuery))
+                    {
+                        <span>No hay títulos registrados en posesión física en esta estantería.</span>
+                    }
+                    else
+                    {
+                        <span>No se encontraron juegos que coincidan con «@_searchQuery».</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    @foreach (var game in filteredGames)
+                    {
+                        <div class="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex flex-col justify-between gap-3 transition-all hover:border-[var(--border-highlight)] hover:shadow-sm">
+                            <a href="/juegos/@game.GameSlug" class="block space-y-2 group">
+                                <div class="aspect-square rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] relative">
+                                    @{
+                                        string placeholder = game.IsExpansion ? "/images/expansion-placeholder.svg" : "/images/game-placeholder.svg";
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(game.GameCoverUrl))
+                                    {
+                                        <img src="@game.GameCoverUrl"
+                                             alt="@game.GameTitle"
+                                             loading="lazy"
+                                             decoding="async"
+                                             width="180"
+                                             height="180"
+                                             onerror="this.onerror=null; this.src='@placeholder';"
+                                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                                    }
+                                    else
+                                    {
+                                        <img src="@placeholder"
+                                             alt="@game.GameTitle"
+                                             loading="lazy"
+                                             decoding="async"
+                                             width="180"
+                                             height="180"
+                                             class="w-full h-full object-cover opacity-80" />
+                                    }
+
+                                    @if (game.IsExpansion)
+                                    {
+                                        <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[0.62rem] font-black bg-purple-950/85 text-purple-200 border border-purple-500/30">
+                                            🧩 Exp
+                                        </span>
+                                    }
+
+                                    @if (game.IsCurrentlyLoaned)
+                                    {
+                                        <span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded text-[0.62rem] font-black bg-amber-500/90 text-amber-950">
+                                            📦 Prestado
+                                        </span>
+                                    }
+                                </div>
+                                <div>
+                                    <h3 class="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] line-clamp-2 leading-tight transition-colors">
+                                        @game.GameTitle
+                                    </h3>
+                                </div>
+                            </a>
+
+                            <div class="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between">
+                                <span class="text-[0.65rem] font-bold px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-muted)]">
+                                    En estantería
+                                </span>
+                                <a href="/juegos/@game.GameSlug" class="text-[0.68rem] font-black text-[var(--brand-primary)] hover:underline">
+                                    Ficha →
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; } = string.Empty;
+
+    private PublicUserProfileDto? _profile;
+    private bool _isLoading = true;
+    private bool _copied = false;
+    private string _searchQuery = string.Empty;
+
+    private bool IsOwnProfile =>
+        !string.IsNullOrWhiteSpace(UserId) &&
+        UserId.Equals(CurrentUserService.UserId, StringComparison.OrdinalIgnoreCase);
+
+    private List<UserCollectionItemDto> FilteredShelfGames
+    {
+        get
+        {
+            if (_profile == null) return [];
+            if (string.IsNullOrWhiteSpace(_searchQuery))
+            {
+                return _profile.ShelfGames;
+            }
+
+            return _profile.ShelfGames
+                .Where(g => g.GameTitle.Contains(_searchQuery, StringComparison.CurrentCultureIgnoreCase))
+                .ToList();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadProfileAsync();
+    }
+
+    private async Task LoadProfileAsync()
+    {
+        _isLoading = true;
+        _profile = null;
+        try
+        {
+            _profile = await StatsService.GetPublicProfileAsync(UserId);
+        }
+        catch
+        {
+            // Manejo silencioso o perfil nulo
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task CopyProfileUrlAsync()
+    {
+        try
+        {
+            string url = Navigation.Uri;
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", url);
+            _copied = true;
+            StateHasChanged();
+            await Task.Delay(2500);
+            _copied = false;
+            StateHasChanged();
+        }
+        catch
+        {
+            // Clipboard fallback
+        }
+    }
+}

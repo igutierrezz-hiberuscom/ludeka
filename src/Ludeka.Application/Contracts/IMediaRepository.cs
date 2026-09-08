@@ -14,6 +14,7 @@ public interface IMediaRepository
     Task<IReadOnlyList<MediaItem>> GetOrphansAsync(CancellationToken ct = default);
     Task<IReadOnlyList<MediaItem>> GetApprovedAsync(CancellationToken ct = default);
     Task<IReadOnlyList<MediaItem>> GetAllAsync(CancellationToken ct = default);
+    Task<bool> ExistsByUrlAsync(string url, CancellationToken ct = default);
     Task AddAsync(MediaItem item, CancellationToken ct = default);
     Task UpdateAsync(MediaItem item, CancellationToken ct = default);
     Task DeleteAsync(Guid id, CancellationToken ct = default);

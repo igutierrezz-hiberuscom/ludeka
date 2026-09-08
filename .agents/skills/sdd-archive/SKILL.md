@@ -306,6 +306,27 @@ mv "$nested_source" "$active_source"
 
 Never automatically delete, overwrite, or merge the outer archive directory. If the active source exists or is a symlink, the outer destination or nested source is not a real directory, or the shape is otherwise ambiguous, stop and resolve the paths manually. After the active source is restored and the collision is resolved, rerun this archive step.
 
+### Step 3b: Sincronización Obligatoria de Roadmap y Archivo de Incrementos
+
+**MANDATORIO PARA CADA INCREMENTO DEL SISTEMA:**
+1. **Trasladar el Documento de Incremento:** Mover el archivo de incremento de `docs/increments/inc-XX-<nombre>.md` a `docs/increments/archive/inc-XX-<nombre>.md`.
+2. **Actualizar `docs/increments/ROADMAP.md`:** Actualizar la fila correspondiente al incremento en la tabla central, cambiando su estado de `⏳ Pendiente` o `⏳ En progreso` a `✅ Archivado`, actualizando el enlace hacia `docs/increments/archive/inc-XX-<nombre>.md`.
+3. **Actualizar `docs/specs/ROADMAP_MVP_SLICES.md`:** Actualizar la sección del incremento marcando su estado como `✅ Completado y Archivado` junto con el recuento verificado de pruebas unitarias/integración y el enlace al documento archivado.
+
+### Step 3c: Volcado Obligatorio a la Especificación Viva del Sistema (`docs/specs/sistema/`)
+
+**MANDATORIO: El código implementado DEBE reflejarse en la especificación viva del sistema:**
+1. **Documentar el Subsistema:** Crear o actualizar el archivo temático en `docs/specs/sistema/` (siguiendo el formato `NN-nombre-modulo.md`, ej. `14-gestion-usuarios-permisos-y-auditoria.md` o actualizando los módulos existentes afectados `01-...` a `NN-...`).
+2. **Contenido Mínimo Requerido:**
+   - Visión general y propósito del subsistema.
+   - Modelo de dominio e invariantes (`Ludeka.Core`): entidades, agregados, enumerados, flags y value objects.
+   - Capa de aplicación y seguridad defensiva (`Ludeka.Application`): contratos de repositorio, servicios, reglas de negocio y manejo defensivo de autorizaciones.
+   - Persistencia e infraestructura (`Ludeka.Infrastructure`): configuración de EF Core, SQLite, migraciones automáticas (`SqliteSchemaMigrator`), semilleros y clientes externos.
+   - Vistas Web y experiencia de usuario (`Ludeka.Web`): rutas Blazor, componentes, modales, interacción reactiva y estados de interfaz.
+3. **Actualizar Índice Central (`docs/specs/sistema/README.md`):**
+   - Incorporar el nuevo módulo en la lista numerada de módulos del sistema con su enlace correspondiente.
+   - Actualizar el contador global de pruebas automáticas verificadas (100% pasando).
+
 ### Step 4: Verify Archive
 
 **IF mode is `openspec` or `hybrid`:** The Mechanical Copy Contract above is the verification: the verbatim `diff -r` output from Steps 2 and 3 MUST appear in the phase result, and an empty diff is the only passing evidence. In addition, confirm:
@@ -315,6 +336,9 @@ Never automatically delete, overwrite, or merge the outer archive directory. If 
 - [ ] Archived `tasks.md` has no unchecked implementation tasks, unless the orchestrator explicitly approved archive-time stale-checkbox reconciliation backed by apply-progress/verify-report proof
 - [ ] Active changes directory no longer has this change
 - [ ] Verbatim `diff -r` readback output is included in the result and is empty (no differences)
+- [ ] Roadmap sincronizado: `docs/increments/ROADMAP.md` y `docs/specs/ROADMAP_MVP_SLICES.md` actualizados con estado `✅ Archivado`
+- [ ] Fichero de incremento trasladado a `docs/increments/archive/inc-XX.md`
+- [ ] Especificación viva del sistema volcada en `docs/specs/sistema/` y enlazada en `docs/specs/sistema/README.md`
 
 A failed or skipped `diff -r` FAILS the phase regardless of the checkboxes above — agent self-report is never sufficient evidence of byte-identity.
 
@@ -376,5 +400,8 @@ Ready for the next change.
 - If the merge would be destructive (removing large sections), WARN the orchestrator and ask for confirmation
 - The archive is an AUDIT TRAIL — never delete or modify archived changes
 - If `openspec/changes/archive/` doesn't exist, create it
+- ALWAYS update `docs/increments/ROADMAP.md` and `docs/specs/ROADMAP_MVP_SLICES.md` to mark the increment as archived/completed
+- ALWAYS move the increment document from `docs/increments/inc-XX-<name>.md` to `docs/increments/archive/inc-XX-<name>.md`
+- ALWAYS dump the comprehensive architectural and functional specification into `docs/specs/sistema/` (creating `NN-module.md` or updating existing modules) and update `docs/specs/sistema/README.md`
 - Apply any `rules.archive` from `openspec/config.yaml`
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.

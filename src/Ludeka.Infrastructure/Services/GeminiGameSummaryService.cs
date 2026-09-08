@@ -1,0 +1,303 @@
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
+using Ludeka.Application.Contracts;
+using Ludeka.Application.DTOs;
+using Ludeka.Core.Entities;
+using Ludeka.Core.ValueObjects;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+namespace Ludeka.Infrastructure.Services;
+
+/// <summary>
+/// Proveedor oficial de síntesis editorial inteligente que conecta con la API REST de Google Gemini
+/// e integra autoselección de modelos y un generador heurístico determinista como respaldo transparente (Zero-Crash Fallback).
+/// </summary>
+public class GeminiGameSummaryService : IAiGameSummaryService
+{
+    private readonly HttpClient _httpClient;
+    private readonly GeminiOptions _options;
+    private readonly IGameRepository _gameRepository;
+    private readonly ILogger<GeminiGameSummaryService> _logger;
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    public GeminiGameSummaryService(
+        HttpClient httpClient,
+        IOptions<GeminiOptions> options,
+        IGameRepository gameRepository,
+        ILogger<GeminiGameSummaryService> logger)
+    {
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _options = options?.Value ?? new GeminiOptions();
+        _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public async Task<AiGameSummaryDto> GenerateSummaryAsync(Game game, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+
+        // 1. Conmutación a simulación heurística si está configurado o si no hay API Key
+        if (_options.ShouldSimulate)
+        {
+            _logger.LogInformation("Gemini está en modo simulado o sin API Key. Empleando generador heurístico editorial para '{Title}'.", game.SpanishTitle);
+            return HeuristicGameSummaryGenerator.Generate(game, "Heurística Editorial");
+        }
+
+        // 2. Ejecución con Google Gemini API (con autoselección y autorrecuperación de modelo)
+        try
+        {
+            var summaryFromGemini = await CallGeminiApiAsync(game, ct);
+            if (summaryFromGemini != null)
+            {
+                return summaryFromGemini;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error al invocar Google Gemini API para '{Title}'. Activando fallback heurístico.", game.SpanishTitle);
+        }
+
+        // 3. Fallback tolerante a fallos
+        return HeuristicGameSummaryGenerator.Generate(game, "Heurística Editorial (Fallback)");
+    }
+
+    public async Task<AiGameSummaryDto> EnsureSummaryForGameAsync(Guid gameId, CancellationToken ct = default)
+    {
+        var game = await _gameRepository.GetByIdAsync(gameId, ct)
+            ?? throw new InvalidOperationException($"No se encontró el juego con ID {gameId}");
+
+        if (game.AiSummary != null)
+        {
+            return new AiGameSummaryDto(
+                game.Id,
+                game.SpanishTitle,
+                game.AiSummary.ScalabilitySummary,
+                game.AiSummary.AgeSummary,
+                game.AiSummary.FootprintSummary,
+                game.AiSummary.GeneralVerdict,
+                game.AiSummary.Model,
+                game.AiSummary.GeneratedAt
+            );
+        }
+
+        var generated = await GenerateSummaryAsync(game, ct);
+        var aiSummaryVo = new AiGameSummary(
+            generated.GeneralVerdict,
+            generated.ScalabilitySummary,
+            generated.AgeSummary,
+            generated.FootprintSummary,
+            generated.Model,
+            generated.GeneratedAt ?? DateTime.UtcNow
+        );
+
+        game.SetAiSummary(aiSummaryVo);
+        await _gameRepository.UpdateAsync(game, ct);
+
+        return generated;
+    }
+
+    public async Task<AiBatchProcessingResultDto> ProcessPendingSummariesBatchAsync(int batchSize = 20, CancellationToken ct = default)
+    {
+        if (batchSize < 1) batchSize = 20;
+
+        var gamesWithoutSummary = await _gameRepository.GetGamesWithoutAiSummaryAsync(batchSize, ct);
+        if (gamesWithoutSummary.Count == 0)
+        {
+            return new AiBatchProcessingResultDto(0, 0, 0, []);
+        }
+
+        int successCount = 0;
+        int failedCount = 0;
+        var summarizedTitles = new List<string>();
+
+        foreach (var game in gamesWithoutSummary)
+        {
+            if (ct.IsCancellationRequested) break;
+
+            try
+            {
+                var summary = await GenerateSummaryAsync(game, ct);
+                var aiSummaryVo = new AiGameSummary(
+                    summary.GeneralVerdict,
+                    summary.ScalabilitySummary,
+                    summary.AgeSummary,
+                    summary.FootprintSummary,
+                    summary.Model,
+                    summary.GeneratedAt ?? DateTime.UtcNow
+                );
+
+                game.SetAiSummary(aiSummaryVo);
+                await _gameRepository.UpdateAsync(game, ct);
+
+                summarizedTitles.Add(game.SpanishTitle);
+                successCount++;
+                _logger.LogInformation("Carga nocturna IA: generada síntesis para '{Title}' ({Model}).", game.SpanishTitle, summary.Model);
+            }
+            catch (Exception ex)
+            {
+                failedCount++;
+                _logger.LogWarning(ex, "Carga nocturna IA: error al sintetizar el juego '{Title}' (ID {Id}).", game.SpanishTitle, game.Id);
+            }
+        }
+
+        return new AiBatchProcessingResultDto(
+            ProcessedCount: gamesWithoutSummary.Count,
+            SuccessCount: successCount,
+            FailedCount: failedCount,
+            SummarizedTitles: summarizedTitles
+        );
+    }
+
+    private async Task<AiGameSummaryDto?> CallGeminiApiAsync(Game game, CancellationToken ct)
+    {
+        string prompt = BuildPrompt(game);
+        string effectiveModel = _options.GetEffectiveModel();
+
+        var result = await TryGenerateWithModelAsync(game, prompt, effectiveModel, ct);
+        if (result != null)
+        {
+            return result;
+        }
+
+        // Autorrecuperación: si el modelo configurado no era el predeterminado y falló (ej. 404 por modelo descontinuado),
+        // reintentar automáticamente con el modelo canónico recomendado
+        if (!effectiveModel.Equals(GeminiOptions.DefaultModel, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogInformation("Reintentando llamada a Gemini con el modelo predeterminado {DefaultModel}", GeminiOptions.DefaultModel);
+            return await TryGenerateWithModelAsync(game, prompt, GeminiOptions.DefaultModel, ct);
+        }
+
+        return null;
+    }
+
+    private async Task<AiGameSummaryDto?> TryGenerateWithModelAsync(Game game, string prompt, string model, CancellationToken ct)
+    {
+        var requestBody = new
+        {
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = prompt }
+                    }
+                }
+            },
+            generationConfig = new
+            {
+                responseMimeType = "application/json",
+                temperature = 0.2
+            }
+        };
+
+        string jsonPayload = JsonSerializer.Serialize(requestBody, JsonOptions);
+        using var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        string requestUri = $"{_options.BaseUrl.TrimEnd('/')}/models/{model}:generateContent?key={_options.ApiKey}";
+
+        using var response = await _httpClient.PostAsync(requestUri, content, ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            string errorBody = await response.Content.ReadAsStringAsync(ct);
+            _logger.LogWarning("Google Gemini API ({Model}) respondió con código {StatusCode}: {Error}", model, response.StatusCode, errorBody);
+            return null;
+        }
+
+        string responseJson = await response.Content.ReadAsStringAsync(ct);
+        using var doc = JsonDocument.Parse(responseJson);
+
+        if (!doc.RootElement.TryGetProperty("candidates", out var candidates) ||
+            candidates.GetArrayLength() == 0)
+        {
+            _logger.LogWarning("Respuesta de Gemini ({Model}) sin candidatos válidos.", model);
+            return null;
+        }
+
+        var candidate = candidates[0];
+        if (!candidate.TryGetProperty("content", out var contentProp) ||
+            !contentProp.TryGetProperty("parts", out var parts) ||
+            parts.GetArrayLength() == 0)
+        {
+            _logger.LogWarning("Respuesta de Gemini ({Model}) sin partes de contenido.", model);
+            return null;
+        }
+
+        string rawStructuredJson = parts[0].GetProperty("text").GetString() ?? string.Empty;
+        var parsed = JsonSerializer.Deserialize<GeminiStructuredResponse>(rawStructuredJson, JsonOptions);
+
+        if (parsed == null ||
+            string.IsNullOrWhiteSpace(parsed.GeneralVerdict) ||
+            string.IsNullOrWhiteSpace(parsed.ScalabilitySummary))
+        {
+            _logger.LogWarning("No se pudo parsear la respuesta JSON estructurada de Gemini ({Model}).", model);
+            return null;
+        }
+
+        return new AiGameSummaryDto(
+            GameId: game.Id,
+            GameTitle: game.SpanishTitle,
+            ScalabilitySummary: parsed.ScalabilitySummary.Trim(),
+            AgeSummary: parsed.AgeSummary?.Trim() ?? $"{game.Age.CommunityAge}+ años según comunidad.",
+            FootprintSummary: parsed.FootprintSummary?.Trim() ?? "Mesa de comedor estándar.",
+            GeneralVerdict: parsed.GeneralVerdict.Trim(),
+            Model: $"Google Gemini ({model})",
+            GeneratedAt: DateTime.UtcNow
+        );
+    }
+
+    private static string BuildPrompt(Game game)
+    {
+        return $"""
+            Eres un crítico y analista experto de juegos de mesa para Ludeka ("El Letterboxd de los juegos de mesa en español").
+            Genera un resumen editorial objetivo, conciso y fundamentado en español neutro para la ficha del juego:
+
+            DATOS TÉCNICOS:
+            - Título en español: {game.SpanishTitle}
+            - Título original: {game.OriginalTitle}
+            - Autor: {(string.IsNullOrWhiteSpace(game.Designer) ? "Desconocido" : game.Designer)}
+            - Editorial: {(string.IsNullOrWhiteSpace(game.Publisher) ? "Desconocida" : game.Publisher)}
+            - Año: {game.YearPublished}
+            - Estilo: {game.Style}
+            - Confrontación: {game.Confrontation}
+            - Escalabilidad ideal según consenso: {game.CalculateIdealPlayerCountText()}
+            - Edades: Caja oficial {game.Age.BoxAge}+ | Recomendada por comunidad {game.Age.CommunityAge}+
+            - Despliegue en mesa: {game.Footprint}
+            - Duración: {game.Duration.MinMinutes}-{game.Duration.MaxMinutes} minutos (~{game.Duration.EstimatedPerPlayerMinutes} min por jugador)
+            - Puntuación BGG: {game.BggRating:0.0}/10
+            - Sinopsis original: {(string.IsNullOrWhiteSpace(game.Description) ? "Sin sinopsis" : game.Description)}
+
+            INSTRUCCIONES DE FORMATO:
+            Devuelve estrictamente un JSON válido con estas 4 propiedades textuales exactas en español:
+            1. "generalVerdict": Reseña objetiva (2-3 oraciones). Tono sobrio y profesional. Sin frases publicitarias vacías.
+            2. "scalabilitySummary": A qué número de jugadores brilla según el consenso, fluidez y entreturno.
+            3. "ageSummary": Comparativa de edad de caja vs real y accesibilidad familiar con niños.
+            4. "footprintSummary": Huella física en mesa (comedor, cafetería, monstruo) y ritmo de partida.
+            """;
+    }
+
+    private class GeminiStructuredResponse
+    {
+        [JsonPropertyName("generalVerdict")]
+        public string? GeneralVerdict { get; set; }
+
+        [JsonPropertyName("scalabilitySummary")]
+        public string? ScalabilitySummary { get; set; }
+
+        [JsonPropertyName("ageSummary")]
+        public string? AgeSummary { get; set; }
+
+        [JsonPropertyName("footprintSummary")]
+        public string? FootprintSummary { get; set; }
+    }
+}

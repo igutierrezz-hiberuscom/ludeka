@@ -1,0 +1,88 @@
+@rendermode InteractiveServer
+@implements IDisposable
+@inject IJSRuntime JS
+
+@if (!_isOnline)
+{
+    <div role="status" 
+         aria-live="polite" 
+         class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-sm animate-pulse">
+        <span class="text-sm">📡</span>
+        <span>Modo sin conexión</span>
+    </div>
+}
+else if (_showRestoredNotice)
+{
+    <div role="status" 
+         aria-live="polite" 
+         class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm transition-all">
+        <span class="text-sm">🟢</span>
+        <span>Conexión restablecida</span>
+    </div>
+}
+
+@code {
+    private bool _isOnline = true;
+    private bool _showRestoredNotice = false;
+    private DotNetObjectReference<OfflineIndicator>? _dotNetRef;
+    private CancellationTokenSource? _cts;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                _dotNetRef = DotNetObjectReference.Create(this);
+                _isOnline = await JS.InvokeAsync<bool>("LudekaOffline.initConnectivityListener", _dotNetRef);
+                StateHasChanged();
+            }
+            catch
+            {
+                // Fallback si JS aún no está disponible
+            }
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnConnectivityChanged(bool isOnline)
+    {
+        bool wasOffline = !_isOnline;
+        _isOnline = isOnline;
+
+        if (wasOffline && isOnline)
+        {
+            _showRestoredNotice = true;
+            _cts?.Cancel();
+            _cts = new CancellationTokenSource();
+            _ = HideRestoredNoticeAfterDelayAsync(_cts.Token);
+        }
+        else if (!isOnline)
+        {
+            _showRestoredNotice = false;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HideRestoredNoticeAfterDelayAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(3500, token);
+            _showRestoredNotice = false;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignorado intencionadamente
+        }
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _dotNetRef?.Dispose();
+    }
+}

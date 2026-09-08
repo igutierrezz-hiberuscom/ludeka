@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Ludeka.Application.Contracts;
 using Ludeka.Application.DTOs;
 using Ludeka.Core.Entities;
+using Ludeka.Core.Enums;
 
 namespace Ludeka.Infrastructure.Bgg;
 
@@ -18,22 +19,24 @@ public class BggXmlApiClient : IBggClient, IDisposable
     private readonly HttpClient _httpClient;
     private readonly RateLimiter _rateLimiter;
     private readonly bool _ownsHttpClient;
+    private readonly BggOptions _options;
 
     public BggXmlApiClient(HttpClient? httpClient = null, IOptions<BggOptions>? options = null)
     {
         _ownsHttpClient = httpClient == null;
         _httpClient = httpClient ?? new HttpClient();
+        _options = options?.Value ?? new BggOptions();
 
-        var bggOpts = options?.Value ?? new BggOptions();
-        if (!string.IsNullOrWhiteSpace(bggOpts.ApiToken))
+        var bearerToken = _options.BearerToken;
+        if (!string.IsNullOrWhiteSpace(bearerToken) && _httpClient.DefaultRequestHeaders.Authorization == null)
         {
             _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bggOpts.ApiToken.Trim());
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken.Trim());
         }
 
         if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
         {
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(bggOpts.UserAgent);
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_options.UserAgent);
         }
 
         // Limitar a máximo 2 peticiones por segundo para cortesía hacia los servidores de BGG
@@ -80,11 +83,12 @@ public class BggXmlApiClient : IBggClient, IDisposable
                     return null;
                 }
 
-                if (response.StatusCode == (HttpStatusCode)429)
+                if (response.StatusCode == (HttpStatusCode)429 || response.StatusCode == HttpStatusCode.ServiceUnavailable)
                 {
                     if (attempt < maxRetries)
                     {
-                        await Task.Delay(delayMs * 2 * attempt, ct);
+                        int waitSec = BggResilienceAndAuthHandler.ExtractRetryAfterSeconds(response) ?? ((delayMs * 2 * attempt) / 1000);
+                        await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, waitSec)), ct);
                         continue;
                     }
                     return null;
@@ -126,17 +130,51 @@ public class BggXmlApiClient : IBggClient, IDisposable
         return null;
     }
 
-    public async Task<IReadOnlyList<BggCollectionItemDto>> FetchUserCollectionAsync(string username, CancellationToken ct = default)
+    public Task<IReadOnlyList<BggCollectionItemDto>> FetchUserCollectionAsync(string username, CancellationToken ct = default)
+    {
+        return FetchUserCollectionAsync(username, null, ct);
+    }
+
+    public async Task<IReadOnlyList<BggCollectionItemDto>> FetchUserCollectionAsync(
+        string username,
+        IProgress<BggImportProgressReport>? progress,
+        CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(username)) return [];
 
-        string url = $"https://boardgamegeek.com/xmlapi2/collection?username={Uri.EscapeDataString(username)}&stats=1";
+        progress?.Report(new BggImportProgressReport(BggImportPhase.Initializing, "Iniciando solicitud a BoardGameGeek..."));
 
-        int maxRetries = 4;
-        int delayMs = 2000;
+        string url = $"https://boardgamegeek.com/xmlapi2/collection?username={Uri.EscapeDataString(username.Trim())}&stats=1";
+
+        int maxRetries = Math.Max(1, _options.MaxPollingRetries);
+        int timeoutSeconds = Math.Max(5, _options.PollingTimeoutSeconds);
+        int initialDelaySeconds = Math.Max(1, _options.InitialPollingDelaySeconds);
+        int[] delays = [initialDelaySeconds, 5, 8, 12, 15, 15];
+
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        int rateLimitAttempts = 0;
 
         for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
+            if (stopwatch.Elapsed.TotalSeconds >= timeoutSeconds)
+            {
+                progress?.Report(new BggImportProgressReport(
+                    BggImportPhase.Failed,
+                    $"Tiempo límite de espera ({timeoutSeconds}s) excedido contactando con BGG.",
+                    CurrentAttempt: attempt,
+                    MaxAttempts: maxRetries));
+                return [];
+            }
+
+            if (attempt == 1)
+            {
+                progress?.Report(new BggImportProgressReport(
+                    BggImportPhase.RequestingBgg,
+                    "Solicitando colección a BoardGameGeek...",
+                    CurrentAttempt: 1,
+                    MaxAttempts: maxRetries));
+            }
+
             using var lease = await _rateLimiter.AcquireAsync(1, ct);
             if (!lease.IsAcquired)
             {
@@ -148,29 +186,68 @@ public class BggXmlApiClient : IBggClient, IDisposable
             {
                 using var response = await _httpClient.GetAsync(url, ct);
 
-                // Si BGG responde 202 (Accepted), la colección está encolada para generarse en caché
+                // 1. Si BGG responde 202 (Accepted), la colección está encolada para generarse en caché
                 if (response.StatusCode == HttpStatusCode.Accepted)
                 {
-                    if (attempt < maxRetries)
+                    int delayIndex = Math.Min(attempt - 1, delays.Length - 1);
+                    int waitSeconds = delays[delayIndex];
+                    int remainingSeconds = (int)Math.Max(1, timeoutSeconds - stopwatch.Elapsed.TotalSeconds);
+                    waitSeconds = Math.Min(waitSeconds, remainingSeconds);
+
+                    progress?.Report(new BggImportProgressReport(
+                        BggImportPhase.PreparingInBgg,
+                        $"BGG está preparando tu colección en sus servidores (intento {attempt} de {maxRetries})...",
+                        CurrentAttempt: attempt,
+                        MaxAttempts: maxRetries,
+                        WaitSeconds: waitSeconds));
+
+                    if (attempt >= maxRetries || stopwatch.Elapsed.TotalSeconds + waitSeconds >= timeoutSeconds)
                     {
-                        await Task.Delay(delayMs * attempt, ct);
-                        continue;
+                        progress?.Report(new BggImportProgressReport(
+                            BggImportPhase.Failed,
+                            "BGG continúa preparando la colección. Puedes volver a intentarlo en unos instantes.",
+                            CurrentAttempt: attempt,
+                            MaxAttempts: maxRetries));
+                        return [];
                     }
-                    return [];
+
+                    await Task.Delay(TimeSpan.FromSeconds(waitSeconds), ct);
+                    continue;
                 }
 
-                if (response.StatusCode == (HttpStatusCode)429)
+                // 2. Control de Rate Limit (HTTP 429 / 503)
+                if (response.StatusCode == (HttpStatusCode)429 || response.StatusCode == HttpStatusCode.ServiceUnavailable)
                 {
-                    if (attempt < maxRetries)
+                    int waitSeconds = BggResilienceAndAuthHandler.ExtractRetryAfterSeconds(response) ?? (5 * (rateLimitAttempts + 1));
+                    rateLimitAttempts++;
+
+                    progress?.Report(new BggImportProgressReport(
+                        BggImportPhase.RateLimitedWaiting,
+                        $"BGG está temporalmente saturado (Rate limit {((int)response.StatusCode)}). Pausando {waitSeconds}s antes de reintentar...",
+                        CurrentAttempt: attempt,
+                        MaxAttempts: maxRetries,
+                        WaitSeconds: waitSeconds));
+
+                    if (rateLimitAttempts > _options.MaxRateLimitRetries || stopwatch.Elapsed.TotalSeconds + waitSeconds >= timeoutSeconds)
                     {
-                        await Task.Delay(delayMs * 2 * attempt, ct);
-                        continue;
+                        progress?.Report(new BggImportProgressReport(
+                            BggImportPhase.Failed,
+                            "Límite de peticiones de BGG alcanzado. Por favor, espera un minuto antes de reintentar.",
+                            CurrentAttempt: attempt,
+                            MaxAttempts: maxRetries));
+                        return [];
                     }
-                    return [];
+
+                    await Task.Delay(TimeSpan.FromSeconds(waitSeconds), ct);
+                    continue;
                 }
 
+                // 3. Autenticación fallida (HTTP 401)
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
+                    progress?.Report(new BggImportProgressReport(
+                        BggImportPhase.Failed,
+                        "Error 401: BGG requiere autenticación mediante Application Token (Bearer)."));
                     throw new HttpRequestException("401 Unauthorized: BGG requiere autenticación mediante Application Token (Bearer). Consulta https://boardgamegeek.com/applications y configura 'Bgg:ApiToken'.", null, HttpStatusCode.Unauthorized);
                 }
 
@@ -183,7 +260,35 @@ public class BggXmlApiClient : IBggClient, IDisposable
                 if (string.IsNullOrWhiteSpace(xmlContent)) return [];
 
                 var doc = XDocument.Parse(xmlContent);
-                return BggXmlParser.ParseCollection(doc);
+
+                // Comprobar si BGG devolvió 200 OK con un elemento <message> de encolado
+                var messageEl = doc.Root?.Element("message");
+                if (messageEl != null && messageEl.Value.Contains("accepted and will be processed", StringComparison.OrdinalIgnoreCase))
+                {
+                    int delayIndex = Math.Min(attempt - 1, delays.Length - 1);
+                    int waitSeconds = delays[delayIndex];
+
+                    progress?.Report(new BggImportProgressReport(
+                        BggImportPhase.PreparingInBgg,
+                        $"BGG está preparando tu colección en sus servidores (intento {attempt} de {maxRetries})...",
+                        CurrentAttempt: attempt,
+                        MaxAttempts: maxRetries,
+                        WaitSeconds: waitSeconds));
+
+                    if (attempt >= maxRetries) return [];
+                    await Task.Delay(TimeSpan.FromSeconds(waitSeconds), ct);
+                    continue;
+                }
+
+                var items = BggXmlParser.ParseCollection(doc);
+                progress?.Report(new BggImportProgressReport(
+                    BggImportPhase.ProcessingItems,
+                    $"Colección descargada con éxito. Procesando {items.Count} juegos...",
+                    CurrentAttempt: attempt,
+                    MaxAttempts: maxRetries,
+                    ItemsFound: items.Count));
+
+                return items;
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
             {
@@ -191,7 +296,7 @@ public class BggXmlApiClient : IBggClient, IDisposable
             }
             catch (HttpRequestException) when (attempt < maxRetries)
             {
-                await Task.Delay(delayMs, ct);
+                await Task.Delay(TimeSpan.FromSeconds(initialDelaySeconds), ct);
             }
             catch (Exception)
             {
@@ -224,11 +329,12 @@ public class BggXmlApiClient : IBggClient, IDisposable
             {
                 using var response = await _httpClient.GetAsync(url, ct);
 
-                if (response.StatusCode == (HttpStatusCode)429)
+                if (response.StatusCode == (HttpStatusCode)429 || response.StatusCode == HttpStatusCode.ServiceUnavailable)
                 {
                     if (attempt < maxRetries)
                     {
-                        await Task.Delay(delayMs * 2 * attempt, ct);
+                        int waitSec = BggResilienceAndAuthHandler.ExtractRetryAfterSeconds(response) ?? ((delayMs * 2 * attempt) / 1000);
+                        await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, waitSec)), ct);
                         continue;
                     }
                     return [];
@@ -261,6 +367,58 @@ public class BggXmlApiClient : IBggClient, IDisposable
             catch (Exception)
             {
                 return [];
+            }
+        }
+
+        return [];
+    }
+
+    public async Task<IReadOnlyList<BggTopGameDto>> FetchTopGamesAsync(int limit = 50, CancellationToken ct = default)
+    {
+        string url = "https://boardgamegeek.com/xmlapi2/hot?type=boardgame";
+        int maxRetries = 3;
+        int delayMs = 1500;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            using var lease = await _rateLimiter.AcquireAsync(1, ct);
+            if (!lease.IsAcquired)
+            {
+                await Task.Delay(500, ct);
+                continue;
+            }
+
+            try
+            {
+                using var response = await _httpClient.GetAsync(url, ct);
+
+                if (response.StatusCode == (HttpStatusCode)429 || response.StatusCode == HttpStatusCode.ServiceUnavailable)
+                {
+                    if (attempt < maxRetries)
+                    {
+                        int waitSec = BggResilienceAndAuthHandler.ExtractRetryAfterSeconds(response) ?? ((delayMs * 2 * attempt) / 1000);
+                        await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, waitSec)), ct);
+                        continue;
+                    }
+                    return [];
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return [];
+                }
+
+                string xmlContent = await response.Content.ReadAsStringAsync(ct);
+                if (string.IsNullOrWhiteSpace(xmlContent)) return [];
+
+                var doc = XDocument.Parse(xmlContent);
+                var items = BggXmlParser.ParseHotGames(doc);
+                return items.Take(limit).ToList();
+            }
+            catch (Exception)
+            {
+                if (attempt >= maxRetries) return [];
+                await Task.Delay(delayMs, ct);
             }
         }
 

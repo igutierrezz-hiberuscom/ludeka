@@ -1,0 +1,347 @@
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+
+<div class="space-y-8">
+    @* 1. Tarjeta Principal de Identidad y Rango *@
+    <div class="p-6 sm:p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none text-9xl select-none">
+            @Stats.Badge.IconEmoji
+        </div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+            <div class="flex items-start sm:items-center gap-5">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center justify-center text-4xl sm:text-5xl shadow-inner shrink-0">
+                    @Stats.Badge.IconEmoji
+                </div>
+                <div class="space-y-1.5">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] border border-[var(--brand-primary)]/20">
+                            Nivel @Stats.Badge.RankLevel • @Stats.Badge.RankName
+                        </span>
+                        <span class="text-xs text-[var(--text-secondary)] font-medium">
+                            @Stats.TotalGamesInCollection juegos en estantería
+                        </span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight">
+                        @Stats.Badge.TraitName
+                    </h2>
+                    <p class="text-xs sm:text-sm text-[var(--text-secondary)] max-w-xl leading-relaxed">
+                        @Stats.Badge.TraitDescription
+                    </p>
+                    <p class="text-xs text-[var(--text-muted)] italic pt-0.5">
+                        «@Stats.Badge.SummaryTagline»
+                    </p>
+                </div>
+            </div>
+
+            @* Píldoras de métricas rápidas *@
+            <div class="grid grid-cols-2 sm:grid-cols-2 gap-3 shrink-0 lg:w-80">
+                <div class="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                    <div class="text-[0.7rem] uppercase font-bold text-[var(--text-muted)] flex items-center gap-1">
+                        <span>⏳</span>
+                        <span>Horas de Juego</span>
+                    </div>
+                    <div class="text-base sm:text-lg font-black text-[var(--text-primary)] mt-0.5">
+                        @if (Stats.ShelfTime.TotalMinHours == Stats.ShelfTime.TotalMaxHours)
+                        {
+                            <span>@Stats.ShelfTime.TotalMinHours h</span>
+                        }
+                        else
+                        {
+                            <span>@Stats.ShelfTime.TotalMinHours–@Stats.ShelfTime.TotalMaxHours h</span>
+                        }
+                    </div>
+                    <div class="text-[0.65rem] text-[var(--text-secondary)]">acumuladas</div>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                    <div class="text-[0.7rem] uppercase font-bold text-[var(--text-muted)] flex items-center gap-1">
+                        <span>👥</span>
+                        <span>Mesa Óptima</span>
+                    </div>
+                    <div class="text-base sm:text-lg font-black text-[var(--brand-primary)] mt-0.5">
+                        @if (Stats.Scalability.SweetSpotPlayerCounts.Count > 0)
+                        {
+                            <span>@string.Join(" y ", Stats.Scalability.SweetSpotPlayerCounts.Select(p => p == 7 ? "7+" : p.ToString())) comensales</span>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </div>
+                    <div class="text-[0.65rem] text-[var(--text-secondary)]">sweet spot</div>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                    <div class="text-[0.7rem] uppercase font-bold text-[var(--text-muted)] flex items-center gap-1">
+                        <span>🛡️</span>
+                        <span>Cartas</span>
+                    </div>
+                    <div class="text-base sm:text-lg font-black text-[var(--text-primary)] mt-0.5">
+                        @Stats.SleevesRadar.TotalCards
+                    </div>
+                    <div class="text-[0.65rem] text-[var(--text-secondary)]">@Stats.SleevesRadar.TotalPacksEstimated packs de fundas</div>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                    <div class="text-[0.7rem] uppercase font-bold text-[var(--text-muted)] flex items-center gap-1">
+                        <span>🧬</span>
+                        <span>Estilo Dominante</span>
+                    </div>
+                    <div class="text-xs sm:text-sm font-black text-[var(--text-primary)] mt-1 truncate">
+                        @Stats.DnaDistribution.DominantStyleName
+                    </div>
+                    <div class="text-[0.65rem] text-[var(--text-secondary)]">perfil de mesa</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* 2. Espectro Visual del ADN Lúdico *@
+    <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+                <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>🧬</span>
+                    <span>El ADN de tu Estantería</span>
+                </h3>
+                <p class="text-xs text-[var(--text-secondary)]">
+                    Distribución de estilos lúdicos calculada sobre tus @Stats.TotalGamesInCollection juegos en propiedad.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold px-3 py-1 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 inline-flex items-center gap-1">
+                    <span>🤝</span>
+                    <span>@Stats.DnaDistribution.CooperativePercentage% Cooperativos</span>
+                </span>
+                <span class="text-xs font-bold px-3 py-1 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 inline-flex items-center gap-1">
+                    <span>🐺</span>
+                    <span>@Stats.DnaDistribution.SoloReadyPercentage% Solitario</span>
+                </span>
+            </div>
+        </div>
+
+        @* Barra de Espectro Continuo *@
+        <div class="h-4 rounded-full overflow-hidden flex w-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]" role="progressbar" aria-label="Distribución porcentual del ADN lúdico">
+            @if (Stats.TotalGamesInCollection == 0)
+            {
+                <div class="h-full w-full bg-[var(--bg-surface-elevated)] flex items-center justify-center text-[0.6rem] text-[var(--text-muted)] font-bold">
+                    Estantería vacía
+                </div>
+            }
+            else
+            {
+                @foreach (var style in Stats.DnaDistribution.Styles.Where(s => s.Percentage > 0))
+                {
+                    <div style="width: @style.Percentage%; background-color: @style.ColorHex;"
+                         class="h-full transition-all hover:opacity-85 cursor-pointer relative group"
+                         title="@style.StyleDisplayName: @style.Percentage% (@style.GameCount juegos)">
+                    </div>
+                }
+            }
+        </div>
+
+        @* Leyenda de Estilos *@
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-2">
+            @foreach (var style in Stats.DnaDistribution.Styles)
+            {
+                <div class="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full shrink-0" style="background-color: @style.ColorHex;"></span>
+                        <span class="text-xs font-bold text-[var(--text-primary)] truncate">@style.StyleDisplayName</span>
+                    </div>
+                    <div class="flex items-baseline justify-between mt-1">
+                        <span class="text-lg font-black text-[var(--text-primary)]">@style.Percentage%</span>
+                        <span class="text-xs text-[var(--text-muted)]">@style.GameCount @(style.GameCount == 1 ? "juego" : "juegos")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* 3. Rango Dulce de Comensales (Sweet Spot de Escalabilidad) *@
+    <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+                <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>👥</span>
+                    <span>Curva de Comensales y Escalabilidad</span>
+                </h3>
+                <p class="text-xs text-[var(--text-secondary)]">
+                    Número de juegos de tu colección que brillan o están recomendados para cada tamaño de mesa.
+                </p>
+            </div>
+            <div class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] border border-[var(--brand-primary)]/20 text-xs font-black self-start sm:self-auto">
+                @Stats.Scalability.SweetSpotSummaryText
+            </div>
+        </div>
+
+        @* Gráfico de Barras de Comensales *@
+        <div class="grid grid-cols-7 gap-2 sm:gap-3 pt-4 items-end min-h-[160px]">
+            @{
+                int maxCount = Stats.Scalability.Curve.Max(c => c.OptimizedGamesCount);
+            }
+            @foreach (var entry in Stats.Scalability.Curve)
+            {
+                int barHeightPct = maxCount > 0 ? (int)Math.Round((entry.OptimizedGamesCount * 100.0) / maxCount) : 0;
+                int minHeight = entry.OptimizedGamesCount > 0 ? Math.Max(barHeightPct, 15) : 8;
+
+                <div class="flex flex-col items-center gap-2 h-full justify-end">
+                    <span class="text-[0.7rem] sm:text-xs font-black @(entry.IsSweetSpot ? "text-[var(--brand-primary)]" : "text-[var(--text-muted)]")">
+                        @entry.OptimizedGamesCount
+                    </span>
+                    <div class="w-full rounded-xl transition-all flex flex-col justify-end p-1 relative @(entry.IsSweetSpot ? "bg-[var(--brand-primary)] text-white shadow-md ring-2 ring-[var(--brand-primary)]/30" : "bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]")"
+                         style="height: @(minHeight)%">
+                        @if (entry.IsSweetSpot)
+                        {
+                            <span class="text-[0.6rem] text-center font-black hidden sm:block pb-1">★</span>
+                        }
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs sm:text-sm font-black text-[var(--text-primary)]">
+                            @entry.DisplayCount@(entry.PlayerCount < 7 ? "P" : "")
+                        </div>
+                        <div class="text-[0.6rem] text-[var(--text-muted)] hidden sm:block">
+                            @(entry.PlayerCount == 1 ? "jugador" : "jugadores")
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* 4. Radar de Fundas y Top Autores/Editoriales *@
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        @* Radar de Fundas *@
+        <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-5">
+            <div>
+                <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>🛡️</span>
+                    <span>Radar de Fundas y Protección</span>
+                </h3>
+                <p class="text-xs text-[var(--text-secondary)]">
+                    Estado de protección y estimación de paquetes requeridos para cartas de tu colección.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div class="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-center">
+                    <div class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)]">Cartas Totales</div>
+                    <div class="text-xl font-black text-[var(--text-primary)] mt-0.5">@Stats.SleevesRadar.TotalCards</div>
+                </div>
+                <div class="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-center">
+                    <div class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)]">Packs Estimados</div>
+                    <div class="text-xl font-black text-[var(--brand-primary)] mt-0.5">@Stats.SleevesRadar.TotalPacksEstimated</div>
+                    <div class="text-[0.6rem] text-[var(--text-muted)]">de 50 uds</div>
+                </div>
+                <div class="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-center">
+                    <div class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)]">Juegos con Cartas</div>
+                    <div class="text-xl font-black text-[var(--text-primary)] mt-0.5">@Stats.SleevesRadar.GamesRequiringSleevesCount</div>
+                </div>
+            </div>
+
+            @if (Stats.SleevesRadar.TopFormats.Count == 0)
+            {
+                <div class="p-4 rounded-xl bg-[var(--bg-surface)] text-center text-xs text-[var(--text-muted)]">
+                    No se han registrado componentes con cartas que requieran fundas en tu estantería.
+                </div>
+            }
+            else
+            {
+                <div class="space-y-2">
+                    <div class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Formatos Más Requeridos</div>
+                    @foreach (var format in Stats.SleevesRadar.TopFormats.Take(4))
+                    {
+                        <div class="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs">
+                            <span class="font-bold text-[var(--text-primary)] truncate max-w-[200px]">@format.FormatName</span>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[var(--text-secondary)]">@format.CardCount cartas</span>
+                                <span class="px-2 py-0.5 rounded-md bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] font-black text-[var(--brand-primary)]">
+                                    @format.PacksNeeded @(format.PacksNeeded == 1 ? "pack" : "packs")
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @* Top Autores y Editoriales *@
+        <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-5">
+            <div>
+                <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>🏆</span>
+                    <span>Autores y Editoriales Favoritas</span>
+                </h3>
+                <p class="text-xs text-[var(--text-secondary)]">
+                    Las mentes maestras y sellos con mayor presencia en tu estantería.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                @* Diseñadores *@
+                <div>
+                    <div class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <span>🖋️</span>
+                        <span>Top Diseñadores</span>
+                    </div>
+                    @if (Stats.TopDesigners.Count == 0)
+                    {
+                        <div class="p-3 rounded-xl bg-[var(--bg-surface)] text-center text-xs text-[var(--text-muted)]">
+                            Sin datos de autores suficientes.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-1.5">
+                            @foreach (var d in Stats.TopDesigners)
+                            {
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs">
+                                    <span class="font-bold text-[var(--text-primary)] truncate max-w-[200px]">@d.Name</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-black text-[var(--brand-primary)]">@d.Count @(d.Count == 1 ? "título" : "títulos")</span>
+                                        <span class="text-[var(--text-muted)] text-[0.68rem]">(@d.Percentage%)</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* Editoriales *@
+                <div>
+                    <div class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <span>🏢</span>
+                        <span>Top Editoriales</span>
+                    </div>
+                    @if (Stats.TopPublishers.Count == 0)
+                    {
+                        <div class="p-3 rounded-xl bg-[var(--bg-surface)] text-center text-xs text-[var(--text-muted)]">
+                            Sin datos de editoriales suficientes.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-1.5">
+                            @foreach (var p in Stats.TopPublishers)
+                            {
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs">
+                                    <span class="font-bold text-[var(--text-primary)] truncate max-w-[200px]">@p.Name</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-black text-[var(--brand-primary)]">@p.Count @(p.Count == 1 ? "título" : "títulos")</span>
+                                        <span class="text-[var(--text-muted)] text-[0.68rem]">(@p.Percentage%)</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public UserLibraryStatsDto Stats { get; set; } = null!;
+}

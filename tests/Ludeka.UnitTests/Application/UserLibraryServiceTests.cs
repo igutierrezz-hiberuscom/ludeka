@@ -349,4 +349,57 @@ public class UserLibraryServiceTests
         Assert.Equal(9.0, review.Score);
         Assert.Equal(9.0, game.LudistRating); // Consenso actualizado
     }
+
+    [Fact]
+    public async Task GetUserLibrarySummaryAsync_ShouldCorrectlyIdentifyExpansionAndBaseGame()
+    {
+        // Arrange
+        var colRepo = new FakeCollectionRepo();
+        var loanRepo = new FakeLoanRepo();
+        var reviewRepo = new FakeReviewRepo();
+        var gameRepo = new FakeGameRepo();
+        var userSvc = new FakeCurrentUserService();
+
+        var baseGame = CreateTestGame();
+        var expansion = new Game(
+            bggId: 2002,
+            originalTitle: "Wingspan: European Expansion",
+            spanishTitle: "Wingspan: Expansión Europea",
+            designer: "Elizabeth Hargrave",
+            publisher: "Maldito Games",
+            yearPublished: 2019,
+            coverImageUrl: "https://example.com/wingspan-europe.jpg",
+            thumbnailUrl: null,
+            description: "Expansión aves europeas",
+            bggRating: 8.3,
+            bggRank: null,
+            ludistRating: 0.0,
+            confrontation: ConfrontationType.Competitive,
+            style: GameStyle.Eurogame,
+            isOfficialSolo: true,
+            age: new AgeRating(10, 10),
+            language: LanguageDependence.Low,
+            footprint: TableFootprint.StandardTable,
+            duration: new GameDuration(40, 70, 20),
+            type: GameType.Expansion,
+            baseGameId: baseGame.Id
+        );
+
+        gameRepo.Games.Add(baseGame);
+        gameRepo.Games.Add(expansion);
+
+        var svc = new UserLibraryService(colRepo, loanRepo, reviewRepo, gameRepo, userSvc);
+        await svc.SetCollectionStateAsync(baseGame.Id, CollectionStatus.InCollection);
+        await svc.SetCollectionStateAsync(expansion.Id, CollectionStatus.InCollection);
+
+        // Act
+        var summary = await svc.GetLibrarySummaryAsync();
+
+        // Assert
+        var baseItem = summary.Items.First(i => i.GameId == baseGame.Id);
+        var expItem = summary.Items.First(i => i.GameId == expansion.Id);
+
+        Assert.False(baseItem.IsExpansion);
+        Assert.True(expItem.IsExpansion);
+    }
 }

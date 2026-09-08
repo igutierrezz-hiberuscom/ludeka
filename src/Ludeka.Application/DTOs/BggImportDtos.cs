@@ -48,7 +48,9 @@ public record CatalogQueueItemDto(
     CatalogQueueStatus Status,
     DateTimeOffset CreatedAt,
     DateTimeOffset? ProcessedAt,
-    string? ErrorMessage = null
+    string? ErrorMessage = null,
+    CatalogQueueOrigin Origin = CatalogQueueOrigin.UserImport,
+    string? ExtractedTitle = null
 );
 
 public record ProcessQueueResultDto(

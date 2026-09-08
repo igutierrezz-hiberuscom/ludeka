@@ -13,10 +13,19 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["Ludeka.Web.styles.css"]" />
+    <!-- PWA & Mobile Meta Tags (Incremento 16) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#d97706" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Ludeka" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <script>
         (function() {
             try {
-                var theme = localStorage.getItem('ludeka-theme') || 'charcoal';
+                var activeUserId = localStorage.getItem('ludeka-active-user-id') || 'usuario-fundador-ludeka';
+                var theme = localStorage.getItem('ludeka-theme-' + activeUserId) || localStorage.getItem('ludeka-theme') || 'charcoal';
                 document.documentElement.setAttribute('data-theme', theme);
             } catch (e) {}
         })();
@@ -29,19 +38,55 @@
     <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
     <script>
-        window.setLudekaTheme = function(theme) {
+        window.setLudekaTheme = function(theme, userId) {
             try {
                 localStorage.setItem('ludeka-theme', theme);
+                if (userId) {
+                    localStorage.setItem('ludeka-theme-' + userId, theme);
+                    localStorage.setItem('ludeka-active-user-id', userId);
+                }
                 document.documentElement.setAttribute('data-theme', theme);
             } catch (e) {}
         };
-        window.getLudekaTheme = function() {
+        window.getLudekaTheme = function(userId) {
             try {
+                if (userId) {
+                    var userTheme = localStorage.getItem('ludeka-theme-' + userId);
+                    if (userTheme) return userTheme;
+                }
                 return localStorage.getItem('ludeka-theme') || 'charcoal';
             } catch (e) {
                 return 'charcoal';
             }
         };
+        window.setActiveUserTheme = function(userId) {
+            try {
+                if (userId) {
+                    localStorage.setItem('ludeka-active-user-id', userId);
+                    var userTheme = localStorage.getItem('ludeka-theme-' + userId);
+                    if (userTheme) {
+                        document.documentElement.setAttribute('data-theme', userTheme);
+                        return userTheme;
+                    }
+                }
+            } catch (e) {}
+            return null;
+        };
+    </script>
+    <script src="/js/ludeka-offline.js"></script>
+    <script src="/js/locationInterop.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(reg) {
+                        // Service Worker registrado correctamente
+                    })
+                    .catch(function(err) {
+                        console.warn('[PWA] Error al registrar Service Worker:', err);
+                    });
+            });
+        }
     </script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>

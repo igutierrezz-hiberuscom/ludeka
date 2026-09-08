@@ -79,6 +79,35 @@ public class GameAggregateAndScalabilityTests
         Assert.Equal("/images/games/wingspan.png", game.ThumbnailUrl);
     }
 
+    [Fact]
+    public void Game_SetAiSummary_ShouldStoreAndExposeValueObject()
+    {
+        var game = CreateSampleGame("Wingspan", "Wingspan", null);
+        var summary = new AiGameSummary(
+            GeneralVerdict: "Excelente eurogame con motor de cartas.",
+            ScalabilitySummary: "Ideal a 2 y 3 jugadores.",
+            AgeSummary: "Desde 10 años.",
+            FootprintSummary: "Mesa estándar.",
+            Model: "Google Gemini (gemini-2.5-flash)",
+            GeneratedAt: System.DateTime.UtcNow
+        );
+
+        game.SetAiSummary(summary);
+
+        Assert.NotNull(game.AiSummary);
+        Assert.Equal("Excelente eurogame con motor de cartas.", game.AiSummary.GeneralVerdict);
+        Assert.Equal("Google Gemini (gemini-2.5-flash)", game.AiSummary.Model);
+        Assert.Equal(summary.GeneratedAt, game.AiSummary.GeneratedAt);
+    }
+
+    [Fact]
+    public void Game_SetAiSummary_WhenNull_ShouldThrowArgumentNullException()
+    {
+        var game = CreateSampleGame("Wingspan", "Wingspan", null);
+
+        Assert.Throws<System.ArgumentNullException>(() => game.SetAiSummary(null!));
+    }
+
     private static Game CreateSampleGame(string originalTitle, string spanishTitle, List<ScalabilityEntry>? scalability)
     {
         return new Game(

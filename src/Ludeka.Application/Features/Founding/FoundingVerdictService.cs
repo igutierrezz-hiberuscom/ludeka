@@ -18,6 +18,7 @@ public class FoundingVerdictService : IFoundingVerdictService
     private readonly IUserReviewRepository _reviewRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ICommunityNotificationQueue? _notificationQueue;
+    private readonly IAiGameSummaryService? _aiSummaryService;
 
     public const int FoundingVoteWeight = 3;
 
@@ -26,13 +27,15 @@ public class FoundingVerdictService : IFoundingVerdictService
         IGameRepository gameRepository,
         IUserReviewRepository reviewRepository,
         ICurrentUserService currentUserService,
-        ICommunityNotificationQueue? notificationQueue = null)
+        ICommunityNotificationQueue? notificationQueue = null,
+        IAiGameSummaryService? aiSummaryService = null)
     {
         _verdictRepository = verdictRepository;
         _gameRepository = gameRepository;
         _reviewRepository = reviewRepository;
         _currentUserService = currentUserService;
         _notificationQueue = notificationQueue;
+        _aiSummaryService = aiSummaryService;
     }
 
     public async Task<FoundingVerdictDto?> GetVerdictByGameIdAsync(Guid gameId, CancellationToken ct = default)
@@ -41,11 +44,65 @@ public class FoundingVerdictService : IFoundingVerdictService
         return verdict != null ? FoundingVerdictDto.FromEntity(verdict) : null;
     }
 
-    public async Task<AiGameSummaryDto> GetAiSummaryForGameAsync(Guid gameId, CancellationToken ct = default)
+    public async Task<AiGameSummaryDto?> GetAiSummaryForGameAsync(Guid gameId, CancellationToken ct = default)
     {
+        var game = await _gameRepository.GetByIdAsync(gameId, ct);
+        if (game == null) return null;
+
+        if (game.AiSummary != null)
+        {
+            return new AiGameSummaryDto(
+                game.Id,
+                game.SpanishTitle,
+                game.AiSummary.ScalabilitySummary,
+                game.AiSummary.AgeSummary,
+                game.AiSummary.FootprintSummary,
+                game.AiSummary.GeneralVerdict,
+                game.AiSummary.Model,
+                game.AiSummary.GeneratedAt
+            );
+        }
+
+        return null;
+    }
+
+    public async Task<AiGameSummaryDto> RequestAiSummaryGenerationAsync(Guid gameId, CancellationToken ct = default)
+    {
+        if (!_currentUserService.IsInRole("FoundingTeam") && !_currentUserService.IsInRole("Moderator"))
+        {
+            throw new UnauthorizedAccessException("Solo miembros de la Mesa Fundadora o moderadores pueden solicitar la generación bajo demanda de síntesis con IA.");
+        }
+
         var game = await _gameRepository.GetByIdAsync(gameId, ct)
             ?? throw new InvalidOperationException($"No se encontró el juego con ID {gameId}");
 
+        AiGameSummaryDto generated;
+        if (_aiSummaryService != null)
+        {
+            generated = await _aiSummaryService.GenerateSummaryAsync(game, ct);
+        }
+        else
+        {
+            generated = GenerateHeuristicSummary(game);
+        }
+
+        var aiSummaryVo = new AiGameSummary(
+            generated.GeneralVerdict,
+            generated.ScalabilitySummary,
+            generated.AgeSummary,
+            generated.FootprintSummary,
+            generated.Model,
+            generated.GeneratedAt ?? DateTime.UtcNow
+        );
+
+        game.SetAiSummary(aiSummaryVo);
+        await _gameRepository.UpdateAsync(game, ct);
+
+        return generated;
+    }
+
+    private static AiGameSummaryDto GenerateHeuristicSummary(Game game)
+    {
         string scalabilitySummary = game.Scalability.Count > 0
             ? $"{game.IdealPlayerCountText}. El consenso internacional destaca que la dinámica fluye con menor entreturno y mayor tensión estratégica en este rango."
             : "Escalabilidad según especificación oficial del fabricante.";
@@ -81,7 +138,9 @@ public class FoundingVerdictService : IFoundingVerdictService
             scalabilitySummary,
             ageSummary,
             footprintSummary,
-            generalVerdict
+            generalVerdict,
+            "Heurística Editorial",
+            DateTime.UtcNow
         );
     }
 

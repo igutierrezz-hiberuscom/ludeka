@@ -1,0 +1,335 @@
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@inject IUserManagementService UserService
+
+@if (IsOpen && User != null)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="user-perm-modal-title">
+        <div class="w-full max-w-xl max-h-[92vh] flex flex-col rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
+             @onclick:stopPropagation="true">
+
+            @* Cabecera *@
+            <div class="p-5 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-surface-elevated)]/60">
+                <div>
+                    <span class="px-2 py-0.5 rounded text-[0.65rem] font-black uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/30 inline-block mb-1">
+                        🛡️ Gobernanza & Permisos RBAC
+                    </span>
+                    <h2 id="user-perm-modal-title" class="text-lg font-black text-[var(--text-primary)] tracking-tight">
+                        Privilegios de @User.UserName (@User.Id)
+                    </h2>
+                </div>
+                <button type="button"
+                        @onclick="Close"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--bg-surface-elevated)] transition-colors">
+                    &times;
+                </button>
+            </div>
+
+            @* Cuerpo con Scroll *@
+            <div class="p-5 space-y-5 overflow-y-auto flex-1 text-xs">
+                @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                {
+                    <div class="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 font-medium">
+                        @_errorMessage
+                    </div>
+                }
+
+                @* Selección de Rol *@
+                <div class="space-y-2">
+                    <label class="font-bold text-[var(--text-secondary)] uppercase tracking-wider text-[0.7rem]">Rol en la Plataforma</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button type="button"
+                                @onclick="() => SelectRole(UserRole.FoundingTeam)"
+                                class="p-3 rounded-2xl border text-left transition-all flex flex-col gap-1 @(_selectedRole == UserRole.FoundingTeam ? "bg-[var(--brand-primary)]/15 border-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-highlight)]")">
+                            <span class="font-black text-sm text-amber-400">👑 Mesa Fundadora</span>
+                            <span class="text-[0.65rem] opacity-80">Acceso total a todo el sistema</span>
+                        </button>
+
+                        <button type="button"
+                                @onclick="() => SelectRole(UserRole.Moderator)"
+                                class="p-3 rounded-2xl border text-left transition-all flex flex-col gap-1 @(_selectedRole == UserRole.Moderator ? "bg-[var(--brand-primary)]/15 border-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-highlight)]")">
+                            <span class="font-black text-sm text-sky-400">🛡️ Moderador</span>
+                            <span class="text-[0.65rem] opacity-80">Permisos granulares configurables</span>
+                        </button>
+
+                        <button type="button"
+                                @onclick="() => SelectRole(UserRole.CommunityUser)"
+                                class="p-3 rounded-2xl border text-left transition-all flex flex-col gap-1 @(_selectedRole == UserRole.CommunityUser ? "bg-[var(--brand-primary)]/15 border-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-highlight)]")">
+                            <span class="font-black text-sm text-slate-300">👤 Comunitario</span>
+                            <span class="text-[0.65rem] opacity-80">Sin facultades de edición</span>
+                        </button>
+                    </div>
+                </div>
+
+                @* Permisos Granulares de Moderación *@
+                <div class="space-y-3 pt-2">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-[var(--text-secondary)] uppercase tracking-wider text-[0.7rem]">
+                            Permisos Granulares de Moderación
+                        </label>
+                        @if (_selectedRole == UserRole.Moderator)
+                        {
+                            <div class="flex items-center gap-2 text-[0.7rem]">
+                                <button type="button" @onclick="SelectAllPermissions" class="text-[var(--brand-primary)] hover:underline font-semibold">Marcar todos</button>
+                                <span>•</span>
+                                <button type="button" @onclick="ClearAllPermissions" class="text-[var(--text-muted)] hover:underline font-semibold">Desmarcar</button>
+                            </div>
+                        }
+                    </div>
+
+                    @if (_selectedRole == UserRole.FoundingTeam)
+                    {
+                        <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start gap-3">
+                            <span class="text-xl">✨</span>
+                            <div class="space-y-1">
+                                <p class="font-bold">Privilegios Plenos Heredados</p>
+                                <p class="text-[0.7rem] opacity-90">
+                                    Los miembros de la Mesa Fundadora poseen de forma implícita todos los permisos de edición, moderación, auditoría y gobernanza sin necesidad de asignación individual.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    else if (_selectedRole == UserRole.CommunityUser)
+                    {
+                        <div class="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-center py-6">
+                            <span>ℹ️ Los usuarios comunitarios no disponen de permisos de moderación. Promueve la cuenta a Moderador para activar conmutadores específicos.</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            @* 1. CanEditGames *@
+                            <label class="p-3 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 @(_canEditGames ? "bg-sky-500/10 border-sky-500/30 text-[var(--text-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-80")">
+                                <input type="checkbox" @bind="_canEditGames" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
+                                <div>
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <span>🎲</span> <span>Editar Fichas de Juego</span>
+                                    </div>
+                                    <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Título, diseñador, editorial, año, comensales y sinopsis.</p>
+                                </div>
+                            </label>
+
+                            @* 2. CanUploadImages *@
+                            <label class="p-3 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 @(_canUploadImages ? "bg-sky-500/10 border-sky-500/30 text-[var(--text-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-80")">
+                                <input type="checkbox" @bind="_canUploadImages" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
+                                <div>
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <span>🖼️</span> <span>Cargar y Reemplazar Imágenes</span>
+                                    </div>
+                                    <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Subida de fotos y carátulas locales o remotas al servidor.</p>
+                                </div>
+                            </label>
+
+                            @* 3. CanManagePublishers *@
+                            <label class="p-3 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 @(_canManagePublishers ? "bg-sky-500/10 border-sky-500/30 text-[var(--text-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-80")">
+                                <input type="checkbox" @bind="_canManagePublishers" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
+                                <div>
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <span>🏢</span> <span>Gestionar Editoriales</span>
+                                    </div>
+                                    <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Alta y edición de casas editoriales y sus redes oficiales.</p>
+                                </div>
+                            </label>
+
+                            @* 4. CanManageCreators *@
+                            <label class="p-3 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 @(_canManageCreators ? "bg-sky-500/10 border-sky-500/30 text-[var(--text-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-80")">
+                                <input type="checkbox" @bind="_canManageCreators" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
+                                <div>
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <span>✍️</span> <span>Gestionar Autores y Diseñadores</span>
+                                    </div>
+                                    <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Alta y biografía de creadores, ilustradores y enlaces BGG.</p>
+                                </div>
+                            </label>
+
+                            @* 5. CanApproveMedia *@
+                            <label class="p-3 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 @(_canApproveMedia ? "bg-sky-500/10 border-sky-500/30 text-[var(--text-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-80")">
+                                <input type="checkbox" @bind="_canApproveMedia" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
+                                <div>
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <span>🎬</span> <span>Moderar Vídeos y Multimedia</span>
+                                    </div>
+                                    <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Aprobación o descarte de vídeos en YouTube e Instagram.</p>
+                                </div>
+                            </label>
+
+                            @* 6. CanResolveReports *@
+                            <label class="p-3 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 @(_canResolveReports ? "bg-sky-500/10 border-sky-500/30 text-[var(--text-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-80")">
+                                <input type="checkbox" @bind="_canResolveReports" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
+                                <div>
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <span>🚩</span> <span>Resolver Reportes Comunitarios</span>
+                                    </div>
+                                    <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Gestión de la bandeja de erratas y sugerencias de la comunidad.</p>
+                                </div>
+                            </label>
+
+                            @* 7. CanManageStoreLinks *@
+                            <label class="p-3 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 @(_canManageStoreLinks ? "bg-sky-500/10 border-sky-500/30 text-[var(--text-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-80")">
+                                <input type="checkbox" @bind="_canManageStoreLinks" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
+                                <div>
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <span>🏪</span> <span>Gestionar Tiendas y Enlaces Afiliados</span>
+                                    </div>
+                                    <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Fichas de tiendas lúdicas, programas de fidelidad y enlaces comerciales.</p>
+                                </div>
+                            </label>
+
+                            @* 8. CanPublishInstagram (Incremento 28) *@
+                            <label class="p-3 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 @(_canPublishInstagram ? "bg-sky-500/10 border-sky-500/30 text-[var(--text-primary)]" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-80")">
+                                <input type="checkbox" @bind="_canPublishInstagram" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
+                                <div>
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <span>📸</span> <span>Publicar en Instagram Oficial</span>
+                                    </div>
+                                    <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Componer y publicar posts en la cuenta oficial de Instagram.</p>
+                                </div>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Pie de Modal *@
+            <div class="p-4 border-t border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-surface-elevated)]/60">
+                <button type="button"
+                        @onclick="Close"
+                        class="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        @onclick="SavePermissions"
+                        disabled="@_isSaving"
+                        class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[var(--brand-primary)] hover:opacity-90 transition-all shadow-md flex items-center gap-2 disabled:opacity-50">
+                    @if (_isSaving)
+                    {
+                        <span class="animate-spin text-sm">⏳</span>
+                        <span>Guardando...</span>
+                    }
+                    else
+                    {
+                        <span>💾 Guardar Privilegios</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public AppUserDto? User { get; set; }
+    [Parameter] public EventCallback<AppUserDto> OnUserUpdated { get; set; }
+
+    private UserRole _selectedRole;
+    private bool _canEditGames;
+    private bool _canUploadImages;
+    private bool _canManagePublishers;
+    private bool _canManageCreators;
+    private bool _canApproveMedia;
+    private bool _canResolveReports;
+    private bool _canManageStoreLinks;
+    private bool _canPublishInstagram;
+
+    private bool _isSaving;
+    private string? _errorMessage;
+
+    protected override void OnParametersSet()
+    {
+        if (User != null)
+        {
+            _selectedRole = User.Role;
+            var perms = User.Permissions;
+            _canEditGames = perms.HasFlag(ModeratorPermission.CanEditGames);
+            _canUploadImages = perms.HasFlag(ModeratorPermission.CanUploadImages);
+            _canManagePublishers = perms.HasFlag(ModeratorPermission.CanManagePublishers);
+            _canManageCreators = perms.HasFlag(ModeratorPermission.CanManageCreators);
+            _canApproveMedia = perms.HasFlag(ModeratorPermission.CanApproveMedia);
+            _canResolveReports = perms.HasFlag(ModeratorPermission.CanResolveReports);
+            _canManageStoreLinks = perms.HasFlag(ModeratorPermission.CanManageStoreLinks);
+            _canPublishInstagram = perms.HasFlag(ModeratorPermission.CanPublishInstagram);
+            _errorMessage = null;
+        }
+    }
+
+    private void SelectRole(UserRole role)
+    {
+        _selectedRole = role;
+    }
+
+    private void SelectAllPermissions()
+    {
+        _canEditGames = true;
+        _canUploadImages = true;
+        _canManagePublishers = true;
+        _canManageCreators = true;
+        _canApproveMedia = true;
+        _canResolveReports = true;
+        _canManageStoreLinks = true;
+        _canPublishInstagram = true;
+    }
+
+    private void ClearAllPermissions()
+    {
+        _canEditGames = false;
+        _canUploadImages = false;
+        _canManagePublishers = false;
+        _canManageCreators = false;
+        _canApproveMedia = false;
+        _canResolveReports = false;
+        _canManageStoreLinks = false;
+        _canPublishInstagram = false;
+    }
+
+    private async Task SavePermissions()
+    {
+        if (User == null) return;
+
+        try
+        {
+            _isSaving = true;
+            _errorMessage = null;
+
+            var permissions = ModeratorPermission.None;
+            if (_selectedRole == UserRole.Moderator)
+            {
+                if (_canEditGames) permissions |= ModeratorPermission.CanEditGames;
+                if (_canUploadImages) permissions |= ModeratorPermission.CanUploadImages;
+                if (_canManagePublishers) permissions |= ModeratorPermission.CanManagePublishers;
+                if (_canManageCreators) permissions |= ModeratorPermission.CanManageCreators;
+                if (_canApproveMedia) permissions |= ModeratorPermission.CanApproveMedia;
+                if (_canResolveReports) permissions |= ModeratorPermission.CanResolveReports;
+                if (_canManageStoreLinks) permissions |= ModeratorPermission.CanManageStoreLinks;
+                if (_canPublishInstagram) permissions |= ModeratorPermission.CanPublishInstagram;
+            }
+
+            var updated = await UserService.UpdateUserRoleAndPermissionsAsync(new UpdateUserRoleAndPermissionsCommand(
+                UserId: User.Id,
+                Role: _selectedRole,
+                Permissions: permissions
+            ));
+
+            await OnUserUpdated.InvokeAsync(updated);
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

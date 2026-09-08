@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="maskGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <!-- Fondo completo cuadrado para recorte adaptativo del SO -->
+  <rect width="512" height="512" fill="url(#maskGrad)"/>
+  <!-- Dado isométrico en zona segura (diámetro < 80% central) -->
+  <g transform="translate(256, 256) scale(0.85)">
+    <!-- Cara Superior -->
+    <path d="M0 -110 L96 -55 L0 0 L-96 -55 Z" fill="#ffffff" opacity="0.95"/>
+    <!-- Cara Izquierda -->
+    <path d="M-96 -55 L0 0 L0 110 L-96 55 Z" fill="#fef3c7"/>
+    <!-- Cara Derecha -->
+    <path d="M0 0 L96 -55 L96 55 L0 110 Z" fill="#fde68a"/>
+    <!-- Pips / Puntos del dado -->
+    <circle cx="0" cy="-55" r="11" fill="#d97706"/>
+    <circle cx="-48" cy="12" r="10" fill="#b45309"/>
+    <circle cx="-48" cy="55" r="10" fill="#b45309"/>
+    <circle cx="36" cy="12" r="10" fill="#b45309"/>
+    <circle cx="48" cy="34" r="10" fill="#b45309"/>
+    <circle cx="60" cy="55" r="10" fill="#b45309"/>
+  </g>
+</svg>

@@ -6,12 +6,24 @@ using Ludeka.Application.Features.Expansions;
 using Ludeka.Application.Features.Founding;
 using Ludeka.Application.Features.Library;
 using Ludeka.Application.Features.Media;
+using Ludeka.Application.Features.Reports;
+using Ludeka.Application.Features.Directory;
+using Ludeka.Application.Features.Admin;
+using Ludeka.Application.Features.Home;
+using Ludeka.Application.Features.Events;
+using Ludeka.Application.Features.Sleeves;
+using Ludeka.Application.Features.Instagram;
 using Ludeka.Infrastructure.Bgg;
 using Ludeka.Infrastructure.Data;
 using Ludeka.Infrastructure.Repositories;
 using Ludeka.Infrastructure.Seeding;
 using Ludeka.Infrastructure.Services;
 using Ludeka.Infrastructure.Notifications;
+using Ludeka.Infrastructure.YouTube;
+using Ludeka.Application.Features.Discovery;
+using Ludeka.Infrastructure.Background;
+using Ludeka.Infrastructure.Stores;
+using Ludeka.Application.DTOs;
 using Ludeka.Application.Options;
 using Ludeka.Web.Components;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +72,18 @@ builder.Services.AddOutputCache(options =>
 });
 
 builder.Services.Configure<BggOptions>(builder.Configuration.GetSection(BggOptions.SectionName));
-builder.Services.AddHttpClient<IBggClient, BggXmlApiClient>();
+builder.Services.AddTransient<BggResilienceAndAuthHandler>();
+builder.Services.AddHttpClient<BggXmlApiClient>()
+    .AddHttpMessageHandler<BggResilienceAndAuthHandler>();
+builder.Services.AddSingleton<SimulatedBggClient>();
+
+builder.Services.AddScoped<IBggClient>(sp =>
+{
+    var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<BggOptions>>().Value;
+    return options.ShouldSimulate
+        ? sp.GetRequiredService<SimulatedBggClient>()
+        : sp.GetRequiredService<BggXmlApiClient>();
+});
 
 builder.Services.AddScoped<IUserCollectionRepository, SqliteUserCollectionRepository>();
 builder.Services.AddScoped<IGameLoanRepository, SqliteGameLoanRepository>();
@@ -77,6 +100,33 @@ builder.Services.AddScoped<IBggImportService, BggImportService>();
 builder.Services.AddScoped<IBggCatalogQueueService, BggCatalogQueueService>();
 builder.Services.AddScoped<IBggSearchAssistedService, BggSearchAssistedService>();
 
+// Incremento 24: Detección Automática de Juegos en Novedades y Cola Nocturna Inteligente BGG/Gemini
+builder.Services.Configure<NightlyCatalogingOptions>(builder.Configuration.GetSection("NightlyCataloging"));
+builder.Services.AddScoped<INewsGameExtractor, NewsGameExtractor>();
+builder.Services.AddScoped<INightlyCatalogingLogRepository, SqliteNightlyCatalogingLogRepository>();
+builder.Services.AddScoped<INightlyCatalogingService, NightlyCatalogingService>();
+builder.Services.AddHostedService<NightlyCatalogingHostedService>();
+
+// Incremento 17: Sistema Comunitario de Reporte de Errores y Bandeja de Moderación de Fichas
+builder.Services.AddScoped<IGameIssueReportRepository, SqliteGameIssueReportRepository>();
+builder.Services.AddScoped<IGameIssueReportService, GameIssueReportService>();
+
+// Incremento 18: Editor Editorial de Fichas de Catálogo y Carga de Imágenes para Moderadores
+builder.Services.AddScoped<IImageStorageService, PhysicalFileImageStorageService>();
+builder.Services.AddScoped<IGameEditLogRepository, SqliteGameEditLogRepository>();
+builder.Services.AddScoped<IGameEditorService, GameEditorService>();
+
+// Incremento 26: Especificación de Fundas (Sleeves) por Juego y Enlaces de Compra Contextuales
+builder.Services.AddSingleton<ISleeveStoreUrlResolver, SleeveStoreUrlResolver>();
+
+// Incremento 27: Monitorización y Verificación de Stock en Tiempo Real en Enlaces de Compra
+builder.Services.Configure<StoreStockOptions>(builder.Configuration.GetSection(StoreStockOptions.SectionName));
+builder.Services.AddSingleton<SimulationStoreStockClient>();
+builder.Services.AddHttpClient<HtmlSchemaStoreStockClient>();
+builder.Services.AddSingleton<IStoreStockClient>(sp => sp.GetRequiredService<SimulationStoreStockClient>());
+builder.Services.AddSingleton<IStoreStockClient>(sp => sp.GetRequiredService<HtmlSchemaStoreStockClient>());
+builder.Services.AddScoped<IStoreStockService, StoreStockService>();
+
 // Incremento 6: Sorteos, Novedades del Viernes, Q&A de Reglas y Tarjetas Sociales
 builder.Services.AddScoped<IGiveawayRepository, SqliteGiveawayRepository>();
 builder.Services.AddScoped<IGiveawayService, GiveawayService>();
@@ -85,6 +135,13 @@ builder.Services.AddScoped<IWeeklyReleaseService, WeeklyReleaseService>();
 builder.Services.AddScoped<IRuleQARepository, SqliteRuleQARepository>();
 builder.Services.AddScoped<IRuleQAService, RuleQAService>();
 builder.Services.AddScoped<ISocialCardService, SocialCardService>();
+
+// Incremento 28: Generador y Publicador Directo de Posts para Instagram en Moderación
+builder.Services.Configure<InstagramOptions>(builder.Configuration.GetSection(InstagramOptions.SectionName));
+builder.Services.AddHttpClient<IInstagramApiClient, InstagramApiClient>();
+builder.Services.AddScoped<IInstagramPostDraftRepository, SqliteInstagramPostDraftRepository>();
+builder.Services.AddScoped<IInstagramComposerService, InstagramComposerService>();
+builder.Services.AddScoped<IInstagramPublisherService, InstagramPublisherService>();
 
 // Incremento 8: Expansiones, Sinergias y Mezclador de Mesa
 builder.Services.AddScoped<IExpansionRepository, SqliteExpansionRepository>();
@@ -102,6 +159,44 @@ builder.Services.AddHostedService<CommunityNotificationDispatcherHostedService>(
 // Servicio de identidad en demo (Singleton para permitir alternancia interactiva de roles en la sesión)
 builder.Services.AddSingleton<ICurrentUserService, DefaultCurrentUserService>();
 builder.Services.AddScoped<IUserLibraryService, UserLibraryService>();
+builder.Services.AddScoped<IUserLibraryStatsService, UserLibraryStatsService>();
+builder.Services.AddScoped<IUserPreferenceService, SqliteUserPreferenceService>();
+builder.Services.AddScoped<IUserLocationService, UserLocationService>();
+
+// Incremento 13: Módulo de Síntesis con IA (Google Gemini / Heurística)
+builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection(GeminiOptions.SectionName));
+builder.Services.AddHttpClient<IAiGameSummaryService, GeminiGameSummaryService>();
+
+// Incremento 14: Búsqueda Quirúrgica y Enlace de YouTube en Tiempo Real
+builder.Services.Configure<YouTubeOptions>(builder.Configuration.GetSection(YouTubeOptions.SectionName));
+builder.Services.AddSingleton<IChannelFocusProvider, ChannelFocusProvider>();
+builder.Services.AddHttpClient<IYouTubeSearchService, YouTubeSearchService>();
+
+// Incremento 19: Directorio de Editoriales, Creadores y Tiendas con Foco Audiovisual
+builder.Services.AddScoped<IPublisherRepository, SqlitePublisherRepository>();
+builder.Services.AddScoped<ICreatorRepository, SqliteCreatorRepository>();
+builder.Services.AddScoped<IStoreRepository, SqliteStoreRepository>();
+builder.Services.AddScoped<IPublisherService, PublisherService>();
+builder.Services.AddScoped<ICreatorService, CreatorService>();
+builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<IChannelDirectoryProvider, ChannelDirectoryProvider>();
+
+// Incremento 20: Gestión de Usuarios, Permisos Granulares de Moderación y Auditoría para la Mesa Fundadora
+builder.Services.AddScoped<IUserRepository, SqliteUserRepository>();
+builder.Services.AddScoped<IAuditLogRepository, SqliteAuditLogRepository>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+
+// Incremento 21: Dashboard de Inicio Editorial y Eventos Lúdicos
+builder.Services.AddScoped<IBoardGameEventRepository, SqliteBoardGameEventRepository>();
+builder.Services.AddScoped<HomeDashboardService>();
+builder.Services.AddScoped<IHomeDashboardService, CachedHomeDashboardService>(sp =>
+    new CachedHomeDashboardService(
+        sp.GetRequiredService<HomeDashboardService>(),
+        sp.GetRequiredService<IMemoryCache>()));
+
+// Incremento 22: Módulo Completo de Grandes Eventos Lúdicos
+builder.Services.AddScoped<IBoardGameEventService, BoardGameEventService>();
 
 // Incremento 10: Observabilidad con Health Checks Oficiales de ASP.NET Core
 builder.Services.AddHealthChecks()
@@ -131,6 +226,9 @@ using (var scope = app.Services.CreateScope())
     await db.Database.EnsureCreatedAsync();
     await SqliteSchemaMigrator.EnsureSchemaUpToDateAsync(db);
     await CatalogSeeder.SeedAsync(db);
+    await DirectorySeeder.SeedDirectoryAsync(db);
+    await UserManagementSeeder.SeedUsersAndAuditAsync(db);
+    await BoardGameEventSeeder.SeedEventsAsync(db);
 }
 
 // Configure the HTTP request pipeline.
@@ -187,6 +285,16 @@ app.MapHealthChecks("/ready", new HealthCheckOptions
         };
         await context.Response.WriteAsync(JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true }));
     }
+});
+
+// Endpoint de entrega de tarjeta vectorial para Instagram (Incremento 28)
+app.MapGet("/api/instagram/card/{draftId:guid}.svg", async (Guid draftId, IInstagramPublisherService publisherService) =>
+{
+    var draft = await publisherService.GetDraftByIdAsync(draftId);
+    if (draft == null || string.IsNullOrWhiteSpace(draft.SvgContent))
+        return Results.NotFound();
+
+    return Results.Content(draft.SvgContent, "image/svg+xml; charset=utf-8");
 });
 
 app.MapStaticAssets();

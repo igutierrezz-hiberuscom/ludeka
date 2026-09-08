@@ -1,0 +1,325 @@
+@page "/tiendas"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@using Ludeka.Core.ValueObjects
+@using Ludeka.Web.Components.Shared
+@inject IStoreService StoreService
+@inject ICurrentUserService CurrentUserService
+@inject IUserLocationService UserLocationService
+
+<PageTitle>Directorio de Tiendas de Juegos de Mesa — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Cabecera con Buscador y Acción de Moderación *@
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+        <div class="space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold">
+                <span>🛒</span> Ecosistema Comercial &bull; Tiendas Lúdicas
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                Tiendas Especializadas
+            </h1>
+            <p class="text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+                Directorio de tiendas físicas y online recomendadas: dónde jugar, comprar tus juegos favoritos, disfrutar de programas de fidelidad y ver sus canales de YouTube.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanManageStoreLinks)))
+            {
+                <button type="button"
+                        @onclick="OpenCreateModal"
+                        class="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                    <span>➕</span> Nueva Tienda
+                </button>
+            }
+        </div>
+    </div>
+
+    @* Buscador reactivo y Filtros por Tipo de Tienda y País *@
+    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <div class="relative max-w-md w-full">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base">🔍</span>
+            <input type="text"
+                   @bind="_searchTerm"
+                   @bind:event="oninput"
+                   @bind:after="FilterStores"
+                   placeholder="Buscar tienda por nombre, ciudad o dirección..."
+                   class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors shadow-sm" />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            @* Filtro por País *@
+            <div class="relative">
+                <select @bind="_selectedCountry"
+                        @bind:after="FilterStores"
+                        class="px-3 py-2 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] shadow-sm">
+                    <option value="">🌍 Todos los países</option>
+                    @foreach (var c in CountryCatalog.GetAllCountries())
+                    {
+                        <option value="@c.Name">@c.FlagEmoji @c.Name</option>
+                    }
+                </select>
+            </div>
+
+            @* Filtro por Tipo *@
+            <div class="flex items-center bg-[var(--bg-surface-elevated)] p-1 rounded-2xl border border-[var(--border-subtle)] text-xs" role="group" aria-label="Filtro por tipo de tienda">
+                <button type="button"
+                        @onclick="() => SetTypeFilter(null)"
+                        class="px-3 py-1.5 rounded-xl font-bold transition-all @(!_selectedType.HasValue ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                    Todas
+                </button>
+                <button type="button"
+                        @onclick="() => SetTypeFilter(StoreType.Hybrid)"
+                        class="px-3 py-1.5 rounded-xl font-bold transition-all @(_selectedType == StoreType.Hybrid ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                    🏪 Híbrida
+                </button>
+                <button type="button"
+                        @onclick="() => SetTypeFilter(StoreType.PhysicalOnly)"
+                        class="px-3 py-1.5 rounded-xl font-bold transition-all @(_selectedType == StoreType.PhysicalOnly ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                    🏢 Física
+                </button>
+                <button type="button"
+                        @onclick="() => SetTypeFilter(StoreType.OnlineOnly)"
+                        class="px-3 py-1.5 rounded-xl font-bold transition-all @(_selectedType == StoreType.OnlineOnly ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                    🌐 Online
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @* Listado en Grid *@
+    @if (_loading)
+    {
+        <div class="py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
+            <span class="animate-spin text-xl">🎲</span>
+            <span>Cargando directorio de tiendas...</span>
+        </div>
+    }
+    else if (_stores.Count == 0)
+    {
+        <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3">
+            <span class="text-4xl block">🏪</span>
+            <h2 class="text-base font-bold text-[var(--text-primary)]">No se encontraron tiendas</h2>
+            <p class="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+                No hay resultados para los criterios seleccionados@(!string.IsNullOrWhiteSpace(_selectedCountry) ? $" en {_selectedCountry}" : "").
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @foreach (var store in _stores)
+            {
+                <div class="p-5 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all flex flex-col justify-between gap-4 group">
+                    <div class="space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                @if (!string.IsNullOrWhiteSpace(store.LogoUrl))
+                                {
+                                    <img src="@store.LogoUrl"
+                                         alt="Logo de @store.Name"
+                                         loading="lazy"
+                                         class="w-12 h-12 rounded-2xl object-contain bg-[var(--bg-surface-elevated)] p-1.5 border border-[var(--border-subtle)]"
+                                         onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                                }
+                                else
+                                {
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-lg text-emerald-400 font-black">
+                                        @store.Name[..Math.Min(2, store.Name.Length)].ToUpper()
+                                    </div>
+                                }
+                                <div>
+                                    <a href="/tiendas/@store.Slug"
+                                       class="font-black text-base text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] transition-colors line-clamp-1">
+                                        @store.Name
+                                    </a>
+                                    <div class="flex items-center gap-1.5 flex-wrap text-xs text-[var(--text-muted)] mt-0.5">
+                                        <span>@FormatStoreType(store.Type)</span>
+                                        @if (!string.IsNullOrWhiteSpace(store.City))
+                                        {
+                                            <span>&bull; @store.City</span>
+                                        }
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[0.68rem] font-bold text-[var(--text-primary)]">
+                                            @CountryCatalog.GetFlag(store.Country) @store.Country
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (store.HasLoyaltyProgram)
+                            {
+                                <span class="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 shrink-0" title="Programa de puntos o ventajas">
+                                    ⭐ Club
+                                </span>
+                            }
+                        </div>
+
+                        @if (store.ShippingCountries != null && store.ShippingCountries.Count > 0)
+                        {
+                            <div class="px-2.5 py-1 rounded-xl bg-[var(--bg-surface-elevated)]/60 border border-[var(--border-subtle)] text-[0.68rem] text-[var(--text-secondary)] flex items-center gap-1 flex-wrap">
+                                <span>🚚 Envíos:</span>
+                                <span class="font-medium">@string.Join(", ", store.ShippingCountries)</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(store.Address))
+                        {
+                            <p class="text-xs text-[var(--text-muted)] flex items-start gap-1">
+                                <span class="shrink-0">📍</span>
+                                <span class="line-clamp-1">@store.Address</span>
+                            </p>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(store.Description))
+                        {
+                            <p class="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                                @store.Description
+                            </p>
+                        }
+
+                        @if (store.SocialLinks != null && store.SocialLinks.Count > 0)
+                        {
+                            <SocialLinksList Links="@store.SocialLinks" />
+                        }
+                    </div>
+
+                    <div class="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                        <a href="/tiendas/@store.Slug" class="font-bold text-[var(--brand-primary)] hover:underline flex items-center gap-1">
+                            <span>Ver ficha y ofertas (@store.ActiveOffersCount)</span>
+                            <span>&rarr;</span>
+                        </a>
+
+                        @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanManageStoreLinks)))
+                        {
+                            <button type="button"
+                                    @onclick="() => OpenEditModal(store)"
+                                    class="text-[var(--text-muted)] hover:text-emerald-400 font-semibold text-[0.7rem] px-2 py-1 rounded bg-[var(--bg-surface-elevated)] transition-colors">
+                                ✏️ Editar
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@* Modal de Edición / Creación *@
+<StoreEditModal
+    IsOpen="@_isModalOpen"
+    StoreId="@_selectedId"
+    Name="@_modalName"
+    Type="@_modalType"
+    Country="@_modalCountry"
+    City="@_modalCity"
+    Address="@_modalAddress"
+    Description="@_modalDescription"
+    LogoUrl="@_modalLogoUrl"
+    WebsiteUrl="@_modalWebsiteUrl"
+    AffiliateCode="@_modalAffiliateCode"
+    HasLoyaltyProgram="@_modalHasLoyaltyProgram"
+    InitialSocialLinks="@_modalSocialLinks"
+    InitialShippingCountries="@_modalShippingCountries"
+    OnClose="() => _isModalOpen = false"
+    OnSaved="LoadStoresAsync" />
+
+@code {
+    private bool _loading = true;
+    private string _searchTerm = string.Empty;
+    private string _selectedCountry = string.Empty;
+    private StoreType? _selectedType;
+    private IReadOnlyList<StoreDto> _stores = [];
+    private bool _isModalOpen = false;
+    private Guid? _selectedId;
+    private string _modalName = string.Empty;
+    private StoreType _modalType = StoreType.Hybrid;
+    private string _modalCountry = "España";
+    private string? _modalCity;
+    private string? _modalAddress;
+    private string? _modalDescription;
+    private string? _modalLogoUrl;
+    private string? _modalWebsiteUrl;
+    private string? _modalAffiliateCode;
+    private bool _modalHasLoyaltyProgram;
+    private List<SocialNetworkLinkDto>? _modalSocialLinks;
+    private List<string>? _modalShippingCountries;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Si el usuario tiene país configurado, aplicarlo como filtro por defecto
+        var userLoc = await UserLocationService.GetUserLocationAsync();
+        if (!string.IsNullOrWhiteSpace(userLoc.EffectiveCountry))
+        {
+            _selectedCountry = userLoc.EffectiveCountry;
+        }
+
+        await LoadStoresAsync();
+    }
+
+    private async Task LoadStoresAsync()
+    {
+        _loading = true;
+        var countryFilter = string.IsNullOrWhiteSpace(_selectedCountry) ? null : _selectedCountry;
+        _stores = await StoreService.GetAllAsync(_searchTerm, _selectedType, countryFilter);
+        _loading = false;
+    }
+
+    private async Task FilterStores()
+    {
+        var countryFilter = string.IsNullOrWhiteSpace(_selectedCountry) ? null : _selectedCountry;
+        _stores = await StoreService.GetAllAsync(_searchTerm, _selectedType, countryFilter);
+    }
+
+    private async Task SetTypeFilter(StoreType? type)
+    {
+        _selectedType = type;
+        await FilterStores();
+    }
+
+    private string FormatStoreType(StoreType type) => type switch
+    {
+        StoreType.Hybrid => "🏪 Híbrida (Física y Online)",
+        StoreType.PhysicalOnly => "🏢 Solo Tienda Física",
+        StoreType.OnlineOnly => "🌐 Solo Tienda Online",
+        _ => "Tienda"
+    };
+
+    private void OpenCreateModal()
+    {
+        _selectedId = null;
+        _modalName = string.Empty;
+        _modalType = StoreType.Hybrid;
+        _modalCountry = string.IsNullOrWhiteSpace(_selectedCountry) ? "España" : _selectedCountry;
+        _modalCity = null;
+        _modalAddress = null;
+        _modalDescription = null;
+        _modalLogoUrl = null;
+        _modalWebsiteUrl = null;
+        _modalAffiliateCode = null;
+        _modalHasLoyaltyProgram = false;
+        _modalSocialLinks = new List<SocialNetworkLinkDto>();
+        _modalShippingCountries = null;
+        _isModalOpen = true;
+    }
+
+    private void OpenEditModal(StoreDto store)
+    {
+        _selectedId = store.Id;
+        _modalName = store.Name;
+        _modalType = store.Type;
+        _modalCountry = store.Country;
+        _modalCity = store.City;
+        _modalAddress = store.Address;
+        _modalDescription = store.Description;
+        _modalLogoUrl = store.LogoUrl;
+        _modalWebsiteUrl = store.WebsiteUrl;
+        _modalAffiliateCode = store.AffiliateCode;
+        _modalHasLoyaltyProgram = store.HasLoyaltyProgram;
+        _modalSocialLinks = store.SocialLinks.ToList();
+        _modalShippingCountries = store.ShippingCountries?.ToList();
+        _isModalOpen = true;
+    }
+}

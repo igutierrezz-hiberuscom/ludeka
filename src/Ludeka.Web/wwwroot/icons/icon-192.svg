@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Fondo redondeado con gradiente de marca -->
+  <rect width="192" height="192" rx="42" fill="#18181b"/>
+  <rect x="8" y="8" width="176" height="176" rx="36" fill="url(#brandGrad)"/>
+  <!-- Dado isométrico estilizado / Isotipo lúdico -->
+  <g transform="translate(96, 96)" filter="url(#shadow)">
+    <!-- Cara Superior -->
+    <path d="M0 -46 L40 -23 L0 0 L-40 -23 Z" fill="#ffffff" opacity="0.95"/>
+    <!-- Cara Izquierda -->
+    <path d="M-40 -23 L0 0 L0 46 L-40 23 Z" fill="#fef3c7"/>
+    <!-- Cara Derecha -->
+    <path d="M0 0 L40 -23 L40 23 L0 46 Z" fill="#fde68a"/>
+    <!-- Pips / Puntos del dado -->
+    <!-- Superior: 1 punto central -->
+    <circle cx="0" cy="-23" r="4.5" fill="#d97706"/>
+    <!-- Izquierda: 2 puntos -->
+    <circle cx="-20" cy="5" r="4" fill="#b45309"/>
+    <circle cx="-20" cy="23" r="4" fill="#b45309"/>
+    <!-- Derecha: 3 puntos diagonales -->
+    <circle cx="15" cy="5" r="4" fill="#b45309"/>
+    <circle cx="20" cy="14" r="4" fill="#b45309"/>
+    <circle cx="25" cy="23" r="4" fill="#b45309"/>
+  </g>
+</svg>

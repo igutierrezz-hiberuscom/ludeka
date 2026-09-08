@@ -1,0 +1,27 @@
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+
+@if (Links != null && Links.Count > 0)
+{
+    <div class="flex items-center gap-2 flex-wrap @CustomClass">
+        @foreach (var link in Links)
+        {
+            <a href="@link.Url"
+               target="_blank"
+               rel="noopener noreferrer"
+               title="@(string.IsNullOrWhiteSpace(link.Title) ? link.PlatformName : link.Title)"
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:border-[var(--brand-primary)]/40 transition-all shadow-sm">
+                <span>@link.PlatformIcon</span>
+                <span>@(link.Handle ?? link.PlatformName)</span>
+            </a>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public IReadOnlyList<SocialNetworkLinkDto>? Links { get; set; }
+
+    [Parameter]
+    public string? CustomClass { get; set; }
+}

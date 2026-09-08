@@ -1,0 +1,369 @@
+@page "/admin/auditoria"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@inject IAuditService AuditService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>Bitácora de Auditoría Editorial | Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-6">
+    @* Verificación de Rol *@
+    @if (!CurrentUserService.IsFoundingTeam)
+    {
+        <div class="max-w-md mx-auto py-16 text-center space-y-4">
+            <span class="text-5xl block">📜</span>
+            <h1 class="text-2xl font-bold text-[var(--text-primary)]">Acceso Exclusivo Mesa Fundadora</h1>
+            <p class="text-sm text-[var(--text-secondary)]">
+                El registro histórico de auditoría editorial contiene información de gobernanza reservada a la Mesa Fundadora.
+            </p>
+            <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
+                <p class="mb-2">
+                    💡 Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
+                </p>
+                <button type="button"
+                        @onclick="SwitchToFounder"
+                        class="px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity">
+                    Activar Modo Fundador Ahora
+                </button>
+            </div>
+            <a href="/" class="inline-block text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] underline">
+                &larr; Volver al Catálogo
+            </a>
+        </div>
+    }
+    else
+    {
+        @* Cabecera *@
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-2xl">📜</span>
+                    <h1 class="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+                        Bitácora & Registro de Auditoría Editorial
+                    </h1>
+                </div>
+                <p class="text-xs text-[var(--text-muted)]">
+                    Trazabilidad indeleble de mutaciones en fichas, editoriales, autores, tiendas, moderación y privilegios.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+                <a href="/admin/usuarios"
+                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
+                    <span>👥</span>
+                    <span>Gestión de Usuarios</span>
+                </a>
+            </div>
+        </div>
+
+        @* Barra de Filtros Multicriterio *@
+        <div class="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-3 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                @* Filtro por Usuario *@
+                <div class="space-y-1">
+                    <label class="font-bold text-[var(--text-secondary)]">Usuario / Moderador</label>
+                    <input type="text"
+                           @bind="_filterUserId"
+                           placeholder="ID o alias..."
+                           class="w-full px-3 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] text-xs" />
+                </div>
+
+                @* Filtro por Entidad *@
+                <div class="space-y-1">
+                    <label class="font-bold text-[var(--text-secondary)]">Tipo de Entidad</label>
+                    <select @bind="_filterEntityType"
+                            class="w-full px-3 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none text-xs">
+                        <option value="">Todas las Entidades</option>
+                        <option value="Game">🎲 Juego</option>
+                        <option value="Publisher">🏢 Editorial</option>
+                        <option value="Creator">✍️ Autor / Diseñador</option>
+                        <option value="Store">🏪 Tienda</option>
+                        <option value="Media">🎬 Multimedia</option>
+                        <option value="Report">🚩 Reporte Comunitario</option>
+                        <option value="User">👥 Usuario / Permisos</option>
+                    </select>
+                </div>
+
+                @* Filtro por Acción *@
+                <div class="space-y-1">
+                    <label class="font-bold text-[var(--text-secondary)]">Tipo de Acción</label>
+                    <select @bind="_filterAction"
+                            class="w-full px-3 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none text-xs">
+                        <option value="">Todas las Acciones</option>
+                        <option value="Created">➕ Creación</option>
+                        <option value="Updated">✏️ Modificación</option>
+                        <option value="Deleted">🗑️ Eliminación</option>
+                        <option value="StatusChanged">🔄 Cambio de Estado</option>
+                        <option value="RoleChanged">👑 Cambio de Rol</option>
+                        <option value="PermissionsChanged">🛡️ Permisos Granulares</option>
+                    </select>
+                </div>
+
+                @* Botones de Acción *@
+                <div class="flex items-end gap-2">
+                    <button type="button"
+                            @onclick="ApplyFilters"
+                            class="flex-1 px-4 py-2 rounded-xl bg-[var(--brand-primary)] text-white font-bold hover:opacity-90 transition-opacity shadow-sm flex items-center justify-center gap-1.5">
+                        <span>🔍</span> <span>Filtrar</span>
+                    </button>
+                    <button type="button"
+                            @onclick="ClearFilters"
+                            class="px-3 py-2 rounded-xl bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold border border-[var(--border-subtle)] transition-colors"
+                            title="Limpiar filtros">
+                        🧹
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @* Listado de Auditoría *@
+        @if (_isLoading)
+        {
+            <div class="p-12 text-center text-xs text-[var(--text-muted)] space-y-2">
+                <span class="animate-spin text-2xl block">⏳</span>
+                <span>Cargando bitácora de auditoría...</span>
+            </div>
+        }
+        else if (_pageData.Items.Count == 0)
+        {
+            <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-2 text-xs text-[var(--text-muted)]">
+                <span class="text-3xl block">📜</span>
+                <p class="font-bold text-[var(--text-secondary)]">No se encontraron entradas de auditoría</p>
+                <p>No hay registros coincidentes con los filtros seleccionados.</p>
+            </div>
+        }
+        else
+        {
+            <div class="space-y-3">
+                <div class="flex items-center justify-between text-xs text-[var(--text-muted)] px-1">
+                    <span>Total de registros: <strong class="text-[var(--text-primary)]">@_pageData.TotalCount</strong></span>
+                    <span>Página @_pageData.Page de @_pageData.TotalPages</span>
+                </div>
+
+                <div class="space-y-2">
+                    @foreach (var entry in _pageData.Items)
+                    {
+                        var isExpanded = _expandedEntryIds.Contains(entry.Id);
+                        <div class="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all overflow-hidden text-xs shadow-sm">
+                            @* Fila Principal *@
+                            <div class="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer select-none"
+                                 @onclick="() => ToggleExpand(entry.Id)">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl shrink-0 mt-0.5">@GetEntityIcon(entry.EntityType)</span>
+                                    <div class="space-y-1">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="font-bold text-sm text-[var(--text-primary)]">@entry.EntityName</span>
+                                            <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-bold @GetActionBadgeStyle(entry.Action)">
+                                                @entry.ActionDisplayName
+                                            </span>
+                                            <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                                                @entry.EntityTypeDisplayName
+                                            </span>
+                                        </div>
+                                        <p class="text-[var(--text-secondary)]">
+                                            @entry.Summary
+                                        </p>
+                                        <div class="text-[0.68rem] text-[var(--text-muted)] flex flex-wrap items-center gap-2">
+                                            <span>Por: <strong class="text-[var(--text-primary)]">@entry.UserName</strong> (<code>@entry.UserId</code>)</span>
+                                            <span>•</span>
+                                            <span>@entry.Timestamp.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
+                                            @if (entry.Changes.Count > 0)
+                                            {
+                                                <span>•</span>
+                                                <span class="text-[var(--brand-primary)] font-semibold">@entry.Changes.Count cambios registrados</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 self-end md:self-center shrink-0 text-[var(--text-muted)]">
+                                    <span class="text-[0.7rem] underline">@(isExpanded ? "Ocultar detalle" : "Ver detalle")</span>
+                                    <span>@(isExpanded ? "▲" : "▼")</span>
+                                </div>
+                            </div>
+
+                            @* Desglose Estructurado (Diff) *@
+                            @if (isExpanded)
+                            {
+                                <div class="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)]/50 space-y-3 animate-fade-in">
+                                    @if (entry.Changes.Count == 0)
+                                    {
+                                        <p class="text-[var(--text-muted)] italic">No hay desglose de campos específicos para esta operación.</p>
+                                    }
+                                    else
+                                    {
+                                        <div class="grid grid-cols-1 gap-2">
+                                            @foreach (var change in entry.Changes)
+                                            {
+                                                <div class="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                    <div class="font-bold text-[var(--text-secondary)] sm:w-1/4">
+                                                        @change.FieldName
+                                                    </div>
+                                                    <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                        <div class="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300">
+                                                            <span class="text-[0.6rem] uppercase tracking-wider block opacity-70 font-bold mb-0.5">Antes</span>
+                                                            <span class="line-through font-mono text-[0.7rem]">@(string.IsNullOrWhiteSpace(change.OldValue) ? "(vacío)" : change.OldValue)</span>
+                                                        </div>
+                                                        <div class="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
+                                                            <span class="text-[0.6rem] uppercase tracking-wider block opacity-70 font-bold mb-0.5">Después</span>
+                                                            <span class="font-mono font-bold text-[0.7rem]">@(string.IsNullOrWhiteSpace(change.NewValue) ? "(vacío)" : change.NewValue)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* Paginador *@
+                @if (_pageData.TotalPages > 1)
+                {
+                    <div class="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)]">
+                        <button type="button"
+                                @onclick="PreviousPage"
+                                disabled="@(_currentPage <= 1)"
+                                class="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-40 transition-opacity font-semibold">
+                            &larr; Anterior
+                        </button>
+
+                        <span class="text-xs font-semibold text-[var(--text-muted)]">
+                            Página @_currentPage de @_pageData.TotalPages
+                        </span>
+
+                        <button type="button"
+                                @onclick="NextPage"
+                                disabled="@(_currentPage >= _pageData.TotalPages)"
+                                class="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-40 transition-opacity font-semibold">
+                            Siguiente &rarr;
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private AuditLogPageDto _pageData = new([], 0, 1, 20, 1);
+    private bool _isLoading = true;
+    private int _currentPage = 1;
+    private const int PageSize = 20;
+
+    private string _filterUserId = string.Empty;
+    private string _filterEntityType = string.Empty;
+    private string _filterAction = string.Empty;
+
+    private readonly HashSet<Guid> _expandedEntryIds = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLogs();
+    }
+
+    private async Task LoadLogs()
+    {
+        try
+        {
+            _isLoading = true;
+            if (CurrentUserService.IsFoundingTeam)
+            {
+                AuditEntityType? entityType = null;
+                if (Enum.TryParse<AuditEntityType>(_filterEntityType, out var et)) entityType = et;
+
+                AuditAction? action = null;
+                if (Enum.TryParse<AuditAction>(_filterAction, out var ac)) action = ac;
+
+                var filter = new AuditLogFilterDto(
+                    UserId: string.IsNullOrWhiteSpace(_filterUserId) ? null : _filterUserId.Trim(),
+                    EntityType: entityType,
+                    Action: action,
+                    Page: _currentPage,
+                    PageSize: PageSize
+                );
+
+                _pageData = await AuditService.GetAuditLogsAsync(filter);
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task ApplyFilters()
+    {
+        _currentPage = 1;
+        await LoadLogs();
+    }
+
+    private async Task ClearFilters()
+    {
+        _filterUserId = string.Empty;
+        _filterEntityType = string.Empty;
+        _filterAction = string.Empty;
+        _currentPage = 1;
+        await LoadLogs();
+    }
+
+    private async Task PreviousPage()
+    {
+        if (_currentPage > 1)
+        {
+            _currentPage--;
+            await LoadLogs();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (_currentPage < _pageData.TotalPages)
+        {
+            _currentPage++;
+            await LoadLogs();
+        }
+    }
+
+    private void ToggleExpand(Guid id)
+    {
+        if (_expandedEntryIds.Contains(id))
+            _expandedEntryIds.Remove(id);
+        else
+            _expandedEntryIds.Add(id);
+    }
+
+    private void SwitchToFounder()
+    {
+        CurrentUserService.SwitchRole("FoundingTeam");
+        Navigation.NavigateTo("/admin/auditoria", forceLoad: true);
+    }
+
+    private static string GetEntityIcon(AuditEntityType type) => type switch
+    {
+        AuditEntityType.Game => "🎲",
+        AuditEntityType.Publisher => "🏢",
+        AuditEntityType.Creator => "✍️",
+        AuditEntityType.Store => "🏪",
+        AuditEntityType.Media => "🎬",
+        AuditEntityType.Report => "🚩",
+        AuditEntityType.User => "👥",
+        _ => "📄"
+    };
+
+    private static string GetActionBadgeStyle(AuditAction action) => action switch
+    {
+        AuditAction.Created => "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+        AuditAction.Updated => "bg-amber-500/15 text-amber-300 border border-amber-500/30",
+        AuditAction.Deleted => "bg-rose-500/15 text-rose-300 border border-rose-500/30",
+        AuditAction.StatusChanged => "bg-sky-500/15 text-sky-300 border border-sky-500/30",
+        AuditAction.RoleChanged => "bg-purple-500/15 text-purple-300 border border-purple-500/30",
+        AuditAction.PermissionsChanged => "bg-indigo-500/15 text-indigo-300 border border-indigo-500/30",
+        _ => "bg-slate-500/15 text-slate-300 border border-slate-500/30"
+    };
+}

@@ -1,0 +1,193 @@
+@page "/creadores/{Slug}"
+@page "/autores/{Slug}"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Web.Components.Shared
+@inject ICreatorService CreatorService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>@(_creator != null ? $"{_creator.Name} — Obras y Ficha de Autor" : "Creador") — Ludeka</PageTitle>
+
+@if (_loading)
+{
+    <div class="container-ludeka py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
+        <span class="animate-spin text-xl">🎲</span>
+        <span>Cargando ficha del autor...</span>
+    </div>
+}
+else if (_creator == null)
+{
+    <div class="container-ludeka py-16 text-center space-y-4">
+        <span class="text-4xl block">🔍</span>
+        <h1 class="text-2xl font-black text-[var(--text-primary)]">Creador no encontrado</h1>
+        <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+            No encontramos ningún autor o creador registrado con el slug especificado.
+        </p>
+        <a href="/creadores" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--brand-primary)] text-white text-xs font-bold">
+            &larr; Volver al Directorio
+        </a>
+    </div>
+}
+else
+{
+    <div class="container-ludeka py-8 space-y-8">
+        @* Navegación y Acciones Superiores *@
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+            <a href="/creadores" class="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors">
+                &larr; Volver al Directorio de Creadores
+            </a>
+
+            @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanManageCreators)))
+            {
+                <button type="button"
+                        @onclick="() => _isEditModalOpen = true"
+                        class="px-3.5 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                    <span>✏️</span> Editar Creador
+                </button>
+            }
+        </div>
+
+        @* Hero de Creador *@
+        <div class="p-6 sm:p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                @if (!string.IsNullOrWhiteSpace(_creator.AvatarUrl))
+                {
+                    <img src="@_creator.AvatarUrl"
+                         alt="Avatar de @_creator.Name"
+                         class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover bg-[var(--bg-surface-elevated)] border-2 border-[var(--border-subtle)] shrink-0"
+                         onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                }
+                else
+                {
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-3xl text-purple-400 font-black shrink-0">
+                        @_creator.Name[..Math.Min(2, _creator.Name.Length)].ToUpper()
+                    </div>
+                }
+
+                <div class="space-y-2 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="px-2.5 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 text-xs font-black">
+                            ✍️ Autor / Diseñador
+                        </span>
+                        @if (!string.IsNullOrWhiteSpace(_creator.Nationality))
+                        {
+                            <span class="text-xs font-bold text-[var(--text-secondary)]">
+                                🌍 @_creator.Nationality
+                            </span>
+                        }
+                    </div>
+
+                    <h1 class="text-2xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                        @_creator.Name
+                    </h1>
+
+                    <div class="flex items-center gap-4 flex-wrap pt-1 text-xs">
+                        @if (!string.IsNullOrWhiteSpace(_creator.WebsiteUrl))
+                        {
+                            <a href="@_creator.WebsiteUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="font-semibold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1">
+                                <span>🌐</span> Web oficial &nearr;
+                            </a>
+                        }
+                        @if (_creator.BggPersonId.HasValue)
+                        {
+                            <a href="@($"https://boardgamegeek.com/boardgamedesigner/{_creator.BggPersonId}")"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="font-semibold text-amber-400 hover:underline inline-flex items-center gap-1">
+                                <span>🎲</span> Perfil en BoardGameGeek &nearr;
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_creator.Bio))
+            {
+                <div class="pt-4 border-t border-[var(--border-subtle)] text-sm text-[var(--text-secondary)] leading-relaxed space-y-2">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Biografía y Trayectoria</h2>
+                    <p>@((MarkupString)_creator.Bio.Replace("\n", "<br />"))</p>
+                </div>
+            }
+
+            @* Redes y Foco Audiovisual *@
+            @if (_creator.SocialLinks != null && _creator.SocialLinks.Count > 0)
+            {
+                <div class="pt-4 border-t border-[var(--border-subtle)] space-y-2">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Redes sociales y canales</h2>
+                    <SocialLinksList Links="@_creator.SocialLinks" />
+                </div>
+            }
+        </div>
+
+        @* Obras diseñadas en Ludeka *@
+        <div class="space-y-4">
+            <div class="flex items-baseline justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🎲</span>
+                    <h2 class="text-xl font-black text-[var(--text-primary)]">
+                        Obras de @_creator.Name en Ludeka
+                    </h2>
+                </div>
+                <span class="text-xs font-bold text-[var(--text-secondary)]">
+                    @_creator.Games.Count @(_creator.Games.Count == 1 ? "título en catálogo" : "títulos en catálogo")
+                </span>
+            </div>
+
+            @if (_creator.Games.Count == 0)
+            {
+                <div class="p-8 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-muted)]">
+                    Actualmente no hay títulos vinculados directamente a este autor en el catálogo activo de Ludeka.
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    @foreach (var game in _creator.Games)
+                    {
+                        <GameCard Game="@game" />
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Modal de Edición *@
+    <CreatorEditModal
+        IsOpen="@_isEditModalOpen"
+        CreatorId="@_creator.Id"
+        Name="@_creator.Name"
+        Nationality="@_creator.Nationality"
+        Bio="@_creator.Bio"
+        AvatarUrl="@_creator.AvatarUrl"
+        BggPersonId="@_creator.BggPersonId"
+        WebsiteUrl="@_creator.WebsiteUrl"
+        InitialSocialLinks="@(_creator.SocialLinks?.ToList() ?? new())"
+        OnClose="() => _isEditModalOpen = false"
+        OnSaved="LoadCreatorAsync" />
+}
+
+@code {
+    [Parameter]
+    public string Slug { get; set; } = string.Empty;
+
+    private bool _loading = true;
+    private CreatorDetailDto? _creator;
+    private bool _isEditModalOpen = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadCreatorAsync();
+    }
+
+    private async Task LoadCreatorAsync()
+    {
+        _loading = true;
+        _creator = await CreatorService.GetBySlugAsync(Slug);
+        _loading = false;
+    }
+}

@@ -17,17 +17,20 @@ public class BggCatalogQueueService : IBggCatalogQueueService
     private readonly IBggClient _bggClient;
     private readonly IGameRepository _gameRepo;
     private readonly IUserCollectionRepository _collectionRepo;
+    private readonly IAiGameSummaryService? _aiSummaryService;
 
     public BggCatalogQueueService(
         IPendingBggImportRepository pendingRepo,
         IBggClient bggClient,
         IGameRepository gameRepo,
-        IUserCollectionRepository collectionRepo)
+        IUserCollectionRepository collectionRepo,
+        IAiGameSummaryService? aiSummaryService = null)
     {
         _pendingRepo = pendingRepo;
         _bggClient = bggClient;
         _gameRepo = gameRepo;
         _collectionRepo = collectionRepo;
+        _aiSummaryService = aiSummaryService;
     }
 
     public async Task<IReadOnlyList<CatalogQueueItemDto>> GetTopPendingQueueAsync(int limit = 50, CancellationToken ct = default)
@@ -43,7 +46,9 @@ public class BggCatalogQueueService : IBggCatalogQueueService
             i.Status,
             i.CreatedAt,
             i.ProcessedAt,
-            i.ErrorMessage
+            i.ErrorMessage,
+            i.Origin,
+            i.ExtractedTitle
         )).ToList();
     }
 
@@ -82,12 +87,52 @@ public class BggCatalogQueueService : IBggCatalogQueueService
                 Guid gameId;
                 if (existingGame == null)
                 {
+                    if (_aiSummaryService != null)
+                    {
+                        try
+                        {
+                            var summaryDto = await _aiSummaryService.GenerateSummaryAsync(fetchedGame, ct);
+                            fetchedGame.SetAiSummary(new AiGameSummary(
+                                summaryDto.GeneralVerdict,
+                                summaryDto.ScalabilitySummary,
+                                summaryDto.AgeSummary,
+                                summaryDto.FootprintSummary,
+                                summaryDto.Model,
+                                summaryDto.GeneratedAt ?? DateTime.UtcNow
+                            ));
+                        }
+                        catch
+                        {
+                            // Salvaguarda para no bloquear la importación de catálogo si falla la síntesis
+                        }
+                    }
+
                     await _gameRepo.AddRangeAsync([fetchedGame], ct);
                     gameId = fetchedGame.Id;
                 }
                 else
                 {
                     gameId = existingGame.Id;
+                    if (existingGame.AiSummary == null && _aiSummaryService != null)
+                    {
+                        try
+                        {
+                            var summaryDto = await _aiSummaryService.GenerateSummaryAsync(existingGame, ct);
+                            existingGame.SetAiSummary(new AiGameSummary(
+                                summaryDto.GeneralVerdict,
+                                summaryDto.ScalabilitySummary,
+                                summaryDto.AgeSummary,
+                                summaryDto.FootprintSummary,
+                                summaryDto.Model,
+                                summaryDto.GeneratedAt ?? DateTime.UtcNow
+                            ));
+                            await _gameRepo.UpdateAsync(existingGame, ct);
+                        }
+                        catch
+                        {
+                            // Salvaguarda
+                        }
+                    }
                 }
 
                 // Promoción atómica de todas las colecciones de usuario en espera

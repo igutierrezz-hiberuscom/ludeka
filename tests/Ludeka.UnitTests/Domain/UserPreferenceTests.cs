@@ -1,0 +1,65 @@
+using System;
+using Ludeka.Core.Entities;
+using Xunit;
+
+namespace Ludeka.UnitTests.Domain;
+
+public class UserPreferenceTests
+{
+    [Fact]
+    public void Constructor_ShouldInitializeWithNormalizedTheme_WhenValid()
+    {
+        // Arrange & Act
+        var pref = new UserPreference("usuario-1", "wood");
+
+        // Assert
+        Assert.Equal("usuario-1", pref.UserId);
+        Assert.Equal("wood", pref.PreferredTheme);
+        Assert.True((DateTime.UtcNow - pref.UpdatedAt).TotalSeconds < 5);
+    }
+
+    [Theory]
+    [InlineData("editorial", "editorial")]
+    [InlineData("wood", "wood")]
+    [InlineData("tabletop", "tabletop")]
+    [InlineData("midnight", "midnight")]
+    [InlineData("charcoal", "charcoal")]
+    [InlineData("WOOD", "wood")]
+    [InlineData("  Editorial  ", "editorial")]
+    [InlineData("desconocido", "charcoal")]
+    [InlineData(null, "charcoal")]
+    [InlineData("", "charcoal")]
+    public void NormalizeTheme_ShouldReturnExpectedNormalizedTheme(string? input, string expected)
+    {
+        // Act
+        var result = UserPreference.NormalizeTheme(input);
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void SetTheme_ShouldUpdateThemeAndTimestamp()
+    {
+        // Arrange
+        var pref = new UserPreference("usuario-1", "charcoal");
+        var originalTime = pref.UpdatedAt;
+
+        // Act
+        pref.SetTheme("wood");
+
+        // Assert
+        Assert.Equal("wood", pref.PreferredTheme);
+        Assert.True(pref.UpdatedAt >= originalTime);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Constructor_ShouldThrowArgumentException_WhenUserIdIsInvalid(string? invalidUserId)
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => new UserPreference(invalidUserId!, "editorial"));
+    }
+}

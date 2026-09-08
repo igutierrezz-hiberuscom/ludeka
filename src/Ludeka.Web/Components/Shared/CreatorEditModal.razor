@@ -1,0 +1,304 @@
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@inject ICreatorService CreatorService
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="creator-modal-title">
+        <div class="w-full max-w-xl max-h-[90vh] flex flex-col rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
+             @onclick:stopPropagation="true">
+
+            @* Cabecera *@
+            <div class="p-5 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-surface-elevated)]/50">
+                <div>
+                    <span class="px-2 py-0.5 rounded text-[0.65rem] font-black uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/30 block mb-1">
+                        🛡️ Moderación de Creadores
+                    </span>
+                    <h2 id="creator-modal-title" class="text-lg font-black text-[var(--text-primary)]">
+                        @(IsNew ? "➕ Nuevo Creador / Autor" : $"✏️ Editar Creador: {Name}")
+                    </h2>
+                </div>
+                <button type="button"
+                        @onclick="Close"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--bg-surface-elevated)] transition-colors">
+                    &times;
+                </button>
+            </div>
+
+            @* Cuerpo con Scroll *@
+            <div class="p-5 space-y-4 overflow-y-auto flex-1 text-xs">
+                @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                {
+                    <div class="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 font-medium">
+                        @_errorMessage
+                    </div>
+                }
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="space-y-1 sm:col-span-2">
+                        <label class="font-bold text-[var(--text-secondary)]">Nombre Completo del Creador / Autor *</label>
+                        <input type="text"
+                               @bind="Name"
+                               placeholder="Ej. Elizabeth Hargrave, Klaus Teuber..."
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-bold text-[var(--text-secondary)]">Nacionalidad</label>
+                        <input type="text"
+                               @bind="Nationality"
+                               placeholder="Ej. Estados Unidos, Alemania..."
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-bold text-[var(--text-secondary)]">ID de Persona en BGG (opcional)</label>
+                        <input type="number"
+                               @bind="BggPersonId"
+                               placeholder="Ej. 104523"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+
+                    <div class="space-y-1 sm:col-span-2">
+                        <label class="font-bold text-[var(--text-secondary)]">Sitio Web / Blog Personal</label>
+                        <input type="url"
+                               @bind="WebsiteUrl"
+                               placeholder="https://elizabethhargrave.com"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+
+                    <div class="space-y-1 sm:col-span-2">
+                        <label class="font-bold text-[var(--text-secondary)]">URL de Fotografía / Avatar</label>
+                        <input type="text"
+                               @bind="AvatarUrl"
+                               placeholder="/images/creators/avatar.png o URL externa"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+
+                    <div class="space-y-1 sm:col-span-2">
+                        <label class="font-bold text-[var(--text-secondary)]">Biografía y Trayectoria</label>
+                        <textarea @bind="Bio"
+                                  rows="3"
+                                  placeholder="Trayectoria profesional, reconocimientos y estilo de diseño..."
+                                  class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]"></textarea>
+                    </div>
+                </div>
+
+                @* Canales Oficiales y Redes Sociales *@
+                <div class="pt-3 border-t border-[var(--border-subtle)] space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-[var(--text-primary)]">Redes y Foco Audiovisual (YouTube)</span>
+                        <button type="button"
+                                @onclick="AddSocialLink"
+                                class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-[var(--border-subtle)] text-[var(--text-primary)] font-bold text-[0.7rem] transition-colors border border-[var(--border-subtle)] flex items-center gap-1">
+                            <span>➕</span> Agregar Red
+                        </button>
+                    </div>
+
+                    @foreach (var (link, index) in _socialLinks.Select((l, i) => (l, i)))
+                    {
+                        <div class="p-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex flex-col sm:flex-row items-center gap-2">
+                            <select @bind="link.Platform"
+                                    class="w-full sm:w-36 px-2 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs">
+                                <option value="@SocialPlatform.YouTube">▶️ YouTube</option>
+                                <option value="@SocialPlatform.Twitter">🐦 X / Twitter</option>
+                                <option value="@SocialPlatform.Instagram">📷 Instagram</option>
+                                <option value="@SocialPlatform.BoardGameGeek">🎲 BGG</option>
+                                <option value="@SocialPlatform.Website">🌐 Web</option>
+                                <option value="@SocialPlatform.Discord">💬 Discord</option>
+                            </select>
+
+                            <input type="text"
+                                   @bind="link.Url"
+                                   placeholder="URL del perfil"
+                                   class="w-full flex-1 px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs" />
+
+                            <input type="text"
+                                   @bind="link.Handle"
+                                   placeholder="Handle (ej. @@handle)"
+                                   class="w-full sm:w-32 px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs" />
+
+                            <button type="button"
+                                    @onclick="() => RemoveSocialLink(index)"
+                                    class="text-rose-400 hover:text-rose-300 px-2 py-1 rounded hover:bg-rose-500/10 transition-colors"
+                                    title="Eliminar red">
+                                🗑️
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Pie *@
+            <div class="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)]/30 flex items-center justify-end gap-2 shrink-0">
+                <button type="button"
+                        @onclick="Close"
+                        class="px-4 py-2 rounded-xl text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                    Cancelar
+                </button>
+                <button type="button"
+                        @onclick="HandleSave"
+                        disabled="@_isSaving"
+                        class="px-5 py-2 rounded-xl text-xs font-black bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50">
+                    @if (_isSaving)
+                    {
+                        <span class="animate-spin">⚙️</span>
+                        <span>Guardando...</span>
+                    }
+                    else
+                    {
+                        <span>💾</span>
+                        <span>@(IsNew ? "Crear Creador" : "Guardar Cambios")</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public Guid? CreatorId { get; set; }
+
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? Nationality { get; set; }
+
+    [Parameter]
+    public string? Bio { get; set; }
+
+    [Parameter]
+    public string? AvatarUrl { get; set; }
+
+    [Parameter]
+    public int? BggPersonId { get; set; }
+
+    [Parameter]
+    public string? WebsiteUrl { get; set; }
+
+    [Parameter]
+    public List<SocialNetworkLinkDto>? InitialSocialLinks { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback OnSaved { get; set; }
+
+    private bool IsNew => !CreatorId.HasValue;
+    private bool _isSaving = false;
+    private string? _errorMessage;
+    private List<SocialLinkItem> _socialLinks = [];
+
+    private class SocialLinkItem
+    {
+        public SocialPlatform Platform { get; set; } = SocialPlatform.YouTube;
+        public string Url { get; set; } = string.Empty;
+        public string? Handle { get; set; }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (IsOpen)
+        {
+            _errorMessage = null;
+            _socialLinks = InitialSocialLinks?.Select(l => new SocialLinkItem
+            {
+                Platform = l.Platform,
+                Url = l.Url,
+                Handle = l.Handle
+            }).ToList() ?? [];
+
+            if (IsNew && _socialLinks.Count == 0)
+            {
+                _socialLinks.Add(new SocialLinkItem { Platform = SocialPlatform.YouTube, Url = "", Handle = "" });
+            }
+        }
+    }
+
+    private void AddSocialLink()
+    {
+        _socialLinks.Add(new SocialLinkItem { Platform = SocialPlatform.YouTube, Url = "", Handle = "" });
+    }
+
+    private void RemoveSocialLink(int index)
+    {
+        if (index >= 0 && index < _socialLinks.Count)
+        {
+            _socialLinks.RemoveAt(index);
+        }
+    }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task HandleSave()
+    {
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            _errorMessage = "El nombre del creador es obligatorio.";
+            return;
+        }
+
+        _isSaving = true;
+        _errorMessage = null;
+
+        try
+        {
+            var mappedLinks = _socialLinks
+                .Where(l => !string.IsNullOrWhiteSpace(l.Url))
+                .Select(l => new SocialNetworkLinkDto(l.Platform, l.Url.Trim(), l.Handle?.Trim()))
+                .ToList();
+
+            if (IsNew)
+            {
+                var createDto = new CreateCreatorDto(
+                    Name: Name.Trim(),
+                    Slug: null,
+                    Nationality: Nationality,
+                    Bio: Bio,
+                    AvatarUrl: AvatarUrl,
+                    BggPersonId: BggPersonId,
+                    WebsiteUrl: WebsiteUrl,
+                    SocialLinks: mappedLinks
+                );
+                await CreatorService.CreateAsync(createDto);
+            }
+            else
+            {
+                var updateDto = new UpdateCreatorDto(
+                    Name: Name.Trim(),
+                    Nationality: Nationality,
+                    Bio: Bio,
+                    AvatarUrl: AvatarUrl,
+                    BggPersonId: BggPersonId,
+                    WebsiteUrl: WebsiteUrl,
+                    SocialLinks: mappedLinks
+                );
+                await CreatorService.UpdateAsync(CreatorId!.Value, updateDto);
+            }
+
+            await OnSaved.InvokeAsync();
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al guardar: {ex.Message}";
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+}

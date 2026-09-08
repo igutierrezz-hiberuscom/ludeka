@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Ludeka.Core.Entities;
@@ -70,5 +70,7 @@ public record AiGameSummaryDto(
     string ScalabilitySummary,
     string AgeSummary,
     string FootprintSummary,
-    string GeneralVerdict
+    string GeneralVerdict,
+    string Model = "Heurística Editorial",
+    DateTime? GeneratedAt = null
 );

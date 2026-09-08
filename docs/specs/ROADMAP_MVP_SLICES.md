@@ -156,6 +156,117 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
+## Incremento 17: Sistema Comunitario de Reporte de Errores y Bandeja de Moderación de Fichas
+- **Identificador SDD:** `change-17-community-error-reports`
+- **Objetivo Principal:** Permitir a cualquier jugador reportar incidencias en fichas (imágenes incorrectas, datos erróneos de jugadores/duración/edad, enlaces caídos) y disponer de una bandeja de entrada en el panel de moderación para su gestión y resolución.
+- **Estado:** ✅ **Completado y Archivado** (339 tests en verde al 100%).
+- **Documento:** [`inc-17-community-error-reports.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-17-community-error-reports.md)
+
+---
+
+## Incremento 18: Editor Editorial de Fichas de Catálogo y Carga de Imágenes para Moderadores
+- **Identificador SDD:** `change-18-moderator-game-editor`
+- **Objetivo Principal:** Dotar al equipo fundador y moderadores de un editor integral de fichas de juego y soporte para subida directa de archivos de imagen (o enlace URL), resolviendo al instante reportes comunitarios y manteniendo la calidad canónica del catálogo.
+- **Estado:** ✅ **Completado y Archivado** (371 tests en verde al 100%).
+- **Documento:** [`inc-18-moderator-game-editor.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-18-moderator-game-editor.md)
+
+---
+
+## Incremento 19: Directorio Editorial y de Creadores: Fichas, Redes Sociales y Gestión para Moderadores
+- **Identificador SDD:** `change-19-publishers-creators-directory`
+- **Objetivo Principal:** Crear un directorio completo de editoriales y de creadores (autores y diseñadores), con fichas individuales que incluyan redes sociales, web oficial y sus juegos en Ludeka, junto con formularios de alta y edición directa para moderadores.
+- **Estado:** ✅ **Completado y Archivado** (413 tests en verde al 100%).
+- **Documento:** [`inc-19-publishers-creators-directory.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-19-publishers-creators-directory.md)
+
+---
+
+## Incremento 20: Gestión de Usuarios, Permisos Granulares de Moderación y Auditoría para la Mesa Fundadora
+- **Identificador SDD:** `change-20-user-management-permissions-audit`
+- **Objetivo Principal:** Dotar a la Mesa Fundadora de un panel de administración para gestionar usuarios, asignar roles y configurar permisos granulares de moderación (juegos, imágenes, editoriales, creadores, multimedia, reportes y tiendas), junto con un registro de auditoría cronológico para verificar quién modificó qué y cuándo.
+- **Estado:** ✅ **Completado y Archivado** (433 tests en verde al 100%).
+- **Documento:** [`inc-20-user-management-permissions-audit.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-20-user-management-permissions-audit.md)
+
+---
+
+## Incremento 21: Dashboard de Inicio Editorial, Desacople de Catálogo, Limpieza de Navbar y Enlace Canónico BGG
+- **Identificador SDD:** `change-21-home-dashboard`
+- **Objetivo Principal:** Reemplazar la página de inicio por un Dashboard editorial con 4 carriles en scroll horizontal mobile-first (Top 20 juegos BGG/Ludeka, sorteos destacados/próximos a finalizar, novedades recientes y próximos eventos). Mudar el catálogo completo a `/catalogo`, retirar el selector de temas de la barra superior y añadir en cada ficha de juego un enlace directo a su página oficial en BoardGameGeek.
+- **Estado:** ✅ **Completado y Archivado** (453 tests en verde al 100%).
+- **Documento:** [`inc-21-home-dashboard.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-21-home-dashboard.md)
+
+---
+
+## Incremento 22: Segregación de Sorteos, Novedades y Nuevo Módulo de Grandes Eventos Lúdicos
+- **Identificador SDD:** `change-22-draws-news-events-split`
+- **Objetivo Principal:** Disolver el módulo unificado de Radar para estructurar secciones y páginas independientes (`/sorteos`, `/novedades` y `/eventos`). Añadir la ingesta de imagen de Instagram y carga manual por moderadores, gestión de sorteos promocionados (`IsPromoted`) y calendario cronológico de grandes ferias y festivales de juegos de mesa.
+- **Estado:** ✅ **Completado y Archivado (472 tests pasando al 100%)**
+- **Documento:** [`inc-22-draws-news-events-split.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-22-draws-news-events-split.md)
+
+---
+
+## Incremento 23: Categorización y Gestión Editorial de Vídeos y Multimedia en Fichas de Juego
+- **Identificador SDD:** `change-23-multimedia-editorial-categorization`
+- **Objetivo Principal:** Establecer la taxonomía formal de vídeos (`QuickOverview` ["Cómo Funciona"], `Tutorial`, `Gameplay`, `ReviewOpinion`) asistida por heurística semántica en el panel de moderación e ingesta, y habilitar a administradores/moderadores para reclasificar, reasignar a otro juego con autocompletado asistido o eliminar vídeos directamente desde la ficha pública del juego con auditoría estricta de cambios.
+- **Estado:** ✅ **Completado y Archivado (531 tests pasando al 100%)**
+- **Documento:** [`inc-23-multimedia-editorial-categorization.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-23-multimedia-editorial-categorization.md)
+
+---
+
+## Incremento 24: Detección Automática de Juegos en Novedades y Cola Nocturna Inteligente BGG/Gemini
+- **Identificador SDD:** `change-24-nightly-game-discovery-cataloging`
+- **Objetivo Principal:** Extraer el título del juego mencionado en cada novedad capturada por el batch nocturno, verificar si existe en Ludeka o en BGG y encolarlo. El proceso nocturno ingesta los juegos de la cola y completa el cupo diario hasta 20 títulos con los mejores del Top de BGG no catalogados, respetando límites de API de BGG y Gemini.
+- **Estado:** ✅ **Completado y Archivado (600 tests pasando al 100%)**
+- **Documento:** [`inc-24-nightly-game-discovery-cataloging.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-24-nightly-game-discovery-cataloging.md)
+- **Módulo del Sistema:** [`18-deteccion-novedades-y-cola-nocturna.md`](file:///c:/repos/Ludeka/docs/specs/sistema/18-deteccion-novedades-y-cola-nocturna.md)
+
+---
+
+## Incremento 25: Auditoría de Resiliencia, Rate Limiting y Estrategia de Token en el Importador de Ludotecas BGG
+- **Identificador SDD:** `change-25-bgg-collection-resilience-token`
+- **Objetivo Principal:** Auditar y blindar el cliente de importación de colecciones BGG frente a respuestas `202 Accepted` de BGG mediante polling con backoff exponencial, mitigar errores de rate limit (429/503), añadir soporte para cabeceras y tokens/claves API de BGG y proporcionar feedback visual en tiempo real al usuario.
+- **Estado:** ✅ **Completado y Archivado (609 tests pasando al 100%)**
+- **Documento:** [`inc-25-bgg-collection-resilience-token.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-25-bgg-collection-resilience-token.md)
+- **Módulo del Sistema:** [`05-integracion-bgg.md`](file:///c:/repos/Ludeka/docs/specs/sistema/05-integracion-bgg.md)
+
+---
+
+## Incremento 26: Especificación de Fundas (Sleeves) por Juego y Enlaces de Compra Contextuales
+- **Identificador SDD:** `change-26-card-sleeves-spec-stores`
+- **Objetivo Principal:** Incorporar en la ficha de cada juego la sección "Protege tu juego", extrayendo medidas exactas de cartas (ancho x alto en mm), número de cartas y paquetes de fundas recomendados (vía BGG / comunidad), conectándolos con enlaces de compra directos al tamaño de funda exacto en tiendas colaboradoras como Zacatrus.
+- **Estado:** ✅ **Completado y Archivado (636 tests pasando al 100%)**
+- **Documento:** [`inc-26-card-sleeves-spec-stores.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-26-card-sleeves-spec-stores.md)
+- **Módulo del Sistema:** [`19-especificacion-fundas-y-enlaces-tiendas.md`](file:///c:/repos/Ludeka/docs/specs/sistema/19-especificacion-fundas-y-enlaces-tiendas.md)
+
+---
+
+## Incremento 27: Monitorización y Verificación de Stock en Tiempo Real en Enlaces de Compra
+- **Identificador SDD:** `change-27-store-live-stock-check`
+- **Objetivo Principal:** Detección de disponibilidad y stock en tiempo real en tiendas comerciales asociadas sin penalizar la velocidad de carga de la ficha de juego (renderizado progresivo no bloqueante, timeout de 1.5s, caché en memoria con TTL y badges visuales claros de disponibilidad).
+- **Estado:** ✅ **Completado y Archivado** (656 tests en verde al 100%).
+- **Documento:** [`inc-27-store-live-stock-check.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-27-store-live-stock-check.md)
+- **Módulo del Sistema:** [`20-verificacion-stock-tiempo-real-tiendas.md`](file:///c:/repos/Ludeka/docs/specs/sistema/20-verificacion-stock-tiempo-real-tiendas.md)
+
+---
+
+## Incremento 28: Generador y Publicador Directo de Posts para Instagram en Moderación
+- **Identificador SDD:** `change-28-instagram-direct-publisher`
+- **Objetivo Principal:** Permitir a los moderadores generar publicaciones automáticas para la cuenta oficial de Instagram de Ludeka a partir de sorteos o novedades aprobados, disponiendo de un previsualizador 1:1, compositor de imagen de marca, editor de copy y botón de publicación directa vía Meta Graph API.
+- **Estado:** ✅ **Completado y Archivado** (681 tests en verde al 100%).
+- **Documento:** [`inc-28-instagram-direct-publisher.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-28-instagram-direct-publisher.md)
+- **Módulo del Sistema:** [`21-publicador-directo-instagram.md`](file:///c:/repos/Ludeka/docs/specs/sistema/21-publicador-directo-instagram.md)
+
+---
+
+## Incremento 29: Localización Geográfica por País, Filtrado Territorial y Detección de Ubicación
+- **Identificador SDD:** `change-29-country-location-filtering`
+- **Objetivo Principal:** Dotar a la plataforma de filtrado y contextualización geográfica por país para tiendas físicas y online, sorteos y eventos lúdicos. Incluye la selección voluntaria de país en el perfil de usuario con advertencia explícita sobre el filtrado territorial, marcado visual de país en listados y fichas de compras (con soporte para juegos y fundas de cartas), estado vacío cuando no existen tiendas vinculadas en el país seleccionado, y detección de ubicación (móvil/ordenador) para ordenar y priorizar contenidos locales.
+- **Estado:** ✅ **Completado y Archivado** (573 tests en verde al 100%).
+- **Documento:** [`inc-29-country-location-filtering.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-29-country-location-filtering.md)
+- **Módulo del Sistema:** [`17-localizacion-territorial-pais.md`](file:///c:/repos/Ludeka/docs/specs/sistema/17-localizacion-territorial-pais.md)
+
+---
+
+
 ## Convención de Trabajo para Cada Incremento (Ciclo SDD)
 
 Cada incremento se ejecutará siguiendo estrictamente las 7 fases de Spec-Driven Development:

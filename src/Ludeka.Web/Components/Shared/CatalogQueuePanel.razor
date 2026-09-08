@@ -2,6 +2,7 @@
 @using Ludeka.Application.DTOs
 @using Ludeka.Core.Enums
 @inject IBggCatalogQueueService QueueService
+@inject IAiGameSummaryService AiSummaryService
 @inject ICurrentUserService CurrentUserService
 
 <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-6">
@@ -21,9 +22,9 @@
             </p>
         </div>
 
-        @if (CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator"))
+        @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanEditGames)))
         {
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
                 @if (_items.Any(i => i.Status == CatalogQueueStatus.Failed))
                 {
                     <button type="button" 
@@ -35,6 +36,23 @@
                         <span>Reintentar Fallidos</span>
                     </button>
                 }
+
+                <button type="button" 
+                        @onclick="ProcessAiBatchAsync"
+                        disabled="@(_isProcessingAi || _isProcessing)"
+                        title="Ejecutar la carga nocturna de síntesis con IA para enriquecer juegos del catálogo pendientes"
+                        class="py-2.5 px-3.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (_isProcessingAi)
+                    {
+                        <span class="animate-spin">⚙️</span>
+                        <span>Carga Nocturna IA...</span>
+                    }
+                    else
+                    {
+                        <span>🌙</span>
+                        <span>Carga Nocturna IA</span>
+                    }
+                </button>
 
                 <button type="button" 
                         @onclick="ProcessQueueBatchAsync"
@@ -54,6 +72,22 @@
             </div>
         }
     </div>
+
+    @if (_lastAiResult != null)
+    {
+        <div class="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-xs space-y-2">
+            <div class="font-bold text-indigo-400 flex items-center gap-2">
+                <span>🌙</span>
+                <span>Carga nocturna de IA finalizada: @_lastAiResult.SuccessCount sintetizados con éxito (@_lastAiResult.FailedCount fallos).</span>
+            </div>
+            @if (_lastAiResult.SummarizedTitles.Count > 0)
+            {
+                <div class="text-[var(--text-secondary)]">
+                    Juegos enriquecidos con IA: <strong class="text-indigo-300">@string.Join(", ", _lastAiResult.SummarizedTitles)</strong>
+                </div>
+            }
+        </div>
+    }
 
     @if (_lastResult != null)
     {
@@ -132,13 +166,16 @@
                 <div class="p-3.5 rounded-xl @(item.Status == CatalogQueueStatus.Failed ? "bg-rose-500/10 border-rose-500/25" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)]") border flex items-center gap-3">
                     @if (!string.IsNullOrWhiteSpace(item.ThumbnailUrl))
                     {
-                        <img src="@item.ThumbnailUrl" alt="@item.Title" class="w-12 h-12 object-cover rounded-lg bg-[var(--bg-card)] flex-shrink-0" />
+                        <img src="@item.ThumbnailUrl"
+                             alt="@item.Title"
+                             onerror="this.onerror=null; this.src='/images/game-placeholder.svg';"
+                             class="w-12 h-12 object-cover rounded-lg bg-[var(--bg-card)] flex-shrink-0" />
                     }
                     else
                     {
-                        <div class="w-12 h-12 rounded-lg bg-[var(--bg-card)] flex items-center justify-center text-xl flex-shrink-0">
-                            🎲
-                        </div>
+                        <img src="/images/game-placeholder.svg"
+                             alt="Carátula no disponible"
+                             class="w-12 h-12 object-cover rounded-lg bg-[var(--bg-card)] flex-shrink-0 opacity-90" />
                     }
 
                     <div class="min-w-0 flex-1">
@@ -226,6 +263,25 @@
         finally
         {
             _isLoading = false;
+        }
+    }
+
+    private bool _isProcessingAi = false;
+    private AiBatchProcessingResultDto? _lastAiResult;
+
+    private async Task ProcessAiBatchAsync()
+    {
+        _isProcessingAi = true;
+        _lastAiResult = null;
+
+        try
+        {
+            _lastAiResult = await AiSummaryService.ProcessPendingSummariesBatchAsync(10);
+            await OnQueueProcessed.InvokeAsync();
+        }
+        finally
+        {
+            _isProcessingAi = false;
         }
     }
 }

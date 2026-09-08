@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,4 +16,16 @@ public interface IGameRepository
     Task AddRangeAsync(IEnumerable<Game> games, CancellationToken ct = default);
     Task UpdateAsync(Game game, CancellationToken ct = default);
     Task<bool> HasAnyAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<Game>> GetGamesWithoutAiSummaryAsync(int limit = 20, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<Game>>([]);
+
+    Task<IReadOnlyList<Game>> GetByPublisherAsync(string publisherName, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<Game>>([]);
+
+    Task<IReadOnlyList<Game>> GetByDesignerAsync(string designerName, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<Game>>([]);
+
+    Task<IReadOnlyList<Game>> GetAllGamesAsync(CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<Game>>([]);
 }
+

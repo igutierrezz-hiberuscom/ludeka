@@ -1,0 +1,267 @@
+@page "/tiendas/{Slug}"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@using Ludeka.Core.ValueObjects
+@using Ludeka.Web.Components.Shared
+@inject IStoreService StoreService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>@(_store != null ? $"{_store.Name} — Ficha de Tienda y Ofertas" : "Tienda Lúdica") — Ludeka</PageTitle>
+
+@if (_loading)
+{
+    <div class="container-ludeka py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
+        <span class="animate-spin text-xl">🎲</span>
+        <span>Cargando ficha de la tienda...</span>
+    </div>
+}
+else if (_store == null)
+{
+    <div class="container-ludeka py-16 text-center space-y-4">
+        <span class="text-4xl block">🔍</span>
+        <h1 class="text-2xl font-black text-[var(--text-primary)]">Tienda no encontrada</h1>
+        <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+            No encontramos ninguna tienda lúdica registrada con el slug especificado.
+        </p>
+        <a href="/tiendas" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--brand-primary)] text-white text-xs font-bold">
+            &larr; Volver al Directorio
+        </a>
+    </div>
+}
+else
+{
+    <div class="container-ludeka py-8 space-y-8">
+        @* Navegación y Acciones Superiores *@
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+            <a href="/tiendas" class="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors">
+                &larr; Volver al Directorio de Tiendas
+            </a>
+
+            @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanManageStoreLinks)))
+            {
+                <button type="button"
+                        @onclick="() => _isEditModalOpen = true"
+                        class="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                    <span>✏️</span> Editar Tienda
+                </button>
+            }
+        </div>
+
+        @* Hero de la Tienda *@
+        <div class="p-6 sm:p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                @if (!string.IsNullOrWhiteSpace(_store.LogoUrl))
+                {
+                    <img src="@_store.LogoUrl"
+                         alt="Logotipo de @_store.Name"
+                         class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-contain bg-[var(--bg-surface-elevated)] p-2 border border-[var(--border-subtle)] shrink-0"
+                         onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                }
+                else
+                {
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-3xl text-emerald-400 font-black shrink-0">
+                        @_store.Name[..Math.Min(2, _store.Name.Length)].ToUpper()
+                    </div>
+                }
+
+                <div class="space-y-2 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-black">
+                            @FormatStoreType(_store.Type)
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)]">
+                            @CountryCatalog.GetFlag(_store.Country) @_store.Country
+                        </span>
+                        @if (!string.IsNullOrWhiteSpace(_store.City))
+                        {
+                            <span class="text-xs font-bold text-[var(--text-secondary)]">
+                                📍 @_store.City
+                            </span>
+                        }
+                        @if (_store.HasLoyaltyProgram)
+                        {
+                            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1">
+                                <span>⭐</span> Programa Club / Fidelidad
+                            </span>
+                        }
+                    </div>
+
+                    <h1 class="text-2xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                        @_store.Name
+                    </h1>
+
+                    @if (_store.ShippingCountries != null && _store.ShippingCountries.Count > 0)
+                    {
+                        <div class="text-xs text-[var(--text-secondary)] flex items-center gap-1.5 flex-wrap">
+                            <span class="font-bold">🚚 Realiza envíos a:</span>
+                            <span class="px-2 py-0.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] font-medium text-[var(--text-primary)]">
+                                @string.Join(", ", _store.ShippingCountries)
+                            </span>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(_store.Address))
+                    {
+                        <p class="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
+                            <span>🏢</span>
+                            <span>@_store.Address</span>
+                        </p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(_store.WebsiteUrl))
+                    {
+                        <a href="@_store.WebsiteUrl"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="text-xs font-semibold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1 pt-1">
+                            <span>🌐</span> Visitar tienda online &nearr;
+                        </a>
+                    }
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_store.Description))
+            {
+                <div class="pt-4 border-t border-[var(--border-subtle)] text-sm text-[var(--text-secondary)] leading-relaxed space-y-2">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Sobre la tienda</h2>
+                    <p>@((MarkupString)_store.Description.Replace("\n", "<br />"))</p>
+                </div>
+            }
+
+            @* Redes y Canal de YouTube *@
+            @if (_store.SocialLinks != null && _store.SocialLinks.Count > 0)
+            {
+                <div class="pt-4 border-t border-[var(--border-subtle)] space-y-2">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Canales oficiales y redes de la tienda</h2>
+                    <SocialLinksList Links="@_store.SocialLinks" />
+                </div>
+            }
+        </div>
+
+        @* Catálogo con Ofertas Vinculadas a esta Tienda *@
+        <div class="space-y-4">
+            <div class="flex items-baseline justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🛒</span>
+                    <h2 class="text-xl font-black text-[var(--text-primary)]">
+                        Juegos con Ofertas en @_store.Name
+                    </h2>
+                </div>
+                <span class="text-xs font-bold text-[var(--text-secondary)]">
+                    @_store.Offers.Count @(_store.Offers.Count == 1 ? "título disponible" : "títulos disponibles")
+                </span>
+            </div>
+
+            @if (_store.Offers.Count == 0)
+            {
+                <div class="p-8 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-muted)] space-y-1">
+                    <p class="font-medium text-[var(--text-secondary)]">No hay ofertas vinculadas activas en este momento.</p>
+                    <p>Si eres responsable de la tienda, puedes ponerte en contacto con la Mesa Fundadora para sincronizar tu catálogo.</p>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    @foreach (var offer in _store.Offers)
+                    {
+                        <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all flex flex-col justify-between gap-3 group">
+                            <div class="space-y-2.5">
+                                <a href="/juegos/@offer.GameSlug" class="block aspect-square rounded-xl overflow-hidden bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
+                                    <img src="@(string.IsNullOrWhiteSpace(offer.CoverImageUrl) ? "/images/game-placeholder.svg" : offer.CoverImageUrl)"
+                                         alt="@offer.GameTitle"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                         loading="lazy"
+                                         onerror="this.onerror=null; this.src='/images/game-placeholder.svg';" />
+                                </a>
+
+                                <div>
+                                    <a href="/juegos/@offer.GameSlug" class="font-bold text-sm text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] transition-colors line-clamp-1">
+                                        @offer.GameTitle
+                                    </a>
+                                    <div class="flex items-center justify-between gap-1 mt-1 text-xs">
+                                        <span class="font-black text-sm text-[var(--text-primary)]">
+                                            @(offer.Price.HasValue ? $"{offer.Price.Value:0.00} {offer.Currency}" : "Consultar")
+                                        </span>
+                                        @if (offer.InStock)
+                                        {
+                                            <span class="text-[0.68rem] text-emerald-400 font-semibold flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                                                En stock
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-[0.68rem] text-amber-400 font-semibold flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>
+                                                Bajo pedido
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href="@offer.AffiliateUrl"
+                               target="_blank"
+                               rel="noopener noreferrer sponsored"
+                               class="w-full py-2 px-3 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-sm">
+                                <span>Ver en tienda</span>
+                                <span class="text-[0.75rem]">&nearr;</span>
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Modal de Edición *@
+    <StoreEditModal
+        IsOpen="@_isEditModalOpen"
+        StoreId="@_store.Id"
+        Name="@_store.Name"
+        Type="@_store.Type"
+        Country="@_store.Country"
+        City="@_store.City"
+        Address="@_store.Address"
+        Description="@_store.Description"
+        LogoUrl="@_store.LogoUrl"
+        WebsiteUrl="@_store.WebsiteUrl"
+        AffiliateCode="@_store.AffiliateCode"
+        HasLoyaltyProgram="@_store.HasLoyaltyProgram"
+        InitialSocialLinks="@(_store.SocialLinks?.ToList() ?? new())"
+        InitialShippingCountries="@(_store.ShippingCountries?.ToList())"
+        OnClose="() => _isEditModalOpen = false"
+        OnSaved="LoadStoreAsync" />
+}
+
+@code {
+    [Parameter]
+    public string Slug { get; set; } = string.Empty;
+
+    private bool _loading = true;
+    private StoreDetailDto? _store;
+    private bool _isEditModalOpen = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadStoreAsync();
+    }
+
+    private async Task LoadStoreAsync()
+    {
+        _loading = true;
+        _store = await StoreService.GetBySlugAsync(Slug);
+        _loading = false;
+    }
+
+    private string FormatStoreType(StoreType type) => type switch
+    {
+        StoreType.Hybrid => "🏪 Tienda Híbrida (Física y Online)",
+        StoreType.PhysicalOnly => "🏢 Solo Tienda Física",
+        StoreType.OnlineOnly => "🌐 Solo Tienda Online",
+        _ => "Tienda"
+    };
+}

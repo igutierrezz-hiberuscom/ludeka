@@ -1,5 +1,6 @@
 using System;
 using Ludeka.Core.Enums;
+using Ludeka.Core.ValueObjects;
 
 namespace Ludeka.Core.Entities;
 
@@ -11,11 +12,15 @@ public class Giveaway
     public string? Collaborator { get; private set; }
     public string Url { get; private set; } = string.Empty;
     public GiveawayPlatform Platform { get; private set; } = GiveawayPlatform.Instagram;
+    public string Country { get; private set; } = "España";
     public DateTimeOffset DeadlineAt { get; private set; }
     public Guid? GameId { get; private set; }
     public string? GameTitle { get; private set; }
     public string? ThumbnailUrl { get; private set; }
     public bool IsCommunityExclusive { get; private set; }
+    public bool IsPromoted { get; private set; }
+    public string? InstagramMediaId { get; private set; }
+    public string? InstagramPermalink { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; private set; }
 
@@ -23,6 +28,8 @@ public class Giveaway
     public virtual Game? Game { get; private set; }
 
     public bool IsExpired => DeadlineAt < DateTimeOffset.UtcNow;
+    public bool IsInternational => CountryCatalog.IsInternational(Country);
+    public bool IsPublishedOnInstagram => !string.IsNullOrWhiteSpace(InstagramPermalink);
 
     public string FormattedOrganizer => string.IsNullOrWhiteSpace(Collaborator)
         ? Organizer
@@ -37,11 +44,13 @@ public class Giveaway
         string url,
         GiveawayPlatform platform,
         DateTimeOffset deadlineAt,
+        string country = "España",
         Guid? gameId = null,
         string? gameTitle = null,
         string? collaborator = null,
         string? thumbnailUrl = null,
-        bool isCommunityExclusive = false)
+        bool isCommunityExclusive = false,
+        bool isPromoted = false)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("El título del sorteo no puede estar vacío.", nameof(title));
@@ -56,13 +65,38 @@ public class Giveaway
         Organizer = organizer.Trim();
         Url = url.Trim();
         Platform = platform;
+        Country = string.IsNullOrWhiteSpace(country) ? "España" : CountryCatalog.Normalize(country);
         DeadlineAt = deadlineAt;
         GameId = gameId;
         GameTitle = string.IsNullOrWhiteSpace(gameTitle) ? null : gameTitle.Trim();
         Collaborator = string.IsNullOrWhiteSpace(collaborator) ? null : collaborator.Trim();
         ThumbnailUrl = string.IsNullOrWhiteSpace(thumbnailUrl) ? null : thumbnailUrl.Trim();
         IsCommunityExclusive = isCommunityExclusive;
+        IsPromoted = isPromoted;
         CreatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void UpdateCountry(string country)
+    {
+        Country = string.IsNullOrWhiteSpace(country) ? "España" : CountryCatalog.Normalize(country);
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public bool IsAvailableInCountry(string? targetCountry)
+    {
+        if (string.IsNullOrWhiteSpace(targetCountry))
+            return true;
+
+        if (IsInternational)
+            return true;
+
+        return string.Equals(CountryCatalog.Normalize(Country), CountryCatalog.Normalize(targetCountry), StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void SetPromoted(bool isPromoted)
+    {
+        IsPromoted = isPromoted;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public void MergeCollaborator(string newCollaborator)
@@ -98,6 +132,19 @@ public class Giveaway
         GameId = gameId;
         if (!string.IsNullOrWhiteSpace(gameTitle))
             GameTitle = gameTitle.Trim();
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void MarkPublishedOnInstagram(string mediaId, string permalink)
+    {
+        if (string.IsNullOrWhiteSpace(mediaId))
+            throw new ArgumentException("El identificador de medio de Instagram no puede estar vacío.", nameof(mediaId));
+
+        if (string.IsNullOrWhiteSpace(permalink))
+            throw new ArgumentException("El enlace permanente de Instagram no puede estar vacío.", nameof(permalink));
+
+        InstagramMediaId = mediaId.Trim();
+        InstagramPermalink = permalink.Trim();
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 }

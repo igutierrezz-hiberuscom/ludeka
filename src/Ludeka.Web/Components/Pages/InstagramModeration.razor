@@ -1,0 +1,807 @@
+@page "/admin/instagram"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Application.Options
+@using Ludeka.Core.Entities
+@using Ludeka.Core.Enums
+@using Microsoft.Extensions.Options
+@inject IInstagramPublisherService PublisherService
+@inject IGiveawayService GiveawayService
+@inject IWeeklyReleaseService ReleaseService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+@inject IOptions<InstagramOptions> InstagramOptions
+@inject IJSRuntime JS
+
+<PageTitle>Publicador Oficial de Instagram — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Verificación de Autorización y Permisos *@
+    @if (!_isAuthorized)
+    {
+        <div class="p-8 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-center space-y-4 max-w-xl mx-auto my-12">
+            <span class="text-4xl block">🛡️</span>
+            <h2 class="text-xl font-black text-[var(--text-primary)]">Acceso Reservado a Moderación</h2>
+            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+                Esta zona requiere el rol de <strong>Mesa Fundadora</strong> o disponer del permiso granular
+                <strong>Publicar en Instagram Oficial</strong> (<code>CanPublishInstagram</code>).
+            </p>
+            <div class="pt-2">
+                <a href="/" class="px-4 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] hover:border-[var(--brand-primary)] transition-colors">
+                    &larr; Volver al Inicio
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        @* Cabecera Editorial de la Página *@
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--brand-primary)] text-xs font-bold mb-2">
+                    <span>📸</span> Automatización Omnicanal & Publicación Directa
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-3">
+                    <span>Publicador de Instagram</span>
+                    @if (InstagramOptions.Value.IsConfigured)
+                    {
+                        <span class="text-xs px-2.5 py-1 rounded-full font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span>Meta API Conectada</span>
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-xs px-2.5 py-1 rounded-full font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 inline-flex items-center gap-1.5" title="En modo simulado no se requieren credenciales de Meta para publicar">
+                            <span>🧪</span>
+                            <span>Modo Simulado Activo</span>
+                        </span>
+                    }
+                </h1>
+                <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
+                    Compón, previsualiza y publica sorteos y novedades lúdicas en la cuenta oficial de Instagram de Ludeka con un solo clic.
+                </p>
+            </div>
+
+            @* Acciones de Creación Rápida *@
+            <div class="flex items-center gap-2 flex-wrap">
+                <button type="button"
+                        @onclick="() => _isSelectGiveawayModalOpen = true"
+                        class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                    <span>🎁</span>
+                    <span>Post desde Sorteo</span>
+                </button>
+                <button type="button"
+                        @onclick="() => _isSelectReleaseModalOpen = true"
+                        class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                    <span>📰</span>
+                    <span>Post desde Novedad</span>
+                </button>
+            </div>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="py-20 text-center text-[var(--text-muted)] space-y-3">
+                <div class="inline-block animate-spin text-3xl">📸</div>
+                <p class="text-sm font-semibold">Sincronizando bandeja de Instagram...</p>
+            </div>
+        }
+        else
+        {
+            @* Layout Principal de 2 Columnas *@
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                @* COLUMNA IZQUIERDA (5 cols): Bandeja de borradores y Mockup del Feed *@
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    @* Selector / Pestañas de Borradores *@
+                    <div class="p-4 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                                Borradores (@_drafts.Count)
+                            </span>
+                            <div class="flex items-center gap-1 text-[0.7rem]">
+                                <button type="button"
+                                        @onclick="() => _filterStatus = null"
+                                        class="px-2 py-0.5 rounded-lg font-bold transition-colors @(_filterStatus == null ? "bg-[var(--brand-primary)] text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")">
+                                    Todos
+                                </button>
+                                <button type="button"
+                                        @onclick="() => _filterStatus = InstagramPostDraftStatus.Draft"
+                                        class="px-2 py-0.5 rounded-lg font-bold transition-colors @(_filterStatus == InstagramPostDraftStatus.Draft ? "bg-[var(--brand-primary)] text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")">
+                                    Pendientes (@_drafts.Count(d => d.Status == InstagramPostDraftStatus.Draft))
+                                </button>
+                                <button type="button"
+                                        @onclick="() => _filterStatus = InstagramPostDraftStatus.Published"
+                                        class="px-2 py-0.5 rounded-lg font-bold transition-colors @(_filterStatus == InstagramPostDraftStatus.Published ? "bg-[var(--brand-primary)] text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")">
+                                    Publicados (@_drafts.Count(d => d.Status == InstagramPostDraftStatus.Published))
+                                </button>
+                            </div>
+                        </div>
+
+                        @* Lista con scroll de borradores *@
+                        <div class="max-h-56 overflow-y-auto space-y-2 pr-1 text-xs">
+                            @if (FilteredDrafts.Count == 0)
+                            {
+                                <div class="py-6 text-center text-[var(--text-muted)] italic">
+                                    No hay borradores en este filtro.
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var draft in FilteredDrafts)
+                                {
+                                    <button type="button"
+                                            @onclick="() => SelectDraft(draft)"
+                                            class="w-full text-left p-3 rounded-2xl border transition-all flex items-start justify-between gap-2 @(_activeDraft?.Id == draft.Id ? "bg-[var(--brand-primary)]/15 border-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-highlight)]")">
+                                        <div class="space-y-1 min-w-0">
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span class="px-1.5 py-0.5 rounded text-[0.65rem] font-bold @GetSourceBadgeClass(draft.SourceType)">
+                                                    @GetSourceIcon(draft.SourceType) @draft.SourceType
+                                                </span>
+                                                <span class="font-bold truncate text-[var(--text-primary)]">@draft.Title</span>
+                                            </div>
+                                            <p class="text-[0.68rem] text-[var(--text-muted)] truncate">@draft.Caption</p>
+                                        </div>
+                                        <div class="shrink-0 flex flex-col items-end gap-1">
+                                            <span class="px-2 py-0.5 rounded-full text-[0.65rem] font-bold @GetStatusBadgeClass(draft.Status)">
+                                                @draft.Status
+                                            </span>
+                                            <span class="text-[0.62rem] text-[var(--text-muted)]">@draft.CreatedAt.ToString("dd/MM HH:mm")</span>
+                                        </div>
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    @* Mockup Fidedigno del Feed de Instagram *@
+                    @if (_activeDraft != null)
+                    {
+                        <div class="space-y-2">
+                            <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block px-1">
+                                📱 Previsualización Feed de Instagram (1:1)
+                            </span>
+
+                            <div class="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl overflow-hidden max-w-md mx-auto">
+                                @* Cabecera del Post en Instagram *@
+                                <div class="p-3.5 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)]/50">
+                                    <div class="flex items-center gap-2.5">
+                                        @* Avatar de Ludeka con anillo degradado estilo Instagram *@
+                                        <div class="w-9 h-9 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600">
+                                            <div class="w-full h-full rounded-full bg-[var(--bg-card)] flex items-center justify-center font-black text-[0.8rem] text-[var(--brand-primary)]">
+                                                L.
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-1 font-bold text-xs text-[var(--text-primary)] leading-tight">
+                                                <span>ludeka.app</span>
+                                                <span class="text-sky-400 text-[0.75rem]" title="Cuenta Verificada">✓</span>
+                                            </div>
+                                            <span class="text-[0.65rem] text-[var(--text-muted)]">El Letterboxd de los juegos de mesa</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-base text-[var(--text-muted)] px-1">&bull;&bull;&bull;</span>
+                                </div>
+
+                                @* Contenedor Cuadrado de la Imagen (1:1) *@
+                                <div class="aspect-square w-full bg-[var(--bg-surface)] flex items-center justify-center overflow-hidden border-b border-[var(--border-subtle)] relative">
+                                    @if (_previewMode == "vector" && !string.IsNullOrWhiteSpace(_activeDraft.SvgContent))
+                                    {
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            @((MarkupString)_activeDraft.SvgContent)
+                                        </div>
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(_activeDraft.ImageUrl))
+                                    {
+                                        <img src="@_activeDraft.ImageUrl" alt="@_activeDraft.Title" class="w-full h-full object-cover" />
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(_activeDraft.SvgContent))
+                                    {
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            @((MarkupString)_activeDraft.SvgContent)
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="p-8 text-center text-[var(--text-muted)]">
+                                            <span class="text-4xl block mb-2">🖼️</span>
+                                            <span class="text-xs">Sin imagen seleccionada</span>
+                                        </div>
+                                    }
+
+                                    @if (_activeDraft.Status == InstagramPostDraftStatus.Published)
+                                    {
+                                        <div class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-black bg-emerald-500 text-black shadow-lg flex items-center gap-1">
+                                            <span>✓ Publicado en IG</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                @* Barra de Interacción Social (❤️ 💬 ↗️ 🔖) *@
+                                <div class="p-3.5 pb-2 space-y-2 text-xs">
+                                    <div class="flex items-center justify-between text-xl text-[var(--text-primary)]">
+                                        <div class="flex items-center gap-4">
+                                            <button type="button" @onclick="() => _isLiked = !_isLiked" class="hover:scale-110 transition-transform @(_isLiked ? "text-rose-500" : "")">
+                                                @(_isLiked ? "❤️" : "🤍")
+                                            </button>
+                                            <button type="button" class="hover:scale-110 transition-transform">💬</button>
+                                            <button type="button" class="hover:scale-110 transition-transform">↗️</button>
+                                        </div>
+                                        <button type="button" class="hover:scale-110 transition-transform">🔖</button>
+                                    </div>
+
+                                    @* Conteo de Likes *@
+                                    <div class="font-bold text-[0.75rem] text-[var(--text-primary)]">
+                                        Les gusta a <span class="font-black">deviriberia</span>, <span class="font-black">zacatrus</span> y <span class="font-black">148 personas más</span>
+                                    </div>
+
+                                    @* Copy con 'ver más' y Hashtags *@
+                                    <div class="text-[0.72rem] leading-relaxed text-[var(--text-secondary)] whitespace-pre-line break-words max-h-40 overflow-y-auto">
+                                        <strong class="text-[var(--text-primary)] font-black">ludeka.app</strong> @_activeDraft.Caption
+                                    </div>
+
+                                    <div class="pt-1 text-[0.62rem] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                                        HACE UN MOMENTO &bull; VER TRADUCCIÓN
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* COLUMNA DERECHA (7 cols): Editor en Vivo y Panel de Publicación *@
+                <div class="lg:col-span-7 space-y-6">
+                    @if (_activeDraft == null)
+                    {
+                        <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-4">
+                            <span class="text-5xl block">📸</span>
+                            <h3 class="text-lg font-bold text-[var(--text-primary)]">Ningún borrador seleccionado</h3>
+                            <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto leading-relaxed">
+                                Selecciona un borrador existente de la columna izquierda o crea uno nuevo a partir de un sorteo o novedad aprobados.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm space-y-6">
+                            @* Estado del Borrador / Alertas *@
+                            @if (_activeDraft.Status == InstagramPostDraftStatus.Published)
+                            {
+                                <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-2xl">🎉</span>
+                                        <div>
+                                            <p class="font-bold text-xs">¡Publicado oficialmente en Instagram!</p>
+                                            <p class="text-[0.7rem] opacity-90">ID de Medio: <code>@_activeDraft.InstagramMediaId</code></p>
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(_activeDraft.InstagramPermalink))
+                                    {
+                                        <a href="@_activeDraft.InstagramPermalink"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-black font-bold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-sm hover:opacity-90">
+                                            <span>🔗 Ver en Instagram</span>
+                                            <span>↗</span>
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else if (_activeDraft.Status == InstagramPostDraftStatus.Failed)
+                            {
+                                <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 space-y-1">
+                                    <div class="flex items-center gap-2 font-bold text-xs">
+                                        <span>⚠️</span> Error en el último intento de publicación
+                                    </div>
+                                    <p class="text-[0.7rem] opacity-90">@_activeDraft.ErrorMessage</p>
+                                </div>
+                            }
+
+                            @* Título y Origen *@
+                            <div class="flex items-start justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+                                <div>
+                                    <span class="text-[0.65rem] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                                        Origen: @GetSourceIcon(_activeDraft.SourceType) @_activeDraft.SourceType &bull; ID: @_activeDraft.SourceId
+                                    </span>
+                                    <h2 class="text-xl font-black text-[var(--text-primary)] mt-0.5">
+                                        @_activeDraft.Title
+                                    </h2>
+                                </div>
+                                <button type="button"
+                                        @onclick="DeleteActiveDraft"
+                                        class="text-[var(--text-muted)] hover:text-rose-400 text-xs font-bold transition-colors flex items-center gap-1">
+                                    <span>🗑️</span>
+                                    <span>Descartar</span>
+                                </button>
+                            </div>
+
+                            @* Controles de la Tarjeta Visual *@
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @* Selector de Imagen a Publicar *@
+                                <div class="space-y-1.5">
+                                    <label class="font-bold text-[var(--text-secondary)] uppercase tracking-wider text-[0.7rem] block">
+                                        Imagen para el Post
+                                    </label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button type="button"
+                                                @onclick='() => SetPreviewMode("vector")'
+                                                class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 @(_previewMode == "vector" ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
+                                            <span>🎨</span>
+                                            <span>Tarjeta 1:1</span>
+                                        </button>
+                                        <button type="button"
+                                                @onclick='() => SetPreviewMode("cover")'
+                                                disabled="@(string.IsNullOrWhiteSpace(_activeDraft.ImageUrl))"
+                                                class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 @(_previewMode == "cover" ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
+                                            <span>🖼️</span>
+                                            <span>Carátula</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                @* Selector de Tema Visual *@
+                                <div class="space-y-1.5">
+                                    <label class="font-bold text-[var(--text-secondary)] uppercase tracking-wider text-[0.7rem] block">
+                                        Tema Visual de Marca
+                                    </label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button type="button"
+                                                @onclick='() => ChangeTheme("Dark")'
+                                                class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 @(_editorTheme == "Dark" ? "bg-slate-900 text-white border-slate-700 shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
+                                            <span>🌙</span>
+                                            <span>Oscuro</span>
+                                        </button>
+                                        <button type="button"
+                                                @onclick='() => ChangeTheme("Light")'
+                                                class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 @(_editorTheme == "Light" ? "bg-white text-slate-900 border-slate-300 shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
+                                            <span>☀️</span>
+                                            <span>Claro</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* Editor de Texto y Copy *@
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label for="instagram-caption-input" class="font-bold text-[var(--text-secondary)] uppercase tracking-wider text-[0.7rem]">
+                                        Texto del Post (Copy para Instagram)
+                                    </label>
+                                    <span class="text-[0.68rem] font-mono @(_editorCaption.Length > 2200 ? "text-rose-500 font-bold" : "text-[var(--text-muted)]")">
+                                        @_editorCaption.Length / 2200 caracteres
+                                    </span>
+                                </div>
+
+                                <textarea id="instagram-caption-input"
+                                          @bind="_editorCaption"
+                                          @bind:event="oninput"
+                                          rows="9"
+                                          class="w-full p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs font-mono leading-relaxed resize-y focus:outline-none focus:border-[var(--brand-primary)] shadow-inner">
+                                </textarea>
+                            </div>
+
+                            @* Chips de Hashtags Rápidos *@
+                            <div class="space-y-1.5">
+                                <span class="font-bold text-[var(--text-secondary)] uppercase tracking-wider text-[0.68rem] block">
+                                    Añadir Hashtags con 1 clic:
+                                </span>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    @foreach (var tag in _suggestedTags)
+                                    {
+                                        <button type="button"
+                                                @onclick="() => AppendHashtag(tag)"
+                                                class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[0.7rem] font-semibold transition-colors">
+                                            @tag
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+
+                            @* Botones de Acción de Publicación *@
+                            <div class="pt-4 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-2">
+                                    <button type="button"
+                                            @onclick="SaveDraftChanges"
+                                            disabled="@_isSaving"
+                                            class="px-4 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                                        @if (_isSaving)
+                                        {
+                                            <span class="animate-spin">⏳</span>
+                                            <span>Guardando...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>💾</span>
+                                            <span>Guardar Cambios</span>
+                                        }
+                                    </button>
+
+                                    <button type="button"
+                                            @onclick="CopyCaptionToClipboard"
+                                            class="px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-xs transition-colors flex items-center justify-center gap-1.5">
+                                        @if (_isCopied)
+                                        {
+                                            <span class="text-emerald-400 font-bold">✓ ¡Copiado!</span>
+                                        }
+                                        else
+                                        {
+                                            <span>📋</span>
+                                            <span>Copiar Copy</span>
+                                        }
+                                    </button>
+                                </div>
+
+                                <button type="button"
+                                        @onclick="PublishNow"
+                                        disabled="@(_isPublishing || _activeDraft.Status == InstagramPostDraftStatus.Published)"
+                                        class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:opacity-95 text-white font-black text-xs transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                    @if (_isPublishing)
+                                    {
+                                        <span class="animate-spin text-sm">⏳</span>
+                                        <span>Despachando a Instagram API...</span>
+                                    }
+                                    else if (_activeDraft.Status == InstagramPostDraftStatus.Published)
+                                    {
+                                        <span>✓ Ya Publicado</span>
+                                    }
+                                    else
+                                    {
+                                        <span>🚀 Validar y Publicar en Instagram</span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@* Modal de Selección de Sorteo para Nuevo Post *@
+@if (_isSelectGiveawayModalOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true">
+        <div class="w-full max-w-xl max-h-[85vh] rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl flex flex-col space-y-4">
+            <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+                <h3 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>🎁</span> Seleccionar Sorteo para Crear Post
+                </h3>
+                <button type="button" @onclick="() => _isSelectGiveawayModalOpen = false" class="text-xl text-[var(--text-muted)] hover:text-[var(--text-primary)]">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
+                @if (_availableGiveaways.Count == 0)
+                {
+                    <div class="p-8 text-center text-[var(--text-muted)] italic">No hay sorteos vigentes registrados.</div>
+                }
+                else
+                {
+                    @foreach (var g in _availableGiveaways)
+                    {
+                        <div class="p-3 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <span class="font-bold text-[var(--text-primary)] block truncate">@g.Title</span>
+                                <span class="text-[0.68rem] text-[var(--text-muted)]">Organizado por @g.FormattedOrganizer &bull; Límite: @g.DeadlineAt.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <button type="button"
+                                    @onclick="() => CreateFromGiveaway(g.Id)"
+                                    class="px-3 py-1.5 rounded-xl bg-[var(--brand-primary)] text-white font-bold text-xs hover:opacity-90 shrink-0">
+                                Elegir &rarr;
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@* Modal de Selección de Novedad para Nuevo Post *@
+@if (_isSelectReleaseModalOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true">
+        <div class="w-full max-w-xl max-h-[85vh] rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl flex flex-col space-y-4">
+            <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+                <h3 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>📰</span> Seleccionar Novedad Editorial para Crear Post
+                </h3>
+                <button type="button" @onclick="() => _isSelectReleaseModalOpen = false" class="text-xl text-[var(--text-muted)] hover:text-[var(--text-primary)]">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
+                @if (_availableReleases.Count == 0)
+                {
+                    <div class="p-8 text-center text-[var(--text-muted)] italic">No hay novedades registradas.</div>
+                }
+                else
+                {
+                    @foreach (var r in _availableReleases)
+                    {
+                        <div class="p-3 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <span class="font-bold text-[var(--text-primary)] block truncate">@r.Title</span>
+                                <span class="text-[0.68rem] text-[var(--text-muted)]">Editorial: @r.Publisher &bull; Fecha: @r.ReleaseDate.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <button type="button"
+                                    @onclick="() => CreateFromRelease(r.Id)"
+                                    class="px-3 py-1.5 rounded-xl bg-[var(--brand-primary)] text-white font-bold text-xs hover:opacity-90 shrink-0">
+                                Elegir &rarr;
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? SourceType { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? SourceId { get; set; }
+
+    private bool _isAuthorized;
+    private bool _isLoading = true;
+    private List<InstagramPostDraftDto> _drafts = [];
+    private InstagramPostDraftDto? _activeDraft;
+    private InstagramPostDraftStatus? _filterStatus;
+
+    private string _editorCaption = string.Empty;
+    private string _editorTheme = "Dark";
+    private string _previewMode = "vector"; // "vector" | "cover"
+    private bool _isLiked;
+    private bool _isSaving;
+    private bool _isPublishing;
+    private bool _isCopied;
+
+    private bool _isSelectGiveawayModalOpen;
+    private bool _isSelectReleaseModalOpen;
+    private List<GiveawayDto> _availableGiveaways = [];
+    private List<WeeklyReleaseDto> _availableReleases = [];
+
+    private readonly string[] _suggestedTags = [
+        "#juegosdemesa",
+        "#boardgames",
+        "#ludeka",
+        "#sorteojuegos",
+        "#novedadesludicas",
+        "#bgg",
+        "#juegosdemesaespaña",
+        "#juegosdecartas"
+    ];
+
+    private IReadOnlyList<InstagramPostDraftDto> FilteredDrafts => _filterStatus.HasValue
+        ? _drafts.Where(d => d.Status == _filterStatus.Value).ToList()
+        : _drafts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isAuthorized = CurrentUserService.HasPermission(ModeratorPermission.CanPublishInstagram);
+
+        if (!_isAuthorized)
+        {
+            _isLoading = false;
+            return;
+        }
+
+        await LoadDataAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!_isAuthorized) return;
+
+        // Si viene con parámetros de consulta para auto-crear o abrir
+        if (!string.IsNullOrWhiteSpace(SourceType) && !string.IsNullOrWhiteSpace(SourceId) && Guid.TryParse(SourceId, out var parsedId))
+        {
+            if (string.Equals(SourceType, "Giveaway", StringComparison.OrdinalIgnoreCase))
+            {
+                await CreateFromGiveaway(parsedId);
+            }
+            else if (string.Equals(SourceType, "WeeklyRelease", StringComparison.OrdinalIgnoreCase))
+            {
+                await CreateFromRelease(parsedId);
+            }
+        }
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var rawDrafts = await PublisherService.GetDraftsAsync();
+            _drafts = rawDrafts.ToList();
+
+            if (_activeDraft == null && _drafts.Count > 0)
+            {
+                SelectDraft(_drafts[0]);
+            }
+
+            // Cargar sorteos y lanzamientos para los modales de creación rápida
+            var giveaways = await GiveawayService.GetGiveawaysAsync(includeExpired: false);
+            _availableGiveaways = giveaways.ToList();
+
+            var releases = await ReleaseService.GetReleasesAsync(fromDate: null);
+            _availableReleases = releases.ToList();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void SelectDraft(InstagramPostDraftDto draft)
+    {
+        _activeDraft = draft;
+        _editorCaption = draft.Caption;
+        _editorTheme = draft.Theme;
+        _previewMode = !string.IsNullOrWhiteSpace(draft.SvgContent) ? "vector" : "cover";
+    }
+
+    private async Task ChangeTheme(string theme)
+    {
+        if (_activeDraft == null) return;
+        _editorTheme = theme;
+        await SaveDraftChanges();
+    }
+
+    private void SetPreviewMode(string mode)
+    {
+        _previewMode = mode;
+    }
+
+    private void AppendHashtag(string tag)
+    {
+        if (!_editorCaption.Contains(tag, StringComparison.OrdinalIgnoreCase))
+        {
+            _editorCaption = $"{_editorCaption.TrimEnd()} {tag}";
+        }
+    }
+
+    private async Task SaveDraftChanges()
+    {
+        if (_activeDraft == null) return;
+
+        try
+        {
+            _isSaving = true;
+            var updated = await PublisherService.UpdateDraftAsync(_activeDraft.Id, new UpdateInstagramDraftCommand(
+                Caption: _editorCaption,
+                Theme: _editorTheme,
+                ImageUrl: _activeDraft.ImageUrl,
+                SvgContent: null
+            ));
+
+            _activeDraft = updated;
+            var index = _drafts.FindIndex(d => d.Id == updated.Id);
+            if (index >= 0) _drafts[index] = updated;
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task PublishNow()
+    {
+        if (_activeDraft == null) return;
+
+        try
+        {
+            _isPublishing = true;
+            // Guardar cambios previos en el copy antes de disparar
+            await SaveDraftChanges();
+
+            var result = await PublisherService.PublishDraftAsync(
+                _activeDraft.Id,
+                CurrentUserService.UserId,
+                CurrentUserService.UserName
+            );
+
+            // Refrescar borrador activo
+            var refreshed = await PublisherService.GetDraftByIdAsync(_activeDraft.Id);
+            if (refreshed != null)
+            {
+                SelectDraft(refreshed);
+                var index = _drafts.FindIndex(d => d.Id == refreshed.Id);
+                if (index >= 0) _drafts[index] = refreshed;
+            }
+        }
+        finally
+        {
+            _isPublishing = false;
+        }
+    }
+
+    private async Task DeleteActiveDraft()
+    {
+        if (_activeDraft == null) return;
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "¿Deseas descartar este borrador de Instagram?");
+        if (confirmed)
+        {
+            await PublisherService.DeleteDraftAsync(_activeDraft.Id);
+            _drafts.RemoveAll(d => d.Id == _activeDraft.Id);
+            _activeDraft = _drafts.FirstOrDefault();
+            if (_activeDraft != null) SelectDraft(_activeDraft);
+        }
+    }
+
+    private async Task CreateFromGiveaway(Guid giveawayId)
+    {
+        _isSelectGiveawayModalOpen = false;
+        var draft = await PublisherService.CreateDraftFromGiveawayAsync(
+            giveawayId,
+            CurrentUserService.UserId,
+            CurrentUserService.UserName
+        );
+
+        if (!_drafts.Any(d => d.Id == draft.Id))
+        {
+            _drafts.Insert(0, draft);
+        }
+        SelectDraft(draft);
+    }
+
+    private async Task CreateFromRelease(Guid releaseId)
+    {
+        _isSelectReleaseModalOpen = false;
+        var draft = await PublisherService.CreateDraftFromWeeklyReleaseAsync(
+            releaseId,
+            CurrentUserService.UserId,
+            CurrentUserService.UserName
+        );
+
+        if (!_drafts.Any(d => d.Id == draft.Id))
+        {
+            _drafts.Insert(0, draft);
+        }
+        SelectDraft(draft);
+    }
+
+    private async Task CopyCaptionToClipboard()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", _editorCaption);
+            _isCopied = true;
+            StateHasChanged();
+            await Task.Delay(2500);
+            _isCopied = false;
+            StateHasChanged();
+        }
+        catch
+        {
+            // Fallback silencioso
+        }
+    }
+
+    private static string GetSourceIcon(InstagramPostSourceType type) => type switch
+    {
+        InstagramPostSourceType.Giveaway => "🎁",
+        InstagramPostSourceType.WeeklyRelease => "📰",
+        InstagramPostSourceType.Game => "🎲",
+        _ => "📝"
+    };
+
+    private static string GetSourceBadgeClass(InstagramPostSourceType type) => type switch
+    {
+        InstagramPostSourceType.Giveaway => "bg-amber-500/15 text-amber-400 border border-amber-500/30",
+        InstagramPostSourceType.WeeklyRelease => "bg-blue-500/15 text-blue-400 border border-blue-500/30",
+        InstagramPostSourceType.Game => "bg-purple-500/15 text-purple-400 border border-purple-500/30",
+        _ => "bg-slate-500/15 text-slate-300 border border-slate-500/30"
+    };
+
+    private static string GetStatusBadgeClass(InstagramPostDraftStatus status) => status switch
+    {
+        InstagramPostDraftStatus.Published => "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
+        InstagramPostDraftStatus.Publishing => "bg-sky-500/15 text-sky-400 border border-sky-500/30 animate-pulse",
+        InstagramPostDraftStatus.Failed => "bg-rose-500/15 text-rose-400 border border-rose-500/30",
+        _ => "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+    };
+}

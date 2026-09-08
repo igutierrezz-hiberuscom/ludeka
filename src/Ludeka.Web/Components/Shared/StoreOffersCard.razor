@@ -1,0 +1,349 @@
+@using Ludeka.Application.Contracts
+@using Ludeka.Core.Enums
+@using Ludeka.Core.ValueObjects
+@inject IUserLocationService LocationService
+@inject IStoreStockService StockService
+
+<div id="donde-comprar" class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-4">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2.5">
+            <span class="text-xl">🛒</span>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h2 class="font-bold text-base text-[var(--text-primary)] leading-tight">Dónde Comprar</h2>
+                    @if (!string.IsNullOrWhiteSpace(_effectiveCountry))
+                    {
+                        <span class="px-2 py-0.5 rounded-md text-[0.68rem] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/30 inline-flex items-center gap-1">
+                            <span>@CountryCatalog.GetFlag(_effectiveCountry)</span>
+                            <span>@_effectiveCountry</span>
+                        </span>
+                    }
+                    @if (_isCheckingStock)
+                    {
+                        <span class="px-2 py-0.5 rounded-md text-[0.65rem] font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20 inline-flex items-center gap-1 animate-pulse">
+                            <span>⚙️</span>
+                            <span>Verificando stock en vivo...</span>
+                        </span>
+                    }
+                </div>
+                <p class="text-xs text-[var(--text-secondary)]">Tiendas colaboradoras con verificación de disponibilidad en tiempo real</p>
+            </div>
+        </div>
+        <a href="/transparencia" class="text-[0.7rem] font-medium text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
+            <span>🛡️</span> 100% Transparente
+        </a>
+    </div>
+
+    @if (_displayedOffers != null && _displayedOffers.Count > 0)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            @foreach (var offer in _displayedOffers)
+            {
+                var stock = GetOfferStock(offer);
+                var isOutOfStock = stock != null && stock.IsOutOfStock;
+
+                <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border @(isOutOfStock ? "border-rose-500/20 opacity-90" : "border-[var(--border-subtle)] hover:border-[var(--border-highlight)]") flex flex-col justify-between gap-3 transition-all group">
+                    <div class="space-y-1.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <a href="@($"/tiendas/{Ludeka.Core.Entities.Game.GenerateSlug(offer.StoreName)}")"
+                               class="font-bold text-sm text-[var(--text-primary)] hover:text-[var(--brand-primary)] transition-colors inline-flex items-center gap-1"
+                               title="Ver ficha de @offer.StoreName en el directorio de tiendas">
+                                <span>@offer.StoreName</span>
+                                <span class="text-[0.65rem] opacity-70">&nearr;</span>
+                            </a>
+                            @if (!string.IsNullOrWhiteSpace(offer.Badge))
+                            {
+                                <span class="px-2 py-0.5 rounded-md bg-[var(--bg-card)] text-[var(--brand-primary)] border border-[var(--border-subtle)] font-bold text-[0.65rem] tracking-wide">
+                                    @offer.Badge
+                                </span>
+                            }
+                        </div>
+
+                        @* Badge territorial de la tienda *@
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 text-[0.68rem] px-2 py-0.5 rounded-md bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-medium">
+                                <span>@CountryCatalog.GetFlag(offer.Country)</span>
+                                <span>@offer.Country</span>
+                            </span>
+                            @if (offer.ShippingCountries != null && offer.ShippingCountries.Count > 1)
+                            {
+                                <span class="text-[0.65rem] text-[var(--text-muted)]" title="Envíos a: @string.Join(", ", offer.ShippingCountries)">
+                                    ✈️ Envíos a @offer.ShippingCountries.Count países
+                                </span>
+                            }
+                        </div>
+
+                        @* Precio orientativo o en vivo *@
+                        <div class="flex items-baseline gap-2 pt-1">
+                            @if (stock?.CurrentPrice.HasValue == true)
+                            {
+                                <span class="text-lg font-black text-[var(--text-primary)]">
+                                    @($"{stock.CurrentPrice.Value:0.00} {offer.Currency}")
+                                </span>
+                                <span class="text-[0.65rem] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">En vivo</span>
+                            }
+                            else if (offer.Price.HasValue)
+                            {
+                                <span class="text-lg font-black text-[var(--text-primary)]">
+                                    @offer.FormattedPrice
+                                </span>
+                                <span class="text-[0.65rem] text-[var(--text-muted)]">PVP orientativo</span>
+                            }
+                            else
+                            {
+                                <span class="text-xs text-[var(--text-muted)] italic">Precio en tienda</span>
+                            }
+                        </div>
+
+                        @* Estado y semáforo de disponibilidad en tiempo real *@
+                        <div class="pt-0.5">
+                            @if (stock == null || stock.IsChecking)
+                            {
+                                <div class="flex items-center gap-1.5 animate-pulse">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-slate-400"></span>
+                                    <span class="text-[0.7rem] font-medium text-slate-400">Consultando disponibilidad...</span>
+                                </div>
+                            }
+                            else if (stock.IsInStock)
+                            {
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <span class="text-[0.7rem] font-semibold text-emerald-400">
+                                            @(stock.AvailableQuantity.HasValue ? $"En stock ({stock.AvailableQuantity} uds)" : "En stock")
+                                        </span>
+                                    </div>
+                                    <span class="text-[0.62rem] text-[var(--text-muted)]" title="@stock.StatusNote">
+                                        @stock.GetRelativeTimeText()
+                                    </span>
+                                </div>
+                            }
+                            else if (stock.IsLowStock)
+                            {
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
+                                        <span class="text-[0.7rem] font-semibold text-amber-400">
+                                            @(stock.AvailableQuantity.HasValue ? $"Últimas {stock.AvailableQuantity} uds" : "Últimas unidades")
+                                        </span>
+                                    </div>
+                                    <span class="text-[0.62rem] text-[var(--text-muted)]" title="@stock.StatusNote">
+                                        @stock.GetRelativeTimeText()
+                                    </span>
+                                </div>
+                            }
+                            else if (stock.IsOutOfStock)
+                            {
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="inline-block w-2 h-2 rounded-full bg-rose-500"></span>
+                                        <span class="text-[0.7rem] font-semibold text-rose-400">Agotado en tienda</span>
+                                    </div>
+                                    <span class="text-[0.62rem] text-[var(--text-muted)]" title="@stock.StatusNote">
+                                        @stock.GetRelativeTimeText()
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="inline-block w-2 h-2 rounded-full bg-slate-400"></span>
+                                        <span class="text-[0.7rem] font-medium text-slate-400">Verificar en web</span>
+                                    </div>
+                                    <span class="text-[0.62rem] text-[var(--text-muted)]" title="@stock.StatusNote">
+                                        @stock.GetRelativeTimeText()
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @* Botón de compra y acción contextual *@
+                    <div class="flex items-center gap-2 pt-1">
+                        @if (isOutOfStock)
+                        {
+                            <a href="@offer.AffiliateUrl"
+                               target="_blank"
+                               rel="noopener noreferrer sponsored"
+                               aria-label="Ver disponibilidad de @(string.IsNullOrWhiteSpace(GameTitle) ? "juego" : GameTitle) en @offer.StoreName"
+                               class="inline-flex items-center justify-center gap-1.5 flex-1 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition-all shadow-sm">
+                                <span>Agotado / Ver tienda</span>
+                                <span class="text-[0.75rem] opacity-70">&nearr;</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@offer.AffiliateUrl"
+                               target="_blank"
+                               rel="noopener noreferrer sponsored"
+                               aria-label="Comprar @(string.IsNullOrWhiteSpace(GameTitle) ? "juego" : GameTitle) en @offer.StoreName"
+                               class="inline-flex items-center justify-center gap-1.5 flex-1 px-3.5 py-2 rounded-lg text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all shadow-sm group-hover:shadow">
+                                <span>Ver en tienda</span>
+                                <span class="text-[0.8rem]">&nearr;</span>
+                            </a>
+                        }
+
+                        <button type="button"
+                                @onclick="() => RefreshOfferStockAsync(offer)"
+                                title="Recomprobar disponibilidad en vivo en @offer.StoreName"
+                                aria-label="Recomprobar disponibilidad en @offer.StoreName"
+                                class="p-2 rounded-lg bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] text-xs transition-colors">
+                            🔄
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_effectiveCountry))
+    {
+        <div class="p-5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-center sm:text-left flex flex-col sm:flex-row items-center gap-3">
+            <span class="text-2xl">📦</span>
+            <div class="text-xs text-[var(--text-secondary)] space-y-1">
+                <p class="font-bold text-[var(--text-primary)]">
+                    No hay tiendas asociadas con disponibilidad o envíos para @CountryCatalog.GetFlag(_effectiveCountry) @_effectiveCountry por el momento.
+                </p>
+                <p>
+                    Para consultar tiendas de otros países o envíos internacionales, puedes desactivar el filtro de país en tu perfil o cambiar la ubicación en la barra superior.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-center sm:text-left flex flex-col sm:flex-row items-center gap-3">
+            <span class="text-2xl">📦</span>
+            <div class="text-xs text-[var(--text-secondary)] space-y-0.5">
+                <p class="font-medium text-[var(--text-primary)]">Sin enlaces de compra vinculados por el momento.</p>
+                <p>Si eres una tienda física o especializada y dispones de stock de este título, puedes contactar con la comunidad para vincularlo.</p>
+            </div>
+        </div>
+    }
+
+    <div class="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[0.68rem] text-[var(--text-muted)] flex-wrap gap-2">
+        <span>
+            💡 <em>Al comprar a través de estos enlaces recibimos una pequeña aportación que ayuda a mantener Ludeka libre de publicidad invasiva.</em>
+        </span>
+        <a href="/transparencia" class="underline hover:text-[var(--text-secondary)]">
+            Transparencia de fondos &rarr;
+        </a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyList<GamePurchaseLink>? Offers { get; set; }
+
+    [Parameter]
+    public string? GameTitle { get; set; }
+
+    private string? _effectiveCountry;
+    private IReadOnlyList<GamePurchaseLink> _displayedOffers = [];
+    private readonly Dictionary<string, StoreStockInfo> _stockByUrl = new(StringComparer.OrdinalIgnoreCase);
+    private bool _isCheckingStock;
+    private bool _hasLoadedInitialStock;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _effectiveCountry = await LocationService.GetEffectiveCountryAsync();
+
+        if (Offers == null || Offers.Count == 0)
+        {
+            _displayedOffers = [];
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_effectiveCountry))
+        {
+            // Filtrado territorial estricto
+            _displayedOffers = Offers.Where(o => o.ShipsTo(_effectiveCountry)).ToList();
+        }
+        else
+        {
+            // Sin filtro excluyente: priorizar por país detectado si existe
+            string? detected = await LocationService.GetDetectedCountryAsync();
+            _displayedOffers = LocationService.PrioritizeByCountry(Offers, detected).ToList();
+        }
+
+        // Sembrar valores iniciales orientativos si no se han cargado todavía
+        foreach (var offer in _displayedOffers)
+        {
+            if (!_stockByUrl.ContainsKey(offer.AffiliateUrl))
+            {
+                _stockByUrl[offer.AffiliateUrl] = offer.InStock
+                    ? StoreStockInfo.InStock(price: offer.Price, note: "Disponibilidad orientativa")
+                    : StoreStockInfo.OutOfStock(note: "Agotado orientativo");
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasLoadedInitialStock && _displayedOffers.Count > 0)
+        {
+            _hasLoadedInitialStock = true;
+            await LoadStockInBackgroundAsync();
+        }
+    }
+
+    private StoreStockInfo? GetOfferStock(GamePurchaseLink offer)
+    {
+        if (string.IsNullOrWhiteSpace(offer.AffiliateUrl))
+            return null;
+
+        _stockByUrl.TryGetValue(offer.AffiliateUrl, out var stock);
+        return stock;
+    }
+
+    private async Task LoadStockInBackgroundAsync()
+    {
+        if (_displayedOffers.Count == 0)
+            return;
+
+        _isCheckingStock = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var batchResults = await StockService.GetStockBatchAsync(_displayedOffers);
+            foreach (var kvp in batchResults)
+            {
+                _stockByUrl[kvp.Key] = kvp.Value;
+            }
+        }
+        catch
+        {
+            // Resiliencia total: degradación transparente sin errores en pantalla
+        }
+        finally
+        {
+            _isCheckingStock = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task RefreshOfferStockAsync(GamePurchaseLink offer)
+    {
+        if (offer == null || string.IsNullOrWhiteSpace(offer.AffiliateUrl))
+            return;
+
+        StockService.InvalidateStockCache(offer.AffiliateUrl);
+        _stockByUrl[offer.AffiliateUrl] = StoreStockInfo.Checking();
+        StateHasChanged();
+
+        try
+        {
+            var updated = await StockService.GetStockAsync(offer.StoreName, offer.AffiliateUrl);
+            _stockByUrl[offer.AffiliateUrl] = updated;
+        }
+        catch
+        {
+            _stockByUrl[offer.AffiliateUrl] = StoreStockInfo.Unknown("Error al verificar en vivo");
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+}

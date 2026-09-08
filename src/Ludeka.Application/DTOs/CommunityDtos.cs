@@ -19,7 +19,13 @@ public record GiveawayDto(
     string? GameTitle,
     string? ThumbnailUrl,
     bool IsCommunityExclusive,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    bool IsPromoted = false,
+    string Country = "España",
+    string CountryFlag = "🇪🇸",
+    bool IsInternational = false,
+    string? InstagramPermalink = null,
+    bool IsPublishedOnInstagram = false);
 
 public record CreateGiveawayRequest(
     string Title,
@@ -31,7 +37,9 @@ public record CreateGiveawayRequest(
     Guid? GameId = null,
     string? GameTitle = null,
     string? ThumbnailUrl = null,
-    bool IsCommunityExclusive = false);
+    bool IsCommunityExclusive = false,
+    bool IsPromoted = false,
+    string Country = "España");
 
 public record WeeklyReleaseDto(
     Guid Id,
@@ -42,7 +50,9 @@ public record WeeklyReleaseDto(
     string? CoverImageUrl,
     decimal? EstimatedPvp,
     bool IsReprint,
-    string? Notes);
+    string? Notes,
+    string? InstagramPermalink = null,
+    bool IsPublishedOnInstagram = false);
 
 public record CreateWeeklyReleaseRequest(
     string Title,

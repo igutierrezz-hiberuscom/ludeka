@@ -67,6 +67,9 @@ public static class BggXmlParser
         // ADN lúdico heurístico según enlaces y categorías
         var (confrontation, style, isSolo) = InferGameDna(item, scalability);
 
+        // Fundas de cartas
+        var sleeves = BggSleeveParser.ParseSleeves(item);
+
         return new Game(
             bggId: bggId,
             originalTitle: originalTitle,
@@ -87,7 +90,8 @@ public static class BggXmlParser
             language: language,
             footprint: TableFootprint.StandardTable,
             duration: new GameDuration(minTime, maxTime, estPerPlayer),
-            scalability: scalability
+            scalability: scalability,
+            sleeves: sleeves
         );
     }
 
@@ -326,6 +330,37 @@ public static class BggXmlParser
                 BggId: bggId,
                 Title: WebUtility.HtmlDecode(title).Trim(),
                 YearPublished: year
+            ));
+        }
+
+        return results;
+    }
+
+    public static IReadOnlyList<BggTopGameDto> ParseHotGames(XDocument doc)
+    {
+        var results = new List<BggTopGameDto>();
+        if (doc.Root == null) return results;
+
+        foreach (var item in doc.Root.Elements("item"))
+        {
+            if (!int.TryParse(item.Attribute("id")?.Value, out int bggId) || bggId <= 0)
+                continue;
+
+            int? rank = int.TryParse(item.Attribute("rank")?.Value, out int rk) ? rk : null;
+            string title = item.Element("name")?.Attribute("value")?.Value
+                ?? item.Element("name")?.Value
+                ?? "Desconocido";
+
+            int? year = int.TryParse(item.Element("yearpublished")?.Attribute("value")?.Value, out int yr) ? yr : null;
+            string? thumb = item.Element("thumbnail")?.Attribute("value")?.Value
+                ?? item.Element("thumbnail")?.Value;
+
+            results.Add(new BggTopGameDto(
+                BggId: bggId,
+                Title: WebUtility.HtmlDecode(title).Trim(),
+                BggRank: rank,
+                YearPublished: year,
+                ThumbnailUrl: string.IsNullOrWhiteSpace(thumb) ? null : thumb.Trim()
             ));
         }
 

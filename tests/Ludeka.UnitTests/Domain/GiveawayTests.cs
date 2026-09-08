@@ -112,4 +112,26 @@ public class GiveawayTests
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => giveaway.ExtendDeadline(invalidDate));
     }
+
+    [Fact]
+    public void SetPromoted_SetsIsPromotedFlagCorrectly()
+    {
+        // Arrange
+        var giveaway = new Giveaway(
+            title: "Sorteo Destacado",
+            organizer: "Maldito Games",
+            url: "https://malditogames.com/sorteo",
+            platform: GiveawayPlatform.Instagram,
+            deadlineAt: DateTimeOffset.UtcNow.AddDays(10),
+            isPromoted: false);
+
+        Assert.False(giveaway.IsPromoted);
+
+        // Act
+        giveaway.SetPromoted(true);
+
+        // Assert
+        Assert.True(giveaway.IsPromoted);
+        Assert.NotNull(giveaway.UpdatedAt);
+    }
 }

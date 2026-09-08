@@ -1,0 +1,263 @@
+@using Ludeka.Application.Contracts
+@using Ludeka.Application.DTOs
+@using Ludeka.Core.Enums
+@inject IGameIssueReportService ReportService
+@inject ICurrentUserService CurrentUserService
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="report-modal-title"
+         @onkeydown="HandleKeyDown">
+        <div class="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 sm:p-8 shadow-2xl space-y-6 relative"
+             @onclick:stopPropagation="true">
+            
+            @* Botón cerrar *@
+            <button type="button"
+                    @onclick="Close"
+                    class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--bg-surface-elevated)] transition-colors"
+                    aria-label="Cerrar modal de reporte">
+                &times;
+            </button>
+
+            @if (_isSuccess)
+            {
+                @* Estado de Éxito y Agradecimiento *@
+                <div class="py-8 text-center space-y-4 animate-fade-in">
+                    <span class="text-6xl block animate-bounce">🎲</span>
+                    <h2 class="text-2xl font-black text-[var(--text-primary)] tracking-tight">
+                        ¡Gracias por tu colaboración!
+                    </h2>
+                    <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto leading-relaxed">
+                        Tu reporte sobre <strong>@GameTitle</strong> ha quedado registrado. El equipo de moderadores de Ludeka revisará la información para mantener el catálogo en español impecable.
+                    </p>
+                    <div class="pt-4">
+                        <button type="button"
+                                @onclick="Close"
+                                class="px-6 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs font-bold transition-all shadow-md">
+                            Volver a la ficha
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @* Cabecera *@
+                <div class="border-b border-[var(--border-subtle)] pb-4 pr-8">
+                    <div class="flex items-center gap-2 text-xs uppercase font-bold tracking-wider text-[var(--brand-primary)] mb-1">
+                        <span>🚩</span>
+                        <span>Calidad Comunitaria</span>
+                    </div>
+                    <h2 id="report-modal-title" class="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                        Reportar problema en @GameTitle
+                    </h2>
+                    <p class="text-xs text-[var(--text-muted)] mt-1">
+                        Ayúdanos a corregir datos desactualizados, imágenes incorrectas o enlaces caídos.
+                    </p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold flex items-center gap-2">
+                        <span>⚠️</span>
+                        <span>@_errorMessage</span>
+                    </div>
+                }
+
+                @* Selector de Tipología de Incidencia *@
+                <div class="space-y-2.5">
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                        ¿Qué problema has detectado?
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        @foreach (var (type, label, icon) in _issueTypes)
+                        {
+                            var isSelected = _selectedIssueType == type;
+                            <button type="button"
+                                    @onclick="() => _selectedIssueType = type"
+                                    class="p-3 rounded-2xl text-left border transition-all flex items-start gap-2.5 text-xs @(isSelected ? "bg-[var(--brand-primary)]/10 border-[var(--brand-primary)] text-[var(--text-primary)] font-bold shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-highlight)]")">
+                                <span class="text-lg shrink-0">@icon</span>
+                                <div class="flex-1">
+                                    <span class="block">@label</span>
+                                </div>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @* Campo de Detalles *@
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                        <label for="report-details-input">
+                            Detalles o sugerencia de corrección @(_selectedIssueType == GameIssueType.Other ? "(Obligatorio)" : "(Opcional)")
+                        </label>
+                        <span class="text-[0.68rem] text-[var(--text-muted)] font-mono">
+                            @((_details?.Length ?? 0))/1000
+                        </span>
+                    </div>
+                    <textarea id="report-details-input"
+                              rows="3"
+                              maxlength="1000"
+                              placeholder="Describe brevemente el fallo (ej. la edición correcta es la de 2024 de Devir, la duración real es 45-60 min...)"
+                              @bind="_details"
+                              @bind:event="oninput"
+                              class="w-full p-3 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs leading-relaxed resize-none focus:outline-none focus:border-[var(--brand-primary)]">
+                    </textarea>
+                </div>
+
+                @* Identificación del Reportador *@
+                <div class="pt-1">
+                    @if (!string.IsNullOrWhiteSpace(CurrentUserService.UserId))
+                    {
+                        <div class="p-3 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                            <span class="text-[var(--text-muted)]">Reportando como:</span>
+                            <div class="flex items-center gap-1.5 font-bold text-[var(--text-primary)]">
+                                <span>@(CurrentUserService.IsFoundingTeam ? "🛡️" : "👤")</span>
+                                <span>@CurrentUserService.UserName</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-1.5">
+                            <label for="report-alias-input" class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                                Tu nombre o alias <span class="text-[var(--text-muted)] font-normal lowercase">(opcional)</span>
+                            </label>
+                            <input id="report-alias-input"
+                                   type="text"
+                                   maxlength="100"
+                                   placeholder="Comunidad anónima (o tu apodo jugón)"
+                                   @bind="_reporterAlias"
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--brand-primary)]" />
+                        </div>
+                    }
+                </div>
+
+                @* Botones de Acción *@
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
+                    <button type="button"
+                            @onclick="Close"
+                            disabled="@_isSubmitting"
+                            class="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="button"
+                            @onclick="SubmitReport"
+                            disabled="@_isSubmitting"
+                            class="px-5 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 disabled:opacity-50">
+                        @if (_isSubmitting)
+                        {
+                            <span class="animate-spin text-sm">⚙️</span>
+                            <span>Enviando...</span>
+                        }
+                        else
+                        {
+                            <span>🚩</span>
+                            <span>Enviar reporte</span>
+                        }
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public Guid GameId { get; set; }
+    [Parameter] public string GameSlug { get; set; } = string.Empty;
+    [Parameter] public string GameTitle { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<GameIssueReportDto> OnReportSubmitted { get; set; }
+
+    private GameIssueType _selectedIssueType = GameIssueType.WrongImage;
+    private string? _details;
+    private string? _reporterAlias;
+    private bool _isSubmitting;
+    private bool _isSuccess;
+    private string? _errorMessage;
+
+    private static readonly (GameIssueType Type, string Label, string Icon)[] _issueTypes =
+    [
+        (GameIssueType.WrongImage, "Imagen incorrecta o de otra edición", "🖼️"),
+        (GameIssueType.BrokenImage, "Imagen no carga o enlace caído", "🚫"),
+        (GameIssueType.IncorrectPlayerCount, "Nº de jugadores o semáforo erróneo", "👥"),
+        (GameIssueType.IncorrectDuration, "Duración de partida desajustada", "⏱️"),
+        (GameIssueType.IncorrectAge, "Edad mínima o recomendada errónea", "🎂"),
+        (GameIssueType.ErroneousMetadata, "Erratas en título, autor o editorial", "📝"),
+        (GameIssueType.BrokenPurchaseLink, "Enlace de compra caído o sin stock", "🛒"),
+        (GameIssueType.Other, "Otro problema o sugerencia libre", "💬")
+    ];
+
+    private async Task SubmitReport()
+    {
+        _errorMessage = null;
+
+        if (_selectedIssueType == GameIssueType.Other && string.IsNullOrWhiteSpace(_details))
+        {
+            _errorMessage = "Por favor, especifica el detalle de la incidencia antes de enviar.";
+            return;
+        }
+
+        try
+        {
+            _isSubmitting = true;
+
+            var reporter = !string.IsNullOrWhiteSpace(CurrentUserService.UserId)
+                ? CurrentUserService.UserName
+                : (!string.IsNullOrWhiteSpace(_reporterAlias) ? _reporterAlias.Trim() : "Comunidad anónima");
+
+            var userId = !string.IsNullOrWhiteSpace(CurrentUserService.UserId) ? CurrentUserService.UserId : null;
+
+            var command = new CreateGameReportCommand(
+                GameId: GameId,
+                GameSlug: GameSlug,
+                GameTitle: GameTitle,
+                IssueType: _selectedIssueType,
+                Details: _details,
+                ReporterNameOrAlias: reporter,
+                UserId: userId
+            );
+
+            var report = await ReportService.CreateReportAsync(command);
+
+            _isSuccess = true;
+            if (OnReportSubmitted.HasDelegate)
+            {
+                await OnReportSubmitted.InvokeAsync(report);
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Ocurrió un error al registrar el reporte: {ex.Message}";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private async Task Close()
+    {
+        _isSuccess = false;
+        _details = null;
+        _reporterAlias = null;
+        _errorMessage = null;
+        _selectedIssueType = GameIssueType.WrongImage;
+
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await Close();
+        }
+    }
+}

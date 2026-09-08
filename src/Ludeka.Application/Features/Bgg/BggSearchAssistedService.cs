@@ -6,6 +6,8 @@ using Ludeka.Application.Contracts;
 using Ludeka.Application.DTOs;
 using Ludeka.Core.Entities;
 using Ludeka.Core.Enums;
+using Ludeka.Core.ValueObjects;
+using Microsoft.Extensions.Logging;
 
 namespace Ludeka.Application.Features.Bgg;
 
@@ -16,19 +18,25 @@ public class BggSearchAssistedService : IBggSearchAssistedService
     private readonly IUserCollectionRepository _collectionRepo;
     private readonly IPendingBggImportRepository _pendingRepo;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IAiGameSummaryService? _aiSummaryService;
+    private readonly Microsoft.Extensions.Logging.ILogger<BggSearchAssistedService>? _logger;
 
     public BggSearchAssistedService(
         IBggClient bggClient,
         IGameRepository gameRepo,
         IUserCollectionRepository collectionRepo,
         IPendingBggImportRepository pendingRepo,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IAiGameSummaryService? aiSummaryService = null,
+        Microsoft.Extensions.Logging.ILogger<BggSearchAssistedService>? logger = null)
     {
         _bggClient = bggClient;
         _gameRepo = gameRepo;
         _collectionRepo = collectionRepo;
         _pendingRepo = pendingRepo;
         _currentUserService = currentUserService;
+        _aiSummaryService = aiSummaryService;
+        _logger = logger;
     }
 
     public async Task<IReadOnlyList<BggSearchResultDto>> SearchGamesAsync(string query, CancellationToken ct = default)
@@ -96,6 +104,26 @@ public class BggSearchAssistedService : IBggSearchAssistedService
             if (fetchedGame == null)
             {
                 throw new InvalidOperationException($"No se pudo descargar la información de BoardGameGeek para el identificador {bggId}.");
+            }
+
+            if (_aiSummaryService != null)
+            {
+                try
+                {
+                    var summaryDto = await _aiSummaryService.GenerateSummaryAsync(fetchedGame, ct);
+                    fetchedGame.SetAiSummary(new AiGameSummary(
+                        summaryDto.GeneralVerdict,
+                        summaryDto.ScalabilitySummary,
+                        summaryDto.AgeSummary,
+                        summaryDto.FootprintSummary,
+                        summaryDto.Model,
+                        summaryDto.GeneratedAt ?? DateTime.UtcNow
+                    ));
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogWarning(ex, "No se pudo generar la síntesis de IA al descargar el juego #{BggId} ('{Title}') de BGG.", bggId, fetchedGame.SpanishTitle);
+                }
             }
 
             await _gameRepo.AddRangeAsync([fetchedGame], ct);

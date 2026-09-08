@@ -1,0 +1,454 @@
+@page "/admin/eventos"
+@rendermode InteractiveServer
+@using Ludeka.Core.ValueObjects
+@inject IBoardGameEventService EventService
+@inject IImageStorageService ImageStorageService
+@inject ICurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<PageTitle>Gestión Editorial de Eventos — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Verificación de Seguridad y Roles *@
+    @if (!IsAuthorized)
+    {
+        <div class="p-8 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center space-y-3">
+            <span class="text-4xl block">🛡️</span>
+            <h2 class="text-lg font-bold text-rose-500">Acceso Restringido a Moderación</h2>
+            <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto">
+                Esta sección está reservada a miembros de la Mesa Fundadora y moderadores del catálogo lúdico.
+            </p>
+            <a href="/eventos" class="inline-block px-4 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] hover:border-[var(--brand-primary)]">
+                Volver al Calendario de Eventos
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-emerald-400 text-xs font-bold mb-2">
+                    <span>🛡️</span> Mesa Fundadora & Moderación
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                    Gestión Editorial de Eventos & Ferias
+                </h1>
+                <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
+                    Alta, edición, eliminación y subida de carteles de las grandes citas lúdicas del calendario.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="/eventos" class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                    👁️ Ver Público
+                </a>
+                <button type="button"
+                        @onclick="OpenCreateModal"
+                        class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                    <span>➕</span> Nuevo Evento
+                </button>
+            </div>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="py-16 text-center text-[var(--text-muted)]">
+                <div class="inline-block animate-spin text-3xl mb-2">🎪</div>
+                <p class="text-sm font-semibold">Cargando directorio de ferias...</p>
+            </div>
+        }
+        else
+        {
+            <div class="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] overflow-hidden shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] border-b border-[var(--border-subtle)] font-bold">
+                            <tr>
+                                <th class="p-3.5">Cartel</th>
+                                <th class="p-3.5">Título & Ciudad</th>
+                                <th class="p-3.5">País</th>
+                                <th class="p-3.5">Fechas</th>
+                                <th class="p-3.5">Organizador</th>
+                                <th class="p-3.5">Estado</th>
+                                <th class="p-3.5 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--border-subtle)]">
+                            @foreach (var evt in _events)
+                            {
+                                <tr class="hover:bg-[var(--bg-surface)] transition-colors">
+                                    <td class="p-3.5">
+                                        <img src="@evt.ImageUrl"
+                                             alt="@evt.Title"
+                                             class="w-12 h-12 rounded-lg object-cover border border-[var(--border-subtle)]" />
+                                    </td>
+                                    <td class="p-3.5 font-medium">
+                                        <div class="font-bold text-[var(--text-primary)] text-sm">@evt.Title</div>
+                                        <div class="text-[var(--text-secondary)] mt-0.5">📍 @evt.Location</div>
+                                    </td>
+                                    <td class="p-3.5">
+                                        <span class="inline-flex items-center gap-1 font-semibold text-[var(--text-primary)]">
+                                            <span>@CountryCatalog.GetFlag(evt.Country)</span>
+                                            <span>@(evt.IsInternational ? "Internacional" : evt.Country)</span>
+                                        </span>
+                                    </td>
+                                    <td class="p-3.5">
+                                        <span class="font-semibold text-[var(--text-primary)]">@evt.FormattedDates</span>
+                                    </td>
+                                    <td class="p-3.5 text-[var(--text-secondary)]">
+                                        @evt.Organizer
+                                    </td>
+                                    <td class="p-3.5">
+                                        <span class="px-2.5 py-1 rounded-full font-bold @(evt.IsOfficial ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20")">
+                                            @(evt.IsOfficial ? "⭐ Oficial" : "Comunitario")
+                                        </span>
+                                    </td>
+                                    <td class="p-3.5 text-right space-x-2">
+                                        <button type="button"
+                                                @onclick="() => OpenEditModal(evt)"
+                                                class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-[var(--brand-primary)] font-bold transition-colors">
+                                            ✏️ Editar
+                                        </button>
+                                        <button type="button"
+                                                @onclick="() => ConfirmDelete(evt.Id, evt.Title)"
+                                                class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-500 hover:bg-rose-500/20 font-bold transition-colors">
+                                            🗑️
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@* Modal de Edición / Creación *@
+@if (_isModalOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true">
+        <div class="w-full max-w-lg rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+                <h2 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>🎪</span> @(_editingId.HasValue ? "Editar Evento Lúdico" : "Nuevo Evento Lúdico")
+                </h2>
+                <button type="button"
+                        @onclick="() => _isModalOpen = false"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xl">
+                    &times;
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="font-semibold text-[var(--text-secondary)] block mb-1">Título del Evento *</label>
+                    <input type="text"
+                           @bind="_formTitle"
+                           placeholder="Ej. Festival Internacional de Juegos de Córdoba 2026"
+                           class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                </div>
+
+                <div>
+                    <label class="font-semibold text-[var(--text-secondary)] block mb-1">Ubicación y Ciudad *</label>
+                    <input type="text"
+                           @bind="_formLocation"
+                           placeholder="Ej. Córdoba — Palacio de la Merced"
+                           class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-semibold text-[var(--text-secondary)] block mb-1">Fecha de Inicio *</label>
+                        <input type="date"
+                               @bind="_formStartDate"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+                    <div>
+                        <label class="font-semibold text-[var(--text-secondary)] block mb-1">Fecha de Fin *</label>
+                        <input type="date"
+                               @bind="_formEndDate"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-semibold text-[var(--text-secondary)] block mb-1">Organizador</label>
+                        <input type="text"
+                               @bind="_formOrganizer"
+                               placeholder="Ej. Jugamos Tod@s"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+                    <div>
+                        <label class="font-semibold text-[var(--text-secondary)] block mb-1">Web Oficial (URL)</label>
+                        <input type="url"
+                               @bind="_formWebsiteUrl"
+                               placeholder="https://festivaldejuegos.es"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-semibold text-[var(--text-secondary)] block mb-1">País / Ámbito Territorial *</label>
+                    <select @bind="_formCountry"
+                            class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]">
+                        <option value="España">🇪🇸 España</option>
+                        <option value="Internacional">🌎 Internacional (Circuito Global)</option>
+                        @foreach (var c in CountryCatalog.GetAllCountries().Where(c => c.Name != "España"))
+                        {
+                            <option value="@c.Name">@c.FlagEmoji @c.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label class="font-semibold text-[var(--text-secondary)] block mb-1">Imagen o Cartel Promocional *</label>
+                    <input type="text"
+                           @bind="_formImageUrl"
+                           placeholder="https://... o /images/events/..."
+                           class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] mb-2" />
+
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
+                        <span class="text-base">📁</span>
+                        <div class="flex-1">
+                            <span class="text-[0.65rem] text-[var(--text-muted)] block">O subir archivo local (PNG, JPG, WEBP &lt; 5MB):</span>
+                            <InputFile OnChange="HandlePosterUpload" class="text-xs text-[var(--text-secondary)] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[var(--brand-primary)] file:text-white hover:file:opacity-90 cursor-pointer" />
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-semibold text-[var(--text-secondary)] block mb-1">Descripción del Evento</label>
+                    <textarea rows="3"
+                              @bind="_formDescription"
+                              placeholder="Detalles sobre zona de editoriales, entrega de premios, zona de prototipos..."
+                              class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]"></textarea>
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                    <input type="checkbox"
+                           id="isOfficialEvt"
+                           @bind="_formIsOfficial"
+                           class="rounded bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--brand-primary)] focus:ring-0" />
+                    <label for="isOfficialEvt" class="text-[var(--text-secondary)] font-medium cursor-pointer">
+                        ⭐ Gran Cita Oficial del Calendario
+                    </label>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_formError))
+            {
+                <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs">
+                    @_formError
+                </div>
+            }
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-subtle)]">
+                <button type="button"
+                        @onclick="() => _isModalOpen = false"
+                        class="px-4 py-2 rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] text-xs font-bold transition-colors">
+                    Cancelar
+                </button>
+                <button type="button"
+                        @onclick="SaveEventAsync"
+                        class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs font-bold transition-opacity">
+                    Guardar Evento
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _isLoading = true;
+    private IReadOnlyList<BoardGameEventDto> _events = new List<BoardGameEventDto>();
+
+    private bool IsAuthorized => CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator");
+
+    private bool _isModalOpen;
+    private Guid? _editingId;
+    private string _formTitle = string.Empty;
+    private string _formDescription = string.Empty;
+    private string _formLocation = string.Empty;
+    private string _formImageUrl = string.Empty;
+    private DateOnly _formStartDate = DateOnly.FromDateTime(DateTime.UtcNow);
+    private DateOnly _formEndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+    private string? _formWebsiteUrl;
+    private string _formOrganizer = string.Empty;
+    private string _formCountry = "España";
+    private bool _formIsOfficial = true;
+    private string? _formError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsAuthorized)
+        {
+            await LoadDataAsync();
+        }
+        else
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var upcoming = await EventService.GetUpcomingEventsAsync(100);
+            var past = await EventService.GetPastEventsAsync(100);
+            _events = upcoming.Concat(past).ToList();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void OpenCreateModal()
+    {
+        _editingId = null;
+        _formTitle = string.Empty;
+        _formDescription = string.Empty;
+        _formLocation = string.Empty;
+        _formImageUrl = string.Empty;
+        _formStartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
+        _formEndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(9));
+        _formWebsiteUrl = null;
+        _formOrganizer = string.Empty;
+        _formCountry = "España";
+        _formIsOfficial = true;
+        _formError = null;
+        _isModalOpen = true;
+    }
+
+    private void OpenEditModal(BoardGameEventDto evt)
+    {
+        _editingId = evt.Id;
+        _formTitle = evt.Title;
+        _formDescription = evt.Description;
+        _formLocation = evt.Location;
+        _formImageUrl = evt.ImageUrl;
+        _formStartDate = evt.StartDate;
+        _formEndDate = evt.EndDate;
+        _formWebsiteUrl = evt.WebsiteUrl;
+        _formOrganizer = evt.Organizer;
+        _formCountry = evt.IsInternational ? "Internacional" : evt.Country;
+        _formIsOfficial = evt.IsOfficial;
+        _formError = null;
+        _isModalOpen = true;
+    }
+
+    private async Task HandlePosterUpload(InputFileChangeEventArgs e)
+    {
+        _formError = null;
+        var file = e.File;
+        if (file == null) return;
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            var result = await ImageStorageService.SaveEventPosterAsync(
+                eventSlugOrId: string.IsNullOrWhiteSpace(_formTitle) ? "evento" : _formTitle,
+                contentStream: stream,
+                originalFileName: file.Name,
+                contentType: file.ContentType);
+
+            if (result.Success && !string.IsNullOrWhiteSpace(result.RelativePath))
+            {
+                _formImageUrl = result.RelativePath;
+            }
+            else
+            {
+                _formError = result.ErrorMessage ?? "Error al procesar la subida del cartel.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _formError = $"Error al subir el archivo: {ex.Message}";
+        }
+    }
+
+    private async Task SaveEventAsync()
+    {
+        _formError = null;
+
+        if (string.IsNullOrWhiteSpace(_formTitle))
+        {
+            _formError = "El título del evento es obligatorio.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_formLocation))
+        {
+            _formError = "La ubicación o recinto es obligatoria.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_formImageUrl))
+        {
+            _formError = "La imagen o cartel del evento es obligatoria.";
+            return;
+        }
+
+        if (_formEndDate < _formStartDate)
+        {
+            _formError = "La fecha de fin no puede ser anterior a la fecha de inicio.";
+            return;
+        }
+
+        try
+        {
+            if (_editingId.HasValue)
+            {
+                var updateReq = new UpdateBoardGameEventRequest(
+                    Title: _formTitle,
+                    Description: _formDescription,
+                    ImageUrl: _formImageUrl,
+                    StartDate: _formStartDate,
+                    EndDate: _formEndDate,
+                    Location: _formLocation,
+                    Country: _formCountry,
+                    WebsiteUrl: _formWebsiteUrl,
+                    Organizer: _formOrganizer,
+                    IsOfficial: _formIsOfficial);
+
+                await EventService.UpdateEventAsync(_editingId.Value, updateReq);
+            }
+            else
+            {
+                var createReq = new CreateBoardGameEventRequest(
+                    Title: _formTitle,
+                    Description: _formDescription,
+                    ImageUrl: _formImageUrl,
+                    StartDate: _formStartDate,
+                    EndDate: _formEndDate,
+                    Location: _formLocation,
+                    Country: _formCountry,
+                    WebsiteUrl: _formWebsiteUrl,
+                    Organizer: _formOrganizer,
+                    IsOfficial: _formIsOfficial);
+
+                await EventService.CreateEventAsync(createReq);
+            }
+
+            _isModalOpen = false;
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            _formError = ex.Message;
+        }
+    }
+
+    private async Task ConfirmDelete(Guid id, string title)
+    {
+        await EventService.DeleteEventAsync(id);
+        await LoadDataAsync();
+    }
+}

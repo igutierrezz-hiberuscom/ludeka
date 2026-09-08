@@ -41,6 +41,9 @@ public class BggSearchAssistedServiceTests
 
         public Task<IReadOnlyList<BggSearchResultDto>> SearchGamesAsync(string query, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<BggSearchResultDto>>(SearchResults);
+
+        public Task<IReadOnlyList<BggTopGameDto>> FetchTopGamesAsync(int limit = 50, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<BggTopGameDto>>([]);
     }
 
     private class FakeGameRepo : IGameRepository
@@ -235,5 +238,54 @@ public class BggSearchAssistedServiceTests
         Assert.Single(fakeCollectionRepo.Items);
         Assert.Equal(gameId, fakeCollectionRepo.Items[0].GameId);
         Assert.Equal(CollectionStatus.InCollection, fakeCollectionRepo.Items[0].Status);
+    }
+
+    [Fact]
+    public async Task AddGameToCollectionAsync_WhenGameNotCataloged_AttachesAiSummaryIfServiceAvailable()
+    {
+        // Arrange
+        var fakeBgg = new FakeBggClient();
+        var arkNova = CreateGame(342942, "Ark Nova");
+        fakeBgg.Games[342942] = arkNova;
+
+        var fakeGameRepo = new FakeGameRepo();
+        var fakeCollectionRepo = new FakeCollectionRepo();
+        var fakePendingRepo = new FakePendingRepo();
+        var fakeAi = new FakeAiSummaryService();
+
+        var service = new BggSearchAssistedService(
+            fakeBgg, fakeGameRepo, fakeCollectionRepo, fakePendingRepo, new FakeCurrentUserService(), fakeAi);
+
+        // Act
+        var gameId = await service.AddGameToCollectionAsync(342942, CollectionStatus.InCollection);
+
+        // Assert
+        Assert.Single(fakeGameRepo.Games);
+        var cataloged = fakeGameRepo.Games[0];
+        Assert.NotNull(cataloged.AiSummary);
+        Assert.Equal("Fake AI Summary for Ark Nova", cataloged.AiSummary.GeneralVerdict);
+    }
+
+    private class FakeAiSummaryService : IAiGameSummaryService
+    {
+        public Task<AiGameSummaryDto> GenerateSummaryAsync(Game game, CancellationToken ct = default)
+        {
+            return Task.FromResult(new AiGameSummaryDto(
+                game.Id,
+                game.SpanishTitle,
+                "Ideal 2",
+                "14+",
+                "Monstruo",
+                $"Fake AI Summary for {game.SpanishTitle}",
+                "FakeModel",
+                DateTime.UtcNow
+            ));
+        }
+
+        public Task<AiGameSummaryDto> EnsureSummaryForGameAsync(Guid gameId, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
+        public Task<AiBatchProcessingResultDto> ProcessPendingSummariesBatchAsync(int batchSize = 20, CancellationToken ct = default)
+            => Task.FromResult(new AiBatchProcessingResultDto(0, 0, 0, []));
     }
 }

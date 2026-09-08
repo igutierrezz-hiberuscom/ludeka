@@ -13,9 +13,14 @@ public class WeeklyRelease
     public decimal? EstimatedPvp { get; private set; }
     public bool IsReprint { get; private set; }
     public string? Notes { get; private set; }
+    public string? InstagramMediaId { get; private set; }
+    public string? InstagramPermalink { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? UpdatedAt { get; private set; }
 
     public virtual Game? Game { get; private set; }
+
+    public bool IsPublishedOnInstagram => !string.IsNullOrWhiteSpace(InstagramPermalink);
 
     private WeeklyRelease() { }
 
@@ -44,5 +49,26 @@ public class WeeklyRelease
         IsReprint = isReprint;
         Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
         CreatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void LinkGame(Guid gameId)
+    {
+        if (gameId == Guid.Empty)
+            throw new ArgumentException("El identificador del juego vinculado no puede ser vacío.", nameof(gameId));
+
+        GameId = gameId;
+    }
+
+    public void MarkPublishedOnInstagram(string mediaId, string permalink)
+    {
+        if (string.IsNullOrWhiteSpace(mediaId))
+            throw new ArgumentException("El identificador de medio de Instagram no puede estar vacío.", nameof(mediaId));
+
+        if (string.IsNullOrWhiteSpace(permalink))
+            throw new ArgumentException("El enlace permanente de Instagram no puede estar vacío.", nameof(permalink));
+
+        InstagramMediaId = mediaId.Trim();
+        InstagramPermalink = permalink.Trim();
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 }

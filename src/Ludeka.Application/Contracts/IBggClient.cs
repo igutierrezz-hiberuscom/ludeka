@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +10,17 @@ namespace Ludeka.Application.Contracts;
 public interface IBggClient
 {
     Task<Game?> FetchGameByBggIdAsync(int bggId, CancellationToken ct = default);
-    Task<IReadOnlyList<BggCollectionItemDto>> FetchUserCollectionAsync(string username, CancellationToken ct = default);
+
+    Task<IReadOnlyList<BggCollectionItemDto>> FetchUserCollectionAsync(string username, CancellationToken ct = default)
+        => FetchUserCollectionAsync(username, null, ct);
+
+    Task<IReadOnlyList<BggCollectionItemDto>> FetchUserCollectionAsync(
+        string username,
+        IProgress<BggImportProgressReport>? progress,
+        CancellationToken ct = default)
+        => FetchUserCollectionAsync(username, ct);
+
     Task<IReadOnlyList<BggSearchResultDto>> SearchGamesAsync(string query, CancellationToken ct = default);
+
+    Task<IReadOnlyList<BggTopGameDto>> FetchTopGamesAsync(int limit = 50, CancellationToken ct = default);
 }

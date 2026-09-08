@@ -1,0 +1,269 @@
+@page "/eventos"
+@rendermode InteractiveServer
+@using Ludeka.Application.Contracts
+@using Ludeka.Core.ValueObjects
+@inject IBoardGameEventService EventService
+@inject ICurrentUserService CurrentUserService
+@inject IUserLocationService LocationService
+
+<PageTitle>Grandes Citas y Ferias Lúdicas — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Encabezado de Página *@
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold mb-2">
+                <span>🎪</span> Calendario Oficial del Sector
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                Grandes Citas, Ferias & Festivales
+            </h1>
+            <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
+                La guía de referencia para los grandes festivales, convenciones y encuentros de juegos de mesa en España y el circuito internacional.
+            </p>
+        </div>
+
+        @if (IsModerator)
+        {
+            <div class="flex items-center gap-3">
+                <a href="/admin/eventos"
+                   class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                    <span>⚙️</span> Gestionar Eventos
+                </a>
+            </div>
+        }
+    </div>
+
+    @* Pestañas de Navegación Temporal *@
+    <div class="flex items-center gap-3 border-b border-[var(--border-subtle)]" role="tablist" aria-label="Pestañas de Eventos">
+        <button type="button"
+                id="tab-upcoming"
+                role="tab"
+                aria-selected="@(_activeTab == Tab.Upcoming ? "true" : "false")"
+                @onclick="() => SwitchTab(Tab.Upcoming)"
+                class="pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 @(_activeTab == Tab.Upcoming ? "border-[var(--brand-primary)] text-[var(--text-primary)]" : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+            <span>🟢</span> Próximas Citas
+            <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)]">@_upcomingEvents.Count</span>
+        </button>
+
+        <button type="button"
+                id="tab-past"
+                role="tab"
+                aria-selected="@(_activeTab == Tab.Past ? "true" : "false")"
+                @onclick="() => SwitchTab(Tab.Past)"
+                class="pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 @(_activeTab == Tab.Past ? "border-[var(--brand-primary)] text-[var(--text-primary)]" : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+            <span>📜</span> Histórico de Ediciones
+            <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)]">@_pastEvents.Count</span>
+        </button>
+    </div>
+
+    @* Filtro Territorial de Eventos *@
+    <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs text-[var(--text-muted)] mr-1">Ámbito:</span>
+            <button type="button"
+                    @onclick="() => SetCountryFilter(null)"
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors @(string.IsNullOrWhiteSpace(_countryFilter) ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                🌍 Todos (con Internacionales)
+            </button>
+            @if (!string.IsNullOrWhiteSpace(_userActiveCountry) && _userActiveCountry != "Internacional")
+            {
+                <button type="button"
+                        @onclick="() => SetCountryFilter(_userActiveCountry)"
+                        class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors @(_countryFilter == _userActiveCountry ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                    @CountryCatalog.GetFlag(_userActiveCountry) Solo @_userActiveCountry
+                </button>
+            }
+            <select @bind="_countryFilter"
+                    @bind:after="OnCountryDropdownChanged"
+                    class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]">
+                <option value="">Otros países...</option>
+                @foreach (var c in CountryCatalog.GetAllCountries())
+                {
+                    <option value="@c.Name">@c.FlagEmoji @c.Name</option>
+                }
+            </select>
+        </div>
+
+        <span class="text-xs text-[var(--text-muted)]">
+            ⭐ Internacionales siempre visibles &bull; Filtra citas por país
+        </span>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="py-16 text-center text-[var(--text-muted)]">
+            <div class="inline-block animate-spin text-3xl mb-2">🎪</div>
+            <p class="text-sm font-semibold">Consultando el calendario oficial de eventos...</p>
+        </div>
+    }
+    else
+    {
+        var currentList = _activeTab == Tab.Upcoming ? _upcomingEvents : _pastEvents;
+
+        @if (currentList.Count == 0)
+        {
+            <div class="p-12 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                <span class="text-4xl block mb-3">🎪</span>
+                <h3 class="text-base font-bold text-[var(--text-primary)] mb-1">
+                    @(_activeTab == Tab.Upcoming ? "No hay eventos futuros registrados" : "No hay eventos en el archivo histórico")
+                </h3>
+                <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto mb-4">
+                    @(_activeTab == Tab.Upcoming ? "Pronto añadiremos nuevas fechas del calendario lúdico oficial." : "Las citas finalizadas se archivarán automáticamente aquí.")
+                </p>
+                @if (IsModerator)
+                {
+                    <a href="/admin/eventos"
+                       class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity inline-flex items-center gap-1.5">
+                        <span>➕</span> Añadir Evento Ahora
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var evt in currentList)
+                {
+                    <div class="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] transition-all overflow-hidden flex flex-col justify-between shadow-sm">
+                        <div>
+                            @* Cartel o Portada del Evento *@
+                            <div class="w-full h-48 overflow-hidden bg-[var(--bg-surface)] relative border-b border-[var(--border-subtle)]">
+                                <img src="@evt.ImageUrl"
+                                     alt="Cartel de @evt.Title"
+                                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                     loading="lazy" />
+
+                                <div class="absolute top-3 left-3">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold border backdrop-blur-md shadow-sm bg-black/60 text-white border-white/20 flex items-center gap-1">
+                                        <span>@CountryCatalog.GetFlag(evt.Country)</span>
+                                        <span>@(evt.IsInternational ? "Internacional" : evt.Country)</span>
+                                    </span>
+                                </div>
+
+                                <div class="absolute top-3 right-3">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold border backdrop-blur-md shadow-sm @GetRemainingBadgeClass(evt.RemainingDaysText)">
+                                        @evt.RemainingDaysText
+                                    </span>
+                                </div>
+                            </div>
+
+                            @* Metadatos y Contenido *@
+                            <div class="p-5">
+                                <div class="flex items-center gap-2 text-xs text-[var(--brand-primary)] font-bold mb-2">
+                                    <span>🗓️</span>
+                                    <span>@evt.FormattedDates</span>
+                                </div>
+
+                                <h3 class="text-lg font-black text-[var(--text-primary)] leading-tight">
+                                    @evt.Title
+                                </h3>
+
+                                <div class="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mt-2">
+                                    <span>📍</span>
+                                    <span>@evt.Location</span>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(evt.Organizer))
+                                {
+                                    <p class="text-xs text-[var(--text-muted)] mt-1">
+                                        Organiza: <strong class="text-[var(--text-secondary)]">@evt.Organizer</strong>
+                                    </p>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(evt.Description))
+                                {
+                                    <p class="text-xs text-[var(--text-secondary)] mt-3 line-clamp-3 leading-relaxed">
+                                        @evt.Description
+                                    </p>
+                                }
+                            </div>
+                        </div>
+
+                        @* Pie de Tarjeta con Enlace Web *@
+                        <div class="p-5 pt-3 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] flex items-center justify-between gap-3">
+                            <span class="text-[0.68rem] text-[var(--text-muted)] font-medium">
+                                @(evt.IsOfficial ? "⭐ Cita Oficial" : "Encuentro Lúdico")
+                            </span>
+
+                            @if (!string.IsNullOrWhiteSpace(evt.WebsiteUrl))
+                            {
+                                <a href="@evt.WebsiteUrl"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity inline-flex items-center gap-1.5 shadow-sm">
+                                    <span>🌐 Web Oficial</span>
+                                    <span>&rarr;</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private enum Tab { Upcoming, Past }
+    private Tab _activeTab = Tab.Upcoming;
+    private bool _isLoading = true;
+    private string? _userActiveCountry;
+    private string? _countryFilter;
+
+    private IReadOnlyList<BoardGameEventDto> _upcomingEvents = new List<BoardGameEventDto>();
+    private IReadOnlyList<BoardGameEventDto> _pastEvents = new List<BoardGameEventDto>();
+
+    private bool IsModerator => CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator");
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userActiveCountry = await LocationService.GetEffectiveCountryAsync();
+        _countryFilter = _userActiveCountry;
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _upcomingEvents = await EventService.GetUpcomingEventsAsync(limit: 50, country: _countryFilter);
+            _pastEvents = await EventService.GetPastEventsAsync(limit: 50, country: _countryFilter);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task SetCountryFilter(string? country)
+    {
+        _countryFilter = country;
+        await LoadDataAsync();
+    }
+
+    private async Task OnCountryDropdownChanged()
+    {
+        await LoadDataAsync();
+    }
+
+    private void SwitchTab(Tab tab)
+    {
+        _activeTab = tab;
+    }
+
+    private string GetRemainingBadgeClass(string remainingText)
+    {
+        if (remainingText.Contains("curso", StringComparison.OrdinalIgnoreCase))
+            return "bg-rose-500/90 text-white border-rose-600 animate-pulse";
+
+        if (remainingText.Contains("hoy", StringComparison.OrdinalIgnoreCase) || remainingText.Contains("mañana", StringComparison.OrdinalIgnoreCase))
+            return "bg-amber-500/90 text-black border-amber-600 font-black";
+
+        if (remainingText.Contains("Finalizado", StringComparison.OrdinalIgnoreCase))
+            return "bg-black/60 text-zinc-300 border-zinc-600";
+
+        return "bg-black/60 text-white border-white/20";
+    }
+}

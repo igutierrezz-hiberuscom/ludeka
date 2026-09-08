@@ -1,0 +1,373 @@
+@page "/novedades"
+@rendermode InteractiveServer
+@inject IWeeklyReleaseService ReleaseService
+@inject ICurrentUserService CurrentUserService
+
+<PageTitle>Novedades y Estrenos Editoriales — Ludeka</PageTitle>
+
+<div class="container-ludeka py-8 space-y-8">
+    @* Encabezado de Página *@
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold mb-2">
+                <span>📰</span> Calendario de Estrenos
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                Novedades de los Viernes & Lanzamientos
+            </h1>
+            <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
+                Cronología de novedades, preventas y reimpresiones programadas para llegar a tiendas especializadas de juegos de mesa en español.
+            </p>
+        </div>
+
+        @if (IsModerator)
+        {
+            <div class="flex items-center gap-3">
+                <button type="button"
+                        @onclick="() => _isCreateModalOpen = true"
+                        class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                    <span>➕</span> Añadir Novedad
+                </button>
+            </div>
+        }
+    </div>
+
+    @* Barra de Filtros y Búsqueda *@
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="relative w-full sm:w-72">
+                <span class="absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">🔍</span>
+                <input type="text"
+                       @bind="_searchTerm"
+                       @bind:event="oninput"
+                       placeholder="Buscar por juego o editorial..."
+                       class="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]" />
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_selectedPublisher))
+            {
+                <button type="button"
+                        @onclick="() => _selectedPublisher = null"
+                        class="px-3 py-1.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1 font-semibold">
+                    <span>@_selectedPublisher</span>
+                    <span class="text-rose-500 font-bold">&times;</span>
+                </button>
+            }
+        </div>
+
+        <span class="text-xs text-[var(--text-muted)]">
+            Total lanzamientos: <strong>@FilteredReleases.Count</strong>
+        </span>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="py-16 text-center text-[var(--text-muted)]">
+            <div class="inline-block animate-spin text-3xl mb-2">📦</div>
+            <p class="text-sm font-semibold">Cargando lanzamientos de tiendas...</p>
+        </div>
+    }
+    else if (FilteredReleases.Count == 0)
+    {
+        <div class="p-12 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+            <span class="text-4xl block mb-3">📦</span>
+            <h3 class="text-base font-bold text-[var(--text-primary)] mb-1">Sin lanzamientos encontrados</h3>
+            <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto mb-4">
+                No hay novedades registradas con los filtros actuales.
+            </p>
+            @if (IsModerator)
+            {
+                <button type="button"
+                        @onclick="() => _isCreateModalOpen = true"
+                        class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity">
+                    ➕ Añadir Primer Lanzamiento
+                </button>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var release in FilteredReleases)
+            {
+                <div class="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] transition-all overflow-hidden flex flex-col justify-between shadow-sm">
+                    <div>
+                        @if (!string.IsNullOrWhiteSpace(release.CoverImageUrl))
+                        {
+                            <div class="w-full h-44 overflow-hidden bg-[var(--bg-surface)] relative border-b border-[var(--border-subtle)]">
+                                <img src="@release.CoverImageUrl"
+                                     alt="Carátula de @release.Title"
+                                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                     loading="lazy" />
+                            </div>
+                        }
+
+                        <div class="p-5">
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="px-2.5 py-0.5 rounded-lg text-xs font-bold border @(release.IsReprint ? "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]" : "bg-[var(--brand-glow)] border-[var(--brand-primary)] text-[var(--brand-primary)]")">
+                                    @(release.IsReprint ? "🔄 Reimpresión" : "🆕 Novedad")
+                                </span>
+
+                                <span class="text-xs text-[var(--text-muted)] font-medium">
+                                    🗓️ @release.ReleaseDate.ToString("dd/MM/yyyy")
+                                </span>
+                            </div>
+
+                            <h3 class="text-base font-black text-[var(--text-primary)]">
+                                @release.Title
+                            </h3>
+
+                            <p class="text-xs text-[var(--text-secondary)] mt-1 flex items-center gap-1.5">
+                                <span class="text-[var(--text-muted)]">Editorial:</span>
+                                <button type="button"
+                                        @onclick="() => _selectedPublisher = release.Publisher"
+                                        class="font-semibold text-[var(--text-primary)] hover:underline">
+                                    @release.Publisher
+                                </button>
+                            </p>
+
+                            @if (!string.IsNullOrWhiteSpace(release.Notes))
+                            {
+                                <p class="text-xs text-[var(--text-secondary)] mt-3 p-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] leading-relaxed">
+                                    @release.Notes
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="p-5 pt-3 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] flex items-center justify-between text-xs">
+                        @if (release.EstimatedPvp.HasValue)
+                        {
+                            <div>
+                                <span class="text-[var(--text-muted)] block text-[0.68rem]">PVP aproximado:</span>
+                                <span class="font-extrabold text-[var(--text-primary)] text-sm">@release.EstimatedPvp.Value.ToString("0.00") €</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-[0.68rem] text-[var(--text-muted)]">PVP por confirmar</span>
+                        }
+
+                        @if (release.IsPublishedOnInstagram && !string.IsNullOrWhiteSpace(release.InstagramPermalink))
+                        {
+                            <a href="@release.InstagramPermalink"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="inline-flex items-center gap-1 text-[0.7rem] font-bold text-pink-500 hover:text-pink-600 dark:text-pink-400">
+                                <span>📸</span> <span>En Instagram</span> <span>↗</span>
+                            </a>
+                        }
+                        else if (IsModerator)
+                        {
+                            <a href="/admin/instagram?sourceType=WeeklyRelease&sourceId=@release.Id"
+                               class="px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-500 text-sky-400 font-bold text-[0.7rem] transition-colors inline-flex items-center gap-1">
+                                <span>📸</span> <span>Instagram</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@* Modal para Registrar Novedad Manualmente *@
+@if (_isCreateModalOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="release-modal-title">
+        <div class="w-full max-w-lg rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+                <h2 id="release-modal-title" class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>📰</span> Añadir Novedad Editorial
+                </h2>
+                <button type="button"
+                        @onclick="() => _isCreateModalOpen = false"
+                        aria-label="Cerrar modal de novedad"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xl">
+                    &times;
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="font-semibold text-[var(--text-secondary)] block mb-1">Título del Juego *</label>
+                    <input type="text"
+                           @bind="_formTitle"
+                           placeholder="Ej. Heat: Lluvia Torrencial"
+                           class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-semibold text-[var(--text-secondary)] block mb-1">Editorial / Distribuidora *</label>
+                        <input type="text"
+                               @bind="_formPublisher"
+                               placeholder="Ej. Asmodee / Days of Wonder"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+                    <div>
+                        <label class="font-semibold text-[var(--text-secondary)] block mb-1">Fecha de Lanzamiento *</label>
+                        <input type="date"
+                               @bind="_formReleaseDate"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-semibold text-[var(--text-secondary)] block mb-1">PVP Estimado (€)</label>
+                        <input type="number"
+                               step="0.5"
+                               @bind="_formPvp"
+                               placeholder="Ej. 39.99"
+                               class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    </div>
+                    <div class="flex items-center pt-5">
+                        <label class="flex items-center gap-2 cursor-pointer font-medium text-[var(--text-secondary)]">
+                            <input type="checkbox"
+                                   @bind="_formIsReprint"
+                                   class="rounded bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--brand-primary)] focus:ring-0" />
+                            <span>Es Reimpresión</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-semibold text-[var(--text-secondary)] block mb-1">URL de Carátula (Opcional)</label>
+                    <input type="url"
+                           @bind="_formCoverImageUrl"
+                           placeholder="https://... o /images/..."
+                           class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                </div>
+
+                <div>
+                    <label class="font-semibold text-[var(--text-secondary)] block mb-1">Notas Editoriales (Opcional)</label>
+                    <textarea rows="2"
+                              @bind="_formNotes"
+                              placeholder="Ej. Incluye nuevos circuitos y modo solitario mejorado..."
+                              class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]"></textarea>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_formError))
+            {
+                <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs">
+                    @_formError
+                </div>
+            }
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-subtle)]">
+                <button type="button"
+                        @onclick="() => _isCreateModalOpen = false"
+                        class="px-4 py-2 rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] text-xs font-bold transition-colors">
+                    Cancelar
+                </button>
+                <button type="button"
+                        @onclick="HandleSubmitRelease"
+                        class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs font-bold transition-opacity">
+                    Guardar y Publicar
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _isLoading = true;
+    private IReadOnlyList<WeeklyReleaseDto> _releases = new List<WeeklyReleaseDto>();
+    private string _searchTerm = string.Empty;
+    private string? _selectedPublisher;
+
+    private bool _isCreateModalOpen;
+    private string _formTitle = string.Empty;
+    private string _formPublisher = string.Empty;
+    private DateOnly _formReleaseDate = DateOnly.FromDateTime(DateTime.UtcNow);
+    private decimal? _formPvp;
+    private bool _formIsReprint;
+    private string? _formCoverImageUrl;
+    private string? _formNotes;
+    private string? _formError;
+
+    private bool IsModerator => CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator");
+
+    private IReadOnlyList<WeeklyReleaseDto> FilteredReleases
+    {
+        get
+        {
+            var query = _releases.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(_selectedPublisher))
+            {
+                query = query.Where(r => r.Publisher.Equals(_selectedPublisher, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(_searchTerm))
+            {
+                var term = _searchTerm.Trim();
+                query = query.Where(r => r.Title.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                                         r.Publisher.Contains(term, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return query.OrderByDescending(r => r.ReleaseDate).ToList();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _releases = await ReleaseService.GetReleasesAsync();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleSubmitRelease()
+    {
+        _formError = null;
+
+        if (string.IsNullOrWhiteSpace(_formTitle))
+        {
+            _formError = "El título del lanzamiento es obligatorio.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_formPublisher))
+        {
+            _formError = "La editorial es obligatoria.";
+            return;
+        }
+
+        var request = new CreateWeeklyReleaseRequest(
+            Title: _formTitle,
+            Publisher: _formPublisher,
+            ReleaseDate: _formReleaseDate,
+            CoverImageUrl: string.IsNullOrWhiteSpace(_formCoverImageUrl) ? null : _formCoverImageUrl.Trim(),
+            EstimatedPvp: _formPvp,
+            IsReprint: _formIsReprint,
+            Notes: string.IsNullOrWhiteSpace(_formNotes) ? null : _formNotes.Trim());
+
+        await ReleaseService.CreateReleaseAsync(request);
+
+        _isCreateModalOpen = false;
+        _formTitle = string.Empty;
+        _formPublisher = string.Empty;
+        _formPvp = null;
+        _formIsReprint = false;
+        _formCoverImageUrl = null;
+        _formNotes = null;
+
+        await LoadDataAsync();
+    }
+}
