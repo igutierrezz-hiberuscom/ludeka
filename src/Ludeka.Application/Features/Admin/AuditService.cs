@@ -119,7 +119,7 @@ public class AuditService : IAuditService
     {
         AuditEntityType.Game => "Juego",
         AuditEntityType.Publisher => "Editorial",
-        AuditEntityType.Creator => "Autor/Creador",
+        AuditEntityType.Creator => "Creador de Contenido",
         AuditEntityType.Store => "Tienda",
         AuditEntityType.Media => "Multimedia",
         AuditEntityType.Report => "Reporte",

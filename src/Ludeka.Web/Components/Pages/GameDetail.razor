@@ -201,10 +201,7 @@ else
                             Diseñado por
                             @if (!string.IsNullOrWhiteSpace(Game.Designer))
                             {
-                                var creatorSlug = Ludeka.Core.Entities.Game.GenerateSlug(Game.Designer);
-                                <a href="@($"/creadores/{creatorSlug}")" class="text-[var(--text-primary)] font-bold hover:text-[var(--brand-primary)] hover:underline" title="Ver ficha del autor @Game.Designer">
-                                    @Game.Designer
-                                </a>
+                                <span class="text-[var(--text-primary)] font-bold">@Game.Designer</span>
                             }
                             else
                             {
