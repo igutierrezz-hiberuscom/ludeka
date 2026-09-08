@@ -105,4 +105,54 @@ public class SqliteCountryMigrationTests
         var preferences = await db.UserPreferences.ToListAsync();
         Assert.Empty(preferences);
     }
+
+    [Fact]
+    public async Task EnsureSchemaUpToDateAsync_CuandoTablasNoExistenPreviamente_DebeCrearlasConColumnasDePais()
+    {
+        // Arrange: Crear base de datos SQLite en memoria que solo tiene Games (emulando una base de datos antigua que aún no tenía Stores, etc.)
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = """
+                CREATE TABLE "Games" (
+                    "Id" TEXT NOT NULL PRIMARY KEY,
+                    "Slug" TEXT NOT NULL
+                );
+            """;
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        var options = new DbContextOptionsBuilder<LudekaDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        using var db = new LudekaDbContext(options);
+
+        // Act: Ejecutar reconciliación completa
+        await SqliteSchemaMigrator.EnsureSchemaUpToDateAsync(db);
+
+        // Assert: Todas las tablas creadas dinámicamente deben incluir la columna Country y ShippingCountries
+        var store = new Core.Entities.Store(
+            name: "Tienda Prueba",
+            slug: "tienda-prueba",
+            type: Core.Enums.StoreType.OnlineOnly,
+            country: "Chile",
+            shippingCountries: new[] { "Chile", "Argentina" }
+        );
+        db.Stores.Add(store);
+        await db.SaveChangesAsync();
+
+        var storesFromDb = await db.Stores.ToListAsync();
+        Assert.Single(storesFromDb);
+        Assert.Equal("Chile", storesFromDb[0].Country);
+        Assert.Contains("Argentina", storesFromDb[0].ShippingCountries);
+
+        var eventsFromDb = await db.BoardGameEvents.ToListAsync();
+        Assert.Empty(eventsFromDb);
+
+        var userPrefsFromDb = await db.UserPreferences.ToListAsync();
+        Assert.Empty(userPrefsFromDb);
+    }
 }

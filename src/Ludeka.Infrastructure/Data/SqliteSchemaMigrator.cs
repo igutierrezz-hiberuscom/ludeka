@@ -121,6 +121,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_ExpansionSynergies_ExpansionAId_ExpansionBId" ON "ExpansionSynergies" ("ExpansionAId", "ExpansionBId");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("ExpansionSynergies");
             }
 
             // 4. Crear tabla ExpansionRecipes si no existe (Incremento 8)
@@ -140,6 +141,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_ExpansionRecipes_BaseGameId" ON "ExpansionRecipes" ("BaseGameId");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("ExpansionRecipes");
             }
 
             // 5. Crear tabla NotificationLogs si no existe (Incremento 9)
@@ -165,6 +167,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_NotificationLogs_CreatedAt" ON "NotificationLogs" ("CreatedAt");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("NotificationLogs");
             }
 
             // 6. Crear tabla UserPreferences si no existe
@@ -175,10 +178,12 @@ public static class SqliteSchemaMigrator
                     CREATE TABLE IF NOT EXISTS "UserPreferences" (
                         "UserId" TEXT NOT NULL CONSTRAINT "PK_UserPreferences" PRIMARY KEY,
                         "PreferredTheme" TEXT NOT NULL,
+                        "Country" TEXT NULL,
                         "UpdatedAt" TEXT NOT NULL
                     );
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("UserPreferences");
             }
 
             // 7. Crear tabla GameEditLogs si no existe (Incremento 18)
@@ -199,6 +204,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_GameEditLogs_EditedAt" ON "GameEditLogs" ("EditedAt");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("GameEditLogs");
             }
 
             // 8. Crear tabla Publishers si no existe (Incremento 19)
@@ -223,6 +229,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_Publishers_Name" ON "Publishers" ("Name");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("Publishers");
             }
 
             // 9. Crear tabla Creators si no existe (Incremento 19)
@@ -247,9 +254,10 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_Creators_Name" ON "Creators" ("Name");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("Creators");
             }
 
-            // 10. Crear tabla Stores si no existe (Incremento 19)
+            // 10. Crear tabla Stores si no existe (Incremento 19 y 29)
             if (!existingTables.Contains("Stores"))
             {
                 using var createCmd = connection.CreateCommand();
@@ -259,6 +267,8 @@ public static class SqliteSchemaMigrator
                         "Name" TEXT NOT NULL,
                         "Slug" TEXT NOT NULL,
                         "Type" INTEGER NOT NULL,
+                        "Country" TEXT NOT NULL DEFAULT 'España',
+                        "ShippingCountries" TEXT NULL,
                         "City" TEXT NULL,
                         "Address" TEXT NULL,
                         "Description" TEXT NULL,
@@ -272,11 +282,13 @@ public static class SqliteSchemaMigrator
                     );
                     CREATE UNIQUE INDEX IF NOT EXISTS "IX_Stores_Slug" ON "Stores" ("Slug");
                     CREATE INDEX IF NOT EXISTS "IX_Stores_Name" ON "Stores" ("Name");
+                    CREATE INDEX IF NOT EXISTS "IX_Stores_Country" ON "Stores" ("Country");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("Stores");
             }
 
-            // 11. Crear tabla AppUsers si no existe (Incremento 20)
+            // 11. Crear tabla AppUsers si no existe (Incremento 20 y 29)
             if (!existingTables.Contains("AppUsers"))
             {
                 using var createCmd = connection.CreateCommand();
@@ -287,6 +299,7 @@ public static class SqliteSchemaMigrator
                         "Email" TEXT NOT NULL,
                         "Role" INTEGER NOT NULL,
                         "Status" INTEGER NOT NULL,
+                        "Country" TEXT NULL,
                         "Permissions" INTEGER NOT NULL,
                         "CreatedAt" TEXT NOT NULL,
                         "UpdatedAt" TEXT NULL
@@ -296,6 +309,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_AppUsers_Status" ON "AppUsers" ("Status");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("AppUsers");
             }
 
             // 12. Crear tabla AuditLogs si no existe (Incremento 20)
@@ -322,6 +336,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_AuditLogs_EntityType_EntityId" ON "AuditLogs" ("EntityType", "EntityId");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("AuditLogs");
             }
 
             // 13. Reconciliar columna IsPromoted en tabla Giveaways (Incremento 21)
@@ -346,7 +361,7 @@ public static class SqliteSchemaMigrator
                 }
             }
 
-            // 14. Crear tabla BoardGameEvents si no existe (Incremento 21)
+            // 14. Crear tabla BoardGameEvents si no existe (Incremento 21 y 29)
             if (!existingTables.Contains("BoardGameEvents"))
             {
                 using var createCmd = connection.CreateCommand();
@@ -355,6 +370,7 @@ public static class SqliteSchemaMigrator
                         "Id" TEXT NOT NULL CONSTRAINT "PK_BoardGameEvents" PRIMARY KEY,
                         "Title" TEXT NOT NULL,
                         "Description" TEXT NOT NULL,
+                        "Country" TEXT NOT NULL DEFAULT 'España',
                         "ImageUrl" TEXT NOT NULL,
                         "StartDate" TEXT NOT NULL,
                         "EndDate" TEXT NOT NULL,
@@ -367,8 +383,10 @@ public static class SqliteSchemaMigrator
                     );
                     CREATE INDEX IF NOT EXISTS "IX_BoardGameEvents_StartDate" ON "BoardGameEvents" ("StartDate");
                     CREATE INDEX IF NOT EXISTS "IX_BoardGameEvents_IsOfficial" ON "BoardGameEvents" ("IsOfficial");
+                    CREATE INDEX IF NOT EXISTS "IX_BoardGameEvents_Country" ON "BoardGameEvents" ("Country");
                     """;
                 await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("BoardGameEvents");
             }
 
             // 15. Reconciliar columna Category en tabla MediaItems (Incremento 23)
@@ -506,6 +524,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_NightlyCatalogingExecutionLogs_StartedAt" ON "NightlyCatalogingExecutionLogs" ("StartedAt");
                 """;
                 await cmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("NightlyCatalogingExecutionLogs");
             }
 
             // Reconciliar columnas de Giveaways para Instagram (Incremento 28)
@@ -579,6 +598,7 @@ public static class SqliteSchemaMigrator
                     CREATE INDEX IF NOT EXISTS "IX_InstagramPostDrafts_CreatedAt" ON "InstagramPostDrafts" ("CreatedAt");
                 """;
                 await cmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("InstagramPostDrafts");
             }
         }
         finally
