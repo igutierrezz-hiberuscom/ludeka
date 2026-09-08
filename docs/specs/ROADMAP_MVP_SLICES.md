@@ -284,6 +284,15 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
+## Incremento 32: Fix HTTP 500 en Fichas de Juego (ORDER BY DateTimeOffset en SQLite)
+- **Identificador:** `fix-32-playlog-orderby-datetimeoffset` (fix directo, sin ciclo SDD)
+- **Objetivo Principal:** Corregir el error HTTP 500 en todas las fichas de juego (`/juegos/{slug}`), causado por `SqliteGamePlayLogRepository.GetByUserAndGameAsync` que aplicaba `OrderByDescending` sobre propiedades `DateTimeOffset` (`PlayDate`, `CreatedAt`) en LINQ-to-EF. EF Core SQLite no traduce ORDER BY sobre `DateTimeOffset` (se persiste como TEXT), lanzando `NotSupportedException` en cada render de la ficha vía `GameDetail.RefreshPlaysCountAsync`. El fix materializa el query y ordena en memoria (LINQ to Objects) preservando la semántica `PlayDate DESC, CreatedAt DESC`.
+- **Estado:** 🏆. **Completado y Archivado** (725 tests en verde al 100%; defecto introducido en INC-30, commit fc90de0).
+- **Documento:** [`SqliteGamePlayLogRepositoryTests.cs` (test rojo→verde del fix)](file:///c:/repos/Ludeka/tests/Ludeka.UnitTests/Infrastructure/SqliteGamePlayLogRepositoryTests.cs)
+- **Módulo del Sistema:** [`02-ludoteca-y-prestamos.md`](file:///c:/repos/Ludeka/docs/specs/sistema/02-ludoteca-y-prestamos.md)
+
+---
+
 
 ## Convención de Trabajo para Cada Incremento (Ciclo SDD)
 

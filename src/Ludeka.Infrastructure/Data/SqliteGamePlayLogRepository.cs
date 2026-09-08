@@ -53,12 +53,16 @@ public class SqliteGamePlayLogRepository : IGamePlayLogRepository
 
     public async Task<List<GamePlayLog>> GetByUserAndGameAsync(string userId, Guid gameId, CancellationToken cancellationToken = default)
     {
-        return await _context.GamePlayLogs
+        // EF Core SQLite no traduce ORDER BY sobre DateTimeOffset: se materializa primero y se ordena en memoria.
+        var logs = await _context.GamePlayLogs
             .Include(p => p.Game)
             .Where(p => p.UserId == userId && p.GameId == gameId)
+            .ToListAsync(cancellationToken);
+
+        return logs
             .OrderByDescending(p => p.PlayDate)
             .ThenByDescending(p => p.CreatedAt)
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 
     public async Task<int> GetCountByUserAsync(string userId, CancellationToken cancellationToken = default)
