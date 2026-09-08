@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject ICatalogService CatalogService
 @inject IUserLibraryService LibraryService
+@inject IGamePlayLogService PlayLogService
 @inject IFoundingVerdictService FoundingService
 @inject IMediaService MediaService
 @inject ICurrentUserService CurrentUserService
@@ -260,12 +261,15 @@ else
         </div>
     </div>
 
-    @* Bloque de Interacción de Usuario: Colección en 4 Estados y Préstamos *@
+    @* Bloque de Interacción de Usuario: Colección, Estados y Préstamos *@
     <div class="container-ludeka pt-6">
         <CollectionActionBar
             CurrentItem="@_collectionItem"
             ActiveLoan="@_activeLoan"
+            PlayCount="@_userPlaysCount"
             OnStatusSelected="HandleStatusSelected"
+            OnTogglePlayed="HandleTogglePlayed"
+            OnRecordPlayClicked="() => _isRecordPlayModalOpen = true"
             OnLoanClicked="() => _isLoanModalOpen = true" />
 
         @if (_activeLoan != null)
@@ -353,7 +357,9 @@ else
         @* 2. Tarjeta de Valoración Propia y Acceso a Review *@
         <UserReviewCard
             Review="@_userReview"
-            OnEditClicked="() => _isReviewModalOpen = true" />
+            CanReview="@CanUserReview()"
+            DisabledReviewReason="@GetDisabledReviewReason()"
+            OnEditClicked="OpenReviewModal" />
 
         @* 3. Semáforo Dinámico *@
         <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
@@ -414,6 +420,13 @@ else
         OnReturnLoan="HandleReturnLoan"
         OnClose="() => _isLoanModalOpen = false" />
 
+    <RecordPlayModal
+        IsOpen="@_isRecordPlayModalOpen"
+        GameId="@Game.Id"
+        GameTitle="@Game.SpanishTitle"
+        OnPlayRecorded="HandlePlayRecorded"
+        OnClose="() => _isRecordPlayModalOpen = false" />
+
     <ReviewBottomSheet
         IsOpen="@_isReviewModalOpen"
         ExistingReview="@_userReview"
@@ -461,6 +474,7 @@ else
 
     private bool _isLoading = true;
     private bool _isLoanModalOpen;
+    private bool _isRecordPlayModalOpen;
     private bool _isReviewModalOpen;
     private bool _isFoundingModalOpen;
     private bool _isSocialCardModalOpen;
@@ -469,6 +483,7 @@ else
     private SocialCardDataDto? _socialCardData;
     private bool _isGeneratingAiSummary;
     private string? _aiSummaryMessage;
+    private int _userPlaysCount;
 
     private void HandleGameUpdated(GameDetailDto updated)
     {
@@ -525,6 +540,7 @@ else
         _collectionItem = await LibraryService.GetCollectionStateAsync(Game.Id);
         _activeLoan = await LibraryService.GetActiveLoanAsync(Game.Id);
         _userReview = await LibraryService.GetUserReviewAsync(Game.Id);
+        await RefreshPlaysCountAsync();
 
         _foundingVerdict = await FoundingService.GetVerdictByGameIdAsync(Game.Id);
         if (_foundingVerdict == null)
@@ -555,6 +571,61 @@ else
         }
     }
 
+    private bool CanUserReview()
+    {
+        if (_userReview != null) return true;
+        if (_collectionItem != null && _collectionItem.Status == CollectionStatus.WantToBuy && !_collectionItem.IsPlayed)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private string? GetDisabledReviewReason()
+    {
+        if (_collectionItem != null && _collectionItem.Status == CollectionStatus.WantToBuy && !_collectionItem.IsPlayed)
+        {
+            return "Tienes este juego en tu lista de compra. Para valorarlo, márcalo como «Jugado» o registra una partida.";
+        }
+        return null;
+    }
+
+    private void OpenReviewModal()
+    {
+        if (!CanUserReview()) return;
+        _isReviewModalOpen = true;
+    }
+
+    private async Task HandleTogglePlayed()
+    {
+        if (Game == null) return;
+        bool wasUnrated = _userReview == null;
+        bool wasPlayed = _collectionItem?.IsPlayed == true;
+
+        _collectionItem = await LibraryService.TogglePlayedStateAsync(Game.Id);
+        await RefreshPlaysCountAsync();
+
+        if (wasUnrated && !wasPlayed && _collectionItem?.IsPlayed == true)
+        {
+            _isReviewModalOpen = true;
+        }
+    }
+
+    private async Task HandlePlayRecorded(RecordPlayRequest req)
+    {
+        if (Game == null) return;
+        await PlayLogService.RecordPlayAsync(req);
+        _collectionItem = await LibraryService.GetCollectionStateAsync(Game.Id);
+        await RefreshPlaysCountAsync();
+    }
+
+    private async Task RefreshPlaysCountAsync()
+    {
+        if (Game == null) return;
+        var plays = await PlayLogService.GetGamePlaysAsync(Game.Id);
+        _userPlaysCount = plays.Count;
+    }
+
     private async Task HandleStatusSelected(CollectionStatus status)
     {
         if (Game == null) return;
@@ -565,9 +636,9 @@ else
         _collectionItem = await LibraryService.SetCollectionStateAsync(Game.Id, status);
         _activeLoan = await LibraryService.GetActiveLoanAsync(Game.Id);
 
-        // Disparador de valoración: si el juego pasa a Jugado o En mi ludoteca por primera vez y no tiene valoración, sugerir valoración en 45s
+        // Disparador de valoración: si el juego pasa a En mi ludoteca por primera vez y no tiene valoración, sugerir valoración
         if (wasUnrated && _collectionItem != null &&
-            (status == CollectionStatus.Played || status == CollectionStatus.InCollection) &&
+            status == CollectionStatus.InCollection &&
             prevStatus != status)
         {
             _isReviewModalOpen = true;

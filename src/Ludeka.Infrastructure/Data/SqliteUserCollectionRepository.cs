@@ -75,12 +75,27 @@ public class SqliteUserCollectionRepository : IUserCollectionRepository
     public async Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken cancellationToken = default)
     {
         var counts = await _context.CollectionItems
-            .Where(c => c.UserId == userId)
-            .GroupBy(c => c.Status)
+            .Where(c => c.UserId == userId && c.Status != null)
+            .GroupBy(c => c.Status!.Value)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Status, x => x.Count, cancellationToken);
 
         return counts;
+    }
+
+    public async Task<List<UserCollectionItem>> GetPlayedByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.CollectionItems
+            .Include(c => c.Game)
+            .Where(c => c.UserId == userId && c.IsPlayed)
+            .OrderByDescending(c => c.AddedAt)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetPlayedCountAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.CollectionItems
+            .CountAsync(c => c.UserId == userId && c.IsPlayed, cancellationToken);
     }
 
     public async Task AddAsync(UserCollectionItem item, CancellationToken cancellationToken = default)

@@ -68,16 +68,14 @@ public class BggImportService : IBggImportService
             {
                 targetStatus = CollectionStatus.InCollection;
             }
-            else if (bggItem.IsWishlist && request.ImportWishlist)
-            {
-                targetStatus = CollectionStatus.Wishlist;
-            }
-            else if (bggItem.IsWantToBuy && request.ImportWishlist)
+            else if ((bggItem.IsWishlist || bggItem.IsWantToBuy) && request.ImportWishlist)
             {
                 targetStatus = CollectionStatus.WantToBuy;
             }
 
-            if (targetStatus == null) continue;
+            bool isPlayed = bggItem.NumPlays > 0;
+
+            if (targetStatus == null && !isPlayed) continue;
 
             try
             {
@@ -88,14 +86,27 @@ public class BggImportService : IBggImportService
                     var existingItem = await _collectionRepo.GetByUserAndGameAsync(userId, localGame.Id, ct);
                     if (existingItem == null)
                     {
-                        var newItem = new UserCollectionItem(userId, localGame.Id, targetStatus.Value);
+                        var newItem = new UserCollectionItem(userId, localGame.Id, targetStatus, isPlayed);
                         await _collectionRepo.AddAsync(newItem, ct);
                         importedCount++;
                     }
-                    else if (existingItem.Status != targetStatus.Value)
+                    else
                     {
-                        existingItem.ChangeStatus(targetStatus.Value);
-                        await _collectionRepo.UpdateAsync(existingItem, ct);
+                        bool updated = false;
+                        if (targetStatus.HasValue && existingItem.Status != targetStatus.Value)
+                        {
+                            existingItem.ChangeStatus(targetStatus.Value);
+                            updated = true;
+                        }
+                        if (isPlayed && !existingItem.IsPlayed)
+                        {
+                            existingItem.SetPlayed(true);
+                            updated = true;
+                        }
+                        if (updated)
+                        {
+                            await _collectionRepo.UpdateAsync(existingItem, ct);
+                        }
                     }
                 }
                 else
@@ -108,7 +119,8 @@ public class BggImportService : IBggImportService
                             userId: userId,
                             bggId: bggItem.BggId,
                             pendingTitle: bggItem.Title,
-                            status: targetStatus.Value,
+                            status: targetStatus,
+                            isPlayed: isPlayed,
                             thumbnailUrl: bggItem.ThumbnailUrl,
                             yearPublished: bggItem.YearPublished
                         );

@@ -28,6 +28,7 @@ public class LudekaDbContext : DbContext
     public DbSet<Store> Stores => Set<Store>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<AuditLogEntry> AuditLogs => Set<AuditLogEntry>();
+    public DbSet<GamePlayLog> GamePlayLogs => Set<GamePlayLog>();
     public DbSet<BoardGameEvent> BoardGameEvents => Set<BoardGameEvent>();
     public DbSet<NightlyCatalogingExecutionLog> NightlyCatalogingExecutionLogs => Set<NightlyCatalogingExecutionLog>();
     public DbSet<InstagramPostDraft> InstagramPostDrafts => Set<InstagramPostDraft>();
@@ -79,11 +80,32 @@ public class LudekaDbContext : DbContext
         collection.HasIndex(c => new { c.UserId, c.GameId });
         collection.HasIndex(c => new { c.UserId, c.BggId });
         collection.HasIndex(c => new { c.UserId, c.Status });
+        collection.HasIndex(c => new { c.UserId, c.IsPlayed });
+
+        collection.Property(c => c.IsPlayed).HasDefaultValue(false);
+        collection.Property(c => c.Status).IsRequired(false);
 
         collection.HasOne(c => c.Game)
             .WithMany()
             .HasForeignKey(c => c.GameId)
             .IsRequired(false)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // --- Configuración de GamePlayLog (Incremento 30) ---
+        var playLog = modelBuilder.Entity<GamePlayLog>();
+        playLog.ToTable("GamePlayLogs");
+        playLog.HasKey(p => p.Id);
+
+        playLog.HasIndex(p => new { p.UserId, p.PlayDate });
+        playLog.HasIndex(p => p.GameId);
+
+        playLog.Property(p => p.UserId).IsRequired().HasMaxLength(100);
+        playLog.Property(p => p.Location).IsRequired().HasMaxLength(150);
+        playLog.Property(p => p.Comment).HasMaxLength(1000);
+
+        playLog.HasOne(p => p.Game)
+            .WithMany()
+            .HasForeignKey(p => p.GameId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // --- Configuración de PendingBggImport ---

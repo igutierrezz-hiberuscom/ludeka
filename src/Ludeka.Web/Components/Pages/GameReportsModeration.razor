@@ -52,18 +52,37 @@
                 </p>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <a href="/admin/cola-catalogacion"
+                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-indigo-400 text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm"
+                   title="Cola de catalogación e importaciones nocturnas de BGG">
+                    <span>🌙</span>
+                    <span>Cola BGG & Batch</span>
+                </a>
                 <a href="/moderacion-media"
-                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
+                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-emerald-400 text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
                     <span>🎬</span>
                     <span>Moderación Multimedia</span>
                 </a>
                 <a href="/"
-                   class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors border border-[var(--border-subtle)]">
-                    &larr; Ir a la Web
+                   class="px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors border border-[var(--border-subtle)]">
+                    &larr; Web
                 </a>
             </div>
         </div>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
+                <div class="flex items-center gap-2 font-semibold">
+                    <span>⚠️</span>
+                    <span>@_errorMessage</span>
+                </div>
+                <button type="button" @onclick="LoadDataAsync" class="px-3 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-white font-bold transition-colors">
+                    Reintentar
+                </button>
+            </div>
+        }
 
         @* Tarjetas de Métricas / KPI *@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -424,6 +443,7 @@
     private bool _isEditorModalOpen;
     private GameDetailDto? _gameToEdit;
     private GameIssueReportDto? _editingReport;
+    private string? _errorMessage;
 
     private async Task OpenEditorForReport(GameIssueReportDto report)
     {
@@ -451,9 +471,20 @@
     private async Task LoadDataAsync()
     {
         _isLoading = true;
-        _summary = await ReportService.GetSummaryAsync();
-        await LoadReportsAsync();
-        _isLoading = false;
+        _errorMessage = null;
+        try
+        {
+            _summary = await ReportService.GetSummaryAsync();
+            await LoadReportsAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"No se pudieron consultar los reportes de catálogo: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
     private async Task LoadReportsAsync()

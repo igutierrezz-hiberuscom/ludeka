@@ -124,5 +124,55 @@ public class UserCollectionItemTests
         // Act & Assert
         Assert.Throws<ArgumentException>(() => item.PromoteToCataloged(Guid.Empty));
     }
+
+    [Fact]
+    public void Constructor_CanCreateOnlyPlayedItem_WithNullStatus()
+    {
+        // Act
+        var item = new UserCollectionItem("user-1", Guid.NewGuid(), status: null, isPlayed: true);
+
+        // Assert
+        Assert.Null(item.Status);
+        Assert.True(item.IsPlayed);
+    }
+
+    [Fact]
+    public void Constructor_CanCreateWantToBuyAndPlayedSimultaneously()
+    {
+        // Act
+        var item = new UserCollectionItem("user-1", Guid.NewGuid(), status: CollectionStatus.WantToBuy, isPlayed: true);
+
+        // Assert
+        Assert.Equal(CollectionStatus.WantToBuy, item.Status);
+        Assert.True(item.IsPlayed);
+    }
+
+    [Fact]
+    public void Constructor_ThrowsInvalidOperationException_WhenBothStatusAndIsPlayedAreEmpty()
+    {
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => new UserCollectionItem("user-1", Guid.NewGuid(), status: null, isPlayed: false));
+    }
+
+    [Fact]
+    public void TogglePlayed_TogglesIsPlayedStateAndUpdatesTimestamp()
+    {
+        // Arrange
+        var item = new UserCollectionItem("user-1", Guid.NewGuid(), status: CollectionStatus.WantToBuy, isPlayed: false);
+        Assert.False(item.IsPlayed);
+
+        // Act 1: Activar
+        item.TogglePlayed();
+
+        // Assert 1
+        Assert.True(item.IsPlayed);
+        Assert.NotNull(item.UpdatedAt);
+
+        // Act 2: Desactivar
+        item.TogglePlayed();
+
+        // Assert 2
+        Assert.False(item.IsPlayed);
+    }
 }
 

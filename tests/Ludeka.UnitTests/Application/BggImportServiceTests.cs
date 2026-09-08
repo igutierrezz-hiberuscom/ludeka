@@ -102,8 +102,14 @@ public class BggImportServiceTests
             return Task.CompletedTask;
         }
 
+        public Task<List<UserCollectionItem>> GetPlayedByUserIdAsync(string userId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Items.Where(i => i.UserId == userId && i.IsPlayed).ToList());
+
+        public Task<int> GetPlayedCountAsync(string userId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Items.Count(i => i.UserId == userId && i.IsPlayed));
+
         public Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken cancellationToken = default) =>
-            Task.FromResult(Items.Where(i => i.UserId == userId).GroupBy(i => i.Status).ToDictionary(g => g.Key, g => g.Count()));
+            Task.FromResult(Items.Where(i => i.UserId == userId && i.Status.HasValue).GroupBy(i => i.Status!.Value).ToDictionary(g => g.Key, g => g.Count()));
 
         public Task AddAsync(UserCollectionItem item, CancellationToken cancellationToken = default)
         {

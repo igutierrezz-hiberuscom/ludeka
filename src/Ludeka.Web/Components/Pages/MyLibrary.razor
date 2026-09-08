@@ -3,6 +3,7 @@
 @using Ludeka.Application.Contracts
 @using Ludeka.Core.ValueObjects
 @inject IUserLibraryService LibraryService
+@inject IGamePlayLogService PlayLogService
 @inject ICurrentUserService CurrentUserService
 @inject IUserPreferenceService PreferenceService
 @inject IUserLocationService LocationService
@@ -26,7 +27,7 @@
                 Mi Ludoteca Personal
             </h1>
             <p class="text-sm text-[var(--text-secondary)] mt-1">
-                Gestiona tus copias físicas en propiedad, títulos jugados, deseos y el cuaderno de préstamos ("¿A quién se lo dejé?").
+                Gestiona tus copias físicas en propiedad, títulos jugados, lista de compra y tu diario de partidas y préstamos.
             </p>
         </div>
 
@@ -114,19 +115,6 @@
             </button>
 
             <button type="button"
-                    id="tab-wishlist"
-                    role="tab"
-                    aria-selected="@(_activeTab == TabType.Wishlist ? "true" : "false")"
-                    aria-controls="panel-collection"
-                    @onclick="() => _activeTab = TabType.Wishlist"
-                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Wishlist)">
-                <span>🔖 Deseados</span>
-                <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.Wishlist)">
-                    @_summary.TotalWishlist
-                </span>
-            </button>
-
-            <button type="button"
                     id="tab-wanttobuy"
                     role="tab"
                     aria-selected="@(_activeTab == TabType.WantToBuy ? "true" : "false")"
@@ -137,6 +125,22 @@
                 <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.WantToBuy)">
                     @_summary.TotalWantToBuy
                 </span>
+            </button>
+
+            <button type="button"
+                    id="tab-plays"
+                    role="tab"
+                    aria-selected="@(_activeTab == TabType.Plays ? "true" : "false")"
+                    aria-controls="panel-plays"
+                    @onclick="SwitchToPlaysAsync"
+                    class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Plays)">
+                <span>📝 Diario de Partidas</span>
+                @if (_playsStats != null && _playsStats.TotalPlays > 0)
+                {
+                    <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.Plays)">
+                        @_playsStats.TotalPlays
+                    </span>
+                }
             </button>
 
             <button type="button"
@@ -482,6 +486,130 @@
                 <CatalogQueuePanel OnQueueProcessed="LoadSummaryAsync" />
             </div>
         }
+        else if (_activeTab == TabType.Plays)
+        {
+            <div id="panel-plays" role="tabpanel" aria-labelledby="tab-plays" class="space-y-6">
+                @if (_isLoadingPlays)
+                {
+                    <div class="py-20 text-center text-[var(--text-secondary)]">
+                        <div class="inline-block animate-spin text-4xl mb-3">🎲</div>
+                        <p class="text-base font-semibold">Cargando tu diario de partidas...</p>
+                    </div>
+                }
+                else
+                {
+                    @* Panel de Métricas de Partidas *@
+                    @if (_playsStats != null && _playsStats.TotalPlays > 0)
+                    {
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                                <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] block mb-1">Total Partidas</span>
+                                <span class="text-2xl font-black text-[var(--text-primary)]">@_playsStats.TotalPlays</span>
+                            </div>
+                            <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                                <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] block mb-1">Este Mes</span>
+                                <span class="text-2xl font-black text-amber-500">@_playsStats.PlaysThisMonth</span>
+                            </div>
+                            <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                                <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] block mb-1">Más Jugado</span>
+                                <span class="text-xs font-bold text-[var(--text-primary)] truncate block" title="@_playsStats.MostPlayedGameTitle">
+                                    @(_playsStats.MostPlayedGameTitle ?? "—")
+                                </span>
+                                @if (_playsStats.MostPlayedGameCount > 0)
+                                {
+                                    <span class="text-[0.65rem] text-[var(--brand-primary)] font-semibold">(@_playsStats.MostPlayedGameCount partidas)</span>
+                                }
+                            </div>
+                            <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                                <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] block mb-1">Lugar Favorito</span>
+                                <span class="text-xs font-bold text-[var(--text-primary)] truncate block" title="@_playsStats.FavoriteLocation">
+                                    @(_playsStats.FavoriteLocation ?? "—")
+                                </span>
+                                @if (_playsStats.MostCommonPlayerCount.HasValue)
+                                {
+                                    <span class="text-[0.65rem] text-[var(--text-muted)]">(@_playsStats.MostCommonPlayerCount jug. habitual)</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @* Listado de Partidas Cronológicas *@
+                    @if (_userPlayLogs == null || _userPlayLogs.Count == 0)
+                    {
+                        <div class="py-16 text-center max-w-md mx-auto p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                            <span class="text-4xl block mb-3">🎲</span>
+                            <h3 class="text-lg font-bold text-[var(--text-primary)] mb-1">Tu diario de partidas está vacío</h3>
+                            <p class="text-xs text-[var(--text-secondary)] mb-6">
+                                Registra cada sesión con fecha, lugar, número de jugadores y notas desde la ficha de cualquier juego.
+                            </p>
+                            <a href="/" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-colors inline-block shadow-sm">
+                                Explorar Catálogo para Registrar Partida
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between px-1">
+                                <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Historial de Sesiones</span>
+                                <span class="text-xs text-[var(--text-muted)]">@_userPlayLogs.Count registradas</span>
+                            </div>
+
+                            <div class="divide-y divide-[var(--border-subtle)] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] overflow-hidden shadow-sm">
+                                @foreach (var play in _userPlayLogs)
+                                {
+                                    <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[var(--bg-surface)] transition-colors">
+                                        <div class="flex items-start sm:items-center gap-3.5 min-w-0">
+                                            <a href="/juegos/@play.GameSlug" class="shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] block">
+                                                @if (!string.IsNullOrWhiteSpace(play.GameCoverUrl))
+                                                {
+                                                    <img src="@play.GameCoverUrl" alt="@play.GameTitle" class="w-full h-full object-cover" />
+                                                }
+                                                else
+                                                {
+                                                    <img src="/images/game-placeholder.svg" alt="@play.GameTitle" class="w-full h-full object-cover opacity-80" />
+                                                }
+                                            </a>
+                                            <div class="min-w-0">
+                                                <a href="/juegos/@play.GameSlug" class="text-sm font-bold text-[var(--text-primary)] hover:text-[var(--brand-primary)] transition-colors block truncate">
+                                                    @play.GameTitle
+                                                </a>
+                                                <div class="flex flex-wrap items-center gap-2 mt-1 text-xs text-[var(--text-secondary)]">
+                                                    <span class="inline-flex items-center gap-1 font-semibold text-[var(--text-primary)]">
+                                                        <span>📅</span> @play.PlayDate.ToString("dd/MM/yyyy")
+                                                    </span>
+                                                    <span>·</span>
+                                                    <span class="inline-flex items-center gap-1">
+                                                        <span>👥</span> @play.PlayerCount @(play.PlayerCount == 1 ? "jugador" : "jugadores")
+                                                    </span>
+                                                    <span>·</span>
+                                                    <span class="inline-flex items-center gap-1">
+                                                        <span>📍</span> @play.Location
+                                                    </span>
+                                                    @if (play.DurationMinutes.HasValue)
+                                                    {
+                                                        <span>·</span>
+                                                        <span class="inline-flex items-center gap-1">
+                                                            <span>⏱️</span> @(play.DurationMinutes)m
+                                                        </span>
+                                                    }
+                                                </div>
+                                                @if (!string.IsNullOrWhiteSpace(play.Comment))
+                                                {
+                                                    <p class="text-xs text-[var(--text-secondary)] italic mt-2 line-clamp-2 bg-[var(--bg-surface-elevated)] p-2 rounded-lg border border-[var(--border-subtle)]">
+                                                        &ldquo;@play.Comment&rdquo;
+                                                    </p>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
         else if (_activeTab == TabType.Loans)
         {
             @* Vista de Préstamos Activos *@
@@ -563,6 +691,17 @@
         {
             @* Vista de Juegos por Estado *@
             <div id="panel-collection" role="tabpanel" aria-labelledby="@($"tab-{_activeTab.ToString().ToLowerInvariant()}")">
+                @if (_activeTab == TabType.WantToBuy)
+                {
+                    <div class="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/25 flex items-center gap-3 text-xs text-sky-700 dark:text-sky-300 shadow-sm mb-6">
+                        <span class="text-2xl shrink-0">🔔</span>
+                        <div>
+                            <strong class="font-bold block text-sm mb-0.5">Radar de Compra Inteligente Activo</strong>
+                            <span>Ludeka monitoriza bajadas de precio, ofertas especiales, sorteos y reimpresiones en tiendas para todos los títulos de tu lista de seguimiento para comprar.</span>
+                        </div>
+                    </div>
+                }
+
                 @{
                     var currentList = GetFilteredItems();
                 }
@@ -718,8 +857,8 @@
     {
         InCollection,
         Played,
-        Wishlist,
         WantToBuy,
+        Plays,
         Loans,
         Queue,
         Appearance,
@@ -729,8 +868,11 @@
     private TabType _activeTab = TabType.InCollection;
     private UserLibrarySummaryDto? _summary;
     private UserLibraryStatsDto? _stats;
+    private IReadOnlyList<GamePlayLogDto>? _userPlayLogs;
+    private UserPlaysStatsDto? _playsStats;
     private bool _isLoading = true;
     private bool _isLoadingStats = false;
+    private bool _isLoadingPlays = false;
     private bool _copiedProfileLink = false;
     private bool _showBggImportModal = false;
     private bool _showBggSearchModal = false;
@@ -799,10 +941,50 @@
         {
             _isLoading = false;
             _stats = null;
+            try
+            {
+                _playsStats = await PlayLogService.GetUserPlaysStatsAsync();
+            }
+            catch
+            {
+            }
+
             if (_activeTab == TabType.Stats)
             {
                 await LoadStatsAsync();
             }
+            else if (_activeTab == TabType.Plays)
+            {
+                await LoadPlaysDataAsync();
+            }
+        }
+    }
+
+    private async Task SwitchToPlaysAsync()
+    {
+        _activeTab = TabType.Plays;
+        if (_userPlayLogs == null)
+        {
+            await LoadPlaysDataAsync();
+        }
+    }
+
+    private async Task LoadPlaysDataAsync()
+    {
+        _isLoadingPlays = true;
+        StateHasChanged();
+        try
+        {
+            _userPlayLogs = await PlayLogService.GetUserPlaysAsync();
+            _playsStats = await PlayLogService.GetUserPlaysStatsAsync();
+        }
+        catch
+        {
+        }
+        finally
+        {
+            _isLoadingPlays = false;
+            StateHasChanged();
         }
     }
 
@@ -933,24 +1115,21 @@
     {
         if (_summary == null) return [];
 
-        var targetStatus = _activeTab switch
+        return _activeTab switch
         {
-            TabType.InCollection => CollectionStatus.InCollection,
-            TabType.Played => CollectionStatus.Played,
-            TabType.Wishlist => CollectionStatus.Wishlist,
-            TabType.WantToBuy => CollectionStatus.WantToBuy,
-            _ => CollectionStatus.InCollection
+            TabType.InCollection => _summary.Items.Where(i => i.Status == CollectionStatus.InCollection).ToList(),
+            TabType.Played => _summary.Items.Where(i => i.IsPlayed).ToList(),
+            TabType.WantToBuy => _summary.Items.Where(i => i.Status == CollectionStatus.WantToBuy).ToList(),
+            _ => _summary.Items.Where(i => i.Status == CollectionStatus.InCollection).ToList()
         };
-
-        return _summary.Items.Where(i => i.Status == targetStatus).ToList();
     }
 
     private string GetActiveTabName() => _activeTab switch
     {
         TabType.InCollection => "«En mi ludoteca»",
-        TabType.Played => "«Jugado»",
-        TabType.Wishlist => "«Deseado»",
-        TabType.WantToBuy => "«Quiero comprar»",
+        TabType.Played => "«Jugados»",
+        TabType.WantToBuy => "«Comprar»",
+        TabType.Plays => "«Diario de Partidas»",
         TabType.Loans => "«Préstamos»",
         TabType.Queue => "«Cola comunitaria»",
         TabType.Appearance => "«Apariencia y Tema»",

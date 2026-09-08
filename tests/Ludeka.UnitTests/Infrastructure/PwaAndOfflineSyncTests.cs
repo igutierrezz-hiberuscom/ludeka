@@ -117,6 +117,7 @@ public class PwaAndOfflineSyncTests
             "https://images.ludeka.es/wingspan.jpg",
             "wingspan",
             CollectionStatus.InCollection,
+            true,
             DateTimeOffset.UtcNow,
             false,
             1001,

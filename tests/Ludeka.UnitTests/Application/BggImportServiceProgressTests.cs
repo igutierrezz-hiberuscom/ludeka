@@ -70,7 +70,9 @@ public class BggImportServiceProgressTests
         public Task<List<UserCollectionItem>> GetByUserIdAsync(string userId, CollectionStatus? status = null, CancellationToken cancellationToken = default) => Task.FromResult(status.HasValue ? Items.Where(i => i.UserId == userId && i.Status == status.Value).ToList() : Items.Where(i => i.UserId == userId).ToList());
         public Task<List<UserCollectionItem>> GetPendingItemsByBggIdAsync(int bggId, CancellationToken cancellationToken = default) => Task.FromResult(Items.Where(i => i.BggId == bggId && i.GameId == null).ToList());
         public Task PromotePendingItemsAsync(int bggId, Guid gameId, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken cancellationToken = default) => Task.FromResult(Items.Where(i => i.UserId == userId).GroupBy(i => i.Status).ToDictionary(g => g.Key, g => g.Count()));
+        public Task<List<UserCollectionItem>> GetPlayedByUserIdAsync(string userId, CancellationToken cancellationToken = default) => Task.FromResult(Items.Where(i => i.UserId == userId && i.IsPlayed).ToList());
+        public Task<int> GetPlayedCountAsync(string userId, CancellationToken cancellationToken = default) => Task.FromResult(Items.Count(i => i.UserId == userId && i.IsPlayed));
+        public Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken cancellationToken = default) => Task.FromResult(Items.Where(i => i.UserId == userId && i.Status.HasValue).GroupBy(i => i.Status!.Value).ToDictionary(g => g.Key, g => g.Count()));
         public Task AddAsync(UserCollectionItem item, CancellationToken cancellationToken = default) { Items.Add(item); return Task.CompletedTask; }
         public Task UpdateAsync(UserCollectionItem item, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task RemoveAsync(UserCollectionItem item, CancellationToken cancellationToken = default) { Items.Remove(item); return Task.CompletedTask; }

@@ -266,6 +266,15 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
+## Incremento 30: Colección en 3 Estados, Estado 'Jugado' Independiente, Radar de Compra y Diario de Partidas
+- **Identificador SDD:** `change-30-played-independent-status`
+- **Objetivo Principal:** Reestructuración de la colección personal eliminando el estado redundante 'Deseado' en favor de 3 estados potentes ('En mi ludoteca', 'Jugado', 'Comprar'). El estado 'Jugado' es ortogonal e independiente de la posesión o compra. Solo se permite valorar títulos que hayan sido marcados como jugados. Se introduce el nuevo subsistema de Diario de Partidas (registro de qué juego, fecha, lugar, comensales y comentarios) con actualización automática a 'Jugado' y analíticas de sesiones lúdicas.
+- **Estado:** ✅ **Completado y Archivado** (705 tests en verde al 100%).
+- **Documento:** [`inc-30-played-independent-status.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-30-played-independent-status.md)
+- **Módulo del Sistema:** [`02-ludoteca-y-prestamos.md`](file:///c:/repos/Ludeka/docs/specs/sistema/02-ludoteca-y-prestamos.md)
+
+---
+
 
 ## Convención de Trabajo para Cada Incremento (Ciclo SDD)
 

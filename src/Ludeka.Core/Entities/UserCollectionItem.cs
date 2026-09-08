@@ -8,7 +8,8 @@ public class UserCollectionItem
     public Guid Id { get; private set; } = Guid.NewGuid();
     public string UserId { get; private set; } = string.Empty;
     public Guid? GameId { get; private set; }
-    public CollectionStatus Status { get; private set; }
+    public CollectionStatus? Status { get; private set; }
+    public bool IsPlayed { get; private set; }
     public DateTimeOffset AddedAt { get; private set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; private set; }
 
@@ -26,19 +27,30 @@ public class UserCollectionItem
     private UserCollectionItem() { }
 
     /// <summary>
-    /// Constructor para juegos ya catalogados en Ludeka.
+    /// Constructor para juegos ya catalogados en Ludeka con estado de posesión/interés y estado de jugado.
     /// </summary>
-    public UserCollectionItem(string userId, Guid gameId, CollectionStatus status)
+    public UserCollectionItem(string userId, Guid gameId, CollectionStatus? status, bool isPlayed = false)
     {
         if (string.IsNullOrWhiteSpace(userId))
             throw new ArgumentException("El identificador de usuario no puede estar vacío.", nameof(userId));
         if (gameId == Guid.Empty)
             throw new ArgumentException("El identificador del juego no puede ser un GUID vacío.", nameof(gameId));
+        if (!status.HasValue && !isPlayed)
+            throw new InvalidOperationException("Un ítem de colección debe tener un estado de posesión o estar marcado como jugado.");
 
         UserId = userId.Trim();
         GameId = gameId;
         Status = status;
+        IsPlayed = isPlayed || status == CollectionStatus.Played;
         AddedAt = DateTimeOffset.UtcNow;
+    }
+
+    /// <summary>
+    /// Constructor de compatibilidad para juegos catalogados con estado no nulo.
+    /// </summary>
+    public UserCollectionItem(string userId, Guid gameId, CollectionStatus status)
+        : this(userId, gameId, (CollectionStatus?)status, status == CollectionStatus.Played)
+    {
     }
 
     /// <summary>
@@ -48,7 +60,8 @@ public class UserCollectionItem
         string userId,
         int bggId,
         string pendingTitle,
-        CollectionStatus status,
+        CollectionStatus? status,
+        bool isPlayed = false,
         string? thumbnailUrl = null,
         int? yearPublished = null)
     {
@@ -58,23 +71,58 @@ public class UserCollectionItem
             throw new ArgumentException("El identificador BGG debe ser mayor a cero.", nameof(bggId));
         if (string.IsNullOrWhiteSpace(pendingTitle))
             throw new ArgumentException("El título provisional del juego no puede estar vacío.", nameof(pendingTitle));
+        if (!status.HasValue && !isPlayed)
+            throw new InvalidOperationException("Un ítem en cola debe tener un estado de posesión o estar marcado como jugado.");
 
         UserId = userId.Trim();
         GameId = null;
         BggId = bggId;
         PendingTitle = pendingTitle.Trim();
         Status = status;
+        IsPlayed = isPlayed || status == CollectionStatus.Played;
         PendingThumbnailUrl = thumbnailUrl?.Trim();
         PendingYearPublished = yearPublished;
         AddedAt = DateTimeOffset.UtcNow;
     }
 
-    public void ChangeStatus(CollectionStatus newStatus)
+    /// <summary>
+    /// Constructor de compatibilidad para cola BGG con CollectionStatus no nulo.
+    /// </summary>
+    public UserCollectionItem(
+        string userId,
+        int bggId,
+        string pendingTitle,
+        CollectionStatus status,
+        string? thumbnailUrl = null,
+        int? yearPublished = null)
+        : this(userId, bggId, pendingTitle, (CollectionStatus?)status, status == CollectionStatus.Played, thumbnailUrl, yearPublished)
     {
+    }
+
+    public void ChangeStatus(CollectionStatus? newStatus)
+    {
+        if (newStatus == CollectionStatus.Played)
+        {
+            IsPlayed = true;
+        }
+
         if (Status == newStatus) return;
 
         Status = newStatus;
         UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void SetPlayed(bool isPlayed)
+    {
+        if (IsPlayed == isPlayed) return;
+
+        IsPlayed = isPlayed;
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void TogglePlayed()
+    {
+        SetPlayed(!IsPlayed);
     }
 
     /// <summary>

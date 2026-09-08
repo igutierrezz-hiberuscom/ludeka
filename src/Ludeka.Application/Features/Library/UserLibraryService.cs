@@ -38,22 +38,7 @@ public class UserLibraryService : IUserLibraryService
         var item = await _collectionRepo.GetByUserAndGameAsync(userId, gameId, ct);
         if (item == null) return null;
 
-        var activeLoan = await _loanRepo.GetActiveLoanByUserAndGameAsync(userId, gameId, ct);
-        var game = item.Game ?? await _gameRepo.GetByIdAsync(gameId, ct);
-
-        return new UserCollectionItemDto(
-            item.Id,
-            item.GameId,
-            game?.SpanishTitle ?? "Juego",
-            game?.CoverImageUrl,
-            game?.Slug ?? string.Empty,
-            item.Status,
-            item.AddedAt,
-            activeLoan != null,
-            item.BggId ?? game?.BggId,
-            false,
-            game?.IsExpansion ?? false
-        );
+        return await MapCollectionItemAsync(item, ct);
     }
 
     public async Task<UserCollectionItemDto?> SetCollectionStateAsync(Guid gameId, CollectionStatus? status, CancellationToken ct = default)
@@ -61,10 +46,23 @@ public class UserLibraryService : IUserLibraryService
         string userId = _currentUserService.UserId;
         var existing = await _collectionRepo.GetByUserAndGameAsync(userId, gameId, ct);
 
+        // Si el estado es Played, se redirige al flujo de jugado independiente
+        if (status == CollectionStatus.Played)
+        {
+            return await TogglePlayedStateAsync(gameId, ct);
+        }
+
         if (!status.HasValue)
         {
             if (existing != null)
             {
+                if (existing.IsPlayed)
+                {
+                    existing.ChangeStatus(null);
+                    await _collectionRepo.UpdateAsync(existing, ct);
+                    return await MapCollectionItemAsync(existing, ct);
+                }
+
                 await _collectionRepo.RemoveAsync(existing, ct);
             }
             return null;
@@ -75,6 +73,13 @@ public class UserLibraryService : IUserLibraryService
             // Toggle: si se vuelve a pulsar el mismo estado, se desmarca
             if (existing.Status == status.Value)
             {
+                if (existing.IsPlayed)
+                {
+                    existing.ChangeStatus(null);
+                    await _collectionRepo.UpdateAsync(existing, ct);
+                    return await MapCollectionItemAsync(existing, ct);
+                }
+
                 await _collectionRepo.RemoveAsync(existing, ct);
                 return null;
             }
@@ -90,10 +95,76 @@ public class UserLibraryService : IUserLibraryService
             throw new KeyNotFoundException($"No se encontró el juego con ID {gameId}.");
         }
 
-        var newItem = new UserCollectionItem(userId, gameId, status.Value);
+        var newItem = new UserCollectionItem(userId, gameId, status.Value, isPlayed: false);
         await _collectionRepo.AddAsync(newItem, ct);
 
         return await MapCollectionItemAsync(newItem, ct);
+    }
+
+    public async Task<UserCollectionItemDto?> TogglePlayedStateAsync(Guid gameId, CancellationToken ct = default)
+    {
+        string userId = _currentUserService.UserId;
+        var existing = await _collectionRepo.GetByUserAndGameAsync(userId, gameId, ct);
+
+        if (existing == null)
+        {
+            var game = await _gameRepo.GetByIdAsync(gameId, ct);
+            if (game == null)
+            {
+                throw new KeyNotFoundException($"No se encontró el juego con ID {gameId}.");
+            }
+
+            var newItem = new UserCollectionItem(userId, gameId, status: null, isPlayed: true);
+            await _collectionRepo.AddAsync(newItem, ct);
+            return await MapCollectionItemAsync(newItem, ct);
+        }
+
+        bool newPlayed = !existing.IsPlayed;
+        if (!newPlayed && !existing.Status.HasValue)
+        {
+            await _collectionRepo.RemoveAsync(existing, ct);
+            return null;
+        }
+
+        existing.SetPlayed(newPlayed);
+        await _collectionRepo.UpdateAsync(existing, ct);
+        return await MapCollectionItemAsync(existing, ct);
+    }
+
+    public async Task<UserCollectionItemDto?> SetPlayedStateAsync(Guid gameId, bool isPlayed, CancellationToken ct = default)
+    {
+        string userId = _currentUserService.UserId;
+        var existing = await _collectionRepo.GetByUserAndGameAsync(userId, gameId, ct);
+
+        if (existing == null)
+        {
+            if (!isPlayed) return null;
+
+            var game = await _gameRepo.GetByIdAsync(gameId, ct);
+            if (game == null)
+            {
+                throw new KeyNotFoundException($"No se encontró el juego con ID {gameId}.");
+            }
+
+            var newItem = new UserCollectionItem(userId, gameId, status: null, isPlayed: true);
+            await _collectionRepo.AddAsync(newItem, ct);
+            return await MapCollectionItemAsync(newItem, ct);
+        }
+
+        if (existing.IsPlayed == isPlayed)
+        {
+            return await MapCollectionItemAsync(existing, ct);
+        }
+
+        if (!isPlayed && !existing.Status.HasValue)
+        {
+            await _collectionRepo.RemoveAsync(existing, ct);
+            return null;
+        }
+
+        existing.SetPlayed(isPlayed);
+        await _collectionRepo.UpdateAsync(existing, ct);
+        return await MapCollectionItemAsync(existing, ct);
     }
 
     public async Task<GameLoanDto?> GetActiveLoanAsync(Guid gameId, CancellationToken ct = default)
@@ -194,6 +265,26 @@ public class UserLibraryService : IUserLibraryService
     public async Task<UserReviewDto> SubmitReviewAsync(SubmitReviewRequest request, CancellationToken ct = default)
     {
         string userId = _currentUserService.UserId;
+
+        // Regla de negocio de integridad: Solo se puede valorar si se ha jugado o se tiene en ludoteca propia
+        var collectionItem = await _collectionRepo.GetByUserAndGameAsync(userId, request.GameId, ct);
+        if (collectionItem != null && collectionItem.Status == CollectionStatus.WantToBuy && !collectionItem.IsPlayed)
+        {
+            throw new InvalidOperationException("No puedes valorar un juego en tu lista de compra sin haberlo jugado («Jugado»).");
+        }
+
+        // Si el juego no estaba marcado como jugado, al emitir la valoración se asegura IsPlayed = true
+        if (collectionItem == null)
+        {
+            collectionItem = new UserCollectionItem(userId, request.GameId, status: null, isPlayed: true);
+            await _collectionRepo.AddAsync(collectionItem, ct);
+        }
+        else if (!collectionItem.IsPlayed)
+        {
+            collectionItem.SetPlayed(true);
+            await _collectionRepo.UpdateAsync(collectionItem, ct);
+        }
+
         var review = await _reviewRepo.GetByUserAndGameAsync(userId, request.GameId, ct);
 
         if (review != null)
@@ -260,6 +351,7 @@ public class UserLibraryService : IUserLibraryService
                     item.PendingThumbnailUrl,
                     string.Empty,
                     item.Status,
+                    item.IsPlayed,
                     item.AddedAt,
                     false,
                     item.BggId,
@@ -277,6 +369,7 @@ public class UserLibraryService : IUserLibraryService
                     game?.CoverImageUrl ?? item.PendingThumbnailUrl,
                     game?.Slug ?? string.Empty,
                     item.Status,
+                    item.IsPlayed,
                     item.AddedAt,
                     isLoaned,
                     item.BggId ?? game?.BggId,
@@ -304,9 +397,11 @@ public class UserLibraryService : IUserLibraryService
             ));
         }
 
+        int totalPlayed = collectionItems.Count(i => i.IsPlayed);
+
         return new UserLibrarySummaryDto(
             counts.GetValueOrDefault(CollectionStatus.InCollection, 0),
-            counts.GetValueOrDefault(CollectionStatus.Played, 0),
+            totalPlayed,
             counts.GetValueOrDefault(CollectionStatus.Wishlist, 0),
             counts.GetValueOrDefault(CollectionStatus.WantToBuy, 0),
             activeLoansCount,
@@ -326,6 +421,7 @@ public class UserLibraryService : IUserLibraryService
                 item.PendingThumbnailUrl,
                 string.Empty,
                 item.Status,
+                item.IsPlayed,
                 item.AddedAt,
                 false,
                 item.BggId,
@@ -343,6 +439,7 @@ public class UserLibraryService : IUserLibraryService
             game?.CoverImageUrl ?? item.PendingThumbnailUrl,
             game?.Slug ?? string.Empty,
             item.Status,
+            item.IsPlayed,
             item.AddedAt,
             activeLoan != null,
             item.BggId ?? game?.BggId,

@@ -57,8 +57,8 @@ public class UserLibraryServiceTests
         public Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken ct = default)
         {
             var dict = Items
-                .Where(i => i.UserId == userId)
-                .GroupBy(i => i.Status)
+                .Where(i => i.UserId == userId && i.Status.HasValue)
+                .GroupBy(i => i.Status!.Value)
                 .ToDictionary(g => g.Key, g => g.Count());
             return Task.FromResult(dict);
         }
@@ -401,5 +401,98 @@ public class UserLibraryServiceTests
 
         Assert.False(baseItem.IsExpansion);
         Assert.True(expItem.IsExpansion);
+    }
+
+    [Fact]
+    public async Task SetCollectionStateAsync_And_TogglePlayedStateAsync_ShouldCoexist()
+    {
+        // Arrange
+        var colRepo = new FakeCollectionRepo();
+        var loanRepo = new FakeLoanRepo();
+        var reviewRepo = new FakeReviewRepo();
+        var gameRepo = new FakeGameRepo();
+        var userSvc = new FakeCurrentUserService();
+        var game = CreateTestGame();
+        gameRepo.Games.Add(game);
+
+        var svc = new UserLibraryService(colRepo, loanRepo, reviewRepo, gameRepo, userSvc);
+
+        // Act 1: Marcar como WantToBuy (Comprar)
+        var item1 = await svc.SetCollectionStateAsync(game.Id, CollectionStatus.WantToBuy);
+        Assert.NotNull(item1);
+        Assert.Equal(CollectionStatus.WantToBuy, item1.Status);
+        Assert.False(item1.IsPlayed);
+
+        // Act 2: Marcar como Jugado (Toggle)
+        var item2 = await svc.TogglePlayedStateAsync(game.Id);
+        Assert.NotNull(item2);
+        Assert.Equal(CollectionStatus.WantToBuy, item2.Status);
+        Assert.True(item2.IsPlayed);
+
+        // Act 3: Desmarcar Comprar (vuelve a pulsar WantToBuy) -> Se mantiene como Jugado
+        var item3 = await svc.SetCollectionStateAsync(game.Id, CollectionStatus.WantToBuy);
+        Assert.NotNull(item3);
+        Assert.Null(item3.Status);
+        Assert.True(item3.IsPlayed);
+
+        // Act 4: Desmarcar Jugado (Toggle) -> Ahora sí se elimina
+        var item4 = await svc.TogglePlayedStateAsync(game.Id);
+        Assert.Null(item4);
+        Assert.Empty(colRepo.Items);
+    }
+
+    [Fact]
+    public async Task SubmitReviewAsync_ShouldThrow_WhenInWantToBuyAndNotPlayed()
+    {
+        // Arrange
+        var colRepo = new FakeCollectionRepo();
+        var loanRepo = new FakeLoanRepo();
+        var reviewRepo = new FakeReviewRepo();
+        var gameRepo = new FakeGameRepo();
+        var userSvc = new FakeCurrentUserService();
+        var game = CreateTestGame();
+        gameRepo.Games.Add(game);
+
+        var svc = new UserLibraryService(colRepo, loanRepo, reviewRepo, gameRepo, userSvc);
+
+        // Poner en lista de compra sin haber jugado
+        await svc.SetCollectionStateAsync(game.Id, CollectionStatus.WantToBuy);
+
+        // Act & Assert: Intentar valorar debe fallar
+        await Assert.ThrowsAsync<InvalidOperationException>(() => svc.SubmitReviewAsync(new SubmitReviewRequest(
+            game.Id,
+            8.5,
+            "Quiero comprarlo pero aún no lo he jugado"
+        )));
+    }
+
+    [Fact]
+    public async Task SubmitReviewAsync_ShouldSucceed_WhenInWantToBuyAndPlayed()
+    {
+        // Arrange
+        var colRepo = new FakeCollectionRepo();
+        var loanRepo = new FakeLoanRepo();
+        var reviewRepo = new FakeReviewRepo();
+        var gameRepo = new FakeGameRepo();
+        var userSvc = new FakeCurrentUserService();
+        var game = CreateTestGame();
+        gameRepo.Games.Add(game);
+
+        var svc = new UserLibraryService(colRepo, loanRepo, reviewRepo, gameRepo, userSvc);
+
+        // Poner en lista de compra y marcar como jugado
+        await svc.SetCollectionStateAsync(game.Id, CollectionStatus.WantToBuy);
+        await svc.TogglePlayedStateAsync(game.Id);
+
+        // Act
+        var review = await svc.SubmitReviewAsync(new SubmitReviewRequest(
+            game.Id,
+            9.0,
+            "Lo jugué en las jornadas y ahora lo quiero comprar sí o sí"
+        ));
+
+        // Assert
+        Assert.NotNull(review);
+        Assert.Equal(9.0, review.Score);
     }
 }

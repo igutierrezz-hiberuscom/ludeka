@@ -13,6 +13,7 @@ using Ludeka.Application.Features.Home;
 using Ludeka.Application.Features.Events;
 using Ludeka.Application.Features.Sleeves;
 using Ludeka.Application.Features.Instagram;
+using Ludeka.Application.Features.Plays;
 using Ludeka.Infrastructure.Bgg;
 using Ludeka.Infrastructure.Data;
 using Ludeka.Infrastructure.Repositories;
@@ -88,6 +89,8 @@ builder.Services.AddScoped<IBggClient>(sp =>
 builder.Services.AddScoped<IUserCollectionRepository, SqliteUserCollectionRepository>();
 builder.Services.AddScoped<IGameLoanRepository, SqliteGameLoanRepository>();
 builder.Services.AddScoped<IUserReviewRepository, SqliteUserReviewRepository>();
+builder.Services.AddScoped<IGamePlayLogRepository, SqliteGamePlayLogRepository>();
+builder.Services.AddScoped<IGamePlayLogService, GamePlayLogService>();
 builder.Services.AddScoped<IFoundingVerdictRepository, SqliteFoundingVerdictRepository>();
 builder.Services.AddScoped<IFoundingVerdictService, FoundingVerdictService>();
 

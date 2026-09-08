@@ -50,8 +50,8 @@ public class UserLibraryStatsServiceTests
         public Task<Dictionary<CollectionStatus, int>> GetCountsByStatusAsync(string userId, CancellationToken ct = default)
         {
             var dict = Items
-                .Where(i => i.UserId == userId)
-                .GroupBy(i => i.Status)
+                .Where(i => i.UserId == userId && i.Status.HasValue)
+                .GroupBy(i => i.Status!.Value)
                 .ToDictionary(g => g.Key, g => g.Count());
             return Task.FromResult(dict);
         }

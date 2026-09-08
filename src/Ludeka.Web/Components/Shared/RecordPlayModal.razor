@@ -1,0 +1,238 @@
+@using System
+@using Ludeka.Application.DTOs
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="record-play-modal-title"
+         @onclick="HandleBackdropClick">
+        <div class="w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl p-6 text-left relative overflow-hidden flex flex-col max-h-[90vh]"
+             @onclick:stopPropagation="true">
+
+            @* Header *@
+            <div class="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)] shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🎲</span>
+                    <div>
+                        <h3 id="record-play-modal-title" class="text-base font-bold text-[var(--text-primary)]">
+                            Registrar Partida
+                        </h3>
+                        <p class="text-[0.68rem] text-[var(--brand-primary)] font-semibold truncate max-w-xs">
+                            @GameTitle
+                        </p>
+                    </div>
+                </div>
+                <button type="button" @onclick="Close"
+                        aria-label="Cerrar modal de partida"
+                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg text-lg transition-colors">
+                    &times;
+                </button>
+            </div>
+
+            @* Form Body *@
+            <div class="py-4 space-y-4 overflow-y-auto pr-1 flex-1">
+                @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                {
+                    <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-600 dark:text-red-300">
+                        ⚠️ @_errorMessage
+                    </div>
+                }
+
+                @* 1. Fecha de la partida *@
+                <div>
+                    <label for="play-date" class="font-bold text-xs text-[var(--text-secondary)] block mb-1.5">
+                        Fecha de la sesión:
+                    </label>
+                    <input id="play-date"
+                           type="date"
+                           @bind="_playDate"
+                           max="@DateTime.Today.ToString("yyyy-MM-dd")"
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                </div>
+
+                @* 2. Número de Jugadores *@
+                <div>
+                    <label class="font-bold text-xs text-[var(--text-secondary)] block mb-1.5">
+                        Número de jugadores:
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1">
+                            @foreach (var count in new[] { 1, 2, 3, 4, 5, 6 })
+                            {
+                                <button type="button"
+                                        @onclick="() => _playerCount = count"
+                                        class="w-9 h-9 rounded-xl text-xs font-bold transition-all flex items-center justify-center @(_playerCount == count ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]")">
+                                    @count
+                                </button>
+                            }
+                        </div>
+                        <div class="relative flex-1 min-w-[70px]">
+                            <input type="number"
+                                   min="1"
+                                   max="99"
+                                   @bind="_playerCount"
+                                   aria-label="Número personalizado de comensales"
+                                   class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-center text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                        </div>
+                    </div>
+                </div>
+
+                @* 3. Lugar de juego *@
+                <div>
+                    <label for="play-location" class="font-bold text-xs text-[var(--text-secondary)] block mb-1.5">
+                        ¿Dónde habéis jugado?
+                    </label>
+                    <input id="play-location"
+                           type="text"
+                           placeholder="ej. En casa, Club Dragón, Bar El Laberinto..."
+                           @bind="_location"
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                    
+                    @* Chips de sugerencia rápida *@
+                    <div class="flex flex-wrap gap-1.5 mt-2">
+                        @foreach (var quickLoc in new[] { "En casa", "Club / Asociación", "Casa de amigos", "Bar lúdico", "Digital / BGA" })
+                        {
+                            <button type="button"
+                                    @onclick="() => _location = quickLoc"
+                                    class="px-2 py-0.5 rounded-md text-[0.68rem] font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] transition-colors">
+                                @quickLoc
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @* 4. Duración aproximada (opcional) *@
+                <div>
+                    <label for="play-duration" class="font-bold text-xs text-[var(--text-secondary)] block mb-1.5">
+                        Duración aproximada (minutos, opcional):
+                    </label>
+                    <input id="play-duration"
+                           type="number"
+                           min="5"
+                           step="5"
+                           placeholder="ej. 60"
+                           @bind="_durationMinutes"
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]" />
+                </div>
+
+                @* 5. Comentarios o notas de la partida *@
+                <div>
+                    <label for="play-comment" class="font-bold text-xs text-[var(--text-secondary)] block mb-1.5">
+                        Crónica / Notas de la sesión (opcional):
+                    </label>
+                    <textarea id="play-comment"
+                              rows="3"
+                              maxlength="500"
+                              placeholder="¿Quién ganó? ¿Qué estrategia funcionó? ¿Algún momento memorable en mesa?"
+                              @bind="_comment"
+                              class="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] resize-none"></textarea>
+                </div>
+            </div>
+
+            @* Footer *@
+            <div class="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-end gap-3 shrink-0">
+                <button type="button"
+                        @onclick="Close"
+                        class="px-4 py-2.5 rounded-xl text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                    Cancelar
+                </button>
+                <button type="button"
+                        disabled="@_isSubmitting"
+                        @onclick="HandleSubmit"
+                        class="px-5 py-2.5 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all flex items-center gap-2 shadow-sm disabled:opacity-50">
+                    @if (_isSubmitting)
+                    {
+                        <span class="animate-spin">⚙️</span>
+                        <span>Guardando partida...</span>
+                    }
+                    else
+                    {
+                        <span>🎲</span>
+                        <span>Guardar partida</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public Guid GameId { get; set; }
+
+    [Parameter]
+    public string GameTitle { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<RecordPlayRequest> OnPlayRecorded { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private DateTime _playDate = DateTime.Today;
+    private int _playerCount = 2;
+    private string _location = "En casa";
+    private int? _durationMinutes;
+    private string? _comment;
+    private string? _errorMessage;
+    private bool _isSubmitting;
+
+    private async Task HandleBackdropClick()
+    {
+        await Close();
+    }
+
+    private async Task Close()
+    {
+        _errorMessage = null;
+        _isSubmitting = false;
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (GameId == Guid.Empty) return;
+
+        if (_playerCount < 1)
+        {
+            _errorMessage = "El número de jugadores debe ser al menos 1.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_location))
+        {
+            _location = "En casa";
+        }
+
+        _isSubmitting = true;
+        _errorMessage = null;
+
+        try
+        {
+            var request = new RecordPlayRequest(
+                GameId: GameId,
+                PlayDate: new DateTimeOffset(_playDate.Date, TimeSpan.Zero),
+                Location: _location.Trim(),
+                PlayerCount: _playerCount,
+                DurationMinutes: _durationMinutes > 0 ? _durationMinutes : null,
+                Comment: string.IsNullOrWhiteSpace(_comment) ? null : _comment.Trim()
+            );
+
+            await OnPlayRecorded.InvokeAsync(request);
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al guardar la partida: {ex.Message}";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

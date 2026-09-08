@@ -1,27 +1,44 @@
 @using Ludeka.Core.Enums
 @using Ludeka.Application.DTOs
 
-<div class="rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-4 sm:p-5 shadow-sm">
+<div class="rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-4 sm:p-5 shadow-sm space-y-4">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
             <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] tracking-wider block mb-1">
                 Tu Ludoteca Personal
             </span>
-            <p class="text-xs text-[var(--text-secondary)]">
-                @if (CurrentItem != null)
+            <p class="text-xs text-[var(--text-secondary)] flex flex-wrap items-center gap-2">
+                @if (CurrentItem != null && (CurrentItem.Status.HasValue || CurrentItem.IsPlayed))
                 {
-                    <span>Estado actual: <strong class="text-[var(--text-primary)]">@GetStatusName(CurrentItem.Status)</strong></span>
+                    <span>Estado actual: <strong class="text-[var(--text-primary)]">@GetStatusName(CurrentItem.Status, CurrentItem.IsPlayed)</strong></span>
                 }
                 else
                 {
                     <span>Añade este título a tu colección lúdica:</span>
                 }
+
+                @if (PlayCount > 0)
+                {
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.68rem] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <span>🎲</span>
+                        <span>@PlayCount @(PlayCount == 1 ? "partida" : "partidas")</span>
+                    </span>
+                }
             </p>
         </div>
 
-        @if (CurrentItem?.Status == CollectionStatus.InCollection)
-        {
-            <div class="w-full sm:w-auto flex items-center gap-2">
+        <div class="w-full sm:w-auto flex flex-wrap items-center gap-2">
+            @* Botón de Registrar Partida *@
+            <button type="button"
+                    @onclick="() => OnRecordPlayClicked.InvokeAsync()"
+                    class="w-full sm:w-auto px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                <span>➕</span>
+                <span>Registrar partida</span>
+            </button>
+
+            @* Botón de Préstamos (solo si está en propiedad física) *@
+            @if (CurrentItem?.Status == CollectionStatus.InCollection)
+            {
                 @if (ActiveLoan != null)
                 {
                     <button type="button"
@@ -40,44 +57,52 @@
                         <span>Prestar juego</span>
                     </button>
                 }
-            </div>
-        }
+            }
+        </div>
     </div>
 
-    @* Barra de 4 acciones estilo Letterboxd *@
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4" role="group" aria-label="Estados de colección">
+    @* Barra de 3 acciones ergonómicas *@
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" role="group" aria-label="Estados de colección">
         @* 1. En mi ludoteca *@
         <button type="button"
                 @onclick="() => HandleStatusClick(CollectionStatus.InCollection)"
-                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetButtonStyle(CollectionStatus.InCollection)">
+                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetStatusButtonStyle(CollectionStatus.InCollection)">
             <span>📚</span>
             <span>En mi ludoteca</span>
         </button>
 
-        @* 2. Jugado *@
+        @* 2. Jugado (Independiente y Coexistente) *@
         <button type="button"
-                @onclick="() => HandleStatusClick(CollectionStatus.Played)"
-                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetButtonStyle(CollectionStatus.Played)">
+                @onclick="HandlePlayedClick"
+                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetPlayedButtonStyle()">
             <span>🎲</span>
             <span>Jugado</span>
+            @if (CurrentItem?.IsPlayed == true)
+            {
+                <span class="text-[0.65rem] opacity-80">✓</span>
+            }
         </button>
 
-        @* 3. Deseado *@
-        <button type="button"
-                @onclick="() => HandleStatusClick(CollectionStatus.Wishlist)"
-                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetButtonStyle(CollectionStatus.Wishlist)">
-            <span>🔖</span>
-            <span>Deseado</span>
-        </button>
-
-        @* 4. Quiero comprar *@
+        @* 3. Quiero comprar *@
         <button type="button"
                 @onclick="() => HandleStatusClick(CollectionStatus.WantToBuy)"
-                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetButtonStyle(CollectionStatus.WantToBuy)">
+                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 @GetStatusButtonStyle(CollectionStatus.WantToBuy)">
             <span>🛒</span>
             <span>Comprar</span>
         </button>
     </div>
+
+    @* Píldora de Radar de Compra *@
+    @if (CurrentItem?.Status == CollectionStatus.WantToBuy)
+    {
+        <div class="p-3 rounded-xl bg-sky-500/10 border border-sky-500/25 flex items-center gap-2.5 text-xs text-sky-700 dark:text-sky-300">
+            <span class="text-base shrink-0">🔔</span>
+            <div class="leading-tight">
+                <strong class="font-bold">Radar de compra activo:</strong>
+                <span> Te avisaremos en cuanto detectemos sorteos, descuentos o reimpresiones de este juego en tiendas.</span>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -88,7 +113,16 @@
     public GameLoanDto? ActiveLoan { get; set; }
 
     [Parameter]
+    public int PlayCount { get; set; } = 0;
+
+    [Parameter]
     public EventCallback<CollectionStatus> OnStatusSelected { get; set; }
+
+    [Parameter]
+    public EventCallback OnTogglePlayed { get; set; }
+
+    [Parameter]
+    public EventCallback OnRecordPlayClicked { get; set; }
 
     [Parameter]
     public EventCallback OnLoanClicked { get; set; }
@@ -98,7 +132,12 @@
         await OnStatusSelected.InvokeAsync(status);
     }
 
-    private string GetButtonStyle(CollectionStatus status)
+    private async Task HandlePlayedClick()
+    {
+        await OnTogglePlayed.InvokeAsync();
+    }
+
+    private string GetStatusButtonStyle(CollectionStatus status)
     {
         bool isSelected = CurrentItem?.Status == status;
 
@@ -110,12 +149,36 @@
         return "bg-[var(--brand-glow)] text-[var(--text-primary)] border-2 border-[var(--brand-primary)] font-bold shadow-sm";
     }
 
-    private static string GetStatusName(CollectionStatus status) => status switch
+    private string GetPlayedButtonStyle()
     {
-        CollectionStatus.InCollection => "En mi ludoteca",
-        CollectionStatus.Played => "Jugado",
-        CollectionStatus.Wishlist => "En lista de deseos",
-        CollectionStatus.WantToBuy => "En seguimiento para comprar",
-        _ => status.ToString()
-    };
+        bool isPlayed = CurrentItem?.IsPlayed == true;
+
+        if (!isPlayed)
+        {
+            return "bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)]";
+        }
+
+        return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-2 border-emerald-500 font-bold shadow-sm";
+    }
+
+    private static string GetStatusName(CollectionStatus? status, bool isPlayed)
+    {
+        var parts = new List<string>();
+
+        if (status == CollectionStatus.InCollection)
+        {
+            parts.Add("En mi ludoteca");
+        }
+        else if (status == CollectionStatus.WantToBuy)
+        {
+            parts.Add("En seguimiento para comprar");
+        }
+
+        if (isPlayed)
+        {
+            parts.Add("Jugado");
+        }
+
+        return parts.Count > 0 ? string.Join(" · ", parts) : "Sin estado";
+    }
 }

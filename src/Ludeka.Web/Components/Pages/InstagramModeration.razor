@@ -81,6 +81,19 @@
             </div>
         </div>
 
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
+                <div class="flex items-center gap-2 font-semibold">
+                    <span>⚠️</span>
+                    <span>@_errorMessage</span>
+                </div>
+                <button type="button" @onclick="LoadDataAsync" class="px-3 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-white font-bold transition-colors">
+                    Reintentar
+                </button>
+            </div>
+        }
+
         @if (_isLoading)
         {
             <div class="py-20 text-center text-[var(--text-muted)] space-y-3">
@@ -557,6 +570,7 @@
     private bool _isSaving;
     private bool _isPublishing;
     private bool _isCopied;
+    private string? _errorMessage;
 
     private bool _isSelectGiveawayModalOpen;
     private bool _isSelectReleaseModalOpen;
@@ -612,6 +626,7 @@
     private async Task LoadDataAsync()
     {
         _isLoading = true;
+        _errorMessage = null;
         try
         {
             var rawDrafts = await PublisherService.GetDraftsAsync();
@@ -628,6 +643,10 @@
 
             var releases = await ReleaseService.GetReleasesAsync(fromDate: null);
             _availableReleases = releases.ToList();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"No se pudieron cargar los datos de Instagram: {ex.Message}";
         }
         finally
         {

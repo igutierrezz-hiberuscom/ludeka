@@ -43,7 +43,7 @@ public class UserLibraryStatsService : IUserLibraryStatsService
         int activeLoansCount = await _loanRepo.GetActiveLoansCountAsync(resolvedUserId, ct);
 
         int totalInCollection = counts.GetValueOrDefault(CollectionStatus.InCollection, 0);
-        int totalPlayed = counts.GetValueOrDefault(CollectionStatus.Played, 0);
+        int totalPlayed = allItems.Count(i => i.IsPlayed);
         int totalWishlist = counts.GetValueOrDefault(CollectionStatus.Wishlist, 0);
         int totalWantToBuy = counts.GetValueOrDefault(CollectionStatus.WantToBuy, 0);
 
@@ -129,6 +129,7 @@ public class UserLibraryStatsService : IUserLibraryStatsService
                 game?.CoverImageUrl ?? item.PendingThumbnailUrl,
                 game?.Slug ?? string.Empty,
                 item.Status,
+                item.IsPlayed,
                 item.AddedAt,
                 activeLoan != null,
                 item.BggId ?? game?.BggId,

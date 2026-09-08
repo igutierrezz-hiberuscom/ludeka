@@ -59,6 +59,19 @@
             </div>
         </div>
 
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
+                <div class="flex items-center gap-2 font-semibold">
+                    <span>⚠️</span>
+                    <span>@_errorMessage</span>
+                </div>
+                <button type="button" @onclick="LoadLogs" class="px-3 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-white font-bold transition-colors">
+                    Reintentar
+                </button>
+            </div>
+        }
+
         @* Barra de Filtros Multicriterio *@
         <div class="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-3 text-xs">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -259,6 +272,7 @@
     private string _filterUserId = string.Empty;
     private string _filterEntityType = string.Empty;
     private string _filterAction = string.Empty;
+    private string? _errorMessage;
 
     private readonly HashSet<Guid> _expandedEntryIds = [];
 
@@ -269,9 +283,10 @@
 
     private async Task LoadLogs()
     {
+        _isLoading = true;
+        _errorMessage = null;
         try
         {
-            _isLoading = true;
             if (CurrentUserService.IsFoundingTeam)
             {
                 AuditEntityType? entityType = null;
@@ -290,6 +305,10 @@
 
                 _pageData = await AuditService.GetAuditLogsAsync(filter);
             }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"No se pudo cargar la bitácora de auditoría: {ex.Message}";
         }
         finally
         {

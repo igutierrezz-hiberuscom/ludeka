@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ludeka.Application.DTOs;
@@ -10,6 +10,8 @@ public interface IUserLibraryService
 {
     Task<UserCollectionItemDto?> GetCollectionStateAsync(Guid gameId, CancellationToken ct = default);
     Task<UserCollectionItemDto?> SetCollectionStateAsync(Guid gameId, CollectionStatus? status, CancellationToken ct = default);
+    Task<UserCollectionItemDto?> TogglePlayedStateAsync(Guid gameId, CancellationToken ct = default);
+    Task<UserCollectionItemDto?> SetPlayedStateAsync(Guid gameId, bool isPlayed, CancellationToken ct = default);
     Task<GameLoanDto?> GetActiveLoanAsync(Guid gameId, CancellationToken ct = default);
     Task<GameLoanDto> CreateLoanAsync(CreateLoanRequest request, CancellationToken ct = default);
     Task<GameLoanDto> ReturnLoanAsync(Guid loanId, CancellationToken ct = default);

@@ -139,4 +139,36 @@ public class SqliteGameIssueReportRepositoryTests : IDisposable
         Assert.Equal("mod-99", retrieved.ResolvedByUserId);
         Assert.Equal("Corregida edad a 14+", retrieved.ModeratorNotes);
     }
+
+    [Fact]
+    public async Task EnsureSchemaUpToDateAsync_CreatesGameIssueReportsTable_WhenMissing()
+    {
+        using var rawConnection = new SqliteConnection("DataSource=:memory:");
+        await rawConnection.OpenAsync();
+
+        // Creamos solo la tabla Games para simular una base de datos existente previa al incremento 17
+        using (var cmd = rawConnection.CreateCommand())
+        {
+            cmd.CommandText = "CREATE TABLE \"Games\" (\"Id\" TEXT PRIMARY KEY, \"Slug\" TEXT NOT NULL);";
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        var options = new DbContextOptionsBuilder<LudekaDbContext>()
+            .UseSqlite(rawConnection)
+            .Options;
+
+        using var dbContext = new LudekaDbContext(options);
+
+        // Ejecutar migrador defensivo
+        await SqliteSchemaMigrator.EnsureSchemaUpToDateAsync(dbContext);
+
+        // Verificar que la tabla GameIssueReports existe y se puede consultar/añadir sin errores
+        var reportRepo = new SqliteGameIssueReportRepository(dbContext);
+        var report = new GameIssueReport(Guid.NewGuid(), "dune", "Dune", GameIssueType.IncorrectPlayerCount);
+        await reportRepo.AddAsync(report);
+
+        var summary = await reportRepo.GetSummaryAsync();
+        Assert.Equal(1, summary.TotalCount);
+        Assert.Equal(1, summary.PendingCount);
+    }
 }

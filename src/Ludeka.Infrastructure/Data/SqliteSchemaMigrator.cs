@@ -186,6 +186,37 @@ public static class SqliteSchemaMigrator
                 existingTables.Add("UserPreferences");
             }
 
+            // 6.1 Crear tabla GameIssueReports si no existe (Incremento 17)
+            if (!existingTables.Contains("GameIssueReports"))
+            {
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "GameIssueReports" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_GameIssueReports" PRIMARY KEY,
+                        "GameId" TEXT NOT NULL,
+                        "GameSlug" TEXT NOT NULL,
+                        "GameTitle" TEXT NOT NULL,
+                        "IssueType" INTEGER NOT NULL,
+                        "Details" TEXT NULL,
+                        "ReportedByUserId" TEXT NULL,
+                        "ReporterNameOrAlias" TEXT NOT NULL,
+                        "Status" INTEGER NOT NULL,
+                        "ModeratorNotes" TEXT NULL,
+                        "ResolvedByUserId" TEXT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        "UpdatedAt" TEXT NULL,
+                        "ResolvedAt" TEXT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS "IX_GameIssueReports_GameId" ON "GameIssueReports" ("GameId");
+                    CREATE INDEX IF NOT EXISTS "IX_GameIssueReports_Status" ON "GameIssueReports" ("Status");
+                    CREATE INDEX IF NOT EXISTS "IX_GameIssueReports_IssueType" ON "GameIssueReports" ("IssueType");
+                    CREATE INDEX IF NOT EXISTS "IX_GameIssueReports_CreatedAt" ON "GameIssueReports" ("CreatedAt");
+                    CREATE INDEX IF NOT EXISTS "IX_GameIssueReports_Status_CreatedAt" ON "GameIssueReports" ("Status", "CreatedAt");
+                    """;
+                await createCmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("GameIssueReports");
+            }
+
             // 7. Crear tabla GameEditLogs si no existe (Incremento 18)
             if (!existingTables.Contains("GameEditLogs"))
             {
@@ -599,6 +630,56 @@ public static class SqliteSchemaMigrator
                 """;
                 await cmd.ExecuteNonQueryAsync(ct);
                 existingTables.Add("InstagramPostDrafts");
+            }
+
+            // --- Incremento 30: Desacoplamiento de IsPlayed, Fusión de Wishlist y Diario de Partidas ---
+            if (existingTables.Contains("UserCollectionItems"))
+            {
+                var collectionCols = await GetTableColumnsAsync(connection, "UserCollectionItems", ct);
+                if (!collectionCols.Contains("IsPlayed"))
+                {
+                    using var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = "ALTER TABLE \"UserCollectionItems\" ADD COLUMN \"IsPlayed\" INTEGER NOT NULL DEFAULT 0;";
+                    await alterCmd.ExecuteNonQueryAsync(ct);
+
+                    // Migrar registros existentes con Status = 2 (Played) a IsPlayed = 1 y Status = NULL
+                    using var migratePlayedCmd = connection.CreateCommand();
+                    migratePlayedCmd.CommandText = "UPDATE \"UserCollectionItems\" SET \"IsPlayed\" = 1, \"Status\" = NULL WHERE \"Status\" = 2;";
+                    await migratePlayedCmd.ExecuteNonQueryAsync(ct);
+                }
+
+                // Migrar registros históricos de Wishlist (3) a WantToBuy (4)
+                using var migrateWishlistCmd = connection.CreateCommand();
+                migrateWishlistCmd.CommandText = "UPDATE \"UserCollectionItems\" SET \"Status\" = 4 WHERE \"Status\" = 3;";
+                await migrateWishlistCmd.ExecuteNonQueryAsync(ct);
+
+                using var idxCmd = connection.CreateCommand();
+                idxCmd.CommandText = "CREATE INDEX IF NOT EXISTS \"IX_UserCollectionItems_UserId_IsPlayed\" ON \"UserCollectionItems\" (\"UserId\", \"IsPlayed\");";
+                await idxCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // Crear tabla GamePlayLogs si no existe (Incremento 30)
+            if (!existingTables.Contains("GamePlayLogs"))
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS "GamePlayLogs" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_GamePlayLogs" PRIMARY KEY,
+                        "UserId" TEXT NOT NULL,
+                        "GameId" TEXT NOT NULL,
+                        "PlayDate" TEXT NOT NULL,
+                        "Location" TEXT NOT NULL,
+                        "PlayerCount" INTEGER NOT NULL,
+                        "DurationMinutes" INTEGER NULL,
+                        "Comment" TEXT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        CONSTRAINT "FK_GamePlayLogs_Games_GameId" FOREIGN KEY ("GameId") REFERENCES "Games" ("Id") ON DELETE CASCADE
+                    );
+                    CREATE INDEX IF NOT EXISTS "IX_GamePlayLogs_UserId_PlayDate" ON "GamePlayLogs" ("UserId", "PlayDate");
+                    CREATE INDEX IF NOT EXISTS "IX_GamePlayLogs_GameId" ON "GamePlayLogs" ("GameId");
+                """;
+                await cmd.ExecuteNonQueryAsync(ct);
+                existingTables.Add("GamePlayLogs");
             }
         }
         finally
