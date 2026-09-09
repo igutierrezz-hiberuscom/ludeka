@@ -78,10 +78,12 @@ public class WebMarkupContractTests
           new[] { "Gestionar Creadores de Contenido" },
           new[] { "Autores y Diseñadores" } },
 
-        // HomeDashboard: hero minimalista con h1 sr-only, sin badge ni titular, sin enlaces a /radar
-        { "HomeDashboard (hero minimalista)", "src/Ludeka.Web/Components/Pages/HomeDashboard.razor",
-          new[] { "sr-only", "<h1 class=\"sr-only\">Ludeka — Juegos de mesa en español</h1>" },
-          new[] { "PORTADA EDITORIAL", "href=\"/radar\"" } },
+        // HomeDashboard: orquestador editorial (Decisión 3) — hero y carriles por componentes,
+        // sin markup de card inline, sin emojis, sin h1 propio (vive en el hero) y sin la
+        // clase inválida sm:w-68
+        { "HomeDashboard (orquestador editorial)", "src/Ludeka.Web/Components/Pages/HomeDashboard.razor",
+          new[] { "<HeroEditorial", "Background=\"HeroBackgroundVariant.FotoEurogame\"", "<RailHeader", "<HomeGameCard", "<HomeGiveawayCard", "<HomeReleaseCard", "<HomeEventCard", "Name=\"dices\"" },
+          new[] { "PORTADA EDITORIAL", "href=\"/radar\"", "sm:w-68", "BggRating", "RemainingTimeText", "<h1", "sr-only" } },
 
         // Radar: sin banner legacy, alias silencioso con ambas rutas @page
         { "Radar (sin banner legacy)", "src/Ludeka.Web/Components/Pages/Radar.razor",
@@ -176,11 +178,13 @@ public class WebMarkupContractTests
     }
 
     [Fact]
-    public void HomeDashboard_Pills_AreExactlyTheFourD4PillsInOrder()
+    public void HeroEditorial_Pills_AreExactlyTheFourD4PillsInOrder()
     {
-        var source = ReadSource("src/Ludeka.Web/Components/Pages/HomeDashboard.razor");
+        // Retarget tras la extracción del hero (Decisión 3): las 4 píldoras D4 viven en
+        // HeroEditorial.razor, congeladas en orden por la spec home-landing-hero.
+        var source = ReadSource("src/Ludeka.Web/Components/Home/HeroEditorial.razor");
         var start = source.IndexOf("@* Píldoras de acceso directo *@", StringComparison.Ordinal);
-        var end = source.IndexOf("@if (_isLoading)", StringComparison.Ordinal);
+        var end = source.IndexOf("</section>", StringComparison.Ordinal);
         Assert.True(start >= 0 && end > start, "No se encontró el bloque de píldoras del hero.");
         var pillBlock = source[start..end];
 
@@ -195,6 +199,20 @@ public class WebMarkupContractTests
             positions.Add(pos);
         }
         Assert.Equal(positions.OrderBy(p => p).ToList(), positions);
+    }
+
+    [Fact]
+    public void HomeDashboard_CarrilNovedades_EnlaceVerTodasApuntaANovedades()
+    {
+        // Paridad del enlace "Ver todas las novedades" tras la extracción: el destino lo
+        // fija el Href del orquestador en la misma llamada a RailHeader (Decisión 3).
+        var source = ReadSource("src/Ludeka.Web/Components/Pages/HomeDashboard.razor");
+        var anchorPos = source.IndexOf("Ver todas las novedades", StringComparison.Ordinal);
+        Assert.True(anchorPos >= 0, "No se encontró el enlace 'Ver todas las novedades'.");
+
+        var hrefPos = source.LastIndexOf("Href=\"", anchorPos, StringComparison.Ordinal);
+        Assert.True(hrefPos >= 0, "El carril de Novedades no declara Href.");
+        Assert.StartsWith("Href=\"/novedades\"", source[hrefPos..]);
     }
 
     [Fact]
