@@ -87,6 +87,11 @@ public class WebMarkupContractTests
         { "Icon (SVG Lucide inline)", "src/Ludeka.Web/Components/Shared/Icon.razor",
           new[] { "viewBox=\"0 0 24 24\"", "stroke=\"currentColor\"", "aria-hidden=\"true\"" },
           new[] { "<img", "http" } },
+
+        // DefaultImage: SVG inline temable por variables de tema; sin <img> roto
+        { "DefaultImage (SVG inline temable)", "src/Ludeka.Web/Components/Shared/DefaultImage.razor",
+          new[] { "viewBox=\"0 0 400 225\"", "var(--brand-", "var(--bg-", "aria-hidden" },
+          new[] { "<img" } },
     };
 
     [Theory]
