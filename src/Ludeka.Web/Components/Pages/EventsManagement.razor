@@ -78,9 +78,24 @@
                             {
                                 <tr class="hover:bg-[var(--bg-surface)] transition-colors">
                                     <td class="p-3.5">
+                                    @* Cartel (D5: sin URL el default inline; con URL caída, onerror) *@
+                                    @if (string.IsNullOrWhiteSpace(evt.ImageUrl))
+                                    {
+                                        <DefaultImage Domain="DefaultImageDomain.Evento"
+                                                      Alt="@evt.Title"
+                                                      CssClass="w-12 h-12 rounded-lg object-cover" />
+                                    }
+                                    else
+                                    {
                                         <img src="@evt.ImageUrl"
                                              alt="@evt.Title"
-                                             class="w-12 h-12 rounded-lg object-cover border border-[var(--border-subtle)]" />
+                                             class="w-12 h-12 rounded-lg object-cover border border-[var(--border-subtle)]"
+                                             width="48"
+                                             height="48"
+                                             loading="lazy"
+                                             decoding="async"
+                                             onerror="this.onerror=null; this.src='/images/defaults/evento-default.svg';" />
+                                    }
                                     </td>
                                     <td class="p-3.5 font-medium">
                                         <div class="font-bold text-[var(--text-primary)] text-sm">@evt.Title</div>

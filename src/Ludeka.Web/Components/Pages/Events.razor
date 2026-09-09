@@ -127,12 +127,26 @@
                 {
                     <div class="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] transition-all overflow-hidden flex flex-col justify-between shadow-sm">
                         <div>
-                            @* Cartel o Portada del Evento *@
+                            @* Cartel o Portada del Evento (D5: con URL vacía el SVG inline temable
+                               ocupa la zona; con URL externa caída el onerror cae en el default estático) *@
                             <div class="w-full h-48 overflow-hidden bg-[var(--bg-surface)] relative border-b border-[var(--border-subtle)]">
-                                <img src="@evt.ImageUrl"
-                                     alt="Cartel de @evt.Title"
-                                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                                     loading="lazy" />
+                                @if (string.IsNullOrWhiteSpace(evt.ImageUrl))
+                                {
+                                    <DefaultImage Domain="DefaultImageDomain.Evento"
+                                                  Alt="@($"Cartel de {evt.Title}")"
+                                                  CssClass="w-full h-full" />
+                                }
+                                else
+                                {
+                                    <img src="@evt.ImageUrl"
+                                         alt="Cartel de @evt.Title"
+                                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                         width="400"
+                                         height="225"
+                                         loading="lazy"
+                                         decoding="async"
+                                         onerror="this.onerror=null; this.src='/images/defaults/evento-default.svg';" />
+                                }
 
                                 <div class="absolute top-3 left-3">
                                     <span class="px-2.5 py-1 rounded-full text-xs font-bold border backdrop-blur-md shadow-sm bg-black/60 text-white border-white/20 flex items-center gap-1">

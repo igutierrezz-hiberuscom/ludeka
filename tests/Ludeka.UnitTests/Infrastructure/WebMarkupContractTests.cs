@@ -332,4 +332,32 @@ public class WebMarkupContractTests
         var cssSceneBranch = source[casePos..breakPos];
         Assert.DoesNotContain("<picture", cssSceneBranch, StringComparison.Ordinal);
     }
+
+    // ===== INC-35 PR-3: fix D5 — fallback de imagen en las páginas de eventos =====
+
+    [Theory]
+    [InlineData("src/Ludeka.Web/Components/Pages/Events.razor")]
+    [InlineData("src/Ludeka.Web/Components/Pages/EventsManagement.razor")]
+    public void PaginasEventos_TodaImagenDeEventoTieneFallbackPorDominio(string relativePath)
+    {
+        // Escenario «Página de eventos con evento sin imagen» (spec default-image-fallbacks):
+        // sin URL el cartel es DefaultImage inline por dominio; con URL externa, onerror cae
+        // en el asset estático de eventos. Nadie queda con un <img> roto ni sin dimensiones.
+        var source = ReadSource(relativePath);
+        Assert.Contains("DefaultImageDomain.Evento", source);
+        Assert.Contains("/images/defaults/evento-default.svg", source);
+
+        var imgTags = System.Text.RegularExpressions.Regex.Matches(
+            source, @"<img\b[^>]*>", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Assert.True(imgTags.Count > 0, $"{relativePath}: debe existir al menos una imagen de cartel de evento.");
+
+        foreach (System.Text.RegularExpressions.Match img in imgTags)
+        {
+            Assert.True(img.Value.Contains("onerror=", StringComparison.Ordinal),
+                $"{relativePath}: toda <img> de evento debe declarar onerror con el default de Ludeka.");
+            Assert.True(img.Value.Contains("width=", StringComparison.Ordinal)
+                && img.Value.Contains("height=", StringComparison.Ordinal),
+                $"{relativePath}: toda <img> de evento debe fijar width/height para CLS 0.");
+        }
+    }
 }
