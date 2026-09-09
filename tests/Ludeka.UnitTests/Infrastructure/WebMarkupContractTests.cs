@@ -92,6 +92,20 @@ public class WebMarkupContractTests
         { "DefaultImage (SVG inline temable)", "src/Ludeka.Web/Components/Shared/DefaultImage.razor",
           new[] { "viewBox=\"0 0 400 225\"", "var(--brand-", "var(--bg-", "aria-hidden" },
           new[] { "<img" } },
+
+        // Assets por defecto servibles (variante estática para onerror), uno por dominio
+        { "Asset default de eventos", "src/Ludeka.Web/wwwroot/images/defaults/evento-default.svg",
+          new[] { "EVENTO LUDEKA", "viewBox=\"0 0 400 225\"" },
+          new[] { "game-placeholder" } },
+        { "Asset default de sorteos", "src/Ludeka.Web/wwwroot/images/defaults/sorteo-default.svg",
+          new[] { "SORTEO LUDEKA", "viewBox=\"0 0 400 225\"" },
+          new[] { "game-placeholder" } },
+        { "Asset default de novedades", "src/Ludeka.Web/wwwroot/images/defaults/novedad-default.svg",
+          new[] { "NOVEDAD", "viewBox=\"0 0 400 225\"" },
+          new[] { "game-placeholder" } },
+        { "Asset default genérico", "src/Ludeka.Web/wwwroot/images/defaults/generico-default.svg",
+          new[] { "LUDEKA", "viewBox=\"0 0 400 225\"" },
+          new[] { "game-placeholder" } },
     };
 
     [Theory]

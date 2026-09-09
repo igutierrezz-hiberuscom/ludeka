@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" role="img" aria-label="Imagen por defecto genérica de Ludeka">
+  <!-- Ludeka · variante estática genérica (motivo: isotipo de dados) · par 1:1 del inline DefaultImage.razor -->
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1B2228" />
+      <stop offset="1" stop-color="#242C34" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="225" fill="url(#fondo)" />
+  <circle cx="200" cy="96" r="72" fill="#E05A38" opacity="0.14" />
+  <g transform="translate(152 40) scale(4)" fill="none" stroke="#E05A38" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="12" height="12" x="2" y="10" rx="2" ry="2" />
+    <path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" />
+    <path d="M6 18h.01" />
+    <path d="M10 14h.01" />
+    <path d="M15 6h.01" />
+    <path d="M18 9h.01" />
+  </g>
+  <text x="200" y="196" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700" letter-spacing="3.5" fill="#9AB0C2">LUDEKA</text>
+</svg>
