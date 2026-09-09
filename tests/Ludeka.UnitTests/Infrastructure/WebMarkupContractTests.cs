@@ -167,4 +167,20 @@ public class WebMarkupContractTests
         Assert.True(hrefPos >= 0, "El enlace 'Ver todas las novedades' no tiene href.");
         Assert.StartsWith("href=\"/novedades\"", source[hrefPos..]);
     }
+
+    [Fact]
+    public void App_razor_CargaFrauncesEnLaMismaPeticionDeFuentesSinNuevoEnlace()
+    {
+        // Decisión 7 (INC-35): la serif display Fraunces entra en la URL ya existente de
+        // Google Fonts (misma petición css2, display=swap intacto, sin preload).
+        var source = ReadSource("src/Ludeka.Web/Components/App.razor");
+
+        Assert.Contains("family=Fraunces:opsz,wght@9..144,600..700", source);
+        Assert.Contains("display=swap", source);
+
+        // No se añade ningún <link> de fuente nuevo: una única URL css2 y las mismas
+        // tres hojas de estilo que había antes del incremento.
+        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(source, @"fonts\.googleapis\.com/css2").Count);
+        Assert.Equal(3, System.Text.RegularExpressions.Regex.Matches(source, "rel=\"stylesheet\"").Count);
+    }
 }
