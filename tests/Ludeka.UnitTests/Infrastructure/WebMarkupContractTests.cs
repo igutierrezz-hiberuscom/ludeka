@@ -193,6 +193,39 @@ public class WebMarkupContractTests
         { "StoreOffersCard (sin emojis)", "src/Ludeka.Web/Components/Shared/StoreOffersCard.razor",
           new[] { "<Icon Name=\"shopping-cart\"", "<Icon Name=\"shield\"", "<Icon Name=\"plane\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"package\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"settings\"" },
           new[] { "🛒", "⚙", "🛡", "✈", "🔄", "📦", "💡" } },
+
+        // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 3 — ludoteca y préstamos) =====
+
+        // MyLibrary: pestañas, spinners, vacíos, temas y acciones por iconos Lucide
+        { "MyLibrary (sin emojis)", "src/Ludeka.Web/Components/Pages/MyLibrary.razor",
+          new[] { "<Icon Name=\"library\"", "<Icon Name=\"dices\"", "<Icon Name=\"package\"", "<Icon Name=\"dna\"", "<Icon Name=\"handshake\"", "<Icon Name=\"undo-2\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"wifi-off\"" },
+          new[] { "📥", "🎲", "🔍", "📡", "🔄", "📚", "🛒", "📝", "📦", "⏳", "🎨", "🌍", "🧬", "📖", "🪵", "🌌", "🌑", "⚠", "📍", "📋", "👁", "🤝", "👤", "↩", "🔔", "🧩", "⏱", "👥", "📅" } },
+
+        // CollectionActionBar: estados de colección y préstamos por iconos Lucide
+        { "CollectionActionBar (sin emojis)", "src/Ludeka.Web/Components/Shared/CollectionActionBar.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"plus\"", "<Icon Name=\"package\"", "<Icon Name=\"handshake\"", "<Icon Name=\"library\"", "<Icon Name=\"shopping-cart\"", "<Icon Name=\"bell\"" },
+          new[] { "🎲", "➕", "📦", "🤝", "📚", "🛒", "🔔" } },
+
+        // LoanModal: cabecera y devolución por iconos Lucide
+        { "LoanModal (sin emojis)", "src/Ludeka.Web/Components/Shared/LoanModal.razor",
+          new[] { "<Icon Name=\"package\"", "<Icon Name=\"undo-2\"" },
+          new[] { "📦", "↩" } },
+
+        // RecordPlayModal: cabecera, error y spinner por iconos Lucide
+        { "RecordPlayModal (sin emojis)", "src/Ludeka.Web/Components/Shared/RecordPlayModal.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"settings\"" },
+          new[] { "🎲", "⚠", "⚙" } },
+
+        // ReviewBottomSheet: cabecera y contexto familiar por iconos Lucide; semáforo por puntos CSS
+        { "ReviewBottomSheet (sin emojis)", "src/Ludeka.Web/Components/Shared/ReviewBottomSheet.razor",
+          new[] { "<Icon Name=\"zap\"", "<Icon Name=\"baby\"", "rounded-full bg-emerald-500" },
+          new[] { "⚡", "🟢", "🟡", "🔴", "👶", "🏠", "🛡", "👥", "☕", "💻" } },
+
+        // LibraryStatsDashboard: métricas y secciones por iconos Lucide (el badge IconEmoji
+        // proviene de datos del backend y queda documentado como excepción de este contrato)
+        { "LibraryStatsDashboard (sin emojis)", "src/Ludeka.Web/Components/Features/Library/LibraryStatsDashboard.razor",
+          new[] { "<Icon Name=\"hourglass\"", "<Icon Name=\"users\"", "<Icon Name=\"shield\"", "<Icon Name=\"dna\"", "<Icon Name=\"handshake\"", "<Icon Name=\"trophy\"", "<Icon Name=\"building-2\"" },
+          new[] { "⏳", "👥", "🛡", "🧬", "🤝", "🐺", "🏆", "🖋", "🏢" } },
     };
 
     [Theory]
