@@ -14,7 +14,7 @@
         <div>
             <div class="flex items-center gap-2 mb-2">
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30">
-                    🛡️ PANEL FUNDADOR
+                    <Icon Name="shield" Size="14" /> PANEL FUNDADOR
                 </span>
                 <span class="text-xs text-[var(--text-secondary)]">Automatización Omnicanal</span>
             </div>
@@ -30,7 +30,7 @@
             <button type="button"
                     @onclick="ReloadDataAsync"
                     class="px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                <span>🔄</span>
+                <Icon Name="refresh-cw" Size="14" />
                 <span>Refrescar</span>
             </button>
         </div>
@@ -40,11 +40,11 @@
     {
         <div class="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 space-y-2">
             <div class="flex items-center gap-2 font-bold text-base">
-                <span>⚠️</span>
+                <Icon Name="triangle-alert" Size="16" />
                 <span>Acceso Restringido a la Mesa Fundadora</span>
             </div>
             <p class="text-xs opacity-90">
-                Este panel contiene herramientas de difusión externa para Discord y Telegram. Para probar esta funcionalidad en modo de desarrollo, pulsa el botón <strong>"👤 Usuario / 🛡️ Mesa"</strong> en la cabecera superior para alternar a rol fundador.
+                Este panel contiene herramientas de difusión externa para Discord y Telegram. Para probar esta funcionalidad en modo de desarrollo, pulsa el botón <strong>"Usuario / Mesa"</strong> en la cabecera superior para alternar a rol fundador.
             </p>
         </div>
     }
@@ -55,10 +55,10 @@
         {
             <div class="p-4 rounded-xl text-xs font-semibold flex items-center justify-between transition-all @(_isFeedbackError ? "bg-rose-500/15 text-rose-400 border border-rose-500/30" : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30")">
                 <div class="flex items-center gap-2">
-                    <span>@(_isFeedbackError ? "❌" : "✅")</span>
+                    <Icon Name="@(_isFeedbackError ? "circle-x" : "circle-check")" Size="14" />
                     <span>@_feedbackMessage</span>
                 </div>
-                <button type="button" @onclick="() => _feedbackMessage = null" class="opacity-60 hover:opacity-100 text-sm">✕</button>
+                <button type="button" @onclick="() => _feedbackMessage = null" class="opacity-60 hover:opacity-100 text-sm"><Icon Name="x" Size="14" /></button>
             </div>
         }
 
@@ -69,7 +69,7 @@
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-[#5865F2]/15 text-[#5865F2] flex items-center justify-center font-bold text-lg">
-                            💬
+                            <Icon Name="message-circle" Size="20" />
                         </div>
                         <div>
                             <h3 class="font-bold text-base text-[var(--text-primary)]">Discord Webhook</h3>
@@ -81,19 +81,19 @@
                         @if (_discordStatus.DryRun)
                         {
                             <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                                🟡 Modo Simulado (DryRun)
+                                <span class="inline-block size-2 rounded-full bg-amber-400" aria-hidden="true"></span> Modo Simulado (DryRun)
                             </span>
                         }
                         else if (_discordStatus.Configured)
                         {
                             <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                                🟢 Activo
+                                <span class="inline-block size-2 rounded-full bg-emerald-400" aria-hidden="true"></span> Activo
                             </span>
                         }
                         else
                         {
                             <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-slate-500/15 text-slate-400 border border-slate-500/30">
-                                ⚪ Sin Configurar
+                                <span class="inline-block size-2 rounded-full bg-slate-400" aria-hidden="true"></span> Sin Configurar
                             </span>
                         }
                     }
@@ -108,7 +108,7 @@
                             disabled="@_isProcessing"
                             @onclick="() => SendTestPingAsync(NotificationChannel.Discord)"
                             class="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
-                        <span>🔔</span>
+                        <Icon Name="bell" Size="14" />
                         <span>Probar Discord</span>
                     </button>
                 </div>
@@ -119,7 +119,7 @@
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-[#229ED9]/15 text-[#229ED9] flex items-center justify-center font-bold text-lg">
-                            ✈️
+                            <Icon Name="plane" Size="20" />
                         </div>
                         <div>
                             <h3 class="font-bold text-base text-[var(--text-primary)]">Telegram Bot API</h3>
@@ -131,19 +131,19 @@
                         @if (_telegramStatus.DryRun)
                         {
                             <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                                🟡 Modo Simulado (DryRun)
+                                <span class="inline-block size-2 rounded-full bg-amber-400" aria-hidden="true"></span> Modo Simulado (DryRun)
                             </span>
                         }
                         else if (_telegramStatus.Configured)
                         {
                             <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                                🟢 Activo
+                                <span class="inline-block size-2 rounded-full bg-emerald-400" aria-hidden="true"></span> Activo
                             </span>
                         }
                         else
                         {
                             <span class="px-2 py-0.5 rounded-full text-[0.7rem] font-extrabold bg-slate-500/15 text-slate-400 border border-slate-500/30">
-                                ⚪ Sin Configurar
+                                <span class="inline-block size-2 rounded-full bg-slate-400" aria-hidden="true"></span> Sin Configurar
                             </span>
                         }
                     }
@@ -158,7 +158,7 @@
                             disabled="@_isProcessing"
                             @onclick="() => SendTestPingAsync(NotificationChannel.Telegram)"
                             class="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
-                        <span>🔔</span>
+                        <Icon Name="bell" Size="14" />
                         <span>Probar Telegram</span>
                     </button>
                 </div>
@@ -177,21 +177,21 @@
                             disabled="@_isProcessing"
                             @onclick="TriggerGiveawaysScanAsync"
                             class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:border-[var(--brand-primary)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
-                        <span>⏳</span>
+                        <Icon Name="hourglass" Size="14" />
                         <span>Escanear Sorteos (24h)</span>
                     </button>
                     <button type="button"
                             disabled="@_isProcessing"
                             @onclick="TriggerFridayBulletinAsync"
                             class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:border-[var(--brand-primary)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
-                        <span>🛍️</span>
+                        <Icon Name="shopping-bag" Size="14" />
                         <span>Publicar Boletín de Viernes</span>
                     </button>
                     <button type="button"
                             disabled="@_isProcessing"
                             @onclick="() => SendTestPingAsync(null)"
                             class="px-3.5 py-2 rounded-xl bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)] text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
-                        <span>📢</span>
+                        <Icon Name="megaphone" Size="14" />
                         <span>Ping Multicanal</span>
                     </button>
                 </div>
@@ -234,7 +234,7 @@
             @if (FilteredHistory.Count == 0)
             {
                 <div class="py-12 text-center text-[var(--text-muted)] space-y-2">
-                    <span class="text-3xl">📭</span>
+                    <Icon Name="inbox" Size="30" />
                     <p class="text-xs">No hay registros de notificación que coincidan con el filtro.</p>
                 </div>
             }
@@ -271,7 +271,10 @@
                                         }
                                     </td>
                                     <td class="py-3 px-2 whitespace-nowrap text-[var(--text-secondary)] font-medium">
-                                        @GetEventBadge(item.EventType)
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <Icon Name="@GetEventIcon(item.EventType)" />
+                                            @GetEventBadge(item.EventType)
+                                        </span>
                                     </td>
                                     <td class="py-3 px-2 max-w-md">
                                         <div class="font-bold text-[var(--text-primary)] truncate">@item.Title</div>
@@ -468,11 +471,21 @@
 
     private static string GetEventBadge(NotificationEventType eventType) => eventType switch
     {
-        NotificationEventType.GiveawayExpiring => "⏳ Sorteo 24h",
-        NotificationEventType.FridayReleasesSummary => "🛍️ Novedades Viernes",
-        NotificationEventType.FoundingVerdictPublished => "🛡️ Veredicto Fundador",
-        NotificationEventType.RuleQuestionAnswered => "💡 Duda Resuelta",
-        NotificationEventType.CustomTestPing => "🔔 Ping de Prueba",
-        _ => "📢 Comunidad"
+        NotificationEventType.GiveawayExpiring => "Sorteo 24h",
+        NotificationEventType.FridayReleasesSummary => "Novedades Viernes",
+        NotificationEventType.FoundingVerdictPublished => "Veredicto Fundador",
+        NotificationEventType.RuleQuestionAnswered => "Duda Resuelta",
+        NotificationEventType.CustomTestPing => "Ping de Prueba",
+        _ => "Comunidad"
+    };
+
+    private static string GetEventIcon(NotificationEventType eventType) => eventType switch
+    {
+        NotificationEventType.GiveawayExpiring => "hourglass",
+        NotificationEventType.FridayReleasesSummary => "shopping-bag",
+        NotificationEventType.FoundingVerdictPublished => "shield",
+        NotificationEventType.RuleQuestionAnswered => "lightbulb",
+        NotificationEventType.CustomTestPing => "bell",
+        _ => "megaphone"
     };
 }

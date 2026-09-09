@@ -14,7 +14,7 @@
     @if (!CanManageQueue)
     {
         <div class="p-8 rounded-2xl bg-[var(--bg-card)] border border-rose-500/20 text-center space-y-4 max-w-lg mx-auto">
-            <span class="text-4xl block">🛡️</span>
+            <span class="inline-block"><Icon Name="shield" Size="36" /></span>
             <h2 class="text-xl font-bold text-[var(--text-primary)]">Acceso Exclusivo de Moderación</h2>
             <p class="text-sm text-[var(--text-secondary)]">
                 Esta sección está reservada a la Mesa Fundadora y moderadores con permisos de edición de catálogo.
@@ -30,7 +30,7 @@
         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold mb-2">
-                    <span>🌙</span> Operaciones & Catálogo Automático
+                    <Icon Name="moon" Size="14" /> Operaciones & Catálogo Automático
                 </div>
                 <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
                     Cola de Catalogación & Batch Nocturno
@@ -47,12 +47,12 @@
                         class="px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                     @if (_isProcessing)
                     {
-                        <span class="animate-spin">⚙️</span>
+                        <span class="animate-spin inline-block"><Icon Name="settings" Size="14" /></span>
                         <span>Ejecutando Batch Nocturno...</span>
                     }
                     else
                     {
-                        <span>⚡</span>
+                        <Icon Name="zap" Size="14" />
                         <span>Ejecutar Batch Nocturno Ahora</span>
                     }
                 </button>
@@ -61,7 +61,7 @@
                         @onclick="LoadDataAsync"
                         disabled="@_isProcessing"
                         class="px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>🔄</span>
+                    <Icon Name="refresh-cw" Size="14" />
                     <span>Refrescar</span>
                 </button>
             </div>
@@ -71,7 +71,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1">
                 <span class="text-xs text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
-                    <span>🎯</span> Cupo Diario Configurado
+                    <Icon Name="target" Size="12" /> Cupo Diario Configurado
                 </span>
                 <div class="text-2xl font-black text-[var(--text-primary)]">
                     @(_options?.DailyCatalogingLimit ?? 20) <span class="text-xs font-normal text-[var(--text-muted)]">juegos / día</span>
@@ -83,7 +83,7 @@
 
             <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1">
                 <span class="text-xs text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
-                    <span>⏳</span> En Cola de Espera
+                    <Icon Name="hourglass" Size="14" /> En Cola de Espera
                 </span>
                 <div class="text-2xl font-black text-amber-500">
                     @_totalQueueCount <span class="text-xs font-normal text-[var(--text-muted)]">títulos pendientes</span>
@@ -95,7 +95,7 @@
 
             <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1">
                 <span class="text-xs text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
-                    <span>📰</span> Origen Novedades
+                    <Icon Name="newspaper" Size="14" /> Origen Novedades
                 </span>
                 <div class="text-2xl font-black text-sky-500">
                     @_newsDiscoveryCount <span class="text-xs font-normal text-[var(--text-muted)]">descubrimientos</span>
@@ -107,7 +107,7 @@
 
             <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1">
                 <span class="text-xs text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
-                    <span>📜</span> Última Ejecución
+                    <Icon Name="scroll" Size="14" /> Última Ejecución
                 </span>
                 <div class="text-2xl font-black @GetStatusColor(_lastHistory?.Status)">
                     @(_lastHistory?.Status ?? "Sin historial")
@@ -131,7 +131,7 @@
             <div class="p-5 rounded-2xl border @(_lastResult.FailedCount == 0 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-amber-500/10 border-amber-500/30") text-xs space-y-2">
                 <div class="flex items-center justify-between font-bold text-sm @(_lastResult.FailedCount == 0 ? "text-emerald-600 dark:text-emerald-300" : "text-amber-600 dark:text-amber-300")">
                     <span class="flex items-center gap-2">
-                        <span>@(_lastResult.FailedCount == 0 ? "✅" : "⚠️")</span>
+                        <Icon Name="@(_lastResult.FailedCount == 0 ? "circle-check" : "triangle-alert")" Size="16" />
                         <span>Ejecución del Lote Completada</span>
                     </span>
                     <button type="button" @onclick="() => _lastResult = null" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-base font-bold">&times;</button>
@@ -176,17 +176,17 @@
                     <button type="button"
                             @onclick="() => _originFilter = CatalogQueueOrigin.NewsDiscovery"
                             class="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all @(_originFilter == CatalogQueueOrigin.NewsDiscovery ? "bg-sky-600 text-white border-sky-600" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
-                        📰 Novedades
+                        <Icon Name="newspaper" Size="12" /> Novedades
                     </button>
                     <button type="button"
                             @onclick="() => _originFilter = CatalogQueueOrigin.UserImport"
                             class="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all @(_originFilter == CatalogQueueOrigin.UserImport ? "bg-emerald-600 text-white border-emerald-600" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
-                        👤 Usuarios
+                        <Icon Name="user" Size="12" /> Usuarios
                     </button>
                     <button type="button"
                             @onclick="() => _originFilter = CatalogQueueOrigin.TopBggBackfill"
                             class="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all @(_originFilter == CatalogQueueOrigin.TopBggBackfill ? "bg-amber-600 text-white border-amber-600" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
-                        🏆 Top BGG
+                        <Icon Name="trophy" Size="12" /> Top BGG
                     </button>
                 </div>
             </div>
@@ -194,14 +194,14 @@
             @if (_isLoading)
             {
                 <div class="py-12 text-center text-[var(--text-muted)] space-y-2">
-                    <div class="inline-block animate-spin text-2xl">⏳</div>
+                    <div class="inline-block animate-spin"><Icon Name="hourglass" Size="24" /></div>
                     <p class="text-xs font-semibold">Cargando cola de catalogación...</p>
                 </div>
             }
             else if (FilteredQueueItems.Count == 0)
             {
                 <div class="py-12 text-center text-[var(--text-muted)] space-y-2">
-                    <span class="text-3xl block">🎉</span>
+                    <span class="inline-block"><Icon Name="party-popper" Size="30" /></span>
                     <p class="text-sm font-bold text-[var(--text-primary)]">La cola de espera está vacía</p>
                     <p class="text-xs max-w-sm mx-auto">
                         No hay juegos pendientes en este momento con el filtro seleccionado. El batch nocturno rellenará el cupo diario con los mejores juegos de BGG.
@@ -253,17 +253,17 @@
                                         {
                                             case CatalogQueueOrigin.NewsDiscovery:
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                                                    <span>📰</span> Novedad Editorial
+                                                    <Icon Name="newspaper" /> Novedad Editorial
                                                 </span>
                                                 break;
                                             case CatalogQueueOrigin.TopBggBackfill:
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                                    <span>🏆</span> Top BGG
+                                                    <Icon Name="trophy" /> Top BGG
                                                 </span>
                                                 break;
                                             default:
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                                    <span>👤</span> Usuario
+                                                    <Icon Name="user" /> Usuario
                                                 </span>
                                                 break;
                                         }
@@ -276,22 +276,22 @@
                                         {
                                             case CatalogQueueStatus.Processing:
                                                 <span class="inline-flex items-center gap-1 text-amber-400 font-bold text-[0.7rem]">
-                                                    <span class="animate-spin">⚙️</span> Procesando
+                                                    <span class="animate-spin inline-block"><Icon Name="settings" Size="12" /></span> Procesando
                                                 </span>
                                                 break;
                                             case CatalogQueueStatus.Completed:
                                                 <span class="inline-flex items-center gap-1 text-emerald-400 font-bold text-[0.7rem]">
-                                                    <span>✅</span> Completado
+                                                    <Icon Name="circle-check" Size="12" /> Completado
                                                 </span>
                                                 break;
                                             case CatalogQueueStatus.Failed:
                                                 <span class="inline-flex items-center gap-1 text-rose-400 font-bold text-[0.7rem]" title="@item.ErrorMessage">
-                                                    <span>❌</span> Fallido
+                                                    <Icon Name="circle-x" Size="12" /> Fallido
                                                 </span>
                                                 break;
                                             default:
                                                 <span class="inline-flex items-center gap-1 text-[var(--text-muted)] font-semibold text-[0.7rem]">
-                                                    <span>⏳</span> Pendiente
+                                                    <Icon Name="hourglass" Size="12" /> Pendiente
                                                 </span>
                                                 break;
                                         }
@@ -348,7 +348,7 @@
                                     </td>
                                     <td class="py-3 px-4">
                                         <span class="inline-flex items-center gap-1 font-bold @GetStatusColor(log.Status)">
-                                            @(log.Status == "Completed" ? "✅ Completado" : log.Status == "Running" ? "⚙️ En curso" : "❌ " + log.Status)
+                                            @(log.Status == "Completed" ? "Completado" : log.Status == "Running" ? "En curso" : log.Status)
                                         </span>
                                     </td>
                                     <td class="py-3 px-4 text-center font-bold text-[var(--text-primary)]">

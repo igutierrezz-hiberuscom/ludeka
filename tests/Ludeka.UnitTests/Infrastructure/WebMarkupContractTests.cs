@@ -269,6 +269,80 @@ public class WebMarkupContractTests
         { "ScalabilityTrafficLight (sin emojis)", "src/Ludeka.Web/Components/Shared/ScalabilityTrafficLight.razor",
           new[] { "<Icon Name=\"sparkles\"" },
           new[] { "✨" } },
+
+        // ===== INC-35 PR-3b: migración global de emojis a Icon (Fase 5 — admin y modales) =====
+
+        // AdminNotifications: cabecera, canales, disparadores y badges de evento por iconos Lucide;
+        // los estados de canal DryRun/Activo/SinConfigurar son puntos CSS (patrón PR-3a)
+        { "AdminNotifications (sin emojis)", "src/Ludeka.Web/Components/Pages/AdminNotifications.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"triangle-alert\"",
+                  "<Icon Name=\"message-circle\"", "<Icon Name=\"plane\"",
+                  "<Icon Name=\"bell\"", "<Icon Name=\"hourglass\"", "<Icon Name=\"shopping-bag\"", "<Icon Name=\"megaphone\"",
+                  "<Icon Name=\"inbox\"", "rounded-full bg-emerald-400", "GetEventIcon",
+                  "@(_isFeedbackError ? \"circle-x\" : \"circle-check\")" },
+          new[] { "🛡", "🔄", "⚠", "👤", "❌", "✅", "✕", "💬", "🟡", "🟢", "⚪", "🔔", "✈", "⏳", "🛍", "📢", "📭", "💡" } },
+
+        // AuditLogViewer: cabeceras, filtros de entidad/acción, spinner y tabla por iconos Lucide
+        // (el switch de tipo de entidad devuelve el nombre del icono, no un emoji; ▲▼ de
+        // despliegue se conservan como glifos tipográficos, decisión del PR-3a)
+        { "AuditLogViewer (sin emojis)", "src/Ludeka.Web/Components/Pages/AuditLogViewer.razor",
+          new[] { "<Icon Name=\"scroll\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"users\"", "<Icon Name=\"triangle-alert\"",
+                  "<Icon Name=\"search\"", "<Icon Name=\"eraser\"", "<Icon Name=\"hourglass\"",
+                  "GetEntityTypeIcon", "AuditEntityType.Game => \"dices\"", "AuditEntityType.Publisher => \"building-2\"",
+                  "AuditEntityType.Creator => \"pen-line\"", "AuditEntityType.Store => \"store\"", "AuditEntityType.Media => \"clapperboard\"",
+                  "AuditEntityType.Report => \"flag\"", "AuditEntityType.User => \"users\"", "_ => \"file-text\"" },
+          new[] { "📜", "💡", "👥", "⚠", "🎲", "🏢", "✍", "🏪", "🎬", "🚩", "➕", "✏", "🗑", "🔄", "👑", "🛡", "🔍", "🧹", "⏳", "📄" } },
+
+        // CatalogQueueAdmin: cabecera, métricas, pestañas y estados de cola por iconos Lucide (↗ conservado)
+        { "CatalogQueueAdmin (sin emojis)", "src/Ludeka.Web/Components/Pages/CatalogQueueAdmin.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"moon\"", "<Icon Name=\"settings\"", "<Icon Name=\"zap\"",
+                  "<Icon Name=\"refresh-cw\"", "<Icon Name=\"target\"", "<Icon Name=\"hourglass\"", "<Icon Name=\"newspaper\"",
+                  "<Icon Name=\"scroll\"", "<Icon Name=\"circle-check\"", "<Icon Name=\"circle-x\"",
+                  "<Icon Name=\"party-popper\"", "<Icon Name=\"user\"", "<Icon Name=\"trophy\"",
+                  "@(_lastResult.FailedCount == 0 ? \"circle-check\" : \"triangle-alert\")" },
+          new[] { "🛡", "🌙", "⚙", "⚡", "🔄", "🎯", "⏳", "📰", "📜", "✅", "🎉", "👤", "🏆", "❌", "⚠" } },
+
+        // GameReportsModeration: cabeceras, pestañas, acciones y tipos de incidencia por iconos
+        // Lucide (el switch del tipo devuelve el nombre del icono, no un emoji)
+        { "GameReportsModeration (sin emojis)", "src/Ludeka.Web/Components/Pages/GameReportsModeration.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"flag\"", "<Icon Name=\"moon\"",
+                  "<Icon Name=\"clapperboard\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"hourglass\"", "<Icon Name=\"search\"",
+                  "<Icon Name=\"circle-check\"", "<Icon Name=\"folder\"", "<Icon Name=\"x\"", "<Icon Name=\"dices\"",
+                  "<Icon Name=\"sparkles\"", "<Icon Name=\"pencil\"", "<Icon Name=\"refresh-cw\"", "GetIssueIcon",
+                  "GameIssueType.BrokenImage => \"ban\"", "GameIssueType.WrongImage => \"image\"", "GameIssueType.IncorrectAge => \"cake\"",
+                  "GameIssueType.IncorrectPlayerCount => \"users\"", "GameIssueType.ErroneousMetadata => \"notebook-pen\"",
+                  "GameIssueType.BrokenPurchaseLink => \"shopping-cart\"", "GameIssueType.Other => \"message-circle\"" },
+          new[] { "🛡", "💡", "🚩", "🌙", "🎬", "⚠", "⏳", "🔍", "✅", "📁", "✕", "🎲", "✨", "🖼", "🚫", "👥", "⏱", "🎂", "📝", "🛒", "💬", "✏", "🔄" } },
+
+        // InstagramModeration: cabeceras, previsualización del feed, acciones y badges por iconos
+        // Lucide; la barra social del mock usa heart/message-circle/bookmark y ↗ plano (✓ conservado)
+        { "InstagramModeration (sin emojis)", "src/Ludeka.Web/Components/Pages/InstagramModeration.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"camera\"", "<Icon Name=\"flask-conical\"", "<Icon Name=\"gift\"",
+                  "<Icon Name=\"newspaper\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"smartphone\"", "<Icon Name=\"heart\"",
+                  "<Icon Name=\"message-circle\"", "<Icon Name=\"bookmark\"", "<Icon Name=\"party-popper\"", "<Icon Name=\"link\"",
+                  "<Icon Name=\"trash-2\"", "<Icon Name=\"palette\"", "<Icon Name=\"moon\"", "<Icon Name=\"sun\"",
+                  "<Icon Name=\"hourglass\"", "<Icon Name=\"save\"", "<Icon Name=\"clipboard-copy\"", "<Icon Name=\"rocket\"",
+                  "<Icon Name=\"image\"", "GetSourceIcon",
+                  "InstagramPostSourceType.Game => \"dices\"" },
+          new[] { "🛡", "📸", "🧪", "🎁", "📰", "⚠", "📱", "🖼", "❤", "🤍", "💬", "🔖", "🎉", "🔗", "🗑", "🎨", "🌙", "☀", "⏳", "💾", "📋", "🚀", "🎲", "📝", "↗️" } },
+
+        // MediaModeration: cabeceras, pestañas, acciones y metadatos por iconos Lucide
+        { "MediaModeration (sin emojis)", "src/Ludeka.Web/Components/Pages/MediaModeration.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"clapperboard\"", "<Icon Name=\"flag\"",
+                  "<Icon Name=\"tv\"", "<Icon Name=\"search\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"circle-check\"",
+                  "<Icon Name=\"circle-x\"", "<Icon Name=\"x\"", "<Icon Name=\"hourglass\"", "<Icon Name=\"package\"",
+                  "<Icon Name=\"dices\"", "<Icon Name=\"sparkles\"", "<Icon Name=\"users\"", "<Icon Name=\"eye\"",
+                  "<Icon Name=\"link\"" },
+          new[] { "🛡", "💡", "🎬", "🚩", "📺", "🔍", "⚠", "✅", "✕", "⏳", "📦", "🎲", "✨", "👥", "👁", "🔗", "❌", "⚡", "💬" } },
+
+        // UserManagement: cabeceras, pestañas de rol, buscador y acciones por iconos Lucide
+        // (el switch de rol devuelve el nombre del icono, no un emoji; reactivación por punto CSS)
+        { "UserManagement (sin emojis)", "src/Ludeka.Web/Components/Pages/UserManagement.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"users\"", "<Icon Name=\"scroll\"",
+                  "<Icon Name=\"flag\"", "<Icon Name=\"drama\"", "<Icon Name=\"search\"", "<Icon Name=\"crown\"",
+                  "<Icon Name=\"user\"", "<Icon Name=\"hourglass\"", "<Icon Name=\"sparkles\"", "<Icon Name=\"settings\"",
+                  "<Icon Name=\"ban\"", "rounded-full bg-emerald-400", "GetRoleIcon" },
+          new[] { "🛡", "💡", "👥", "📜", "🚩", "🎭", "🔍", "👑", "👤", "⏳", "✨", "⚙", "🚫", "🟢" } },
     };
 
     [Theory]

@@ -14,14 +14,14 @@
     @if (!CurrentUserService.IsFoundingTeam)
     {
         <div class="max-w-md mx-auto py-16 text-center space-y-4">
-            <span class="text-5xl block">📜</span>
+            <span class="inline-block"><Icon Name="scroll" Size="48" /></span>
             <h1 class="text-2xl font-bold text-[var(--text-primary)]">Acceso Exclusivo Mesa Fundadora</h1>
             <p class="text-sm text-[var(--text-secondary)]">
                 El registro histórico de auditoría editorial contiene información de gobernanza reservada a la Mesa Fundadora.
             </p>
             <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
                 <p class="mb-2">
-                    💡 Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
+                    <Icon Name="lightbulb" Size="14" /> Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
                 </p>
                 <button type="button"
                         @onclick="SwitchToFounder"
@@ -40,7 +40,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
             <div>
                 <div class="flex items-center gap-2 mb-1">
-                    <span class="text-2xl">📜</span>
+                    <Icon Name="scroll" Size="24" />
                     <h1 class="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
                         Bitácora & Registro de Auditoría Editorial
                     </h1>
@@ -53,7 +53,7 @@
             <div class="flex items-center gap-2.5">
                 <a href="/admin/usuarios"
                    class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
-                    <span>👥</span>
+                    <Icon Name="users" Size="14" />
                     <span>Gestión de Usuarios</span>
                 </a>
             </div>
@@ -63,7 +63,7 @@
         {
             <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
                 <div class="flex items-center gap-2 font-semibold">
-                    <span>⚠️</span>
+                    <Icon Name="triangle-alert" Size="14" />
                     <span>@_errorMessage</span>
                 </div>
                 <button type="button" @onclick="LoadLogs" class="px-3 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-white font-bold transition-colors">
@@ -90,13 +90,13 @@
                     <select @bind="_filterEntityType"
                             class="w-full px-3 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none text-xs">
                         <option value="">Todas las Entidades</option>
-                        <option value="Game">🎲 Juego</option>
-                        <option value="Publisher">🏢 Editorial</option>
-                        <option value="Creator">✍️ Creador de Contenido</option>
-                        <option value="Store">🏪 Tienda</option>
-                        <option value="Media">🎬 Multimedia</option>
-                        <option value="Report">🚩 Reporte Comunitario</option>
-                        <option value="User">👥 Usuario / Permisos</option>
+                        <option value="Game">Juego</option>
+                        <option value="Publisher">Editorial</option>
+                        <option value="Creator">Creador de Contenido</option>
+                        <option value="Store">Tienda</option>
+                        <option value="Media">Multimedia</option>
+                        <option value="Report">Reporte Comunitario</option>
+                        <option value="User">Usuario / Permisos</option>
                     </select>
                 </div>
 
@@ -106,12 +106,12 @@
                     <select @bind="_filterAction"
                             class="w-full px-3 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none text-xs">
                         <option value="">Todas las Acciones</option>
-                        <option value="Created">➕ Creación</option>
-                        <option value="Updated">✏️ Modificación</option>
-                        <option value="Deleted">🗑️ Eliminación</option>
-                        <option value="StatusChanged">🔄 Cambio de Estado</option>
-                        <option value="RoleChanged">👑 Cambio de Rol</option>
-                        <option value="PermissionsChanged">🛡️ Permisos Granulares</option>
+                        <option value="Created">Creación</option>
+                        <option value="Updated">Modificación</option>
+                        <option value="Deleted">Eliminación</option>
+                        <option value="StatusChanged">Cambio de Estado</option>
+                        <option value="RoleChanged">Cambio de Rol</option>
+                        <option value="PermissionsChanged">Permisos Granulares</option>
                     </select>
                 </div>
 
@@ -120,13 +120,13 @@
                     <button type="button"
                             @onclick="ApplyFilters"
                             class="flex-1 px-4 py-2 rounded-xl bg-[var(--brand-primary)] text-white font-bold hover:opacity-90 transition-opacity shadow-sm flex items-center justify-center gap-1.5">
-                        <span>🔍</span> <span>Filtrar</span>
+                        <Icon Name="search" Size="14" /> <span>Filtrar</span>
                     </button>
                     <button type="button"
                             @onclick="ClearFilters"
                             class="px-3 py-2 rounded-xl bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold border border-[var(--border-subtle)] transition-colors"
                             title="Limpiar filtros">
-                        🧹
+                        <Icon Name="eraser" Size="14" />
                     </button>
                 </div>
             </div>
@@ -136,14 +136,14 @@
         @if (_isLoading)
         {
             <div class="p-12 text-center text-xs text-[var(--text-muted)] space-y-2">
-                <span class="animate-spin text-2xl block">⏳</span>
+                <span class="animate-spin inline-block"><Icon Name="hourglass" Size="24" /></span>
                 <span>Cargando bitácora de auditoría...</span>
             </div>
         }
         else if (_pageData.Items.Count == 0)
         {
             <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-2 text-xs text-[var(--text-muted)]">
-                <span class="text-3xl block">📜</span>
+                <span class="inline-block"><Icon Name="scroll" Size="30" /></span>
                 <p class="font-bold text-[var(--text-secondary)]">No se encontraron entradas de auditoría</p>
                 <p>No hay registros coincidentes con los filtros seleccionados.</p>
             </div>
@@ -165,7 +165,7 @@
                             <div class="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer select-none"
                                  @onclick="() => ToggleExpand(entry.Id)">
                                 <div class="flex items-start gap-3">
-                                    <span class="text-xl shrink-0 mt-0.5">@GetEntityIcon(entry.EntityType)</span>
+                                    <span class="shrink-0 mt-0.5"><Icon Name="@GetEntityTypeIcon(entry.EntityType)" /></span>
                                     <div class="space-y-1">
                                         <div class="flex flex-wrap items-center gap-2">
                                             <span class="font-bold text-sm text-[var(--text-primary)]">@entry.EntityName</span>
@@ -363,16 +363,16 @@
         Navigation.NavigateTo("/admin/auditoria", forceLoad: true);
     }
 
-    private static string GetEntityIcon(AuditEntityType type) => type switch
+    private static string GetEntityTypeIcon(AuditEntityType type) => type switch
     {
-        AuditEntityType.Game => "🎲",
-        AuditEntityType.Publisher => "🏢",
-        AuditEntityType.Creator => "✍️",
-        AuditEntityType.Store => "🏪",
-        AuditEntityType.Media => "🎬",
-        AuditEntityType.Report => "🚩",
-        AuditEntityType.User => "👥",
-        _ => "📄"
+        AuditEntityType.Game => "dices",
+        AuditEntityType.Publisher => "building-2",
+        AuditEntityType.Creator => "pen-line",
+        AuditEntityType.Store => "store",
+        AuditEntityType.Media => "clapperboard",
+        AuditEntityType.Report => "flag",
+        AuditEntityType.User => "users",
+        _ => "file-text"
     };
 
     private static string GetActionBadgeStyle(AuditAction action) => action switch
