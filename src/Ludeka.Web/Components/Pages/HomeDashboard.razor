@@ -1,63 +1,22 @@
 @page "/"
 @rendermode InteractiveServer
 @using Ludeka.Application.Contracts
-@using Ludeka.Application.DTOs
+@using Ludeka.Web.Components.Home
+@using Ludeka.Web.Components.Shared
 @inject IHomeDashboardService DashboardService
-@inject NavigationManager Navigation
 
 <PageTitle>Ludeka — El Letterboxd de los juegos de mesa en español</PageTitle>
 
 <div class="container-ludeka py-6 space-y-10">
-    @* 1. Hero Editorial de Bienvenida *@
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--bg-surface-elevated)] via-[var(--bg-surface)] to-[var(--bg-card)] border border-[var(--border-subtle)] p-6 sm:p-10 shadow-xl">
-        <div class="max-w-3xl space-y-4">
-            <h1 class="sr-only">Ludeka — Juegos de mesa en español</h1>
-
-            <p class="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                Descubre títulos imprescindibles para tu mesa, participa en sorteos activos de la comunidad, sigue las primicias de tiendas y mantente al día de las grandes ferias del sector.
-            </p>
-
-            @* Buscador directo que redirige a /catalogo *@
-            <div class="pt-2 max-w-xl">
-                <form @onsubmit="HandleQuickSearch" class="flex items-center gap-2">
-                    <div class="relative flex-1">
-                        <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[var(--text-muted)]">
-                            🔍
-                        </span>
-                        <input type="text"
-                               @bind="_searchTerm"
-                               placeholder="Buscar por juego, editorial o diseñador..."
-                               class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] shadow-sm" />
-                    </div>
-                    <button type="submit"
-                            class="px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs sm:text-sm transition-opacity shadow-sm whitespace-nowrap">
-                        Buscar
-                    </button>
-                </form>
-            </div>
-
-            @* Píldoras de acceso directo *@
-            <div class="flex items-center gap-2 pt-2 flex-wrap text-xs font-semibold">
-                <a href="/catalogo" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>🎲</span> Catálogo Completo
-                </a>
-                <a href="/sorteos" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>🎁</span> Sorteos
-                </a>
-                <a href="/novedades" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>📰</span> Novedades
-                </a>
-                <a href="/eventos" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>🎪</span> Eventos
-                </a>
-            </div>
-        </div>
-    </div>
+    @* 1. Hero editorial narrativo: la variante activa del fondo se fija aquí, en una línea *@
+    <HeroEditorial Background="HeroBackgroundVariant.FotoEurogame" />
 
     @if (_isLoading)
     {
         <div class="py-20 text-center text-[var(--text-secondary)]">
-            <div class="inline-block animate-spin text-4xl mb-3">🎲</div>
+            <div class="inline-block animate-spin text-[var(--brand-primary)] mb-3">
+                <Icon Name="dices" Size="40" />
+            </div>
             <p class="text-sm font-semibold">Sintonizando el dashboard editorial de Ludeka...</p>
         </div>
     }
@@ -65,96 +24,31 @@
     {
         @* 2. Carril 1: Top 20 Mejores Juegos *@
         <section class="space-y-4" aria-label="Top 20 Mejores Juegos de Mesa">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🏆</span>
-                    <h2 class="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
-                        Top 20 Juegos de Mesa
-                    </h2>
-                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                        @_dashboard.TopGames.Count títulos
-                    </span>
-                </div>
-
-                <a href="/catalogo" class="text-xs sm:text-sm font-bold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1">
-                    Ver catálogo completo <span>&rarr;</span>
-                </a>
-            </div>
+            <RailHeader IconName="trophy"
+                        Title="Top 20 Juegos de Mesa"
+                        Count="_dashboard.TopGames.Count"
+                        CountLabel="títulos"
+                        Href="/catalogo"
+                        LinkText="Ver catálogo completo"
+                        AriaLabel="Top 20 Mejores Juegos de Mesa" />
 
             <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pt-1 px-1" role="list">
                 @foreach (var game in _dashboard.TopGames)
                 {
-                    <a href="/juegos/@game.Slug"
-                       class="w-40 sm:w-48 shrink-0 snap-start flex flex-col justify-between rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] transition-all overflow-hidden shadow-sm group"
-                       role="listitem"
-                       aria-label="Ver ficha de @game.SpanishTitle">
-                        <div>
-                            <div class="relative aspect-square overflow-hidden bg-[var(--bg-surface-elevated)]">
-                                @{
-                                    var placeholder = game.IsExpansion ? "/images/expansion-placeholder.svg" : "/images/game-placeholder.svg";
-                                }
-                                <img src="@(!string.IsNullOrWhiteSpace(game.CoverImageUrl) ? game.CoverImageUrl : placeholder)"
-                                     alt="Carátula de @game.SpanishTitle"
-                                     loading="lazy"
-                                     decoding="async"
-                                     width="192"
-                                     height="192"
-                                     onerror="this.onerror=null; this.src='@placeholder';"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-
-                                @* Badge de Rating *@
-                                <div class="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-sm border border-amber-500/40 text-amber-300 text-[0.7rem] font-black flex items-center gap-1 shadow-md">
-                                    <span>★</span>
-                                    <span>@game.BggRating.ToString("0.0")</span>
-                                </div>
-
-                                @if (game.IsExpansion)
-                                {
-                                    <div class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-950/80 backdrop-blur-sm border border-purple-500/40 text-[0.65rem] font-bold text-purple-200">
-                                        🧩 Expansión
-                                    </div>
-                                }
-                            </div>
-
-                            <div class="p-3">
-                                <div class="flex items-center justify-between text-[0.7rem] font-semibold text-[var(--text-muted)] mb-1">
-                                    <span>@game.YearPublished</span>
-                                    @if (!string.IsNullOrWhiteSpace(game.IdealPlayerCountText))
-                                    {
-                                        <span class="text-[var(--color-mustplay)] font-bold">@game.IdealPlayerCountText</span>
-                                    }
-                                </div>
-                                <h3 class="text-sm font-extrabold text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] transition-colors line-clamp-2 leading-snug">
-                                    @game.SpanishTitle
-                                </h3>
-                            </div>
-                        </div>
-
-                        <div class="p-3 pt-0 text-[0.7rem] text-[var(--text-secondary)] truncate">
-                            @game.Designer
-                        </div>
-                    </a>
+                    <HomeGameCard Game="game" />
                 }
             </div>
         </section>
 
         @* 3. Carril 2: Sorteos Activos & Promocionados *@
         <section class="space-y-4" aria-label="Sorteos Activos y Destacados">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🎁</span>
-                    <h2 class="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
-                        Sorteos en Marcha
-                    </h2>
-                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                        @_dashboard.Giveaways.Count activos
-                    </span>
-                </div>
-
-                <a href="/sorteos" class="text-xs sm:text-sm font-bold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1">
-                    Ver todos los sorteos <span>&rarr;</span>
-                </a>
-            </div>
+            <RailHeader IconName="gift"
+                        Title="Sorteos en Marcha"
+                        Count="_dashboard.Giveaways.Count"
+                        CountLabel="activos"
+                        Href="/sorteos"
+                        LinkText="Ver todos los sorteos"
+                        AriaLabel="Sorteos Activos y Destacados" />
 
             @if (_dashboard.Giveaways.Count == 0)
             {
@@ -167,44 +61,7 @@
                 <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pt-1 px-1" role="list">
                     @foreach (var giveaway in _dashboard.Giveaways)
                     {
-                        <div class="w-64 sm:w-72 shrink-0 snap-start flex flex-col justify-between rounded-2xl bg-[var(--bg-card)] border @(giveaway.IsPromoted ? "border-amber-500/60 shadow-amber-500/10 shadow-lg" : "border-[var(--border-subtle)]") hover:border-[var(--brand-primary)] p-4 transition-all shadow-sm"
-                             role="listitem">
-                            <div>
-                                <div class="flex items-center justify-between gap-2 mb-2.5">
-                                    @if (giveaway.IsPromoted)
-                                    {
-                                        <span class="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/40 text-amber-400 font-extrabold text-[0.68rem] flex items-center gap-1">
-                                            <span>⭐</span> Promocionado
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="px-2 py-0.5 rounded-md bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-semibold text-[0.68rem]">
-                                            @giveaway.Platform
-                                        </span>
-                                    }
-
-                                    <span class="text-[0.68rem] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                        ⏱️ @giveaway.RemainingTimeText
-                                    </span>
-                                </div>
-
-                                <h3 class="text-sm font-extrabold text-[var(--text-primary)] line-clamp-2 leading-snug mb-1">
-                                    @giveaway.Title
-                                </h3>
-
-                                <p class="text-xs text-[var(--text-secondary)] mb-3">
-                                    Por <strong class="text-[var(--text-primary)]">@giveaway.FormattedOrganizer</strong>
-                                </p>
-                            </div>
-
-                            <a href="@giveaway.Url"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="w-full text-center py-2 px-3 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--brand-primary)] hover:text-white border border-[var(--border-subtle)] font-bold text-xs text-[var(--text-primary)] transition-colors">
-                                Participar en sorteo &rarr;
-                            </a>
-                        </div>
+                        <HomeGiveawayCard Giveaway="giveaway" />
                     }
                 </div>
             }
@@ -212,21 +69,13 @@
 
         @* 4. Carril 3: Novedades del Sector & Lanzamientos *@
         <section class="space-y-4" aria-label="Novedades del Sector y Lanzamientos">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🚀</span>
-                    <h2 class="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
-                        Novedades en Tiendas
-                    </h2>
-                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                        @_dashboard.RecentReleases.Count títulos
-                    </span>
-                </div>
-
-                <a href="/novedades" class="text-xs sm:text-sm font-bold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1">
-                    Ver todas las novedades <span>&rarr;</span>
-                </a>
-            </div>
+            <RailHeader IconName="rocket"
+                        Title="Novedades en Tiendas"
+                        Count="_dashboard.RecentReleases.Count"
+                        CountLabel="títulos"
+                        Href="/novedades"
+                        LinkText="Ver todas las novedades"
+                        AriaLabel="Novedades del Sector y Lanzamientos" />
 
             @if (_dashboard.RecentReleases.Count == 0)
             {
@@ -239,111 +88,25 @@
                 <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pt-1 px-1" role="list">
                     @foreach (var release in _dashboard.RecentReleases)
                     {
-                        <div class="w-60 sm:w-68 shrink-0 snap-start flex flex-col justify-between rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] p-4 transition-all shadow-sm"
-                             role="listitem">
-                            <div>
-                                <div class="flex items-center justify-between gap-2 mb-2">
-                                    <span class="px-2 py-0.5 rounded-md text-[0.68rem] font-bold border @(release.IsReprint ? "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]" : "bg-[var(--brand-glow)] border-[var(--brand-primary)] text-[var(--text-primary)]")">
-                                        @(release.IsReprint ? "🔄 Reimpresión" : "🆕 Novedad")
-                                    </span>
-
-                                    <span class="text-[0.68rem] text-[var(--text-muted)] font-semibold">
-                                        🗓️ @release.ReleaseDate.ToString("dd/MM/yyyy")
-                                    </span>
-                                </div>
-
-                                <h3 class="text-sm font-extrabold text-[var(--text-primary)] line-clamp-2 leading-snug mb-1">
-                                    @release.Title
-                                </h3>
-
-                                <p class="text-xs text-[var(--text-secondary)]">
-                                    Editorial: <strong class="text-[var(--text-primary)]">@release.Publisher</strong>
-                                </p>
-                            </div>
-
-                            @if (release.EstimatedPvp.HasValue)
-                            {
-                                <div class="mt-3 pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
-                                    <span class="text-[var(--text-muted)]">PVP aprox:</span>
-                                    <span class="font-extrabold text-[var(--text-primary)]">@release.EstimatedPvp.Value.ToString("0.00") €</span>
-                                </div>
-                            }
-                        </div>
+                        <HomeReleaseCard Release="release" />
                     }
                 </div>
             }
         </section>
 
-        @* 5. Carril 4: Próximos Eventos & Ferias Lúdicas *@
+        @* 5. Carril 4: Próximos Eventos & Ferias Lúdicas (sin enlace "Ver todos…": el Href queda nulo) *@
         <section class="space-y-4" aria-label="Próximos Eventos y Ferias Lúdicas">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🎪</span>
-                    <h2 class="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
-                        Grandes Citas & Ferias del Sector
-                    </h2>
-                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                        @_dashboard.UpcomingEvents.Count eventos
-                    </span>
-                </div>
-            </div>
+            <RailHeader IconName="tent"
+                        Title="Grandes Citas & Ferias del Sector"
+                        Count="_dashboard.UpcomingEvents.Count"
+                        CountLabel="eventos"
+                        LinkText="Ver todos los eventos"
+                        AriaLabel="Próximos Eventos y Ferias Lúdicas" />
 
             <div class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pt-1 px-1" role="list">
                 @foreach (var evt in _dashboard.UpcomingEvents)
                 {
-                    <div class="w-72 sm:w-80 shrink-0 snap-start rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] overflow-hidden transition-all shadow-sm flex flex-col justify-between"
-                         role="listitem">
-                        <div>
-                            <div class="relative h-36 bg-[var(--bg-surface-elevated)] overflow-hidden">
-                                <img src="@evt.ImageUrl"
-                                     alt="Cartel de @evt.Title"
-                                     loading="lazy"
-                                     decoding="async"
-                                     class="w-full h-full object-cover" />
-
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-
-                                <div class="absolute bottom-2 left-3 right-3 flex items-center justify-between text-white text-xs font-bold">
-                                    <span class="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm border border-white/20">
-                                        📅 @evt.FormattedDates
-                                    </span>
-
-                                    <span class="px-2 py-0.5 rounded-md bg-[var(--brand-primary)] text-white text-[0.68rem]">
-                                        @evt.RemainingDaysText
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="p-4 space-y-2">
-                                <h3 class="text-base font-extrabold text-[var(--text-primary)] line-clamp-1">
-                                    @evt.Title
-                                </h3>
-
-                                <p class="text-xs text-[var(--text-secondary)] font-medium flex items-center gap-1">
-                                    <span>📍</span> <span>@evt.Location</span>
-                                </p>
-
-                                @if (!string.IsNullOrWhiteSpace(evt.Description))
-                                {
-                                    <p class="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed opacity-90">
-                                        @evt.Description
-                                    </p>
-                                }
-                            </div>
-                        </div>
-
-                        <div class="p-4 pt-0">
-                            @if (!string.IsNullOrWhiteSpace(evt.WebsiteUrl))
-                            {
-                                <a href="@evt.WebsiteUrl"
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   class="w-full text-center py-2 px-3 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--brand-primary)] hover:text-white border border-[var(--border-subtle)] font-bold text-xs text-[var(--text-primary)] transition-colors inline-block">
-                                    🌐 Web Oficial del Evento &rarr;
-                                </a>
-                            }
-                        </div>
-                    </div>
+                    <HomeEventCard Event="evt" />
                 }
             </div>
         </section>
@@ -352,15 +115,9 @@
 
 @code {
     private bool _isLoading = true;
-    private string _searchTerm = string.Empty;
     private HomeDashboardDto _dashboard = new([], [], [], []);
 
     protected override async Task OnInitializedAsync()
-    {
-        await LoadDashboardAsync();
-    }
-
-    private async Task LoadDashboardAsync()
     {
         _isLoading = true;
         try
@@ -370,18 +127,6 @@
         finally
         {
             _isLoading = false;
-        }
-    }
-
-    private void HandleQuickSearch()
-    {
-        if (!string.IsNullOrWhiteSpace(_searchTerm))
-        {
-            Navigation.NavigateTo($"/catalogo?q={Uri.EscapeDataString(_searchTerm.Trim())}");
-        }
-        else
-        {
-            Navigation.NavigateTo("/catalogo");
         }
     }
 }

@@ -1,0 +1,66 @@
+@* Tarjeta del carril Novedades de la portada (INC-35, Decisión 3): estrena el render de
+   WeeklyReleaseDto.CoverImageUrl con fallback por dominio (SVG inline temable si falta
+   el dato, asset estático de novedades vía onerror si la URL cae), badge de reimpresión
+   con Icon refresh-cw y texto visible, y anchura definida con clases válidas de
+   Tailwind (la clase inválida sm:w-68 desaparece con la reescritura del orquestador). *@
+@using Ludeka.Web.Components.Shared
+@using Ludeka.Application.DTOs
+
+<div class="rail-card w-60 sm:w-72 shrink-0 snap-start p-4" role="listitem">
+    <div class="rail-cover rail-cover--wide rounded-xl mb-3">
+        @if (!string.IsNullOrWhiteSpace(Release.CoverImageUrl))
+        {
+            <img src="@Release.CoverImageUrl"
+                 alt="Carátula de @Release.Title"
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.onerror=null; this.src='/images/defaults/novedad-default.svg';" />
+        }
+        else
+        {
+            <DefaultImage Domain="DefaultImageDomain.Novedad" CssClass="w-full h-full" />
+        }
+    </div>
+
+    <div>
+        <div class="flex items-center justify-between gap-2 mb-2">
+            @if (Release.IsReprint)
+            {
+                <span class="px-2 py-0.5 rounded-md text-[0.68rem] font-bold border bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center gap-1">
+                    <Icon Name="refresh-cw" Size="12" /> Reimpresión
+                </span>
+            }
+            else
+            {
+                <span class="px-2 py-0.5 rounded-md text-[0.68rem] font-bold border bg-[var(--brand-glow)] border-[var(--brand-primary)] text-[var(--text-primary)] flex items-center gap-1">
+                    <Icon Name="sparkles" Size="12" /> Novedad
+                </span>
+            }
+
+            <span class="text-[0.68rem] text-[var(--text-muted)] font-semibold flex items-center gap-1">
+                <Icon Name="calendar-days" Size="12" /> @Release.ReleaseDate.ToString("dd/MM/yyyy")
+            </span>
+        </div>
+
+        <h3 class="text-sm font-extrabold text-[var(--text-primary)] line-clamp-2 leading-snug mb-1">
+            @Release.Title
+        </h3>
+
+        <p class="text-xs text-[var(--text-secondary)]">
+            Editorial: <strong class="text-[var(--text-primary)]">@Release.Publisher</strong>
+        </p>
+    </div>
+
+    @if (Release.EstimatedPvp.HasValue)
+    {
+        <div class="mt-3 pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+            <span class="text-[var(--text-muted)]">PVP aprox:</span>
+            <span class="font-extrabold text-[var(--text-primary)]">@Release.EstimatedPvp.Value.ToString("0.00") €</span>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>Novedad semanal del carril (datos puros; la card no accede a servicios).</summary>
+    [Parameter, EditorRequired] public WeeklyReleaseDto Release { get; set; } = null!;
+}

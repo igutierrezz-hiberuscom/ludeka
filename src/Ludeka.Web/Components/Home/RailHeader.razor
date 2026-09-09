@@ -1,0 +1,49 @@
+@* Cabecera de carril reutilizable de la portada (INC-35, Decisión 3): icono Lucide,
+   título en serif display (.rail-title, Decisión 7), contador de títulos y enlace
+   opcional "Ver todos…". El carril Eventos no tiene enlace: con Href nulo el enlace no
+   se renderiza. El aria-label expone el nombre accesible de la cabecera de la sección. *@
+@using Ludeka.Web.Components.Shared
+
+<header class="flex items-center justify-between" aria-label="@AriaLabel">
+    <div class="flex items-center gap-2">
+        <span class="text-[var(--brand-primary)]">
+            <Icon Name="@IconName" Size="22" />
+        </span>
+        <h2 class="rail-title text-xl sm:text-2xl">
+            @Title
+        </h2>
+        <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+            @Count @CountLabel
+        </span>
+    </div>
+
+    @if (Href is not null)
+    {
+        <a href="@Href" class="text-xs sm:text-sm font-bold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1">
+            @(LinkText) <span aria-hidden="true">&rarr;</span>
+        </a>
+    }
+</header>
+
+@code {
+    /// <summary>Nombre kebab-case del icono Lucide del carril (trophy, gift, rocket o tent).</summary>
+    [Parameter, EditorRequired] public string IconName { get; set; } = null!;
+
+    /// <summary>Título del carril en serif display.</summary>
+    [Parameter, EditorRequired] public string Title { get; set; } = null!;
+
+    /// <summary>Número de tarjetas del carril (contador mostrado junto al título).</summary>
+    [Parameter] public int Count { get; set; }
+
+    /// <summary>Etiqueta del contador (p. ej. "títulos", "activos" o "eventos").</summary>
+    [Parameter, EditorRequired] public string CountLabel { get; set; } = null!;
+
+    /// <summary>Destino del enlace "Ver todos…"; null cuando el carril no tiene (Eventos).</summary>
+    [Parameter] public string? Href { get; set; }
+
+    /// <summary>Texto visible del enlace "Ver todos…".</summary>
+    [Parameter, EditorRequired] public string LinkText { get; set; } = null!;
+
+    /// <summary>Nombre accesible de la cabecera del carril (aria-label del header).</summary>
+    [Parameter, EditorRequired] public string AriaLabel { get; set; } = null!;
+}
