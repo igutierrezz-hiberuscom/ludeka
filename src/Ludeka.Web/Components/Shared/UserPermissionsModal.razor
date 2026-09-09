@@ -16,7 +16,7 @@
             <div class="p-5 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-surface-elevated)]/60">
                 <div>
                     <span class="px-2 py-0.5 rounded text-[0.65rem] font-black uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/30 inline-block mb-1">
-                        🛡️ Gobernanza & Permisos RBAC
+                        <Icon Name="shield" Size="12" /> Gobernanza & Permisos RBAC
                     </span>
                     <h2 id="user-perm-modal-title" class="text-lg font-black text-[var(--text-primary)] tracking-tight">
                         Privilegios de @User.UserName (@User.Id)
@@ -45,21 +45,21 @@
                         <button type="button"
                                 @onclick="() => SelectRole(UserRole.FoundingTeam)"
                                 class="p-3 rounded-2xl border text-left transition-all flex flex-col gap-1 @(_selectedRole == UserRole.FoundingTeam ? "bg-[var(--brand-primary)]/15 border-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-highlight)]")">
-                            <span class="font-black text-sm text-amber-400">👑 Mesa Fundadora</span>
+                            <span class="font-black text-sm text-amber-400"><Icon Name="crown" Size="12" /> Mesa Fundadora</span>
                             <span class="text-[0.65rem] opacity-80">Acceso total a todo el sistema</span>
                         </button>
 
                         <button type="button"
                                 @onclick="() => SelectRole(UserRole.Moderator)"
                                 class="p-3 rounded-2xl border text-left transition-all flex flex-col gap-1 @(_selectedRole == UserRole.Moderator ? "bg-[var(--brand-primary)]/15 border-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-highlight)]")">
-                            <span class="font-black text-sm text-sky-400">🛡️ Moderador</span>
+                            <span class="font-black text-sm text-sky-400"><Icon Name="shield" Size="12" /> Moderador</span>
                             <span class="text-[0.65rem] opacity-80">Permisos granulares configurables</span>
                         </button>
 
                         <button type="button"
                                 @onclick="() => SelectRole(UserRole.CommunityUser)"
                                 class="p-3 rounded-2xl border text-left transition-all flex flex-col gap-1 @(_selectedRole == UserRole.CommunityUser ? "bg-[var(--brand-primary)]/15 border-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-highlight)]")">
-                            <span class="font-black text-sm text-slate-300">👤 Comunitario</span>
+                            <span class="font-black text-sm text-slate-300"><Icon Name="user" Size="12" /> Comunitario</span>
                             <span class="text-[0.65rem] opacity-80">Sin facultades de edición</span>
                         </button>
                     </div>
@@ -84,7 +84,7 @@
                     @if (_selectedRole == UserRole.FoundingTeam)
                     {
                         <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start gap-3">
-                            <span class="text-xl">✨</span>
+                            <Icon Name="sparkles" Size="18" />
                             <div class="space-y-1">
                                 <p class="font-bold">Privilegios Plenos Heredados</p>
                                 <p class="text-[0.7rem] opacity-90">
@@ -96,8 +96,7 @@
                     else if (_selectedRole == UserRole.CommunityUser)
                     {
                         <div class="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-center py-6">
-                            <span>ℹ️ Los usuarios comunitarios no disponen de permisos de moderación. Promueve la cuenta a Moderador para activar conmutadores específicos.</span>
-                        </div>
+                            <span class="inline-flex items-center gap-1.5"><Icon Name="info" Size="14" /> Los usuarios comunitarios no disponen de permisos de moderación. Promueve la cuenta a Moderador para activar conmutadores específicos.</span>                        </div>
                     }
                     else
                     {
@@ -107,7 +106,7 @@
                                 <input type="checkbox" @bind="_canEditGames" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
                                 <div>
                                     <div class="font-bold flex items-center gap-1.5">
-                                        <span>🎲</span> <span>Editar Fichas de Juego</span>
+                                        <Icon Name="dices" Size="14" /> <span>Editar Fichas de Juego</span>
                                     </div>
                                     <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Título, diseñador, editorial, año, comensales y sinopsis.</p>
                                 </div>
@@ -118,7 +117,7 @@
                                 <input type="checkbox" @bind="_canUploadImages" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
                                 <div>
                                     <div class="font-bold flex items-center gap-1.5">
-                                        <span>🖼️</span> <span>Cargar y Reemplazar Imágenes</span>
+                                        <Icon Name="image" Size="14" /> <span>Cargar y Reemplazar Imágenes</span>
                                     </div>
                                     <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Subida de fotos y carátulas locales o remotas al servidor.</p>
                                 </div>
@@ -129,7 +128,7 @@
                                 <input type="checkbox" @bind="_canManagePublishers" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
                                 <div>
                                     <div class="font-bold flex items-center gap-1.5">
-                                        <span>🏢</span> <span>Gestionar Editoriales</span>
+                                        <Icon Name="building-2" Size="14" /> <span>Gestionar Editoriales</span>
                                     </div>
                                     <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Alta y edición de casas editoriales y sus redes oficiales.</p>
                                 </div>
@@ -140,7 +139,7 @@
                                 <input type="checkbox" @bind="_canManageCreators" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
                                 <div>
                                     <div class="font-bold flex items-center gap-1.5">
-                                        <span>✍️</span> <span>Gestionar Creadores de Contenido</span>
+                                        <Icon Name="pen-line" Size="14" /> <span>Gestionar Creadores de Contenido</span>
                                     </div>
                                     <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Alta y biografía de creadores, ilustradores y enlaces BGG.</p>
                                 </div>
@@ -151,7 +150,7 @@
                                 <input type="checkbox" @bind="_canApproveMedia" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
                                 <div>
                                     <div class="font-bold flex items-center gap-1.5">
-                                        <span>🎬</span> <span>Moderar Vídeos y Multimedia</span>
+                                        <Icon Name="clapperboard" Size="14" /> <span>Moderar Vídeos y Multimedia</span>
                                     </div>
                                     <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Aprobación o descarte de vídeos en YouTube e Instagram.</p>
                                 </div>
@@ -162,7 +161,7 @@
                                 <input type="checkbox" @bind="_canResolveReports" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
                                 <div>
                                     <div class="font-bold flex items-center gap-1.5">
-                                        <span>🚩</span> <span>Resolver Reportes Comunitarios</span>
+                                        <Icon Name="flag" Size="14" /> <span>Resolver Reportes Comunitarios</span>
                                     </div>
                                     <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Gestión de la bandeja de erratas y sugerencias de la comunidad.</p>
                                 </div>
@@ -173,7 +172,7 @@
                                 <input type="checkbox" @bind="_canManageStoreLinks" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
                                 <div>
                                     <div class="font-bold flex items-center gap-1.5">
-                                        <span>🏪</span> <span>Gestionar Tiendas y Enlaces Afiliados</span>
+                                        <Icon Name="store" Size="14" /> <span>Gestionar Tiendas y Enlaces Afiliados</span>
                                     </div>
                                     <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Fichas de tiendas lúdicas, programas de fidelidad y enlaces comerciales.</p>
                                 </div>
@@ -184,7 +183,7 @@
                                 <input type="checkbox" @bind="_canPublishInstagram" class="mt-0.5 rounded text-[var(--brand-primary)] focus:ring-0" />
                                 <div>
                                     <div class="font-bold flex items-center gap-1.5">
-                                        <span>📸</span> <span>Publicar en Instagram Oficial</span>
+                                        <Icon Name="camera" Size="14" /> <span>Publicar en Instagram Oficial</span>
                                     </div>
                                     <p class="text-[0.68rem] text-[var(--text-muted)] mt-0.5">Componer y publicar posts en la cuenta oficial de Instagram.</p>
                                 </div>
@@ -208,12 +207,12 @@
                         class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[var(--brand-primary)] hover:opacity-90 transition-all shadow-md flex items-center gap-2 disabled:opacity-50">
                     @if (_isSaving)
                     {
-                        <span class="animate-spin text-sm">⏳</span>
+                        <span class="animate-spin inline-block"><Icon Name="hourglass" Size="14" /></span>
                         <span>Guardando...</span>
                     }
                     else
                     {
-                        <span>💾 Guardar Privilegios</span>
+                        <span class="inline-flex items-center gap-2"><Icon Name="save" Size="14" /> Guardar Privilegios</span>
                     }
                 </button>
             </div>

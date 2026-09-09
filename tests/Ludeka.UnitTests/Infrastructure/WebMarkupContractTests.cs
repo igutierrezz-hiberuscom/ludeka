@@ -343,6 +343,92 @@ public class WebMarkupContractTests
                   "<Icon Name=\"user\"", "<Icon Name=\"hourglass\"", "<Icon Name=\"sparkles\"", "<Icon Name=\"settings\"",
                   "<Icon Name=\"ban\"", "rounded-full bg-emerald-400", "GetRoleIcon" },
           new[] { "🛡", "💡", "👥", "📜", "🚩", "🎭", "🔍", "👑", "👤", "⏳", "✨", "⚙", "🚫", "🟢" } },
+
+        // ===== INC-35 PR-3b: migración global de emojis a Icon (Fase 5b — modales de gestión) =====
+
+        // UserPermissionsModal: rol de destino y conmutadores granulares por iconos Lucide
+        { "UserPermissionsModal (sin emojis)", "src/Ludeka.Web/Components/Shared/UserPermissionsModal.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"crown\"", "<Icon Name=\"user\"", "<Icon Name=\"sparkles\"",
+                  "<Icon Name=\"dices\"", "<Icon Name=\"image\"", "<Icon Name=\"building-2\"", "<Icon Name=\"pen-line\"",
+                  "<Icon Name=\"clapperboard\"", "<Icon Name=\"flag\"", "<Icon Name=\"store\"", "<Icon Name=\"camera\"",
+                  "<Icon Name=\"hourglass\"", "<Icon Name=\"save\"", "<Icon Name=\"info\"" },
+          new[] { "🛡", "👑", "👤", "✨", "🎲", "🖼", "🏢", "✍", "🎬", "🚩", "🏪", "📸", "⏳", "💾", "ℹ" } },
+
+        // CreatorEditModal: cabecera, plataformas (options sin emoji, el select no admite SVG) y acciones;
+        // el título «Nuevo/Editar Creador» es texto plano, sin icono
+        { "CreatorEditModal (sin emojis)", "src/Ludeka.Web/Components/Shared/CreatorEditModal.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"plus\"", "<Icon Name=\"trash-2\"",
+                  "<Icon Name=\"settings\"", "<Icon Name=\"save\"" },
+          new[] { "🛡", "➕", "✏", "🐦", "📷", "🎲", "🌐", "💬", "▶", "🗑", "⚙", "💾" } },
+
+        // PublisherEditModal: cabecera, plataformas y acciones por iconos Lucide
+        { "PublisherEditModal (sin emojis)", "src/Ludeka.Web/Components/Shared/PublisherEditModal.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"plus\"", "<Icon Name=\"trash-2\"",
+                  "<Icon Name=\"settings\"", "<Icon Name=\"save\"" },
+          new[] { "🛡", "➕", "✏", "🐦", "📷", "🌐", "💬", "▶", "📘", "🗑", "⚙", "💾" } },
+
+        // StoreEditModal: cabecera, tipos de tienda y plataformas por iconos Lucide
+        { "StoreEditModal (sin emojis)", "src/Ludeka.Web/Components/Shared/StoreEditModal.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"plus\"", "<Icon Name=\"trash-2\"",
+                  "<Icon Name=\"settings\"", "<Icon Name=\"save\"" },
+          new[] { "🛡", "➕", "✏", "🏪", "🏢", "🌐", "🐦", "📷", "▶", "📘", "🗑", "⚙", "💾" } },
+
+        // GameEditorModal: pestañas del editor, controles de carátula, fundas y guardado por iconos Lucide
+        { "GameEditorModal (sin emojis)", "src/Ludeka.Web/Components/Shared/GameEditorModal.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"flag\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"notebook-pen\"",
+                  "<Icon Name=\"dices\"", "<Icon Name=\"file-text\"", "<Icon Name=\"image\"", "<Icon Name=\"folder\"",
+                  "<Icon Name=\"settings\"", "<Icon Name=\"link\"", "<Icon Name=\"club\"", "<Icon Name=\"trash-2\"",
+                  "<Icon Name=\"plus\"", "<Icon Name=\"save\"" },
+          new[] { "🛡", "🚩", "⚠", "📝", "🎲", "📄", "🖼", "🪑", "🍽", "🏰", "📁", "⚙", "🔗", "🃏", "🗑", "➕", "💾", "🟢", "🟡", "🔴", "✅" } },
+
+        // BggImportModal: fases de importación y resultados por iconos Lucide
+        { "BggImportModal (sin emojis)", "src/Ludeka.Web/Components/Shared/BggImportModal.razor",
+          new[] { "<Icon Name=\"inbox\"", "<Icon Name=\"hourglass\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"timer\"",
+                  "<Icon Name=\"package\"", "<Icon Name=\"dices\"", "<Icon Name=\"party-popper\"",
+                  "<Icon Name=\"circle-check\"", "<Icon Name=\"user\"", "<Icon Name=\"triangle-alert\"" },
+          new[] { "📥", "⏳", "💡", "⏱", "📦", "🎲", "🎉", "🟢", "👤", "⚠" } },
+
+        // BggSearchModal: buscador, spinner, error y resultados por iconos Lucide (✓ conservado)
+        { "BggSearchModal (sin emojis)", "src/Ludeka.Web/Components/Shared/BggSearchModal.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"search\"", "<Icon Name=\"settings\"", "<Icon Name=\"triangle-alert\"",
+                  "<Icon Name=\"search-x\"", "<Icon Name=\"zap\"" },
+          new[] { "🎲", "🔍", "⚙", "⚠", "🤷", "⚡" } },
+
+        // YouTubeSearchModal: cabecera, foco, pestañas, resultados y acciones por iconos Lucide
+        // (los mensajes de resultado en C# quedan como texto plano)
+        { "YouTubeSearchModal (sin emojis)", "src/Ludeka.Web/Components/Shared/YouTubeSearchModal.razor",
+          new[] { "<Icon Name=\"tv\"", "<Icon Name=\"x\"", "<Icon Name=\"target\"", "<Icon Name=\"dices\"",
+                  "<Icon Name=\"search\"", "<Icon Name=\"zap\"", "<Icon Name=\"clapperboard\"", "<Icon Name=\"sparkles\"",
+                  "<Icon Name=\"users\"", "<Icon Name=\"play\"", "<Icon Name=\"inbox\"", "<Icon Name=\"circle-check\"" },
+          new[] { "📺", "✕", "🎯", "🎲", "🔍", "⚡", "🎬", "✨", "👥", "▶", "📥", "✅" } },
+
+        // GameReportModal: cabecera, selector de tipología e identificación por iconos Lucide
+        // (la tupla estática de incidencias almacena el nombre del icono, no un emoji)
+        { "GameReportModal (sin emojis)", "src/Ludeka.Web/Components/Shared/GameReportModal.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"flag\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"settings\"",
+                  "CurrentUserService.IsFoundingTeam ? \"shield\" : \"user\"",
+                  "(GameIssueType.WrongImage, \"Imagen incorrecta o de otra edición\", \"image\")",
+                  "(GameIssueType.Other, \"Otro problema o sugerencia libre\", \"message-circle\")" },
+          new[] { "🎲", "🚩", "⚠", "🛡", "👤", "⚙", "🖼", "🚫", "👥", "⏱", "🎂", "📝", "🛒", "💬" } },
+
+        // LocationSelectorModal: cabecera, aviso y autodetección por iconos Lucide;
+        // CountryCatalog.FlagEmoji queda como excepción data-driven documentada (datos, no markup)
+        { "LocationSelectorModal (sin emojis)", "src/Ludeka.Web/Components/Shared/LocationSelectorModal.razor",
+          new[] { "<Icon Name=\"earth\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"map-pin\"" },
+          new[] { "🌍", "⚠", "📍" } },
+
+        // MediaEmbedModal: cabecera por tipo, metadatos y cierre por iconos Lucide (↗ conservado)
+        { "MediaEmbedModal (sin emojis)", "src/Ludeka.Web/Components/Shared/MediaEmbedModal.razor",
+          new[] { "<Icon Name=\"clapperboard\"", "<Icon Name=\"dices\"", "<Icon Name=\"camera\"", "<Icon Name=\"smartphone\"",
+                  "<Icon Name=\"x\"", "<Icon Name=\"users\"", "<Icon Name=\"timer\"", "<Icon Name=\"heart\"" },
+          new[] { "🎬", "🎲", "📸", "📱", "✕", "👥", "⏱", "❤" } },
+
+        // CatalogQueuePanel: acciones, resultados y tarjetas de cola por iconos Lucide
+        { "CatalogQueuePanel (sin emojis)", "src/Ludeka.Web/Components/Shared/CatalogQueuePanel.razor",
+          new[] { "<Icon Name=\"refresh-cw\"", "<Icon Name=\"settings\"", "<Icon Name=\"moon\"", "<Icon Name=\"zap\"",
+                  "<Icon Name=\"circle-check\"", "<Icon Name=\"circle-x\"", "<Icon Name=\"triangle-alert\"",
+                  "<Icon Name=\"hourglass\"", "<Icon Name=\"sparkles\"", "<Icon Name=\"flame\"" },
+          new[] { "🔄", "⚙", "🌙", "⚡", "✅", "⚠", "❌", "⏳", "✨", "🔥" } },
     };
 
     [Theory]

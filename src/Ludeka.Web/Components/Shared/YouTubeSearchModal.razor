@@ -16,8 +16,8 @@
             @* Cabecera del Modal *@
             <div class="p-5 border-b border-[var(--border-subtle)] flex items-center justify-between gap-4 bg-[var(--bg-surface-elevated)]">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-red-600/10 text-red-600 dark:text-red-400 border border-red-500/20 flex items-center justify-center text-xl">
-                        📺
+                    <div class="w-10 h-10 rounded-xl bg-red-600/10 text-red-600 dark:text-red-400 border border-red-500/20 flex items-center justify-center">
+                        <Icon Name="tv" Size="20" />
                     </div>
                     <div>
                         <h2 id="yt-modal-title" class="text-base font-bold text-[var(--text-primary)]">
@@ -33,14 +33,14 @@
                         @onclick="CloseModal"
                         class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors"
                         aria-label="Cerrar modal">
-                    ✕
+                    <Icon Name="x" Size="16" />
                 </button>
             </div>
 
             @* Píldora del Foco de Canales *@
             <div class="px-5 py-2.5 bg-gradient-to-r from-red-500/10 via-amber-500/10 to-transparent border-b border-[var(--border-subtle)] flex items-center justify-between text-xs">
                 <div class="flex items-center gap-2">
-                    <span class="text-sm">🎯</span>
+                    <Icon Name="target" Size="14" />
                     <span class="text-[var(--text-secondary)]">
                         <strong>Foco Prioritario:</strong> Editoriales (Devir, Maldito, Asmodee), Creadores (Análisis Parálisis, Meepletopía, El Agujero de Hobbit) y Tiendas (Zacatrus!).
                     </span>
@@ -84,12 +84,12 @@
                             class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 shadow-md">
                         @if (_isSearching)
                         {
-                            <span class="animate-spin text-sm">🎲</span>
+                            <span class="animate-spin inline-block"><Icon Name="dices" Size="14" /></span>
                             <span>Buscando...</span>
                         }
                         else
                         {
-                            <span>🔍</span>
+                            <Icon Name="search" Size="14" />
                             <span>Buscar en YouTube</span>
                         }
                     </button>
@@ -100,7 +100,7 @@
                                 @onclick="AutoIngestTopVideos"
                                 disabled="@_isAutoIngesting"
                                 class="px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md">
-                            <span>⚡</span>
+                            <Icon Name="zap" Size="14" />
                             <span>@(_isAutoIngesting ? "Auto-Ingestando..." : "Auto-Ingestar 3 Mejores")</span>
                         </button>
                     }
@@ -121,7 +121,7 @@
                 {
                     <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs flex items-center justify-between animate-fade-in">
                         <span>@_notificationMessage</span>
-                        <button type="button" @onclick="() => _notificationMessage = null" class="text-xs font-bold">✕</button>
+                        <button type="button" @onclick="() => _notificationMessage = null" class="text-xs font-bold"><Icon Name="x" Size="12" /></button>
                     </div>
                 }
             </div>
@@ -133,7 +133,7 @@
                     <button type="button"
                             @onclick='() => _activeCategory = "quick"'
                             class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 @(_activeCategory == "quick" ? "bg-amber-500 text-black shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                        <span>⚡</span>
+                        <Icon Name="zap" Size="14" />
                         <span>Cómo Funciona (2 min)</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeCategory == "quick" ? "bg-black/20 text-black" : "bg-[var(--bg-card)] text-[var(--text-muted)]")">
                             @_quickOverviews.Count
@@ -143,7 +143,7 @@
                     <button type="button"
                             @onclick='() => _activeCategory = "tutorials"'
                             class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 @(_activeCategory == "tutorials" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                        <span>🎬</span>
+                        <Icon Name="clapperboard" Size="14" />
                         <span>Tutoriales (8–25 min)</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeCategory == "tutorials" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-muted)]")">
                             @_tutorials.Count
@@ -153,7 +153,7 @@
                     <button type="button"
                             @onclick='() => _activeCategory = "playthroughs"'
                             class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 @(_activeCategory == "playthroughs" ? "bg-emerald-600 text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                        <span>🎲</span>
+                        <Icon Name="dices" Size="14" />
                         <span>Partidas Completas</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeCategory == "playthroughs" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-muted)]")">
                             @_playthroughs.Count
@@ -167,7 +167,7 @@
                 @if (_isSearching)
                 {
                     <div class="py-16 text-center space-y-3">
-                        <div class="inline-block animate-spin text-4xl">🎲</div>
+                        <div class="inline-block animate-spin"><Icon Name="dices" Size="36" /></div>
                         <p class="text-xs text-[var(--text-muted)]">
                             Consultando YouTube en vivo y ponderando canales oficiales de referencia...
                         </p>
@@ -176,7 +176,7 @@
                 else if (!_hasSearched)
                 {
                     <div class="py-16 text-center space-y-2 max-w-sm mx-auto">
-                        <span class="text-4xl block">🔍</span>
+                        <span class="inline-block"><Icon Name="search" Size="36" /></span>
                         <h3 class="text-sm font-bold text-[var(--text-primary)]">Empieza una búsqueda</h3>
                         <p class="text-xs text-[var(--text-secondary)]">
                             Selecciona o escribe el nombre de un juego para buscar automáticamente vídeos especializados en español.
@@ -195,7 +195,7 @@
                     @if (activeList.Count == 0)
                     {
                         <div class="py-12 text-center space-y-2">
-                            <span class="text-3xl block">✨</span>
+                            <span class="inline-block"><Icon Name="sparkles" Size="30" /></span>
                             <h3 class="text-sm font-bold text-[var(--text-primary)]">Sin resultados en esta categoría</h3>
                             <p class="text-xs text-[var(--text-secondary)]">
                                 No se localizaron vídeos que encajen estrictamente con los filtros de esta pestaña.
@@ -225,14 +225,14 @@
                                             <div class="flex items-center gap-1.5 flex-wrap">
                                                 @if (item.IsReferenceChannel)
                                                 {
-                                                    <span class="px-2 py-0.5 rounded text-[0.6rem] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25">
-                                                        🎯 Canal de Referencia (@(item.ChannelCategory ?? "Oficial"))
-                                                    </span>
+                                                        <span class="px-2 py-0.5 rounded text-[0.6rem] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 inline-flex items-center gap-1">
+                                                            <Icon Name="target" Size="12" /> Canal de Referencia (@(item.ChannelCategory ?? "Oficial"))
+                                                        </span>
                                                 }
                                                 @if (!string.IsNullOrWhiteSpace(item.ExtractedPlayerBadge))
                                                 {
                                                     <span class="px-2 py-0.5 rounded text-[0.6rem] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/25">
-                                                        👥 @item.ExtractedPlayerBadge
+                                                        <Icon Name="users" Size="12" /> @item.ExtractedPlayerBadge
                                                     </span>
                                                 }
                                             </div>
@@ -251,20 +251,20 @@
                                     <div class="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 text-xs">
                                         <a href="@item.Url" target="_blank" rel="noopener noreferrer"
                                            class="px-2.5 py-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] text-xs font-semibold transition-colors flex items-center gap-1 border border-[var(--border-subtle)]">
-                                            <span>▶</span> Ver en YouTube
+                                            <Icon Name="play" Size="12" /> Ver en YouTube
                                         </a>
 
                                         <div class="flex items-center gap-2">
                                             <button type="button"
                                                     @onclick="() => IngestCandidate(item, false)"
                                                     class="px-3 py-1.5 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold text-xs border border-[var(--border-subtle)] transition-colors flex items-center gap-1">
-                                                <span>📥</span> A Pendientes
+                                                <Icon Name="inbox" Size="12" /> A Pendientes
                                             </button>
 
                                             <button type="button"
                                                     @onclick="() => IngestCandidate(item, true)"
                                                     class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-sm">
-                                                <span>✅</span> Aprobar Ya
+                                                <Icon Name="circle-check" Size="12" /> Aprobar Ya
                                             </button>
                                         </div>
                                     </div>
@@ -437,8 +437,8 @@
 
             await YouTubeSearchService.IngestVideoAsync(request);
             _notificationMessage = autoApprove
-                ? $"✅ Vídeo de '{candidate.ChannelTitle}' aprobado y publicado en el Hub."
-                : $"📥 Vídeo guardado en la bandeja de pendientes de moderación.";
+                ? $"Vídeo de '{candidate.ChannelTitle}' aprobado y publicado en el Hub."
+                : "Vídeo guardado en la bandeja de pendientes de moderación.";
 
             await OnVideoIngested.InvokeAsync();
         }
@@ -456,7 +456,7 @@
         try
         {
             var ingested = await YouTubeSearchService.AutoSuggestAndIngestForGameAsync(_selectedGame.Id, autoApprove: false);
-            _notificationMessage = $"⚡ Se han incorporado {ingested.Count} vídeos sugeridos a la cola de moderación.";
+            _notificationMessage = $"Se han incorporado {ingested.Count} vídeos sugeridos a la cola de moderación.";
             await OnVideoIngested.InvokeAsync();
         }
         catch (Exception ex)

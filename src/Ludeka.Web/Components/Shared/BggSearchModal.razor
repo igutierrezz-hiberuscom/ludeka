@@ -13,7 +13,7 @@
             @* Cabecera del modal *@
             <div class="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-surface-elevated)]">
                 <div class="flex items-center gap-2.5">
-                    <span class="text-2xl">🎲</span>
+                    <Icon Name="dices" Size="24" />
                     <div>
                         <h3 id="bgg-search-modal-title" class="text-lg font-bold text-[var(--text-primary)] tracking-tight">
                             Buscador Asistido por BGG
@@ -35,7 +35,7 @@
             <div class="p-6 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] space-y-3">
                 <div class="flex gap-2">
                     <div class="relative flex-1">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)] text-sm">🔍</span>
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)] text-sm"><Icon Name="search" Size="14" /></span>
                         <input type="text" 
                                @bind="_query" 
                                @bind:event="oninput"
@@ -73,7 +73,7 @@
                 @if (_isAdding)
                 {
                     <div class="py-12 text-center space-y-3">
-                        <div class="inline-block animate-spin text-4xl">⚙️</div>
+                        <div class="inline-block animate-spin"><Icon Name="settings" Size="36" /></div>
                         <h4 class="text-sm font-bold text-[var(--text-primary)]">@_addingMessage</h4>
                         <p class="text-xs text-[var(--text-muted)]">Creando ficha oficial con ADN lúdico, escalabilidad y ratings...</p>
                     </div>
@@ -81,13 +81,13 @@
                 else if (!string.IsNullOrWhiteSpace(_errorMessage))
                 {
                     <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-600 dark:text-red-300">
-                        ⚠️ @_errorMessage
+                        <span class="inline-flex items-center gap-1.5"><Icon Name="triangle-alert" Size="14" /> @_errorMessage</span>
                     </div>
                 }
                 else if (_hasSearched && _results.Count == 0 && !_isSearching)
                 {
                     <div class="py-10 text-center text-[var(--text-muted)]">
-                        <span class="text-3xl block mb-2">🤷</span>
+                        <span class="inline-block mb-2"><Icon Name="search-x" Size="30" /></span>
                         <p class="text-xs font-semibold">No se encontraron juegos en BoardGameGeek con ese término.</p>
                     </div>
                 }
@@ -116,8 +116,8 @@
                                     }
                                     else
                                     {
-                                        <span class="text-[0.68rem] font-bold text-[var(--brand-primary)]">
-                                            ⚡ Se catalogará al vuelo
+                                        <span class="text-[0.68rem] font-bold text-[var(--brand-primary)] inline-flex items-center gap-1">
+                                            <Icon Name="zap" Size="12" /> Se catalogará al vuelo
                                         </span>
                                     }
                                 </div>

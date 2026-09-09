@@ -12,7 +12,7 @@
             @* Cabecera del modal *@
             <div class="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-surface-elevated)]">
                 <div class="flex items-center gap-2.5">
-                    <span class="text-2xl" aria-hidden="true">📥</span>
+                    <Icon Name="inbox" Size="24" aria-hidden="true" />
                     <div>
                         <h3 id="bgg-import-modal-title" class="text-lg font-bold text-[var(--text-primary)] tracking-tight">
                             Importar desde BoardGameGeek
@@ -37,7 +37,7 @@
                     <div class="py-8 text-center space-y-4" role="status" aria-live="polite">
                         @if (_currentProgress?.Phase == BggImportPhase.PreparingInBgg)
                         {
-                            <div class="inline-block animate-spin text-5xl" style="animation-duration: 3s;">⏳</div>
+                            <div class="inline-block animate-spin" style="animation-duration: 3s;"><Icon Name="hourglass" Size="48" /></div>
                             <h4 class="text-base font-bold text-[var(--text-primary)]">
                                 BGG está preparando tu colección...
                             </h4>
@@ -55,18 +55,18 @@
                                 @(_currentProgress.Message)
                             </p>
                             <p class="text-[0.75rem] text-[var(--text-secondary)] bg-[var(--bg-surface-elevated)] p-2.5 rounded-xl border border-[var(--border-subtle)] max-w-sm mx-auto">
-                                💡 <em>BGG genera colecciones asíncronamente en servidores externos. No cierres esta ventana.</em>
+                                <Icon Name="lightbulb" Size="14" /> <em>BGG genera colecciones asíncronamente en servidores externos. No cierres esta ventana.</em>
                             </p>
                         }
                         else if (_currentProgress?.Phase == BggImportPhase.RateLimitedWaiting)
                         {
-                            <div class="inline-block animate-pulse text-5xl">⏱️</div>
+                            <div class="inline-block animate-pulse"><Icon Name="timer" Size="48" /></div>
                             <h4 class="text-base font-bold text-amber-600 dark:text-amber-400">
                                 Aviso de saturación en BoardGameGeek
                             </h4>
                             <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-700 dark:text-amber-300 text-left max-w-md mx-auto space-y-1">
                                 <p class="font-bold flex items-center gap-1.5">
-                                    <span>⏳ Pausa de cortesía obligatoria</span>
+                                    <span class="inline-flex items-center gap-1"><Icon Name="hourglass" Size="12" /> Pausa de cortesía obligatoria</span>
                                 </p>
                                 <p>@(_currentProgress.Message)</p>
                                 <p class="text-[0.7rem] opacity-90">
@@ -76,7 +76,7 @@
                         }
                         else if (_currentProgress?.Phase == BggImportPhase.ProcessingItems)
                         {
-                            <div class="inline-block animate-bounce text-5xl">📦</div>
+                            <div class="inline-block animate-bounce"><Icon Name="package" Size="48" /></div>
                             <h4 class="text-base font-bold text-[var(--text-primary)]">
                                 ¡Colección descargada! Procesando juegos...
                             </h4>
@@ -92,7 +92,7 @@
                         }
                         else
                         {
-                            <div class="inline-block animate-bounce text-5xl">🎲</div>
+                            <div class="inline-block animate-bounce"><Icon Name="dices" Size="48" /></div>
                             <h4 class="text-base font-bold text-[var(--text-primary)]">Sincronizando con BoardGameGeek...</h4>
                             <p class="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
                                 @(_currentProgress?.Message ?? "Conectando con la API oficial de BGG y cruzando datos...")
@@ -108,7 +108,7 @@
                 {
                     <div class="space-y-4">
                         <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-center">
-                            <span class="text-3xl block mb-2" aria-hidden="true">🎉</span>
+                            <span class="inline-block mb-2" aria-hidden="true"><Icon Name="party-popper" Size="30" /></span>
                             <h4 class="text-base font-bold text-emerald-600 dark:text-emerald-300">¡Colección sincronizada con éxito!</h4>
                             <p class="text-xs text-[var(--text-secondary)] mt-1">
                                 Procesados un total de <strong>@_result.TotalProcessed</strong> juegos de tu perfil.
@@ -117,19 +117,19 @@
 
                         <div class="grid grid-cols-2 gap-3">
                             <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-center">
-                                <span class="text-2xl block mb-1" aria-hidden="true">🟢</span>
+                                <span class="inline-block mb-1" aria-hidden="true"><Icon Name="circle-check" Size="24" /></span>
                                 <div class="text-2xl font-bold text-[var(--text-primary)]">@_result.ImportedToCollection</div>
                                 <div class="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">En tu ludoteca ahora</div>
                             </div>
                             <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-center">
-                                <span class="text-2xl block mb-1" aria-hidden="true">⏳</span>
+                                <span class="inline-block mb-1" aria-hidden="true"><Icon Name="hourglass" Size="24" /></span>
                                 <div class="text-2xl font-bold text-amber-600 dark:text-amber-300">@_result.EnqueuedForCataloging</div>
                                 <div class="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">En cola de catalogación</div>
                             </div>
                         </div>
 
                         <p class="text-[0.75rem] text-[var(--text-muted)] bg-[var(--bg-surface-elevated)] p-3 rounded-xl border border-[var(--border-subtle)] leading-relaxed">
-                            💡 <strong>¿Qué son los juegos en cola?</strong> Son títulos que aún no tienen ficha oficial en Ludeka. Ya puedes gestionarlos y prestarles, y nuestro motor de auto-catalogación creará su ficha oficial pronto.
+                            <Icon Name="lightbulb" Size="14" /> <strong>¿Qué son los juegos en cola?</strong> Son títulos que aún no tienen ficha oficial en Ludeka. Ya puedes gestionarlos y prestarles, y nuestro motor de auto-catalogación creará su ficha oficial pronto.
                         </p>
 
                         @if (_result.Errors.Count > 0)
@@ -160,7 +160,7 @@
                                 Usuario de BoardGameGeek
                             </label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)] text-sm" aria-hidden="true">👤</span>
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)] text-sm" aria-hidden="true"><Icon Name="user" Size="14" /></span>
                                 <input id="bgg-username" 
                                        type="text" 
                                        @bind="_username" 
@@ -193,7 +193,7 @@
                         @if (!string.IsNullOrWhiteSpace(_errorMessage))
                         {
                             <div class="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-600 dark:text-red-300 flex items-center gap-2">
-                                <span aria-hidden="true">⚠️</span>
+                                <Icon Name="triangle-alert" Size="14" aria-hidden="true" />
                                 <span>@_errorMessage</span>
                             </div>
                         }
