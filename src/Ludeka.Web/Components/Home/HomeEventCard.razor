@@ -1,0 +1,71 @@
+@* Tarjeta del carril Eventos de la portada (INC-35, Decisión 3): imagen de
+   BoardGameEventDto con dimensiones fijas y fallback por dominio (SVG inline temable si
+   ImageUrl está vacía, asset estático de eventos vía onerror si la URL externa cae en el
+   navegador — fallback que esta card no tenía) e iconografía Lucide sin emojis. *@
+@using Ludeka.Web.Components.Shared
+@using Ludeka.Application.DTOs
+
+<div class="rail-card w-72 sm:w-80 shrink-0 snap-start" role="listitem">
+    <div class="rail-cover rail-cover--banner">
+        @if (string.IsNullOrWhiteSpace(Event.ImageUrl))
+        {
+            <DefaultImage Domain="DefaultImageDomain.Evento" CssClass="w-full h-full" />
+        }
+        else
+        {
+            <img src="@Event.ImageUrl"
+                 alt="Cartel de @Event.Title"
+                 loading="lazy"
+                 decoding="async"
+                 width="320"
+                 height="144"
+                 onerror="this.onerror=null; this.src='/images/defaults/evento-default.svg';" />
+        }
+
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+
+        <div class="absolute bottom-2 left-3 right-3 flex items-center justify-between text-white text-xs font-bold">
+            <span class="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm border border-white/20 flex items-center gap-1">
+                <Icon Name="calendar" Size="12" /> @Event.FormattedDates
+            </span>
+
+            <span class="px-2 py-0.5 rounded-md bg-[var(--brand-primary)] text-white text-[0.68rem]">
+                @Event.RemainingDaysText
+            </span>
+        </div>
+    </div>
+
+    <div class="p-4 space-y-2">
+        <h3 class="text-base font-extrabold text-[var(--text-primary)] line-clamp-1">
+            @Event.Title
+        </h3>
+
+        <p class="text-xs text-[var(--text-secondary)] font-medium flex items-center gap-1">
+            <Icon Name="map-pin" Size="12" /> <span>@Event.Location</span>
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Event.Description))
+        {
+            <p class="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed opacity-90">
+                @Event.Description
+            </p>
+        }
+    </div>
+
+    <div class="p-4 pt-0">
+        @if (!string.IsNullOrWhiteSpace(Event.WebsiteUrl))
+        {
+            <a href="@Event.WebsiteUrl"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="w-full text-center py-2 px-3 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--brand-primary)] hover:text-white border border-[var(--border-subtle)] font-bold text-xs text-[var(--text-primary)] transition-colors inline-flex items-center justify-center gap-1">
+                <Icon Name="globe" Size="12" /> Web Oficial del Evento &rarr;
+            </a>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Evento del carril (datos puros; la card no accede a servicios).</summary>
+    [Parameter, EditorRequired] public BoardGameEventDto Event { get; set; } = null!;
+}

@@ -13,6 +13,10 @@ namespace Ludeka.UnitTests.Infrastructure;
 /// </summary>
 public class WebMarkupContractTests
 {
+    // Emojis prohibidos en la portada (Decisión 6): cada uno tiene su icono Lucide en el catálogo
+    private static readonly string[] EmojisDePortada =
+    { "🔍", "🎲", "🎁", "📰", "🎪", "🏆", "⭐", "⏱", "🚀", "🔄", "🆕", "🗓", "📅", "📍", "🌐", "🧩" };
+
     private static string GetRepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
@@ -124,6 +128,32 @@ public class WebMarkupContractTests
                   "alt=\"@HeroBackgroundAssets.AltText(Background)\"", "hero-scrim", "@switch (Background)",
                   "<h1 class=\"hero-title\">La mesa está servida</h1>" },
           new[] { "PORTADA EDITORIAL", "alt=\"\"" } },
+
+        // RailHeader: cabecera de carril reutilizable con título en serif display, icono Lucide
+        // y enlace "Ver todos…" solo cuando hay destino (Decisiones 3 y 7)
+        { "RailHeader (cabecera de carril)", "src/Ludeka.Web/Components/Home/RailHeader.razor",
+          new[] { "rail-title", "Icon", "href=\"@Href\"" },
+          EmojisDePortada },
+
+        // HomeGameCard: carril Top 20 con lenguaje .rail-card y fallback vigente de carátulas
+        { "HomeGameCard (Top 20)", "src/Ludeka.Web/Components/Home/HomeGameCard.razor",
+          new[] { "rail-card", "rail-cover--square", "game-placeholder.svg", "expansion-placeholder.svg", "loading=\"lazy\"", "onerror" },
+          EmojisDePortada },
+
+        // HomeGiveawayCard: carril Sorteos; estrena render de ThumbnailUrl con fallback por dominio
+        { "HomeGiveawayCard (Sorteos)", "src/Ludeka.Web/Components/Home/HomeGiveawayCard.razor",
+          new[] { "rail-card", "rail-cover--wide", "sorteo-default.svg", "DefaultImage", "loading=\"lazy\"", "onerror" },
+          EmojisDePortada },
+
+        // HomeReleaseCard: carril Novedades; estrena render de CoverImageUrl con fallback por dominio
+        { "HomeReleaseCard (Novedades)", "src/Ludeka.Web/Components/Home/HomeReleaseCard.razor",
+          new[] { "rail-card", "rail-cover--wide", "novedad-default.svg", "DefaultImage", "loading=\"lazy\"", "onerror" },
+          EmojisDePortada },
+
+        // HomeEventCard: carril Eventos; añade dimensiones y fallback que hoy no tiene
+        { "HomeEventCard (Eventos)", "src/Ludeka.Web/Components/Home/HomeEventCard.razor",
+          new[] { "rail-card", "rail-cover--banner", "evento-default.svg", "DefaultImage", "loading=\"lazy\"", "onerror", "width=", "height=" },
+          EmojisDePortada },
     };
 
     [Theory]
@@ -168,15 +198,16 @@ public class WebMarkupContractTests
     }
 
     [Fact]
-    public void HomeDashboard_VerTodasLasNovedades_LinkPointsToNovedades()
+    public void RailHeader_EnlaceVerTodos_SeRenderizaSoloConDestinoYRespetaElHref()
     {
-        var source = ReadSource("src/Ludeka.Web/Components/Pages/HomeDashboard.razor");
-        var anchorPos = source.IndexOf("Ver todas las novedades", StringComparison.Ordinal);
-        Assert.True(anchorPos >= 0, "No se encontró el enlace 'Ver todas las novedades'.");
+        // Retarget tras la extracción (Decisión 3): el enlace "Ver todas las novedades"
+        // pasa a vivir en RailHeader.razor y su destino lo fija el Href del orquestador
+        // (paridad protegida en la entrada del orquestador del C3).
+        var source = ReadSource("src/Ludeka.Web/Components/Home/RailHeader.razor");
 
-        var hrefPos = source.LastIndexOf("href=\"", anchorPos, StringComparison.Ordinal);
-        Assert.True(hrefPos >= 0, "El enlace 'Ver todas las novedades' no tiene href.");
-        Assert.StartsWith("href=\"/novedades\"", source[hrefPos..]);
+        // El enlace se emite con el Href recibido y solo cuando hay destino (Eventos no tiene)
+        Assert.Contains("<a href=\"@Href\"", source);
+        Assert.Contains("@if (Href is not null)", source);
     }
 
     [Fact]
