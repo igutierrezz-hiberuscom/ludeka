@@ -106,6 +106,13 @@ public class WebMarkupContractTests
         { "Asset default genérico", "src/Ludeka.Web/wwwroot/images/defaults/generico-default.svg",
           new[] { "LUDEKA", "viewBox=\"0 0 400 225\"" },
           new[] { "game-placeholder" } },
+
+        // Fundación CSS de microinteracciones (Decisión 4): tokens compartidos + .rail-card
+        { "Fundación CSS (tokens y rail-card)", "src/Ludeka.Web/Styles/input.css",
+          new[] { "--ease-out-expo", "--ease-out-quad", "--dur-fast", "--dur-base", "--dur-slow", "--rail-lift", "--rail-zoom", "--font-display: 'Fraunces'",
+                  ".rail-card:hover, .rail-card:focus-visible", ".rail-cover--square", ".rail-cover--wide", ".rail-cover--banner",
+                  ".scrollbar-none", "prefers-reduced-motion: reduce" },
+          Array.Empty<string>() },
     };
 
     [Theory]
