@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Xunit;
 
 namespace Ludeka.UnitTests.Infrastructure;
@@ -108,11 +109,21 @@ public class WebMarkupContractTests
           new[] { "game-placeholder" } },
 
         // Fundación CSS de microinteracciones (Decisión 4): tokens compartidos + .rail-card
-        { "Fundación CSS (tokens y rail-card)", "src/Ludeka.Web/Styles/input.css",
+        // + tipografía display del hero y de los títulos de carril (Decisiones 7 y 10)
+        { "Fundación CSS (tokens, rail-card y hero)", "src/Ludeka.Web/Styles/input.css",
           new[] { "--ease-out-expo", "--ease-out-quad", "--dur-fast", "--dur-base", "--dur-slow", "--rail-lift", "--rail-zoom", "--font-display: 'Fraunces'",
                   ".rail-card:hover, .rail-card:focus-visible", ".rail-cover--square", ".rail-cover--wide", ".rail-cover--banner",
-                  ".scrollbar-none", "prefers-reduced-motion: reduce" },
+                  ".scrollbar-none", "prefers-reduced-motion: reduce", ".hero-title", ".rail-title", ".hero-scrim" },
           Array.Empty<string>() },
+
+        // HeroEditorial: hero narrativo con <picture> AVIF/WebP/JPG priorizado (patrón INC-07),
+        // escena CSS bajo la foto, scrim por tema y titular en serif display (Decisiones 1, 2 y 10)
+        { "HeroEditorial (picture, prioridad y escena CSS)", "src/Ludeka.Web/Components/Home/HeroEditorial.razor",
+          new[] { "<picture", "<source type=\"image/avif\"", "<source type=\"image/webp\"",
+                  "fetchpriority=\"high\"", "width=\"1600\"", "height=\"900\"",
+                  "alt=\"@HeroBackgroundAssets.AltText(Background)\"", "hero-scrim", "@switch (Background)",
+                  "<h1 class=\"hero-title\">La mesa está servida</h1>" },
+          new[] { "PORTADA EDITORIAL", "alt=\"\"" } },
     };
 
     [Theory]
@@ -182,5 +193,94 @@ public class WebMarkupContractTests
         // tres hojas de estilo que había antes del incremento.
         Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(source, @"fonts\.googleapis\.com/css2").Count);
         Assert.Equal(3, System.Text.RegularExpressions.Regex.Matches(source, "rel=\"stylesheet\"").Count);
+    }
+
+    // ===== INC-35 PR-2: hero editorial narrativo (Decisiones 1, 2 y 10) =====
+
+    private static Type? GetHeroBackgroundVariantType() =>
+        typeof(Ludeka.Web.Components.Pages.HomeDashboard).Assembly
+            .GetType("Ludeka.Web.Components.Home.HeroBackgroundVariant", throwOnError: false);
+
+    private static Type? GetHeroBackgroundAssetsType() =>
+        typeof(Ludeka.Web.Components.Pages.HomeDashboard).Assembly
+            .GetType("Ludeka.Web.Components.Home.HeroBackgroundAssets", throwOnError: false);
+
+    [Fact]
+    public void HeroBackgroundVariant_ExponeLasCincoVariantesDelDiseno()
+    {
+        // Decisión 2: 3 fotos de ambiente, escena CSS de serie e ilustración futura.
+        var variantType = GetHeroBackgroundVariantType();
+        Assert.NotNull(variantType);
+        Assert.Equal(
+            new[] { "FotoEurogame", "FotoMesaAmigos", "FotoPrimerPlano", "CssScene", "Ilustracion" },
+            Enum.GetNames(variantType!));
+    }
+
+    [Theory]
+    [InlineData("FotoEurogame", "hero-ambiente-eurogame")]
+    [InlineData("FotoMesaAmigos", "hero-ambiente-mesa-amigos")]
+    [InlineData("FotoPrimerPlano", "hero-ambiente-primer-plano")]
+    [InlineData("Ilustracion", "hero-ilustracion")]
+    public void HeroBackgroundAssets_MapeaCadaVarianteFotoASusTresFormatos(string variantName, string baseName)
+    {
+        var variantType = GetHeroBackgroundVariantType();
+        Assert.NotNull(variantType);
+        var assetsType = GetHeroBackgroundAssetsType();
+        Assert.NotNull(assetsType);
+
+        var variant = Enum.Parse(variantType!, variantName);
+        foreach (var (methodName, extension) in new[] { ("Avif", ".avif"), ("Webp", ".webp"), ("Jpg", ".jpg") })
+        {
+            var method = assetsType!.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
+            Assert.NotNull(method);
+            var resolved = method!.Invoke(null, new[] { variant }) as string;
+            Assert.Equal($"/images/home/{baseName}{extension}", resolved);
+        }
+    }
+
+    [Fact]
+    public void HeroBackgroundAssets_AltTextosDeFotoEnCastellanoNoVacios()
+    {
+        // Decisión 10: alt descriptivo en castellano por variante con imagen; la escena
+        // CSS no renderiza <img>, así que su alt queda vacío por diseño.
+        var variantType = GetHeroBackgroundVariantType();
+        Assert.NotNull(variantType);
+        var assetsType = GetHeroBackgroundAssetsType();
+        Assert.NotNull(assetsType);
+        var altTextMethod = assetsType!.GetMethod("AltText", BindingFlags.Public | BindingFlags.Static);
+        Assert.NotNull(altTextMethod);
+
+        var expectedByVariant = new (string VariantName, string ExpectedAlt)[]
+        {
+            ("FotoEurogame", "Mesa de juego con un eurogame en marcha sobre el tapete y una estantería lúdica al fondo"),
+            ("FotoMesaAmigos", "Grupo de amigos riendo alrededor de una mesa de madera con juegos de mesa"),
+            ("FotoPrimerPlano", "Primer plano de manos colocando piezas sobre el tablero de un juego de mesa"),
+            ("Ilustracion", "Ilustración editorial de una mesa de juego con estantería al fondo"),
+        };
+
+        foreach (var (variantName, expectedAlt) in expectedByVariant)
+        {
+            var variant = Enum.Parse(variantType!, variantName);
+            var alt = altTextMethod!.Invoke(null, new[] { variant }) as string;
+            Assert.False(string.IsNullOrWhiteSpace(alt), $"El alt de {variantName} debe ser descriptivo.");
+            Assert.Equal(expectedAlt, alt);
+        }
+
+        var cssScene = Enum.Parse(variantType!, "CssScene");
+        Assert.Equal(string.Empty, altTextMethod!.Invoke(null, new[] { cssScene }));
+    }
+
+    [Fact]
+    public void HeroEditorial_RamaCssScene_NoRenderizaPicture()
+    {
+        // Escenario «Escena CSS sin peticiones de imagen»: en la rama del @switch
+        // correspondiente a CssScene el <picture> no existe (troceado de fuente).
+        var source = ReadSource("src/Ludeka.Web/Components/Home/HeroEditorial.razor");
+        var casePos = source.IndexOf("case HeroBackgroundVariant.CssScene", StringComparison.Ordinal);
+        Assert.True(casePos >= 0, "El hero debe conmutar el fondo con @switch sobre Background (rama CssScene).");
+        var breakPos = source.IndexOf("break;", casePos, StringComparison.Ordinal);
+        Assert.True(breakPos > casePos, "La rama CssScene del @switch debe terminar en break;");
+        var cssSceneBranch = source[casePos..breakPos];
+        Assert.DoesNotContain("<picture", cssSceneBranch, StringComparison.Ordinal);
     }
 }

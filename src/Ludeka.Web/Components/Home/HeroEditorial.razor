@@ -1,0 +1,105 @@
+@* Hero editorial narrativo de la portada (INC-35, Decisión 1): titular visible en serif
+   display, subtítulo de invitación a la mesa, buscador rápido y las 4 píldoras de acceso
+   (spec congelada, orden intacto). El fondo se conmuta con el parámetro Background
+   (Decisión 2): foto de ambiente servida en <picture> AVIF/WebP/JPG con prioridad de
+   carga (patrón INC-07) o escena compuesta por CSS con variables de tema. La escena CSS
+   se renderiza SIEMPRE bajo la foto: si el asset falla en el navegador (clase
+   hero-bg-media--failed vía onerror) el fondo cae a la escena sin hueco ni petición
+   extra. El scrim por tema deja casi opaco el cuadrante del texto, de modo que el
+   contraste >= 4,5:1 se conserva por construcción en los 5 data-theme (Decisión 10). *@
+@using Ludeka.Web.Components.Shared
+@inject NavigationManager Navigation
+
+<section class="hero-editorial relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
+    @* Capa de escena CSS: siempre presente bajo la foto (0 peticiones, fallback por tema) *@
+    <div class="hero-scene" aria-hidden="true"></div>
+
+@switch (Background)
+{
+    case HeroBackgroundVariant.CssScene:
+        @* Escena de serie: sin elemento de imagen, el fondo es 100% CSS con variables de tema *@
+        break;
+    case HeroBackgroundVariant.FotoEurogame:
+    case HeroBackgroundVariant.FotoMesaAmigos:
+    case HeroBackgroundVariant.FotoPrimerPlano:
+    case HeroBackgroundVariant.Ilustracion:
+        <picture class="hero-bg-media">
+            <source type="image/avif" srcset="@HeroBackgroundAssets.Avif(Background)" />
+            <source type="image/webp" srcset="@HeroBackgroundAssets.Webp(Background)" />
+            <img src="@HeroBackgroundAssets.Jpg(Background)"
+                 alt="@HeroBackgroundAssets.AltText(Background)"
+                 width="1600"
+                 height="900"
+                 fetchpriority="high"
+                 decoding="async"
+                 onerror="this.onerror=null; this.parentElement.classList.add('hero-bg-media--failed');" />
+        </picture>
+        break;
+}
+
+    @* Scrim por tema: el cuadrante inferior-izquierdo (donde vive el texto) queda casi opaco *@
+    <div class="hero-scrim" aria-hidden="true"></div>
+
+    <div class="relative max-w-3xl space-y-4 p-6 sm:p-10">
+        <h1 class="hero-title">La mesa está servida</h1>
+
+        <p class="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+            Ludeka es el Letterboxd de los juegos de mesa en español: descubre qué títulos merecen tu tapete, participa en los sorteos de la comunidad y sigue las novedades y ferias del sector. Tu próxima partida empieza aquí.
+        </p>
+
+        @* Buscador directo que redirige a /catalogo *@
+        <div class="pt-2 max-w-xl">
+            <form @onsubmit="HandleQuickSearch" class="flex items-center gap-2">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[var(--text-muted)]">
+                        <Icon Name="search" Size="18" />
+                    </span>
+                    <input type="text"
+                           @bind="_searchTerm"
+                           placeholder="Buscar por juego, editorial o diseñador..."
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] shadow-sm" />
+                </div>
+                <button type="submit"
+                        class="px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs sm:text-sm transition-opacity shadow-sm whitespace-nowrap">
+                    Buscar
+                </button>
+            </form>
+        </div>
+
+        @* Píldoras de acceso directo *@
+        <div class="flex items-center gap-2 pt-2 flex-wrap text-xs font-semibold">
+            <a href="/catalogo" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
+                <Icon Name="dices" Size="14" /> Catálogo Completo
+            </a>
+            <a href="/sorteos" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
+                <Icon Name="gift" Size="14" /> Sorteos
+            </a>
+            <a href="/novedades" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
+                <Icon Name="newspaper" Size="14" /> Novedades
+            </a>
+            <a href="/eventos" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
+                <Icon Name="tent" Size="14" /> Eventos
+            </a>
+        </div>
+    </div>
+</section>
+
+@code {
+    /// <summary>Variante de fondo activa (Decisión 2): el cambio de variante es 1 línea en el orquestador.</summary>
+    [Parameter] public HeroBackgroundVariant Background { get; set; } = HeroBackgroundVariant.FotoEurogame;
+
+    private string _searchTerm = string.Empty;
+
+    /// <summary>Buscador rápido de la portada: submit con término → /catalogo?q={término}; vacío → /catalogo.</summary>
+    private void HandleQuickSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            Navigation.NavigateTo($"/catalogo?q={Uri.EscapeDataString(_searchTerm.Trim())}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/catalogo");
+        }
+    }
+}

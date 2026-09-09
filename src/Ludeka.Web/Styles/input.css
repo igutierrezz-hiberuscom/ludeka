@@ -262,6 +262,64 @@
     .rail-card:hover, .rail-card:focus-visible, .rail-card:hover .rail-cover img { transform: none; }
 }
 
+/* ===== Hero editorial narrativo de la portada (INC-35, Decisiones 7 y 10) ===== */
+/* Escena de fondo en CSS puro (variables de tema): vive bajo la foto del <picture>
+   y actúa como fondo completo cuando la variante es CssScene o el asset falla. */
+.hero-scene {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% -20%, var(--brand-glow) 0%, transparent 70%),
+                linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-main) 100%);
+}
+
+/* Foto de ambiente: cubre el hero con dimensiones fijas del <img> (CLS 0) */
+.hero-bg-media {
+    position: absolute;
+    inset: 0;
+}
+
+.hero-bg-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Si el asset falla en el navegador (onerror), el <picture> desaparece y el fondo
+   cae a la escena CSS sin hueco */
+.hero-bg-media--failed {
+    display: none;
+}
+
+/* Scrim por tema: el cuadrante inferior-izquierdo (donde vive el texto) queda casi
+   opaco con --bg-main, así el contraste >= 4,5:1 se conserva por construcción en
+   los 5 data-theme */
+.hero-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--bg-main) 0%, transparent 60%),
+                linear-gradient(180deg, transparent 40%, var(--bg-main) 100%);
+}
+
+/* Titular visible del hero (h1 de la portada) en serif display */
+.hero-title {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+/* Títulos <h2> de los carriles de portada en serif display (exclusivamente portada) */
+.rail-title {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+}
+
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
