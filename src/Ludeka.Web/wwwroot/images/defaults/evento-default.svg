@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" role="img" aria-label="Imagen por defecto de eventos de Ludeka">
+  <!-- Ludeka · variante estática de eventos (motivo: carrusel de feria) · par 1:1 del inline DefaultImage.razor -->
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1B2228" />
+      <stop offset="1" stop-color="#242C34" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="225" fill="url(#fondo)" />
+  <circle cx="200" cy="96" r="72" fill="#E05A38" opacity="0.14" />
+  <g transform="translate(152 40) scale(4)" fill="none" stroke="#E05A38" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.5 21 14 3" />
+    <path d="M20.5 21 10 3" />
+    <path d="M15.5 21 12 15l-3.5 6" />
+    <path d="M2 21h20" />
+  </g>
+  <text x="200" y="196" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700" letter-spacing="3.5" fill="#9AB0C2">EVENTO LUDEKA</text>
+</svg>

@@ -36,3 +36,6 @@ Thumbs.db
 .env
 .env.local
 *.secret.json
+
+# Staging local de assets del usuario (no versionar)
+assets-usuario/

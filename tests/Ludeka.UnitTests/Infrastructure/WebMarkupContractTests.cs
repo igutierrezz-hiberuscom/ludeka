@@ -82,6 +82,37 @@ public class WebMarkupContractTests
         { "Radar (sin banner legacy)", "src/Ludeka.Web/Components/Pages/Radar.razor",
           new[] { "@page \"/sorteos\"", "@page \"/radar\"" },
           new[] { "¡Radar renovado!", "IsLegacyRoute" } },
+
+        // Icon: SVG Lucide inline, currentColor, aria-hidden por defecto; sin <img> ni peticiones de red
+        { "Icon (SVG Lucide inline)", "src/Ludeka.Web/Components/Shared/Icon.razor",
+          new[] { "viewBox=\"0 0 24 24\"", "stroke=\"currentColor\"", "aria-hidden=\"true\"" },
+          new[] { "<img", "http" } },
+
+        // DefaultImage: SVG inline temable por variables de tema; sin <img> roto
+        { "DefaultImage (SVG inline temable)", "src/Ludeka.Web/Components/Shared/DefaultImage.razor",
+          new[] { "viewBox=\"0 0 400 225\"", "var(--brand-", "var(--bg-", "aria-hidden" },
+          new[] { "<img" } },
+
+        // Assets por defecto servibles (variante estática para onerror), uno por dominio
+        { "Asset default de eventos", "src/Ludeka.Web/wwwroot/images/defaults/evento-default.svg",
+          new[] { "EVENTO LUDEKA", "viewBox=\"0 0 400 225\"" },
+          new[] { "game-placeholder" } },
+        { "Asset default de sorteos", "src/Ludeka.Web/wwwroot/images/defaults/sorteo-default.svg",
+          new[] { "SORTEO LUDEKA", "viewBox=\"0 0 400 225\"" },
+          new[] { "game-placeholder" } },
+        { "Asset default de novedades", "src/Ludeka.Web/wwwroot/images/defaults/novedad-default.svg",
+          new[] { "NOVEDAD", "viewBox=\"0 0 400 225\"" },
+          new[] { "game-placeholder" } },
+        { "Asset default genérico", "src/Ludeka.Web/wwwroot/images/defaults/generico-default.svg",
+          new[] { "LUDEKA", "viewBox=\"0 0 400 225\"" },
+          new[] { "game-placeholder" } },
+
+        // Fundación CSS de microinteracciones (Decisión 4): tokens compartidos + .rail-card
+        { "Fundación CSS (tokens y rail-card)", "src/Ludeka.Web/Styles/input.css",
+          new[] { "--ease-out-expo", "--ease-out-quad", "--dur-fast", "--dur-base", "--dur-slow", "--rail-lift", "--rail-zoom", "--font-display: 'Fraunces'",
+                  ".rail-card:hover, .rail-card:focus-visible", ".rail-cover--square", ".rail-cover--wide", ".rail-cover--banner",
+                  ".scrollbar-none", "prefers-reduced-motion: reduce" },
+          Array.Empty<string>() },
     };
 
     [Theory]
@@ -135,5 +166,21 @@ public class WebMarkupContractTests
         var hrefPos = source.LastIndexOf("href=\"", anchorPos, StringComparison.Ordinal);
         Assert.True(hrefPos >= 0, "El enlace 'Ver todas las novedades' no tiene href.");
         Assert.StartsWith("href=\"/novedades\"", source[hrefPos..]);
+    }
+
+    [Fact]
+    public void App_razor_CargaFrauncesEnLaMismaPeticionDeFuentesSinNuevoEnlace()
+    {
+        // Decisión 7 (INC-35): la serif display Fraunces entra en la URL ya existente de
+        // Google Fonts (misma petición css2, display=swap intacto, sin preload).
+        var source = ReadSource("src/Ludeka.Web/Components/App.razor");
+
+        Assert.Contains("family=Fraunces:opsz,wght@9..144,600..700", source);
+        Assert.Contains("display=swap", source);
+
+        // No se añade ningún <link> de fuente nuevo: una única URL css2 y las mismas
+        // tres hojas de estilo que había antes del incremento.
+        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(source, @"fonts\.googleapis\.com/css2").Count);
+        Assert.Equal(3, System.Text.RegularExpressions.Regex.Matches(source, "rel=\"stylesheet\"").Count);
     }
 }

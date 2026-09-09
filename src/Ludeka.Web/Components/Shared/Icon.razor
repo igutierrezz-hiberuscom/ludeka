@@ -1,0 +1,30 @@
+@* Icono Lucide inline (INC-35, spec iconography-lucide): SVG inline con stroke="currentColor"
+   para heredar el color del tema, sin peticiones de red (sin etiqueta de imagen ni fuente externa).
+   Con Title (señal semántica) se expone role="img" con su texto accesible; sin Title el
+   icono es decorativo y queda oculto a lectores de pantalla (aria-hidden="true").
+   Un nombre fuera del catálogo no renderiza nada: sin SVG, sin emoji y sin error. *@
+@if (IconCatalog.Icons.TryGetValue(Name, out var paths))
+{
+    @if (Title is null)
+    {
+        <svg width="@Size" height="@Size" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="@StrokeWidth" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">@((MarkupString)paths)</svg>
+    }
+    else
+    {
+        <svg width="@Size" height="@Size" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="@StrokeWidth" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="@Title" focusable="false"><title>@Title</title>@((MarkupString)paths)</svg>
+    }
+}
+
+@code {
+    /// <summary>Nombre kebab-case del icono en el catálogo Lucide.</summary>
+    [Parameter, EditorRequired] public string Name { get; set; } = null!;
+
+    /// <summary>Tamaño en píxeles (ancho y alto).</summary>
+    [Parameter] public int Size { get; set; } = 16;
+
+    /// <summary>Grosor del trazo (2 = valor por defecto de Lucide).</summary>
+    [Parameter] public int StrokeWidth { get; set; } = 2;
+
+    /// <summary>Texto accesible si el icono transmite significado; null => decorativo.</summary>
+    [Parameter] public string? Title { get; set; }
+}
