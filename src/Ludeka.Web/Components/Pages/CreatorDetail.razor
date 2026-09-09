@@ -13,14 +13,14 @@
 @if (_loading)
 {
     <div class="container-ludeka py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
-        <span class="animate-spin text-xl">🎲</span>
+        <span class="animate-spin"><Icon Name="dices" Size="20" /></span>
         <span>Cargando ficha del creador...</span>
     </div>
 }
 else if (_creator == null)
 {
     <div class="container-ludeka py-16 text-center space-y-4">
-        <span class="text-4xl block">🔍</span>
+        <span class="inline-block"><Icon Name="search" Size="40" /></span>
         <h1 class="text-2xl font-black text-[var(--text-primary)]">Creador no encontrado</h1>
         <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
             No encontramos ningún creador de contenido registrado con el slug especificado.
@@ -44,7 +44,7 @@ else
                 <button type="button"
                         @onclick="() => _isEditModalOpen = true"
                         class="px-3.5 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                    <span>✏️</span> Editar Creador
+                    <Icon Name="pen-line" Size="12" /> Editar Creador
                 </button>
             }
         </div>
@@ -69,12 +69,12 @@ else
                 <div class="space-y-2 flex-1">
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="px-2.5 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 text-xs font-black">
-                            🎬 Creador de contenido
+                            <Icon Name="clapperboard" Size="12" /> Creador de contenido
                         </span>
                         @if (!string.IsNullOrWhiteSpace(_creator.Nationality))
                         {
                             <span class="text-xs font-bold text-[var(--text-secondary)]">
-                                🌍 @_creator.Nationality
+                                <Icon Name="globe" Size="12" /> @_creator.Nationality
                             </span>
                         }
                     </div>
@@ -90,7 +90,7 @@ else
                                target="_blank"
                                rel="noopener noreferrer"
                                class="font-semibold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1">
-                                <span>🌐</span> Web oficial &nearr;
+                                <Icon Name="globe" Size="12" /> Web oficial &nearr;
                             </a>
                         }
                         @if (_creator.BggPersonId.HasValue)
@@ -99,7 +99,7 @@ else
                                target="_blank"
                                rel="noopener noreferrer"
                                class="font-semibold text-amber-400 hover:underline inline-flex items-center gap-1">
-                                <span>🎲</span> Perfil en BoardGameGeek &nearr;
+                                <Icon Name="dices" Size="12" /> Perfil en BoardGameGeek &nearr;
                             </a>
                         }
                     </div>

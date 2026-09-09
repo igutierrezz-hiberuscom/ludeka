@@ -53,9 +53,9 @@ public class WebMarkupContractTests
           new[] { "@page \"/autores\"", "Directorio de Creadores de Contenido — Ludeka", "Creadores de Contenido &bull; Divulgadores del Hobby", "hobby hispanohablante" },
           new[] { "Creadores y Autores", "Autoría Lúdica", "GamesCount", "diseñadores, ilustradores y divulgadores referentes" } },
 
-        // MainLayout: navegación y pie reetiquetados a Creadores
+        // MainLayout: navegación y pie reetiquetados a Creadores; el pie usa icono Lucide (no ✍️)
         { "MainLayout (nav y pie)", "src/Ludeka.Web/Components/Layout/MainLayout.razor",
-          new[] { "Creadores", "✍️ Creadores" },
+          new[] { "Creadores", "Icon Name=\"pen-line\"" },
           new[] { "Autores" } },
 
         // CreatorEditModal: formulario reetiquetado
@@ -156,6 +156,43 @@ public class WebMarkupContractTests
         { "HomeEventCard (Eventos)", "src/Ludeka.Web/Components/Home/HomeEventCard.razor",
           new[] { "rail-card", "rail-cover--banner", "evento-default.svg", "DefaultImage", "loading=\"lazy\"", "onerror", "width=", "height=" },
           EmojisDePortada },
+
+        // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 2 — layout, catálogo y fichas) =====
+
+        // MainLayout: nav, utilidades, menú de gestión y pie con iconos Lucide (sin emojis)
+        { "MainLayout (iconografia Lucide)", "src/Ludeka.Web/Components/Layout/MainLayout.razor",
+          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"newspaper\"", "<Icon Name=\"tent\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"shield\"", "<Icon Name=\"library\"", "<Icon Name=\"bell\"" },
+          new[] { "🎁", "📰", "🎪", "🌍", "📚", "🛡", "👤", "⚙", "🚩", "🌙", "🎬", "📸", "🔔", "👥", "📜", "🏢", "✍", "🛒", "💬", "🗙" } },
+
+        // GameCard: badges de estilo y público con iconos Lucide
+        { "GameCard (badges sin emojis)", "src/Ludeka.Web/Components/Shared/GameCard.razor",
+          new[] { "<Icon Name=\"puzzle\"", "<Icon Name=\"settings\"", "<Icon Name=\"party-popper\"", "<Icon Name=\"book-open\"", "<Icon Name=\"user\"", "<Icon Name=\"baby\"" },
+          new[] { "🧩", "⚙", "🎉", "📖", "👤", "👶" } },
+
+        // GameDetail: ficha inteligente con cabecera, badges y avisos por iconos Lucide
+        { "GameDetail (ficha sin emojis)", "src/Ludeka.Web/Components/Pages/GameDetail.razor",
+          new[] { "<Icon Name=\"globe\"", "<Icon Name=\"flag\"", "<Icon Name=\"palette\"", "<Icon Name=\"shopping-cart\"", "<Icon Name=\"bot\"", "<Icon Name=\"package\"", "<Icon Name=\"trophy\"" },
+          new[] { "🎲", "🕵", "🌐", "🚩", "🎨", "🛒", "✏", "⚙", "🤖", "🛡", "📚", "🧩", "🏆", "📦", "⚡" } },
+
+        // CreatorsDirectory: buscador, spinner, vacío y acciones por iconos Lucide
+        { "CreatorsDirectory (sin emojis)", "src/Ludeka.Web/Components/Pages/CreatorsDirectory.razor",
+          new[] { "<Icon Name=\"pen-line\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"user\"", "<Icon Name=\"globe\"" },
+          new[] { "✍", "➕", "🔍", "🎲", "👤", "🌍", "✏" } },
+
+        // CreatorDetail: spinner, vacío, badge de canal y enlaces externos por iconos Lucide
+        { "CreatorDetail (sin emojis)", "src/Ludeka.Web/Components/Pages/CreatorDetail.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"search\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"clapperboard\"", "<Icon Name=\"globe\"" },
+          new[] { "🎲", "🔍", "✏", "🎬", "🌍", "🌐" } },
+
+        // Home (/catalogo): filtros, spinner y vacío por iconos Lucide
+        { "Home catalogo (sin emojis)", "src/Ludeka.Web/Components/Pages/Home.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"swords\"", "<Icon Name=\"users\"", "<Icon Name=\"user\"", "<Icon Name=\"timer\"" },
+          new[] { "🎲", "🧩", "⚔", "👨", "👤", "⏱" } },
+
+        // StoreOffersCard: cabecera, envíos, recomprobación y nota de afiliación por iconos Lucide
+        { "StoreOffersCard (sin emojis)", "src/Ludeka.Web/Components/Shared/StoreOffersCard.razor",
+          new[] { "<Icon Name=\"shopping-cart\"", "<Icon Name=\"shield\"", "<Icon Name=\"plane\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"package\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"settings\"" },
+          new[] { "🛒", "⚙", "🛡", "✈", "🔄", "📦", "💡" } },
     };
 
     [Theory]
