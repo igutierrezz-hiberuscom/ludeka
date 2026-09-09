@@ -13,7 +13,8 @@
 
         @if (Necessity.HasValue)
         {
-            <div class="inline-flex items-center px-3 py-1.5 rounded-xl border text-xs font-bold shadow-sm @GetNecessityClass(Necessity.Value)">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold shadow-sm @GetNecessityClass(Necessity.Value)">
+                <span class="inline-block size-2 rounded-full @GetNecessityDotClass(Necessity.Value)" aria-hidden="true"></span>
                 <span>@GetNecessityText(Necessity.Value)</span>
             </div>
         }
@@ -30,7 +31,7 @@
                 @foreach (var tag in ImpactTags)
                 {
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)]">
-                        <span>@GetTagIcon(tag)</span>
+                        <Icon Name="@GetTagIcon(tag)" Size="12" />
                         <span>@GetTagLabel(tag)</span>
                     </span>
                 }
@@ -56,7 +57,7 @@
             @if (ExtraPlayerCount.HasValue && ExtraPlayerCount.Value != 0)
             {
                 <div class="p-3 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center gap-3">
-                    <span class="text-2xl">👥</span>
+                    <Icon Name="users" Size="24" />
                     <div>
                         <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] block">Escalabilidad</span>
                         <span class="text-sm font-extrabold text-[var(--text-primary)]">
@@ -69,7 +70,7 @@
             @if (ExtraDurationMinutes.HasValue && ExtraDurationMinutes.Value != 0)
             {
                 <div class="p-3 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center gap-3">
-                    <span class="text-2xl">⏱️</span>
+                    <Icon Name="timer" Size="24" />
                     <div>
                         <span class="text-[0.68rem] uppercase font-bold text-[var(--text-muted)] block">Impacto en Duración</span>
                         <span class="text-sm font-extrabold @(ExtraDurationMinutes.Value < 0 ? "text-emerald-400" : "text-[var(--text-primary)]")">
@@ -100,12 +101,21 @@
 
     private static string GetNecessityText(ExpansionNecessity n) => n switch
     {
-        ExpansionNecessity.MustHave => "🟢 Imprescindible, mejora el juego base",
-        ExpansionNecessity.HighlyRecommended => "🟢 Muy recomendada",
-        ExpansionNecessity.Situational => "🟡 Recomendada según perfil",
-        ExpansionNecessity.OnlyForFans => "🔵 Solo para muy cafeteros / completistas",
-        ExpansionNecessity.Dispensable => "⚪ Prescindible / Aporta poco",
+        ExpansionNecessity.MustHave => "Imprescindible, mejora el juego base",
+        ExpansionNecessity.HighlyRecommended => "Muy recomendada",
+        ExpansionNecessity.Situational => "Recomendada según perfil",
+        ExpansionNecessity.OnlyForFans => "Solo para muy cafeteros / completistas",
+        ExpansionNecessity.Dispensable => "Prescindible / Aporta poco",
         _ => "Expansión Oficial"
+    };
+
+    private static string GetNecessityDotClass(ExpansionNecessity n) => n switch
+    {
+        ExpansionNecessity.MustHave or ExpansionNecessity.HighlyRecommended => "bg-emerald-400",
+        ExpansionNecessity.Situational => "bg-amber-400",
+        ExpansionNecessity.OnlyForFans => "bg-blue-400",
+        ExpansionNecessity.Dispensable => "bg-slate-400",
+        _ => "bg-slate-400"
     };
 
     private static string GetNecessityClass(ExpansionNecessity n) => n switch
@@ -132,14 +142,14 @@
 
     private static string GetTagIcon(ExpansionImpactTag tag) => tag switch
     {
-        ExpansionImpactTag.AddsPlayers => "👥",
-        ExpansionImpactTag.ImprovesTwoPlayers => "⚔️",
-        ExpansionImpactTag.FixesBalance => "⚖️",
-        ExpansionImpactTag.AddsSoloMode => "👤",
-        ExpansionImpactTag.AddsAsymmetry => "🎭",
-        ExpansionImpactTag.ModularContent => "🧩",
-        ExpansionImpactTag.NewMapOrFactions => "🗺️",
-        ExpansionImpactTag.TightensTime => "⚡",
-        _ => "✨"
+        ExpansionImpactTag.AddsPlayers => "users",
+        ExpansionImpactTag.ImprovesTwoPlayers => "swords",
+        ExpansionImpactTag.FixesBalance => "scale",
+        ExpansionImpactTag.AddsSoloMode => "user",
+        ExpansionImpactTag.AddsAsymmetry => "drama",
+        ExpansionImpactTag.ModularContent => "puzzle",
+        ExpansionImpactTag.NewMapOrFactions => "map",
+        ExpansionImpactTag.TightensTime => "zap",
+        _ => "sparkles"
     };
 }

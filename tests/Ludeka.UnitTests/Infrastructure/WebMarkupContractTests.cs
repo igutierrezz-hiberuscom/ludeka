@@ -429,6 +429,133 @@ public class WebMarkupContractTests
                   "<Icon Name=\"circle-check\"", "<Icon Name=\"circle-x\"", "<Icon Name=\"triangle-alert\"",
                   "<Icon Name=\"hourglass\"", "<Icon Name=\"sparkles\"", "<Icon Name=\"flame\"" },
           new[] { "🔄", "⚙", "🌙", "⚡", "✅", "⚠", "❌", "⏳", "✨", "🔥" } },
+
+        // ===== INC-35 PR-3b: migración global de emojis a Icon (Fase 5c — fichas y directorios) =====
+
+        // PublicProfile: cabecera, acciones, estantería y badges por iconos Lucide; el punto
+        // ● es CSS; Stats.Badge.IconEmoji queda como excepción data-driven documentada
+        { "PublicProfile (sin emojis)", "src/Ludeka.Web/Components/Pages/PublicProfile.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"search\"", "<Icon Name=\"library\"", "<Icon Name=\"clipboard-copy\"",
+                  "<Icon Name=\"settings\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"package\"", "rounded-full bg-emerald-400" },
+          new[] { "🎲", "🔍", "📚", "●", "📋", "⚙", "🧩", "📦" } },
+
+        // PublisherDetail: cabeceras, badges y enlaces de la ficha editorial por iconos Lucide
+        { "PublisherDetail (sin emojis)", "src/Ludeka.Web/Components/Pages/PublisherDetail.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"search\"", "<Icon Name=\"pencil\"", "<Icon Name=\"building-2\"",
+                  "<Icon Name=\"map-pin\"", "<Icon Name=\"globe\"" },
+          new[] { "🎲", "🔍", "✏", "🏢", "📍", "🌐" } },
+
+        // PublishersDirectory: cabecera, buscador, spinner, vacío y tarjetas por iconos Lucide
+        { "PublishersDirectory (sin emojis)", "src/Ludeka.Web/Components/Pages/PublishersDirectory.razor",
+          new[] { "<Icon Name=\"building-2\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"dices\"",
+                  "<Icon Name=\"package\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"pencil\"" },
+          new[] { "🏢", "➕", "🔍", "🎲", "📦", "📍", "✏" } },
+
+        // StoreDetail: ficha de tienda, badges, envíos y ofertas por iconos Lucide
+        // (el switch del tipo de tienda devuelve texto plano, sin emoji incrustado)
+        { "StoreDetail (sin emojis)", "src/Ludeka.Web/Components/Pages/StoreDetail.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"search\"", "<Icon Name=\"pencil\"", "<Icon Name=\"map-pin\"",
+                  "<Icon Name=\"star\"", "<Icon Name=\"truck\"", "<Icon Name=\"building-2\"", "<Icon Name=\"globe\"",
+                  "<Icon Name=\"shopping-cart\"" },
+          new[] { "🎲", "🔍", "✏", "📍", "⭐", "🚚", "🏢", "🌐", "🛒", "🏪" } },
+
+        // StoresDirectory: cabecera, filtros, tarjetas y acciones por iconos Lucide
+        // (los selects con FlagEmoji/GetFlag quedan como excepción data-driven documentada)
+        { "StoresDirectory (sin emojis)", "src/Ludeka.Web/Components/Pages/StoresDirectory.razor",
+          new[] { "<Icon Name=\"shopping-cart\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"dices\"",
+                  "<Icon Name=\"store\"", "<Icon Name=\"building-2\"", "<Icon Name=\"star\"", "<Icon Name=\"truck\"",
+                  "<Icon Name=\"map-pin\"", "<Icon Name=\"pencil\"" },
+          new[] { "🛒", "➕", "🔍", "🌍", "🏪", "🏢", "🌐", "🎲", "⭐", "🚚", "📍", "✏" } },
+
+        // Transparency: manifiesto editorial por iconos Lucide
+        { "Transparency (sin emojis)", "src/Ludeka.Web/Components/Pages/Transparency.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"dices\"", "<Icon Name=\"zap\"", "<Icon Name=\"camera\"",
+                  "<Icon Name=\"gift\"", "<Icon Name=\"coffee\"", "<Icon Name=\"message-circle\"" },
+          new[] { "🛡", "🎲", "⚡", "📸", "🎁", "☕", "💬" } },
+
+        // QuickBadges: badges del ADN lúdico por iconos Lucide
+        { "QuickBadges (sin emojis)", "src/Ludeka.Web/Components/Shared/QuickBadges.razor",
+          new[] { "<Icon Name=\"handshake\"", "<Icon Name=\"swords\"", "<Icon Name=\"users\"", "<Icon Name=\"settings\"",
+                  "<Icon Name=\"dices\"", "<Icon Name=\"party-popper\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"book-open\"",
+                  "<Icon Name=\"user\"", "<Icon Name=\"baby\"", "<Icon Name=\"cake\"", "<Icon Name=\"globe\"",
+                  "<Icon Name=\"timer\"", "<Icon Name=\"armchair\"", "<Icon Name=\"castle\"", "<Icon Name=\"utensils\"" },
+          new[] { "🤝", "🗡", "👥", "⚔", "⚙", "🎲", "🎉", "🧩", "📖", "👤", "👶", "🎂", "🌐", "⏱", "🪑", "🏰", "🍽" } },
+
+        // AiSummaryCard: píldoras de la síntesis IA por iconos Lucide
+        { "AiSummaryCard (sin emojis)", "src/Ludeka.Web/Components/Shared/AiSummaryCard.razor",
+          new[] { "<Icon Name=\"bot\"", "<Icon Name=\"zap\"", "<Icon Name=\"shield\"", "<Icon Name=\"users\"",
+                  "<Icon Name=\"baby\"", "<Icon Name=\"shapes\"", "<Icon Name=\"hourglass\"" },
+          new[] { "🤖", "⚡", "🛡", "👥", "🧒", "📐", "⏳" } },
+
+        // FoundingVerdictCard: veredicto editorial, pestañas y galería por iconos Lucide
+        { "FoundingVerdictCard (sin emojis)", "src/Ludeka.Web/Components/Shared/FoundingVerdictCard.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"users\"", "<Icon Name=\"baby\"",
+                  "<Icon Name=\"scale\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"camera\"", "<Icon Name=\"search\"",
+                  "<Icon Name=\"x\"" },
+          new[] { "🛡", "✍", "👥", "🧒", "⚖", "🧩", "📸", "🔍", "✕" } },
+
+        // FoundingVerdictModal: editor del veredicto y sellos por iconos Lucide
+        { "FoundingVerdictModal (sin emojis)", "src/Ludeka.Web/Components/Shared/FoundingVerdictModal.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"x\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"trophy\"",
+                  "<Icon Name=\"tag\"", "<Icon Name=\"package\"", "<Icon Name=\"save\"" },
+          new[] { "🛡", "✕", "⚠", "🏆", "🏷", "📦", "💾" } },
+
+        // ExpansionAporteCard: necesidad, chips de impacto y métricas por iconos Lucide
+        // (el switch del impacto devuelve el nombre del icono y la necesidad un punto CSS)
+        { "ExpansionAporteCard (sin emojis)", "src/Ludeka.Web/Components/Shared/ExpansionAporteCard.razor",
+          new[] { "<Icon Name=\"users\"", "<Icon Name=\"timer\"", "GetTagIcon", "<Icon Name=\"@GetTagIcon(tag)\"",
+                  "GetNecessityDotClass", "rounded-full @GetNecessityDotClass(Necessity.Value)",
+                  "ExpansionImpactTag.ModularContent => \"puzzle\"",
+                  "ExpansionImpactTag.FixesBalance => \"scale\"", "ExpansionImpactTag.NewMapOrFactions => \"map\"" },
+          new[] { "👥", "⏱", "🟢", "🟡", "🔵", "⚪", "⚔", "⚖", "🎭", "🧩", "🗺", "⚡", "✨" } },
+
+        // ExpansionEcosystemSection: pestañas, mezclador y diagnóstico por iconos Lucide (★ conservada)
+        { "ExpansionEcosystemSection (sin emojis)", "src/Ludeka.Web/Components/Shared/ExpansionEcosystemSection.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"flask-conical\"", "<Icon Name=\"lightbulb\"",
+                  "<Icon Name=\"triangle-alert\"", "<Icon Name=\"sparkles\"", "<Icon Name=\"target\"",
+                  "isSelected ? \"circle-check\" : \"square\"" },
+          new[] { "🎲", "🧩", "🔬", "💡", "✅", "⬜", "⚠", "✨", "🎯" } },
+
+        // ExpansionSisterList: badge de expansión hermana por icono Lucide (★ conservada)
+        { "ExpansionSisterList (sin emojis)", "src/Ludeka.Web/Components/Shared/ExpansionSisterList.razor",
+          new[] { "<Icon Name=\"puzzle\"", "rounded-full bg-slate-400" },
+          new[] { "🧩", "⚪" } },
+
+        // UserReviewCard: valoración personal, contexto de partida y acciones por iconos Lucide
+        // (el switch del contexto devuelve texto plano, patrón ReviewBottomSheet del PR-3a)
+        { "UserReviewCard (sin emojis)", "src/Ludeka.Web/Components/Shared/UserReviewCard.razor",
+          new[] { "<Icon Name=\"baby\"", "<Icon Name=\"lock\"", "Review != null ? \"pencil\" : \"star\"",
+                  "PlayContextType.Owned => \"En propiedad\"", "PlayContextType.Bga => \"Digital (BGA)\"" },
+          new[] { "👶", "🔒", "✏", "⭐", "🏠", "🛡", "👥", "☕", "💻" } },
+
+        // MultimediaHub: pestañas, tarjetas, badges y moderación por iconos Lucide
+        { "MultimediaHub (sin emojis)", "src/Ludeka.Web/Components/Shared/MultimediaHub.razor",
+          new[] { "<Icon Name=\"tv\"", "<Icon Name=\"zap\"", "<Icon Name=\"clapperboard\"", "<Icon Name=\"dices\"",
+                  "<Icon Name=\"message-circle\"", "<Icon Name=\"x\"", "<Icon Name=\"settings\"", "<Icon Name=\"play\"",
+                  "<Icon Name=\"timer\"", "<Icon Name=\"users\"", "<Icon Name=\"heart\"", "<Icon Name=\"tag\"",
+                  "<Icon Name=\"repeat\"", "<Icon Name=\"smartphone\"" },
+          new[] { "📺", "⚡", "🎬", "🎲", "💬", "✕", "⚙", "▶", "⏱", "👥", "❤", "🏷", "🔁", "📱", "📸" } },
+
+        // ParentGameBanner: banner de juego base por iconos Lucide (★ conservada)
+        { "ParentGameBanner (sin emojis)", "src/Ludeka.Web/Components/Shared/ParentGameBanner.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"puzzle\"" },
+          new[] { "🎲", "🧩" } },
+
+        // RuleQuestionsSection: consultorio de reglas por iconos Lucide (▲ y ✓ conservados)
+        { "RuleQuestionsSection (sin emojis)", "src/Ludeka.Web/Components/Shared/RuleQuestionsSection.razor",
+          new[] { "<Icon Name=\"plus\"", "<Icon Name=\"dices\"", "<Icon Name=\"book-open\"", "<Icon Name=\"message-circle\"" },
+          new[] { "➕", "🎲", "📖", "💬" } },
+
+        // SleeveGuideCard: guía de fundas, micras y compras por iconos Lucide
+        { "SleeveGuideCard (sin emojis)", "src/Ludeka.Web/Components/Shared/SleeveGuideCard.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"ruler\"", "<Icon Name=\"shopping-cart\"",
+                  "<Icon Name=\"party-popper\"" },
+          new[] { "🛡", "💡", "📏", "🛒", "🎉" } },
+
+        // SocialCardModal: generador de cartel social por iconos Lucide (✓ conservado)
+        { "SocialCardModal (sin emojis)", "src/Ludeka.Web/Components/Shared/SocialCardModal.razor",
+          new[] { "<Icon Name=\"palette\"", "<Icon Name=\"clipboard-copy\"", "<Icon Name=\"inbox\"" },
+          new[] { "🎨", "📋", "📥" } },
     };
 
     [Theory]
@@ -448,6 +575,35 @@ public class WebMarkupContractTests
             Assert.False(source.Contains(fragment, StringComparison.Ordinal),
                 $"{description}: el archivo {relativePath} no debe contener '{fragment}'.");
         }
+    }
+
+    [Fact]
+    public void RestoDeLaWeb_SinEmojisDeLaListaSpecEnNingunComponenteRazor()
+    {
+        // Cierre del escenario «Resto de la web sin emojis» (spec iconography-lucide):
+        // ningún .razor de la web contiene ya los 16 emojis migrados de la Decisión 6.
+        // Los glifos tipográficos (★ ✓ ↗ → ▲ ▼) y los datos emitidos desde Application
+        // (CountryCatalog.FlagEmoji/GetFlag, Stats.Badge.IconEmoji) quedan fuera de este
+        // barrido por decisión documentada del incremento.
+        var componentsDir = Path.Combine(GetRepoRoot(), "src", "Ludeka.Web", "Components");
+        var razors = Directory.EnumerateFiles(componentsDir, "*.razor", SearchOption.AllDirectories).ToList();
+        Assert.True(razors.Count > 20, "No se encontraron componentes Razor que barrer.");
+
+        var offenders = new List<string>();
+        foreach (var file in razors)
+        {
+            var source = File.ReadAllText(file);
+            foreach (var emoji in EmojisDePortada)
+            {
+                if (source.Contains(emoji, StringComparison.Ordinal))
+                {
+                    offenders.Add($"{Path.GetFileName(file)} contiene '{emoji}'.");
+                }
+            }
+        }
+
+        Assert.True(offenders.Count == 0,
+            "La web aún contiene emojis de la lista spec: " + string.Join(" | ", offenders));
     }
 
     [Fact]

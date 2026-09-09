@@ -11,7 +11,7 @@
             @* Modal Header *@
             <div class="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                    <span class="text-xl">🛡️</span>
+                    <Icon Name="shield" Size="20" />
                     <div>
                         <h2 id="founding-verdict-modal-title" class="text-base sm:text-lg font-bold text-[var(--text-primary)] leading-tight">
                             @(ExistingVerdict != null ? "Editar Veredicto de la Mesa" : "Redactar Veredicto de la Mesa")
@@ -23,7 +23,7 @@
                         @onclick="HandleClose"
                         class="w-8 h-8 rounded-lg bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-sm font-bold transition-colors"
                         aria-label="Cerrar modal de veredicto">
-                    ✕
+                    <Icon Name="x" Size="16" />
                 </button>
             </div>
 
@@ -32,7 +32,7 @@
                 @if (!string.IsNullOrWhiteSpace(_errorMessage))
                 {
                     <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-300 text-xs flex items-center gap-2">
-                        <span>⚠️</span>
+                        <Icon Name="triangle-alert" Size="14" />
                         <span>@_errorMessage</span>
                     </div>
                 }
@@ -46,21 +46,21 @@
                         <button type="button"
                                 @onclick="() => _recommendation = FoundingRecommendation.MustPlay"
                                 class="p-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all @(_recommendation == FoundingRecommendation.MustPlay ? "bg-amber-500/20 border-amber-500 text-amber-600 dark:text-amber-300 shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-[var(--border-highlight)]")">
-                            <span class="text-xl">🏆</span>
+                            <Icon Name="trophy" Size="20" />
                             <span>Imprescindible</span>
                             <span class="text-[0.65rem] opacity-75 font-normal">Brilla al máximo</span>
                         </button>
                         <button type="button"
                                 @onclick="() => _recommendation = FoundingRecommendation.RecommendedWithAdaptations"
                                 class="p-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all @(_recommendation == FoundingRecommendation.RecommendedWithAdaptations ? "bg-emerald-500/20 border-emerald-500 text-emerald-600 dark:text-emerald-300 shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-[var(--border-highlight)]")">
-                            <span class="text-xl">🏷️</span>
+                            <Icon Name="tag" Size="20" />
                             <span>Recomendado</span>
                             <span class="text-[0.65rem] opacity-75 font-normal">Con adaptaciones</span>
                         </button>
                         <button type="button"
                                 @onclick="() => _recommendation = FoundingRecommendation.Skippable"
                                 class="p-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all @(_recommendation == FoundingRecommendation.Skippable ? "bg-[var(--bg-surface-elevated)] border-[var(--border-highlight)] text-[var(--text-primary)] shadow-sm font-black" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-[var(--border-highlight)]")">
-                            <span class="text-xl">📦</span>
+                            <Icon Name="package" Size="20" />
                             <span>Prescindible</span>
                             <span class="text-[0.65rem] opacity-75 font-normal">Poco diferencial</span>
                         </button>
@@ -180,7 +180,7 @@
                 <button type="button"
                         @onclick="HandleSubmit"
                         class="px-5 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs sm:text-sm font-bold shadow-sm transition-opacity flex items-center gap-1.5">
-                    <span>💾</span> Publicar Veredicto Oficial
+                    <span class="inline-flex items-center gap-1.5"><Icon Name="save" Size="14" /> Publicar Veredicto Oficial</span>
                 </button>
             </div>
         </div>

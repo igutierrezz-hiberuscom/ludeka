@@ -6,7 +6,7 @@
 @if (_isLoading)
 {
     <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-center text-xs text-[var(--text-muted)]">
-        <div class="inline-block animate-spin text-xl mb-1">🎲</div>
+        <div class="inline-block animate-spin mb-1"><Icon Name="dices" Size="20" /></div>
         <p>Cargando expansiones y sinergias del ecosistema...</p>
     </div>
 }
@@ -28,19 +28,19 @@ else if (Expansions != null && Expansions.Count > 0)
                 <button type="button"
                         @onclick='() => _activeTab = "list"'
                         class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap @(_activeTab == "list" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                    🧩 Expansiones (@Expansions.Count)
+                    <span class="inline-flex items-center gap-1"><Icon Name="puzzle" Size="12" /> Expansiones (@Expansions.Count)</span>
                 </button>
                 <button type="button"
                         @onclick='() => _activeTab = "mixer"'
                         class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap @(_activeTab == "mixer" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                    🔬 Mezclador de Mesa
+                    <span class="inline-flex items-center gap-1"><Icon Name="flask-conical" Size="12" /> Mezclador de Mesa</span>
                 </button>
                 @if (_recipes.Count > 0)
                 {
                     <button type="button"
                             @onclick='() => _activeTab = "recipes"'
                             class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap @(_activeTab == "recipes" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                        💡 Recetas (@_recipes.Count)
+                        <span class="inline-flex items-center gap-1"><Icon Name="lightbulb" Size="12" /> Recetas (@_recipes.Count)</span>
                     </button>
                 }
             </div>
@@ -68,8 +68,8 @@ else if (Expansions != null && Expansions.Count > 0)
                                          alt="Carátula de @exp.SpanishTitle no disponible"
                                          class="w-full h-full object-cover opacity-90" />
                                 }
-                                <div class="absolute top-1 left-1 px-1 py-0.5 rounded bg-purple-950/85 backdrop-blur-sm border border-purple-500/40 text-[0.55rem] font-bold text-purple-200 shadow-sm leading-none">
-                                    🧩
+                                <div class="absolute top-1 left-1 px-1 py-0.5 rounded bg-purple-950/85 backdrop-blur-sm border border-purple-500/40 text-purple-200 shadow-sm leading-none">
+                                    <Icon Name="puzzle" Size="12" />
                                 </div>
                             </div>
 
@@ -148,7 +148,7 @@ else if (Expansions != null && Expansions.Count > 0)
                                 @onclick="() => ToggleExpansion(exp.Id)"
                                 class="p-3 rounded-xl text-left border transition-all flex items-center justify-between gap-3 @(isSelected ? "bg-[var(--brand-primary)]/10 border-[var(--brand-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-highlight)]")">
                             <div class="flex items-center gap-2.5 min-w-0">
-                                <span class="text-lg">@(isSelected ? "✅" : "⬜")</span>
+                                <span class="text-lg"><Icon Name="@(isSelected ? "circle-check" : "square")" Size="18" /></span>
                                 <div class="truncate">
                                     <span class="text-xs font-bold text-[var(--text-primary)] block truncate">
                                         @exp.SpanishTitle
@@ -202,7 +202,7 @@ else if (Expansions != null && Expansions.Count > 0)
                         @if (_evaluation.ConflictWarnings.Count > 0)
                         {
                             <div class="mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 space-y-1">
-                                <span class="font-black uppercase text-[0.68rem] block">⚠️ Incompatibilidades Detectadas:</span>
+                                <span class="font-black uppercase text-[0.68rem] block inline-flex items-center gap-1"><Icon Name="triangle-alert" Size="12" /> Incompatibilidades Detectadas:</span>
                                 @foreach (var warn in _evaluation.ConflictWarnings)
                                 {
                                     <p>&bull; @warn</p>
@@ -214,7 +214,7 @@ else if (Expansions != null && Expansions.Count > 0)
                         @if (_evaluation.CautionWarnings.Count > 0)
                         {
                             <div class="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300 space-y-1">
-                                <span class="font-black uppercase text-[0.68rem] block">⚠️ Advertencias de Mesa y Sobrecarga:</span>
+                                <span class="font-black uppercase text-[0.68rem] block inline-flex items-center gap-1"><Icon Name="triangle-alert" Size="12" /> Advertencias de Mesa y Sobrecarga:</span>
                                 @foreach (var warn in _evaluation.CautionWarnings)
                                 {
                                     <p>&bull; @warn</p>
@@ -226,7 +226,7 @@ else if (Expansions != null && Expansions.Count > 0)
                         @if (_evaluation.SynergyHighlights.Count > 0)
                         {
                             <div class="mt-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 space-y-1">
-                                <span class="font-black uppercase text-[0.68rem] block">✨ Sinergias Óptimas:</span>
+                                <span class="font-black uppercase text-[0.68rem] block inline-flex items-center gap-1"><Icon Name="sparkles" Size="12" /> Sinergias Óptimas:</span>
                                 @foreach (var syn in _evaluation.SynergyHighlights)
                                 {
                                     <p>&bull; @syn</p>
@@ -248,7 +248,7 @@ else if (Expansions != null && Expansions.Count > 0)
                         <div>
                             <div class="flex items-center justify-between gap-2 mb-1">
                                 <span class="text-[0.68rem] font-bold uppercase tracking-wider text-[var(--brand-primary)]">
-                                    💡 Receta Recomendada
+                                    <span class="inline-flex items-center gap-1"><Icon Name="lightbulb" Size="12" /> Receta Recomendada</span>
                                 </span>
                                 <span class="text-[0.68rem] font-extrabold px-2 py-0.5 rounded-full bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-muted)]">
                                     @recipe.IdealFor
@@ -269,7 +269,7 @@ else if (Expansions != null && Expansions.Count > 0)
                             <button type="button"
                                     @onclick="() => LoadRecipe(recipe)"
                                     class="px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white hover:opacity-90 font-bold text-xs transition-opacity flex items-center gap-1.5 shadow-sm">
-                                <span>🎯 Cargar en Mezclador</span>
+                                <span class="inline-flex items-center gap-1"><Icon Name="target" Size="12" /> Cargar en Mezclador</span>
                             </button>
                         </div>
                     </div>

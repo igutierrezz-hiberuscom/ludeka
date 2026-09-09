@@ -6,10 +6,10 @@
     <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border-subtle)]">
         <div class="flex items-center flex-wrap gap-2.5">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-2xs">
-                <span>🤖</span> Síntesis generada por IA
+                <Icon Name="bot" Size="14" /> Síntesis generada por IA
             </span>
             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[0.68rem] font-semibold bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                <span>⚡</span> @Summary.Model
+                <Icon Name="zap" Size="14" /> @Summary.Model
             </span>
             @if (Summary.GeneratedAt.HasValue)
             {
@@ -19,7 +19,7 @@
             }
         </div>
         <div class="text-[0.68rem] text-[var(--text-muted)] flex items-center gap-1">
-            <span>🛡️ Análisis objetivo del hobby</span>
+            <Icon Name="shield" Size="12" /> Análisis objetivo del hobby
         </div>
     </div>
 
@@ -33,7 +33,7 @@
             @* Escalabilidad *@
             <div class="p-3.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-1">
                 <span class="text-[0.68rem] font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
-                    <span>👥</span> Escalabilidad
+                    <Icon Name="users" Size="12" /> Escalabilidad
                 </span>
                 <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
                     @Summary.ScalabilitySummary
@@ -43,7 +43,7 @@
             @* Edad Real *@
             <div class="p-3.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-1">
                 <span class="text-[0.68rem] font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
-                    <span>🧒</span> Accesibilidad & Edad
+                    <Icon Name="baby" Size="12" /> Accesibilidad & Edad
                 </span>
                 <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
                     @Summary.AgeSummary
@@ -53,7 +53,7 @@
             @* Huella en mesa *@
             <div class="p-3.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-1">
                 <span class="text-[0.68rem] font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
-                    <span>📐</span> Espacio y Tiempo
+                    <Icon Name="shapes" Size="12" /> Espacio y Tiempo
                 </span>
                 <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
                     @Summary.FootprintSummary
@@ -63,7 +63,7 @@
 
         @* Banner informativo del ciclo editorial *@
         <div class="p-3 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[0.72rem] text-[var(--text-muted)] flex items-start gap-2.5">
-            <span class="text-base shrink-0">⏳</span>
+            <span class="shrink-0"><Icon Name="hourglass" Size="16" /></span>
             <p>
                 <strong class="text-[var(--text-secondary)]">Ciclo Editorial Ludeka:</strong> Síntesis objetiva provisional generada mediante IA o motor heurístico basada en el consenso internacional. En cuanto el equipo de la Mesa Fundadora publique su veredicto oficial con fotografías de sesión real, este bloque pasará a segundo plano.
             </p>
