@@ -226,6 +226,39 @@ public class WebMarkupContractTests
         { "LibraryStatsDashboard (sin emojis)", "src/Ludeka.Web/Components/Features/Library/LibraryStatsDashboard.razor",
           new[] { "<Icon Name=\"hourglass\"", "<Icon Name=\"users\"", "<Icon Name=\"shield\"", "<Icon Name=\"dna\"", "<Icon Name=\"handshake\"", "<Icon Name=\"trophy\"", "<Icon Name=\"building-2\"" },
           new[] { "⏳", "👥", "🛡", "🧬", "🤝", "🐺", "🏆", "🖋", "🏢" } },
+
+        // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 4 — eventos, sorteos y novedades) =====
+
+        // Events: pestañas, spinner, vacío, metadatos y pie por iconos Lucide
+        { "Events (sin emojis)", "src/Ludeka.Web/Components/Pages/Events.razor",
+          new[] { "<Icon Name=\"tent\"", "<Icon Name=\"calendar-days\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"globe\"", "<Icon Name=\"scroll\"", "<Icon Name=\"settings\"", "rounded-full bg-emerald-500" },
+          new[] { "🎪", "⚙", "🟢", "📜", "🌍", "⭐", "➕", "🗓", "📍", "🌐" } },
+
+        // EventsManagement: cabecera, acciones, tabla y modal de edición por iconos Lucide
+        { "EventsManagement (sin emojis)", "src/Ludeka.Web/Components/Pages/EventsManagement.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"eye\"", "<Icon Name=\"plus\"", "<Icon Name=\"tent\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"trash-2\"", "<Icon Name=\"folder\"" },
+          new[] { "🛡", "👁", "➕", "🎪", "📍", "⭐", "✏", "🗑", "📁", "🇪🇸", "🌎" } },
+
+        // GiveawayCard: badges de plataforma y promoción por iconos Lucide (el switch de
+        // plataforma devuelve el nombre del icono en el catálogo, no un emoji)
+        { "GiveawayCard (sin emojis)", "src/Ludeka.Web/Components/Shared/GiveawayCard.razor",
+          new[] { "<Icon Name=\"@GetPlatformIcon(Giveaway.Platform)\"", "<Icon Name=\"star\"", "<Icon Name=\"gift\"", "<Icon Name=\"dices\"", "<Icon Name=\"camera\"", "GiveawayPlatform.Instagram => \"camera\"" },
+          new[] { "⭐", "🎁", "🎲", "📸", "🔗", "🎬" } },
+
+        // Radar: cabecera, acciones, spinner y vacío por iconos Lucide
+        { "Radar (sin emojis)", "src/Ludeka.Web/Components/Pages/Radar.razor",
+          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"plus\"", "<Icon Name=\"dices\"", "<Icon Name=\"radar\"", "<Icon Name=\"star\"" },
+          new[] { "🎁", "➕", "🌍", "⭐", "🎲", "📡", "🌎" } },
+
+        // News: cabecera, buscador, spinner, vacío y badges por iconos Lucide
+        { "News (sin emojis)", "src/Ludeka.Web/Components/Pages/News.razor",
+          new[] { "<Icon Name=\"newspaper\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"package\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"camera\"", "<Icon Name=\"calendar-days\"" },
+          new[] { "📰", "➕", "🔍", "📦", "🔄", "🆕", "🗓", "📸" } },
+
+        // NotFound: spinner/hero del 404 por icono Lucide
+        { "NotFound (sin emojis)", "src/Ludeka.Web/Components/Pages/NotFound.razor",
+          new[] { "<Icon Name=\"dices\"" },
+          new[] { "🎲" } },
     };
 
     [Theory]

@@ -14,7 +14,7 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold mb-2">
-                <span>🎁</span> Radar de Sorteos Comunitarios
+                <Icon Name="gift" Size="14" /> Radar de Sorteos Comunitarios
             </div>
             <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
                 Sorteos de Juegos de Mesa
@@ -28,7 +28,7 @@
             <button type="button"
                     @onclick="() => _isCreateModalOpen = true"
                     class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
-                <span>➕</span> Proponer Sorteo
+                <Icon Name="plus" Size="12" /> Proponer Sorteo
             </button>
         </div>
     </div>
@@ -53,7 +53,7 @@
             <button type="button"
                     @onclick="() => SetCountryFilter(null)"
                     class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors @(string.IsNullOrWhiteSpace(_countryFilter) ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                🌍 Global (Todos)
+                <Icon Name="globe" Size="12" /> Global (Todos)
             </button>
             @if (!string.IsNullOrWhiteSpace(_userActiveCountry) && _userActiveCountry != "Internacional")
             {
@@ -75,21 +75,21 @@
         </div>
 
         <span class="text-xs text-[var(--text-muted)]">
-            ⭐ Sorteos promocionados en cabecera &bull; Internacionales siempre visibles
+            <Icon Name="star" Size="12" /> Sorteos promocionados en cabecera &bull; Internacionales siempre visibles
         </span>
     </div>
 
     @if (_isLoading)
     {
         <div class="py-16 text-center text-[var(--text-muted)]">
-            <div class="inline-block animate-spin text-3xl mb-2">🎲</div>
+            <div class="inline-block animate-spin mb-2"><Icon Name="dices" Size="30" /></div>
             <p class="text-sm font-semibold">Sintonizando el radar de sorteos...</p>
         </div>
     }
     else if (_giveaways.Count == 0)
     {
         <div class="p-12 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
-            <span class="text-4xl block mb-3">📡</span>
+            <span class="inline-block mb-3"><Icon Name="radar" Size="40" /></span>
             <h3 class="text-base font-bold text-[var(--text-primary)] mb-1">Sin sorteos registrados</h3>
             <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto mb-4">
                 Actualmente no hay sorteos activos en el radar. ¿Conoces alguno en marcha? ¡Añádelo con un clic!
@@ -97,7 +97,7 @@
             <button type="button"
                     @onclick="() => _isCreateModalOpen = true"
                     class="px-3 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity">
-                ➕ Añadir Sorteo
+                <Icon Name="plus" Size="12" /> Añadir Sorteo
             </button>
         </div>
     }
@@ -124,7 +124,7 @@
         <div class="w-full max-w-lg rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
                 <h2 id="radar-create-modal-title" class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>🎁</span> Registrar o Proponer Sorteo
+                    <Icon Name="gift" Size="14" /> Registrar o Proponer Sorteo
                 </h2>
                 <button type="button"
                         @onclick="() => _isCreateModalOpen = false"
@@ -181,7 +181,7 @@
                         <label class="font-semibold text-[var(--text-secondary)] block mb-1">País / Ámbito Territorial</label>
                         <select @bind="_formCountry"
                                 class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]">
-                            <option value="Internacional">🌎 Internacional (Válido para todos)</option>
+                            <option value="Internacional">Internacional (Válido para todos)</option>
                             @foreach (var c in CountryCatalog.GetAllCountries())
                             {
                                 <option value="@c.Name">@c.FlagEmoji @c.Name</option>
@@ -229,7 +229,7 @@
                                @bind="_formIsPromoted"
                                class="rounded bg-[var(--bg-surface-elevated)] border-amber-500/50 text-amber-500 focus:ring-0" />
                         <label for="isPromotedInput" class="text-amber-500 font-bold cursor-pointer">
-                            ⭐ Destacar como Sorteo Promocionado en cabecera
+                            Destacar como Sorteo Promocionado en cabecera
                         </label>
                     </div>
                 }

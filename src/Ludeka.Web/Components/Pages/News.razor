@@ -10,7 +10,7 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold mb-2">
-                <span>📰</span> Calendario de Estrenos
+                <Icon Name="newspaper" Size="14" /> Calendario de Estrenos
             </div>
             <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
                 Novedades de los Viernes & Lanzamientos
@@ -26,7 +26,7 @@
                 <button type="button"
                         @onclick="() => _isCreateModalOpen = true"
                         class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>➕</span> Añadir Novedad
+                    <Icon Name="plus" Size="12" /> Añadir Novedad
                 </button>
             </div>
         }
@@ -36,7 +36,7 @@
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3 w-full sm:w-auto">
             <div class="relative w-full sm:w-72">
-                <span class="absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">🔍</span>
+                <span class="absolute inset-y-0 left-3 flex items-center"><Icon Name="search" Size="16" /></span>
                 <input type="text"
                        @bind="_searchTerm"
                        @bind:event="oninput"
@@ -63,14 +63,14 @@
     @if (_isLoading)
     {
         <div class="py-16 text-center text-[var(--text-muted)]">
-            <div class="inline-block animate-spin text-3xl mb-2">📦</div>
+            <div class="inline-block animate-spin mb-2"><Icon Name="package" Size="30" /></div>
             <p class="text-sm font-semibold">Cargando lanzamientos de tiendas...</p>
         </div>
     }
     else if (FilteredReleases.Count == 0)
     {
         <div class="p-12 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
-            <span class="text-4xl block mb-3">📦</span>
+            <span class="inline-block mb-3"><Icon Name="package" Size="40" /></span>
             <h3 class="text-base font-bold text-[var(--text-primary)] mb-1">Sin lanzamientos encontrados</h3>
             <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto mb-4">
                 No hay novedades registradas con los filtros actuales.
@@ -80,7 +80,7 @@
                 <button type="button"
                         @onclick="() => _isCreateModalOpen = true"
                         class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity">
-                    ➕ Añadir Primer Lanzamiento
+                    <Icon Name="plus" Size="12" /> Añadir Primer Lanzamiento
                 </button>
             }
         </div>
@@ -104,12 +104,20 @@
 
                         <div class="p-5">
                             <div class="flex items-center justify-between gap-2 mb-3">
-                                <span class="px-2.5 py-0.5 rounded-lg text-xs font-bold border @(release.IsReprint ? "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]" : "bg-[var(--brand-glow)] border-[var(--brand-primary)] text-[var(--brand-primary)]")">
-                                    @(release.IsReprint ? "🔄 Reimpresión" : "🆕 Novedad")
+                                <span class="px-2.5 py-0.5 rounded-lg text-xs font-bold border inline-flex items-center gap-1 @(release.IsReprint ? "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]" : "bg-[var(--brand-glow)] border-[var(--brand-primary)] text-[var(--brand-primary)]")">
+                                    @if (release.IsReprint)
+                                    {
+                                        <Icon Name="refresh-cw" Size="12" />
+                                    }
+                                    else
+                                    {
+                                        <Icon Name="sparkles" Size="12" />
+                                    }
+                                    @(release.IsReprint ? "Reimpresión" : "Novedad")
                                 </span>
 
                                 <span class="text-xs text-[var(--text-muted)] font-medium">
-                                    🗓️ @release.ReleaseDate.ToString("dd/MM/yyyy")
+                                    <Icon Name="calendar-days" Size="12" /> @release.ReleaseDate.ToString("dd/MM/yyyy")
                                 </span>
                             </div>
 
@@ -154,14 +162,14 @@
                                target="_blank"
                                rel="noopener noreferrer"
                                class="inline-flex items-center gap-1 text-[0.7rem] font-bold text-pink-500 hover:text-pink-600 dark:text-pink-400">
-                                <span>📸</span> <span>En Instagram</span> <span>↗</span>
+                                <Icon Name="camera" Size="12" /> <span>En Instagram</span> <span>↗</span>
                             </a>
                         }
                         else if (IsModerator)
                         {
                             <a href="/admin/instagram?sourceType=WeeklyRelease&sourceId=@release.Id"
                                class="px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-500 text-sky-400 font-bold text-[0.7rem] transition-colors inline-flex items-center gap-1">
-                                <span>📸</span> <span>Instagram</span>
+                                <Icon Name="camera" Size="12" /> <span>Instagram</span>
                             </a>
                         }
                     </div>
@@ -181,7 +189,7 @@
         <div class="w-full max-w-lg rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
                 <h2 id="release-modal-title" class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>📰</span> Añadir Novedad Editorial
+                    <Icon Name="newspaper" Size="12" /> Añadir Novedad Editorial
                 </h2>
                 <button type="button"
                         @onclick="() => _isCreateModalOpen = false"
