@@ -259,6 +259,16 @@ public class WebMarkupContractTests
         { "NotFound (sin emojis)", "src/Ludeka.Web/Components/Pages/NotFound.razor",
           new[] { "<Icon Name=\"dices\"" },
           new[] { "🎲" } },
+
+        // OfflineIndicator: visible en la cabecera de todas las páginas (portada incluida)
+        { "OfflineIndicator (sin emojis)", "src/Ludeka.Web/Components/Shared/OfflineIndicator.razor",
+          new[] { "<Icon Name=\"wifi-off\"", "rounded-full bg-emerald-500" },
+          new[] { "📡", "🟢" } },
+
+        // ScalabilityTrafficLight: píldora del ideal por icono Lucide
+        { "ScalabilityTrafficLight (sin emojis)", "src/Ludeka.Web/Components/Shared/ScalabilityTrafficLight.razor",
+          new[] { "<Icon Name=\"sparkles\"" },
+          new[] { "✨" } },
     };
 
     [Theory]

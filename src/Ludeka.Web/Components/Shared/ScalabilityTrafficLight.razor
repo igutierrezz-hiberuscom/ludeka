@@ -6,8 +6,8 @@
         <span class="text-xs uppercase tracking-wider font-bold text-[var(--text-secondary)]">Escalabilidad en Mesa</span>
         @if (!string.IsNullOrWhiteSpace(IdealText))
         {
-            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--color-mustplay)] border border-[var(--border-subtle)]">
-                ✨ @IdealText
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--color-mustplay)] border border-[var(--border-subtle)] inline-flex items-center gap-1">
+                <Icon Name="sparkles" Size="12" /> @IdealText
             </span>
         }
     </div>
