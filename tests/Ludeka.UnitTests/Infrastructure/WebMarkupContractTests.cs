@@ -82,6 +82,11 @@ public class WebMarkupContractTests
         { "Radar (sin banner legacy)", "src/Ludeka.Web/Components/Pages/Radar.razor",
           new[] { "@page \"/sorteos\"", "@page \"/radar\"" },
           new[] { "¡Radar renovado!", "IsLegacyRoute" } },
+
+        // Icon: SVG Lucide inline, currentColor, aria-hidden por defecto; sin <img> ni peticiones de red
+        { "Icon (SVG Lucide inline)", "src/Ludeka.Web/Components/Shared/Icon.razor",
+          new[] { "viewBox=\"0 0 24 24\"", "stroke=\"currentColor\"", "aria-hidden=\"true\"" },
+          new[] { "<img", "http" } },
     };
 
     [Theory]
