@@ -26,7 +26,9 @@
                     @if (Review.FamilyExperience?.PlayedWithChildren == true)
                     {
                         <span class="text-[0.68rem] font-semibold px-2 py-0.5 rounded-md bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                            👶 @(Review.FamilyExperience.SuggestedMinAge.HasValue ? $"{Review.FamilyExperience.SuggestedMinAge}+" : "Familiar")
+                            <span class="inline-flex items-center gap-1">
+                                <Icon Name="baby" Size="12" /> @(Review.FamilyExperience.SuggestedMinAge.HasValue ? $"{Review.FamilyExperience.SuggestedMinAge}+" : "Familiar")
+                            </span>
                         </span>
                     }
                 </div>
@@ -61,7 +63,7 @@
         @if (!CanReview && Review == null)
         {
             <div class="w-full sm:w-auto p-2.5 px-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-2 shrink-0">
-                <span>🔒</span>
+                <Icon Name="lock" Size="14" />
                 <span class="max-w-xs leading-snug">@(DisabledReviewReason ?? "Debes haber jugado al juego para poder puntuarlo y valorarlo.")</span>
             </div>
         }
@@ -70,7 +72,10 @@
             <button type="button"
                     @onclick="OnEditClicked"
                     class="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-bold transition-all bg-[var(--brand-primary)] hover:opacity-90 text-white shadow-sm flex items-center justify-center gap-1.5 shrink-0">
-                <span>@(Review != null ? "✏️ Editar mi valoración" : "⭐️ Valorar este juego")</span>
+                <span class="inline-flex items-center gap-1.5">
+                    <Icon Name="@(Review != null ? "pencil" : "star")" Size="14" />
+                    @(Review != null ? "Editar mi valoración" : "Valorar este juego")
+                </span>
             </button>
         }
     </div>
@@ -91,11 +96,11 @@
 
     private static string GetContextBadge(PlayContextType ctx) => ctx switch
     {
-        PlayContextType.Owned => "🏠 En propiedad",
-        PlayContextType.ClubOrAssociation => "🛡️ Club / Asociación",
-        PlayContextType.Friends => "👥 Amigos",
-        PlayContextType.BoardGameBar => "☕ Bar lúdico",
-        PlayContextType.Bga => "💻 Digital (BGA)",
+        PlayContextType.Owned => "En propiedad",
+        PlayContextType.ClubOrAssociation => "Club / Asociación",
+        PlayContextType.Friends => "Amigos",
+        PlayContextType.BoardGameBar => "Bar lúdico",
+        PlayContextType.Bga => "Digital (BGA)",
         _ => ctx.ToString()
     };
 

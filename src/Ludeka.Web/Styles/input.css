@@ -212,13 +212,13 @@
                 border-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
 }
 
-.rail-card:hover, .rail-card:focus-visible {
+.rail-card:hover, .rail-card:focus-visible, .rail-card:has(:focus-visible) {
     transform: translateY(var(--rail-lift));
     border-color: var(--brand-primary);
     box-shadow: 0 16px 36px -6px rgba(0, 0, 0, .25), 0 0 0 1px var(--brand-glow), 0 0 24px var(--brand-glow);
 }
 
-.rail-card:focus-visible {
+.rail-card:focus-visible, .rail-card:has(:focus-visible) {
     outline: 2px solid var(--brand-primary);
     outline-offset: 2px;
 }
@@ -241,7 +241,7 @@
     transition: transform var(--dur-slow) var(--ease-out-quad);
 }
 
-.rail-card:hover .rail-cover img, .rail-card:focus-visible .rail-cover img {
+.rail-card:hover .rail-cover img, .rail-card:focus-visible .rail-cover img, .rail-card:has(:focus-visible) .rail-cover img {
     transform: scale(var(--rail-zoom));
 }
 
@@ -259,7 +259,7 @@
    la evidencia visual queda en estado estático (borde o glow) */
 @media (prefers-reduced-motion: reduce) {
     .rail-card, .rail-card .rail-cover img { transition: none; }
-    .rail-card:hover, .rail-card:focus-visible, .rail-card:hover .rail-cover img { transform: none; }
+    .rail-card:hover, .rail-card:focus-visible, .rail-card:has(:focus-visible), .rail-card:hover .rail-cover img { transform: none; }
 }
 
 /* ===== Hero editorial narrativo de la portada (INC-35, Decisiones 7 y 10) ===== */

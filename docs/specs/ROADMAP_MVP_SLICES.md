@@ -311,6 +311,15 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
+## Incremento 35: Portada Editorial — Narrativa Hogareña, Microinteracciones e Imágenes por Defecto
+- **Identificador SDD:** `portada-editorial`
+- **Objetivo Principal:** Transformar la portada `/` en una portada editorial con narrativa hogareña: hero con titular visible «La mesa está servida» en serif display Fraunces (delta RENAMED+MODIFIED+ADDED sobre `home-landing-hero`, aprobado por el usuario), 5 variantes de fondo intercambiables in situ (fotos de ambiente < 200 KB con `<picture>` AVIF/WebP/JPEG y `fetchpriority="high"`, escena CSS de serie e ilustración futura), scrim por variables de tema; extracción del markup duplicado de los 4 carriles a componentes dedicados (`Components/Home/`) con render de imagen y fallback por dominio (inline `DefaultImage.razor` temable + `onerror` a `/images/defaults/`), tokens de microinteracción `.rail-card` con equivalencia de foco (`:has(:focus-visible)`), `prefers-reduced-motion` y scroll sin scrollbar; iconografía Lucide global vía `Icon.razor` con catálogo whitelist de 94 iconos (cero emojis de interfaz en toda la web); corrección de clases muertas (`.scrollbar-none`, `sm:w-68`).
+- **Estado:** ✅ **Completado y Archivado** (suite 847/847 en verde al 100%; +108 sobre el baseline real 739 de INC-34; verificación PASS WITH WARNINGS 19/19 requerimientos y 30/30 escenarios; WARNING-1 corregido en 44e5ae4).
+- **Documento:** [`inc-35-portada-editorial.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-35-portada-editorial.md) (cadena de 4 PRs apilados; cambio SDD archivado en `openspec/changes/archive/2026-09-10-portada-editorial/`)
+- **Módulo del Sistema:** [`23-portada-editorial.md`](file:///c:/repos/Ludeka/docs/specs/sistema/23-portada-editorial.md)
+
+---
+
 ## Convención de Trabajo para Cada Incremento (Ciclo SDD)
 
 Cada incremento se ejecutará siguiendo estrictamente las 7 fases de Spec-Driven Development:

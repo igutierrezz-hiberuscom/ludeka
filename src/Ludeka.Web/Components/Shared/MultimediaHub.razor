@@ -10,7 +10,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <span class="text-xl">📺</span>
+                <Icon Name="tv" Size="20" />
                 <h2 class="text-lg font-black text-[var(--text-primary)] tracking-tight">
                     Hub Multimedia en Español
                 </h2>
@@ -29,7 +29,7 @@
                     aria-controls="panel-quick"
                     @onclick='() => _activeTab = "quick"'
                     class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 @(_activeTab == "quick" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                <span>⚡</span>
+                <Icon Name="zap" Size="14" />
                 <span>Cómo Funciona</span>
                 <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeTab == "quick" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-muted)]")">
                     @(MediaHub?.QuickOverviews.Count ?? 0)
@@ -43,7 +43,7 @@
                     aria-controls="panel-tutorials"
                     @onclick='() => _activeTab = "tutorials"'
                     class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 @(_activeTab == "tutorials" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                <span>🎬</span>
+                <Icon Name="clapperboard" Size="14" />
                 <span>Tutoriales</span>
                 <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeTab == "tutorials" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-muted)]")">
                     @(MediaHub?.Tutorials.Count ?? 0)
@@ -57,7 +57,7 @@
                     aria-controls="panel-playthroughs"
                     @onclick='() => _activeTab = "playthroughs"'
                     class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 @(_activeTab == "playthroughs" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                <span>🎲</span>
+                <Icon Name="dices" Size="14" />
                 <span>Partidas Completas</span>
                 <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeTab == "playthroughs" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-muted)]")">
                     @(MediaHub?.Playthroughs.Count ?? 0)
@@ -71,7 +71,7 @@
                     aria-controls="panel-social"
                     @onclick='() => _activeTab = "social"'
                     class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 @(_activeTab == "social" ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                <span>💬</span>
+                <Icon Name="message-circle" Size="14" />
                 <span>Opiniones y Redes</span>
                 <span class="px-1.5 py-0.2 rounded-full text-[0.65rem] @(_activeTab == "social" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-muted)]")">
                     @((MediaHub?.InstagramPosts.Count ?? 0) + (MediaHub?.ShortReels.Count ?? 0) + (MediaHub?.ReviewsAndOpinions.Count ?? 0))
@@ -85,7 +85,7 @@
     {
         <div class="p-3 rounded-xl text-xs font-semibold flex items-center justify-between animate-fade-in @(_bannerSuccess ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20")">
             <span>@_bannerMessage</span>
-            <button type="button" @onclick="() => _bannerMessage = null" class="opacity-70 hover:opacity-100">✕</button>
+            <button type="button" @onclick="() => _bannerMessage = null" class="opacity-70 hover:opacity-100"><Icon Name="x" Size="14" /></button>
         </div>
     }
 
@@ -121,24 +121,24 @@
                                             @onclick="() => OpenModerateModal(video)"
                                             title="Moderar vídeo"
                                             class="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg bg-black/80 hover:bg-amber-600 text-white text-[0.65rem] font-bold transition-colors flex items-center gap-1 shadow backdrop-blur-sm border border-white/20">
-                                        <span>⚙️</span> Moderar
+                                        <Icon Name="settings" Size="12" /> Moderar
                                     </button>
                                 }
 
                                 <div class="absolute inset-0 flex items-center justify-center">
-                                    <div class="w-12 h-12 rounded-full bg-amber-500/90 text-white flex items-center justify-center text-lg pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-amber-500 transition-all">
-                                        ⚡
+                                    <div class="w-12 h-12 rounded-full bg-amber-500/90 text-white flex items-center justify-center pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-amber-500 transition-all">
+                                        <Icon Name="zap" Size="22" />
                                     </div>
                                 </div>
 
-                                <div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-amber-500/90 text-black text-[0.62rem] font-bold tracking-tight shadow">
-                                    ⚡ En 2 minutos
+                                <div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-amber-500/90 text-black text-[0.62rem] font-bold tracking-tight shadow inline-flex items-center gap-1">
+                                    <Icon Name="zap" Size="10" /> En 2 minutos
                                 </div>
 
                                 @if (!string.IsNullOrWhiteSpace(video.FormattedDuration))
                                 {
-                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight">
-                                        ⏱️ @video.FormattedDuration
+                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight inline-flex items-center gap-1">
+                                        <Icon Name="timer" Size="10" /> @video.FormattedDuration
                                     </div>
                                 }
                             </div>
@@ -164,7 +164,7 @@
             else
             {
                 <div class="py-12 px-4 text-center rounded-xl bg-[var(--bg-surface)] border border-dashed border-[var(--border-subtle)] space-y-2">
-                    <span class="text-3xl block">⚡</span>
+                    <span class="inline-block"><Icon Name="zap" Size="30" /></span>
                     <h3 class="text-sm font-bold text-[var(--text-primary)]">Sin vídeo de mecánicas rápidas todavía</h3>
                     <p class="text-xs text-[var(--text-secondary)] max-w-sm mx-auto">
                         Aún no tenemos un vídeo breve de 2 minutos para este título. Puedes consultar los tutoriales completos de reglas.
@@ -204,20 +204,20 @@
                                             @onclick="() => OpenModerateModal(tutorial)"
                                             title="Moderar vídeo"
                                             class="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg bg-black/80 hover:bg-amber-600 text-white text-[0.65rem] font-bold transition-colors flex items-center gap-1 shadow backdrop-blur-sm border border-white/20">
-                                        <span>⚙️</span> Moderar
+                                        <Icon Name="settings" Size="12" /> Moderar
                                     </button>
                                 }
 
                                 <div class="absolute inset-0 flex items-center justify-center">
-                                    <div class="w-12 h-12 rounded-full bg-[var(--brand-primary)]/90 text-white flex items-center justify-center text-lg pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-[var(--brand-primary)] transition-all">
-                                        ▶
+                                    <div class="w-12 h-12 rounded-full bg-[var(--brand-primary)]/90 text-white flex items-center justify-center pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-[var(--brand-primary)] transition-all">
+                                        <Icon Name="play" Size="22" />
                                     </div>
                                 </div>
 
                                 @if (!string.IsNullOrWhiteSpace(tutorial.FormattedDuration))
                                 {
-                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight">
-                                        ⏱️ @tutorial.FormattedDuration
+                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight inline-flex items-center gap-1">
+                                        <Icon Name="timer" Size="10" /> @tutorial.FormattedDuration
                                     </div>
                                 }
                             </div>
@@ -243,7 +243,7 @@
             else
             {
                 <div class="p-8 text-center rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] max-w-md mx-auto">
-                    <span class="text-4xl block mb-2">🎬</span>
+                    <span class="inline-block mb-2"><Icon Name="clapperboard" Size="36" /></span>
                     <h3 class="text-sm font-bold text-[var(--text-primary)] mb-1">Aún no hay tutoriales en español</h3>
                     <p class="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">
                         Nadie ha añadido un tutorial de reglas de este juego a la comunidad todavía. ¿Conoces uno excelente de YouTube?
@@ -286,27 +286,27 @@
                                             @onclick="() => OpenModerateModal(play)"
                                             title="Moderar vídeo"
                                             class="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg bg-black/80 hover:bg-amber-600 text-white text-[0.65rem] font-bold transition-colors flex items-center gap-1 shadow backdrop-blur-sm border border-white/20">
-                                        <span>⚙️</span> Moderar
+                                        <Icon Name="settings" Size="12" /> Moderar
                                     </button>
                                 }
 
                                 <div class="absolute top-2.5 left-2.5">
-                                    <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-nav)] text-[var(--text-primary)] border border-[var(--border-highlight)] font-bold text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
-                                        <span aria-hidden="true">👥</span>
-                                        <span>@(play.PlayerCountBadge ?? "Partida")</span>
-                                    </span>
+                    <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-nav)] text-[var(--text-primary)] border border-[var(--border-highlight)] font-bold text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
+                        <Icon Name="users" Size="12" aria-hidden="true" />
+                        <span>@(play.PlayerCountBadge ?? "Partida")</span>
+                    </span>
                                 </div>
 
                                 <div class="absolute inset-0 flex items-center justify-center">
-                                    <div class="w-12 h-12 rounded-full bg-[var(--brand-primary)]/90 text-white flex items-center justify-center text-lg pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-[var(--brand-primary)] transition-all">
-                                        ▶
+                                    <div class="w-12 h-12 rounded-full bg-[var(--brand-primary)]/90 text-white flex items-center justify-center pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-[var(--brand-primary)] transition-all">
+                                        <Icon Name="play" Size="22" />
                                     </div>
                                 </div>
 
                                 @if (!string.IsNullOrWhiteSpace(play.FormattedDuration))
                                 {
-                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight">
-                                        ⏱️ @play.FormattedDuration
+                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight inline-flex items-center gap-1">
+                                        <Icon Name="timer" Size="10" /> @play.FormattedDuration
                                     </div>
                                 }
                             </div>
@@ -332,7 +332,7 @@
             else
             {
                 <div class="p-8 text-center rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] max-w-md mx-auto">
-                    <span class="text-4xl block mb-2">🎲</span>
+                    <span class="inline-block mb-2"><Icon Name="dices" Size="36" /></span>
                     <h3 class="text-sm font-bold text-[var(--text-primary)] mb-1">Sin partidas completas registradas</h3>
                     <p class="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">
                         Aún no tenemos partidas con número de comensales registradas en español para este juego.
@@ -353,8 +353,8 @@
             {
                 <div>
                     <div class="flex items-center gap-2 mb-3">
-                        <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
-                            🎬 Reseñas y Análisis Críticos
+                        <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider inline-flex items-center gap-1.5">
+                            <Icon Name="clapperboard" Size="12" /> Reseñas y Análisis Críticos
                         </span>
                         <div class="h-px flex-1 bg-[var(--border-subtle)]"></div>
                     </div>
@@ -384,24 +384,24 @@
                                                 @onclick="() => OpenModerateModal(review)"
                                                 title="Moderar vídeo"
                                                 class="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg bg-black/80 hover:bg-amber-600 text-white text-[0.65rem] font-bold transition-colors flex items-center gap-1 shadow backdrop-blur-sm border border-white/20">
-                                            <span>⚙️</span> Moderar
+                                            <Icon Name="settings" Size="12" /> Moderar
                                         </button>
                                     }
 
                                     <div class="absolute inset-0 flex items-center justify-center">
-                                        <div class="w-12 h-12 rounded-full bg-[var(--brand-primary)]/90 text-white flex items-center justify-center text-lg pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-[var(--brand-primary)] transition-all">
-                                            ▶
+                                        <div class="w-12 h-12 rounded-full bg-[var(--brand-primary)]/90 text-white flex items-center justify-center pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-[var(--brand-primary)] transition-all">
+                                            <Icon Name="play" Size="22" />
                                         </div>
                                     </div>
 
-                                    <div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-purple-500/90 text-white text-[0.62rem] font-bold tracking-tight shadow">
-                                        💬 Reseña / Opinión
+                                    <div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-purple-500/90 text-white text-[0.62rem] font-bold tracking-tight shadow inline-flex items-center gap-1">
+                                        <Icon Name="message-circle" Size="10" /> Reseña / Opinión
                                     </div>
 
                                     @if (!string.IsNullOrWhiteSpace(review.FormattedDuration))
                                     {
-                                        <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight">
-                                            ⏱️ @review.FormattedDuration
+                                        <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-[0.68rem] font-mono font-bold tracking-tight inline-flex items-center gap-1">
+                                            <Icon Name="timer" Size="10" /> @review.FormattedDuration
                                         </div>
                                     }
                                 </div>
@@ -431,8 +431,8 @@
             {
                 <div>
                     <div class="flex items-center gap-2 mb-3">
-                        <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
-                            📸 Reseñas en Instagram (Fotos 1:1)
+                        <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider inline-flex items-center gap-1.5">
+                            <Icon Name="camera" Size="12" /> Reseñas en Instagram (Fotos 1:1)
                         </span>
                         <div class="h-px flex-1 bg-[var(--border-subtle)]"></div>
                     </div>
@@ -460,14 +460,14 @@
                                                 @onclick="() => OpenModerateModal(post)"
                                                 title="Moderar post"
                                                 class="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg bg-black/80 hover:bg-amber-600 text-white text-[0.65rem] font-bold transition-colors flex items-center gap-1 shadow backdrop-blur-sm border border-white/20">
-                                            <span>⚙️</span> Moderar
+                                            <Icon Name="settings" Size="12" /> Moderar
                                         </button>
                                     }
 
                                     @if (post.LikesCount.HasValue)
                                     {
                                         <div class="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-full bg-black/75 text-white border border-white/20 text-xs font-bold flex items-center gap-1 backdrop-blur-sm">
-                                            <span aria-hidden="true">❤️</span>
+                                            <Icon Name="heart" Size="12" aria-hidden="true" />
                                             <span>@post.LikesCount</span>
                                         </div>
                                     }
@@ -507,8 +507,8 @@
             {
                 <div>
                     <div class="flex items-center gap-2 mb-3">
-                        <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
-                            📱 Vídeos Verticales (Reels & Shorts 9:16)
+                        <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider inline-flex items-center gap-1.5">
+                            <Icon Name="smartphone" Size="12" /> Vídeos Verticales (Reels & Shorts 9:16)
                         </span>
                         <div class="h-px flex-1 bg-[var(--border-subtle)]"></div>
                     </div>
@@ -538,13 +538,13 @@
                                                 @onclick="() => OpenModerateModal(reel)"
                                                 title="Moderar vídeo"
                                                 class="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg bg-black/80 hover:bg-amber-600 text-white text-[0.65rem] font-bold transition-colors flex items-center gap-1 shadow backdrop-blur-sm border border-white/20">
-                                            <span>⚙️</span> Moderar
+                                            <Icon Name="settings" Size="12" /> Moderar
                                         </button>
                                     }
 
                                     <div class="absolute inset-0 flex items-center justify-center">
-                                        <div class="w-10 h-10 rounded-full bg-[var(--brand-primary)]/90 text-white flex items-center justify-center text-sm pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-[var(--brand-primary)] transition-all">
-                                            ▶
+                                        <div class="w-10 h-10 rounded-full bg-[var(--brand-primary)]/90 text-white flex items-center justify-center pl-0.5 shadow-lg group-hover:scale-110 group-hover:bg-[var(--brand-primary)] transition-all">
+                                            <Icon Name="play" Size="18" />
                                         </div>
                                     </div>
 
@@ -574,7 +574,7 @@
             @if (MediaHub == null || (!MediaHub.HasSocial))
             {
                 <div class="p-8 text-center rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] max-w-md mx-auto">
-                    <span class="text-4xl block mb-2">💬</span>
+                    <span class="inline-block mb-2"><Icon Name="message-circle" Size="36" /></span>
                     <h3 class="text-sm font-bold text-[var(--text-primary)] mb-1">Sin menciones en redes todavía</h3>
                     <p class="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">
                         Aún no se han indexado reseñas en vídeo, posts de Instagram ni Reels sobre este título.
@@ -604,12 +604,12 @@
             @* Cabecera *@
             <div class="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
                 <div class="flex items-center gap-2">
-                    <span class="text-xl">⚙️</span>
+                    <Icon Name="settings" Size="20" />
                     <h3 class="text-base font-bold text-[var(--text-primary)]">
                         Moderar Contenido Multimedia
                     </h3>
                 </div>
-                <button type="button" @onclick="CloseModerateModal" class="text-[var(--text-muted)] hover:text-[var(--text-primary)]">✕</button>
+                <button type="button" @onclick="CloseModerateModal" class="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><Icon Name="x" Size="16" /></button>
             </div>
 
             @* Resumen del ítem *@
@@ -637,7 +637,7 @@
                 @* 1. Cambio Inmediato de Categoría *@
                 <div class="p-3.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2.5">
                     <h5 class="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                        <span>🏷️</span> Cambiar Categoría
+                        <Icon Name="tag" Size="12" /> Cambiar Categoría
                     </h5>
                     <p class="text-[0.68rem] text-[var(--text-secondary)]">
                         Reubica el vídeo en otra pestaña de la ficha al instante.
@@ -645,10 +645,10 @@
                     <div class="flex items-center gap-2">
                         <select @bind="_targetCategory"
                                 class="flex-1 px-3 py-1.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]">
-                            <option value="@MediaCategory.QuickOverview">⚡ Cómo Funciona (2 min)</option>
-                            <option value="@MediaCategory.Tutorial">🎬 Tutorial (Reglas)</option>
-                            <option value="@MediaCategory.Gameplay">🎲 Partida Completa</option>
-                            <option value="@MediaCategory.ReviewOpinion">💬 Reseña / Opinión</option>
+                            <option value="@MediaCategory.QuickOverview">Cómo Funciona (2 min)</option>
+                            <option value="@MediaCategory.Tutorial">Tutorial (Reglas)</option>
+                            <option value="@MediaCategory.Gameplay">Partida Completa</option>
+                            <option value="@MediaCategory.ReviewOpinion">Reseña / Opinión</option>
                         </select>
                         <button type="button"
                                 @onclick="SaveCategoryChangeAsync"
@@ -662,7 +662,7 @@
                 @* 2. Reasignación de Juego *@
                 <div class="p-3.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2.5">
                     <h5 class="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                        <span>🔁</span> Reasignar a otro Juego
+                        <span class="inline-flex items-center gap-1"><Icon Name="repeat" Size="12" /> Reasignar a otro Juego</span>
                     </h5>
                     <p class="text-[0.68rem] text-[var(--text-secondary)]">
                         Transfiere el vídeo a otra ficha si corresponde a una expansión o juego diferente.

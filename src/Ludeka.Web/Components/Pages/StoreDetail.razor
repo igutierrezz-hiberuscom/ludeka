@@ -14,14 +14,14 @@
 @if (_loading)
 {
     <div class="container-ludeka py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
-        <span class="animate-spin text-xl">🎲</span>
+        <span class="animate-spin inline-block"><Icon Name="dices" Size="20" /></span>
         <span>Cargando ficha de la tienda...</span>
     </div>
 }
 else if (_store == null)
 {
     <div class="container-ludeka py-16 text-center space-y-4">
-        <span class="text-4xl block">🔍</span>
+        <span class="inline-block"><Icon Name="search" Size="36" /></span>
         <h1 class="text-2xl font-black text-[var(--text-primary)]">Tienda no encontrada</h1>
         <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
             No encontramos ninguna tienda lúdica registrada con el slug especificado.
@@ -45,7 +45,7 @@ else
                 <button type="button"
                         @onclick="() => _isEditModalOpen = true"
                         class="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                    <span>✏️</span> Editar Tienda
+                    <Icon Name="pencil" Size="12" /> Editar Tienda
                 </button>
             }
         </div>
@@ -77,14 +77,14 @@ else
                         </span>
                         @if (!string.IsNullOrWhiteSpace(_store.City))
                         {
-                            <span class="text-xs font-bold text-[var(--text-secondary)]">
-                                📍 @_store.City
+                            <span class="text-xs font-bold text-[var(--text-secondary)] inline-flex items-center gap-1">
+                                <Icon Name="map-pin" Size="12" /> @_store.City
                             </span>
                         }
                         @if (_store.HasLoyaltyProgram)
                         {
                             <span class="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1">
-                                <span>⭐</span> Programa Club / Fidelidad
+                                <Icon Name="star" Size="12" /> Programa Club / Fidelidad
                             </span>
                         }
                     </div>
@@ -96,7 +96,7 @@ else
                     @if (_store.ShippingCountries != null && _store.ShippingCountries.Count > 0)
                     {
                         <div class="text-xs text-[var(--text-secondary)] flex items-center gap-1.5 flex-wrap">
-                            <span class="font-bold">🚚 Realiza envíos a:</span>
+                            <span class="font-bold inline-flex items-center gap-1"><Icon Name="truck" Size="12" /> Realiza envíos a:</span>
                             <span class="px-2 py-0.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] font-medium text-[var(--text-primary)]">
                                 @string.Join(", ", _store.ShippingCountries)
                             </span>
@@ -106,7 +106,7 @@ else
                     @if (!string.IsNullOrWhiteSpace(_store.Address))
                     {
                         <p class="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
-                            <span>🏢</span>
+                            <Icon Name="building-2" Size="12" />
                             <span>@_store.Address</span>
                         </p>
                     }
@@ -117,7 +117,7 @@ else
                            target="_blank"
                            rel="noopener noreferrer"
                            class="text-xs font-semibold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1 pt-1">
-                            <span>🌐</span> Visitar tienda online &nearr;
+                            <Icon Name="globe" Size="12" /> Visitar tienda online &nearr;
                         </a>
                     }
                 </div>
@@ -145,7 +145,7 @@ else
         <div class="space-y-4">
             <div class="flex items-baseline justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
                 <div class="flex items-center gap-2">
-                    <span class="text-xl">🛒</span>
+                    <Icon Name="shopping-cart" Size="20" />
                     <h2 class="text-xl font-black text-[var(--text-primary)]">
                         Juegos con Ofertas en @_store.Name
                     </h2>
@@ -259,9 +259,9 @@ else
 
     private string FormatStoreType(StoreType type) => type switch
     {
-        StoreType.Hybrid => "🏪 Tienda Híbrida (Física y Online)",
-        StoreType.PhysicalOnly => "🏢 Solo Tienda Física",
-        StoreType.OnlineOnly => "🌐 Solo Tienda Online",
+        StoreType.Hybrid => "Tienda Híbrida (Física y Online)",
+        StoreType.PhysicalOnly => "Solo Tienda Física",
+        StoreType.OnlineOnly => "Solo Tienda Online",
         _ => "Tienda"
     };
 }

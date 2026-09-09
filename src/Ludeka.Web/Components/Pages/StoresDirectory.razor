@@ -16,7 +16,7 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
         <div class="space-y-2">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold">
-                <span>🛒</span> Ecosistema Comercial &bull; Tiendas Lúdicas
+                <Icon Name="shopping-cart" Size="14" /> Ecosistema Comercial &bull; Tiendas Lúdicas
             </div>
             <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
                 Tiendas Especializadas
@@ -32,7 +32,7 @@
                 <button type="button"
                         @onclick="OpenCreateModal"
                         class="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>➕</span> Nueva Tienda
+                    <Icon Name="plus" Size="12" /> Nueva Tienda
                 </button>
             }
         </div>
@@ -41,7 +41,7 @@
     @* Buscador reactivo y Filtros por Tipo de Tienda y País *@
     <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <div class="relative max-w-md w-full">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base">🔍</span>
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"><Icon Name="search" Size="16" /></span>
             <input type="text"
                    @bind="_searchTerm"
                    @bind:event="oninput"
@@ -56,7 +56,7 @@
                 <select @bind="_selectedCountry"
                         @bind:after="FilterStores"
                         class="px-3 py-2 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] shadow-sm">
-                    <option value="">🌍 Todos los países</option>
+                    <option value="">Todos los países</option>
                     @foreach (var c in CountryCatalog.GetAllCountries())
                     {
                         <option value="@c.Name">@c.FlagEmoji @c.Name</option>
@@ -74,17 +74,17 @@
                 <button type="button"
                         @onclick="() => SetTypeFilter(StoreType.Hybrid)"
                         class="px-3 py-1.5 rounded-xl font-bold transition-all @(_selectedType == StoreType.Hybrid ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                    🏪 Híbrida
+                    <span class="inline-flex items-center gap-1"><Icon Name="store" Size="12" /> Híbrida</span>
                 </button>
                 <button type="button"
                         @onclick="() => SetTypeFilter(StoreType.PhysicalOnly)"
                         class="px-3 py-1.5 rounded-xl font-bold transition-all @(_selectedType == StoreType.PhysicalOnly ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                    🏢 Física
+                    <span class="inline-flex items-center gap-1"><Icon Name="building-2" Size="12" /> Física</span>
                 </button>
                 <button type="button"
                         @onclick="() => SetTypeFilter(StoreType.OnlineOnly)"
                         class="px-3 py-1.5 rounded-xl font-bold transition-all @(_selectedType == StoreType.OnlineOnly ? "bg-[var(--brand-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                    🌐 Online
+                    <span class="inline-flex items-center gap-1"><Icon Name="globe" Size="12" /> Online</span>
                 </button>
             </div>
         </div>
@@ -94,14 +94,14 @@
     @if (_loading)
     {
         <div class="py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
-            <span class="animate-spin text-xl">🎲</span>
+            <span class="animate-spin inline-block"><Icon Name="dices" Size="20" /></span>
             <span>Cargando directorio de tiendas...</span>
         </div>
     }
     else if (_stores.Count == 0)
     {
         <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3">
-            <span class="text-4xl block">🏪</span>
+            <span class="inline-block"><Icon Name="store" Size="36" /></span>
             <h2 class="text-base font-bold text-[var(--text-primary)]">No se encontraron tiendas</h2>
             <p class="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
                 No hay resultados para los criterios seleccionados@(!string.IsNullOrWhiteSpace(_selectedCountry) ? $" en {_selectedCountry}" : "").
@@ -152,7 +152,7 @@
                             @if (store.HasLoyaltyProgram)
                             {
                                 <span class="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 shrink-0" title="Programa de puntos o ventajas">
-                                    ⭐ Club
+                                    <span class="inline-flex items-center gap-1"><Icon Name="star" Size="10" /> Club</span>
                                 </span>
                             }
                         </div>
@@ -160,7 +160,7 @@
                         @if (store.ShippingCountries != null && store.ShippingCountries.Count > 0)
                         {
                             <div class="px-2.5 py-1 rounded-xl bg-[var(--bg-surface-elevated)]/60 border border-[var(--border-subtle)] text-[0.68rem] text-[var(--text-secondary)] flex items-center gap-1 flex-wrap">
-                                <span>🚚 Envíos:</span>
+                                <span class="inline-flex items-center gap-1"><Icon Name="truck" Size="10" /> Envíos:</span>
                                 <span class="font-medium">@string.Join(", ", store.ShippingCountries)</span>
                             </div>
                         }
@@ -168,7 +168,7 @@
                         @if (!string.IsNullOrWhiteSpace(store.Address))
                         {
                             <p class="text-xs text-[var(--text-muted)] flex items-start gap-1">
-                                <span class="shrink-0">📍</span>
+                                <span class="shrink-0"><Icon Name="map-pin" Size="10" /></span>
                                 <span class="line-clamp-1">@store.Address</span>
                             </p>
                         }
@@ -197,7 +197,7 @@
                             <button type="button"
                                     @onclick="() => OpenEditModal(store)"
                                     class="text-[var(--text-muted)] hover:text-emerald-400 font-semibold text-[0.7rem] px-2 py-1 rounded bg-[var(--bg-surface-elevated)] transition-colors">
-                                ✏️ Editar
+                                <span class="inline-flex items-center gap-1"><Icon Name="pencil" Size="12" /> Editar</span>
                             </button>
                         }
                     </div>
@@ -281,9 +281,9 @@
 
     private string FormatStoreType(StoreType type) => type switch
     {
-        StoreType.Hybrid => "🏪 Híbrida (Física y Online)",
-        StoreType.PhysicalOnly => "🏢 Solo Tienda Física",
-        StoreType.OnlineOnly => "🌐 Solo Tienda Online",
+        StoreType.Hybrid => "Híbrida (Física y Online)",
+        StoreType.PhysicalOnly => "Solo Tienda Física",
+        StoreType.OnlineOnly => "Solo Tienda Online",
         _ => "Tienda"
     };
 

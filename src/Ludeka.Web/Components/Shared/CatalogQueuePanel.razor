@@ -32,7 +32,7 @@
                             disabled="@_isProcessing"
                             title="Restablecer elementos fallidos a estado pendiente para reintentar la catalogación"
                             class="py-2.5 px-3 rounded-xl font-semibold text-xs bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50">
-                        <span>🔄</span>
+                        <Icon Name="refresh-cw" Size="14" />
                         <span>Reintentar Fallidos</span>
                     </button>
                 }
@@ -44,12 +44,12 @@
                         class="py-2.5 px-3.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                     @if (_isProcessingAi)
                     {
-                        <span class="animate-spin">⚙️</span>
+                        <span class="animate-spin inline-block"><Icon Name="settings" Size="14" /></span>
                         <span>Carga Nocturna IA...</span>
                     }
                     else
                     {
-                        <span>🌙</span>
+                        <Icon Name="moon" Size="14" />
                         <span>Carga Nocturna IA</span>
                     }
                 </button>
@@ -60,12 +60,12 @@
                         class="py-2.5 px-4 rounded-xl font-bold text-xs bg-[var(--brand-primary)] hover:opacity-90 text-white transition-opacity flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                     @if (_isProcessing)
                     {
-                        <span class="animate-spin">⚙️</span>
+                        <span class="animate-spin inline-block"><Icon Name="settings" Size="14" /></span>
                         <span>Auto-Catalogando...</span>
                     }
                     else
                     {
-                        <span>⚡</span>
+                        <Icon Name="zap" Size="14" />
                         <span>Ejecutar Auto-Catalogación Ahora</span>
                     }
                 </button>
@@ -77,7 +77,7 @@
     {
         <div class="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-xs space-y-2">
             <div class="font-bold text-indigo-400 flex items-center gap-2">
-                <span>🌙</span>
+                <Icon Name="moon" Size="14" />
                 <span>Carga nocturna de IA finalizada: @_lastAiResult.SuccessCount sintetizados con éxito (@_lastAiResult.FailedCount fallos).</span>
             </div>
             @if (_lastAiResult.SummarizedTitles.Count > 0)
@@ -95,7 +95,7 @@
         {
             <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-xs space-y-2">
                 <div class="font-bold text-emerald-600 dark:text-emerald-300 flex items-center gap-2">
-                    <span>✅</span>
+                    <Icon Name="circle-check" Size="14" />
                     <span>Proceso completado con éxito: @_lastResult.SuccessCount juegos catalogados e incorporados al catálogo.</span>
                 </div>
                 @if (_lastResult.CatalogedGameTitles.Count > 0)
@@ -111,7 +111,7 @@
         {
             <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs space-y-2">
                 <div class="font-bold text-amber-600 dark:text-amber-300 flex items-center gap-2">
-                    <span>⚠️</span>
+                    <Icon Name="triangle-alert" Size="14" />
                     <span>Proceso parcial: @_lastResult.SuccessCount catalogados con éxito, pero @_lastResult.FailedCount fallaron.</span>
                 </div>
                 <div class="text-[var(--text-secondary)]">
@@ -126,7 +126,7 @@
         {
             <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 text-xs space-y-2">
                 <div class="font-bold text-rose-600 dark:text-rose-300 flex items-center gap-2">
-                    <span>❌</span>
+                    <Icon Name="circle-x" Size="14" />
                     <span>Fallo en la auto-catalogación: 0 de @_lastResult.ProcessedCount solicitudes procesadas con éxito (@_lastResult.FailedCount fallos).</span>
                 </div>
                 <p class="text-[var(--text-secondary)] leading-relaxed">
@@ -146,14 +146,14 @@
     @if (_isLoading)
     {
         <div class="py-8 text-center text-[var(--text-muted)]">
-            <div class="inline-block animate-spin text-2xl mb-2">⏳</div>
+            <div class="inline-block animate-spin mb-2"><Icon Name="hourglass" Size="24" /></div>
             <p class="text-xs">Consultando la cola comunitaria...</p>
         </div>
     }
     else if (_items.Count == 0)
     {
         <div class="py-8 text-center text-[var(--text-muted)] max-w-sm mx-auto">
-            <span class="text-3xl block mb-2">✨</span>
+            <span class="inline-block mb-2"><Icon Name="sparkles" Size="30" /></span>
             <p class="text-xs font-bold text-[var(--text-primary)]">¡No hay juegos pendientes en la cola!</p>
             <p class="text-[0.75rem] text-[var(--text-muted)] mt-1">Todos los juegos solicitados han sido catalogados en el catálogo general.</p>
         </div>
@@ -190,12 +190,12 @@
                         </div>
                         <div class="flex items-center gap-2 mt-1 flex-wrap">
                             <span class="text-[0.68rem] font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/25">
-                                🔥 @item.RequestedCount @(item.RequestedCount == 1 ? "solicitud" : "solicitudes")
+                                <Icon Name="flame" Size="12" /> @item.RequestedCount @(item.RequestedCount == 1 ? "solicitud" : "solicitudes")
                             </span>
                             @if (item.Status == CatalogQueueStatus.Failed)
                             {
                                 <span class="text-[0.65rem] font-semibold px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-300 border border-rose-500/25" title="@(item.ErrorMessage ?? "Error al conectar con BGG")">
-                                    ⚠️ Falló (Reintentable)
+                                    <span class="inline-flex items-center gap-1"><Icon Name="triangle-alert" Size="12" /> Falló (Reintentable)</span>
                                 </span>
                             }
                             <span class="text-[0.65rem] text-[var(--text-muted)] font-mono">ID: @item.BggId</span>

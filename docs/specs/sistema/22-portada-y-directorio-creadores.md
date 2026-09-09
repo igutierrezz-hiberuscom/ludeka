@@ -1,8 +1,9 @@
 # 22. Portada Minimalista y Directorio de Creadores de Contenido
 
-> **Estado del Módulo:** ✅ Implementado y Verificado  
+> **Estado del Módulo:** ✅ Implementado y Verificado — **parcialmente superado por INC-35** (ver nota)  
 > **Incremento Asociado:** [INC-31 — cambio SDD `portada-minimalista-creadores` (archivado)](file:///c:/repos/Ludeka/openspec/changes/archive/2026-09-08-portada-minimalista-creadores/proposal.md)  
 > **Pruebas Automatizadas:** 18 pruebas nuevas dedicadas (suite total **723/723** en verde; verificación SDD PASS con 15/15 requerimientos y 22/22 escenarios COMPLIANT)  
+> **⚠️ Superación parcial (INC-35):** el hero minimalista de este módulo (§2.1, §2.2 parcialmente, decisión D3 y la fila `/` de §7) fue **reemplazado por el hero editorial con titular visible** del [módulo 23](file:///c:/repos/Ludeka/docs/specs/sistema/23-portada-editorial.md). Siguen vigentes aquí: el directorio de creadores, el alias `/radar` silencioso, el bugfix del enlace de novedades y el reetiquetado Autores → Creadores.  
 
 ---
 
@@ -148,7 +149,7 @@ public CreatorService(ICreatorRepository creatorRepository,
 
 | Ruta | Componente | Comportamiento |
 |---|---|---|
-| `/` | `HomeDashboard.razor` | Hero minimalista: h1 `sr-only`, párrafo, buscador rápido, 4 píldoras D4, enlace "Ver todas las novedades" → `/novedades` |
+| `/` | `HomeDashboard.razor` | *(Superado por INC-35: hero editorial con titular visible — ver [módulo 23](file:///c:/repos/Ludeka/docs/specs/sistema/23-portada-editorial.md). El buscador y las 4 píldoras D4 y el enlace de novedades se conservan)* |
 | `/sorteos` | `Radar.razor` | Ruta canónica de sorteos, sin banner legacy |
 | `/radar` | `Radar.razor` | Alias silencioso de `/sorteos` (segunda directiva `@page`) |
 | `/creadores` | `CreatorsDirectory.razor` | Listado de creadores de contenido (alias `/autores` conservado) |

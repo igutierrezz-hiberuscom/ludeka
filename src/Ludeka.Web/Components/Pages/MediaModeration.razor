@@ -16,14 +16,14 @@
     @if (!CurrentUserService.IsFoundingTeam && !(CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanApproveMedia)))
     {
         <div class="max-w-md mx-auto py-16 text-center space-y-4">
-            <span class="text-5xl block">🛡️</span>
+            <span class="inline-block"><Icon Name="shield" Size="48" /></span>
             <h1 class="text-2xl font-bold text-[var(--text-primary)]">Acceso Restringido</h1>
             <p class="text-sm text-[var(--text-secondary)]">
                 Esta sección está reservada para moderadores y el equipo fundador de Ludeka.
             </p>
             <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
                 <p class="mb-2">
-                    💡 Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
+                    <Icon Name="lightbulb" Size="14" /> Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
                 </p>
                 <button type="button"
                         @onclick="SwitchToFounder"
@@ -42,7 +42,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
             <div>
                 <div class="flex items-center gap-2 mb-1">
-                    <span class="text-2xl">🎬</span>
+                    <Icon Name="clapperboard" Size="24" />
                     <h1 class="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
                         Panel de Moderación Rápida
                     </h1>
@@ -55,20 +55,20 @@
             <div class="flex items-center gap-3">
                 <a href="/moderacion/reportes"
                    class="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 text-xs font-bold transition-colors flex items-center gap-2 border border-amber-500/30 shadow-sm">
-                    <span>🚩</span>
+                    <Icon Name="flag" Size="14" />
                     <span>Reportes de Catálogo</span>
                 </a>
                 <button type="button"
                         @onclick="() => _isYouTubeModalOpen = true"
                         class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-colors flex items-center gap-2 shadow-sm">
-                    <span>📺</span>
+                    <Icon Name="tv" Size="14" />
                     <span>Buscar en YouTube</span>
                 </button>
                 <button type="button"
                         @onclick="RunBrokenLinksCheck"
                         disabled="@_isCheckingLinks"
                         class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm disabled:opacity-50">
-                    <span>🔍</span>
+                    <Icon Name="search" Size="14" />
                     <span>@(_isCheckingLinks ? "Comprobando..." : "Comprobar Enlaces")</span>
                 </button>
                 <a href="/" class="px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors border border-[var(--border-subtle)]">
@@ -82,7 +82,7 @@
         {
             <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-between text-xs animate-fade-in">
                 <div class="flex items-center gap-2">
-                    <span class="text-lg">@(_brokenLinkReport.BrokenCount > 0 ? "⚠️" : "✅")</span>
+                    <Icon Name="@(_brokenLinkReport.BrokenCount > 0 ? "triangle-alert" : "circle-check")" Size="18" />
                     <span class="text-[var(--text-secondary)]">
                         Verificación completada: <strong>@_brokenLinkReport.TotalChecked</strong> recursos revisados,
                         <strong class="@(_brokenLinkReport.BrokenCount > 0 ? "text-rose-500" : "text-emerald-500")">
@@ -93,7 +93,7 @@
                 <button type="button"
                         @onclick="() => _brokenLinkReport = null"
                         class="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
-                    ✕
+                    <Icon Name="x" Size="14" />
                 </button>
             </div>
         }
@@ -103,7 +103,7 @@
             <button type="button"
                     @onclick='() => _currentTab = "pending"'
                     class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @(_currentTab == "pending" ? "bg-[var(--brand-primary)] text-white" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]")">
-                <span>⏳ Pendientes de Aprobación</span>
+                <Icon Name="hourglass" Size="14" /> Pendientes de Aprobación
                 <span class="px-2 py-0.5 rounded-full text-[0.68rem] @(_currentTab == "pending" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-secondary)]")">
                     @_pendingItems.Count
                 </span>
@@ -112,7 +112,7 @@
             <button type="button"
                     @onclick='() => _currentTab = "orphans"'
                     class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @(_currentTab == "orphans" ? "bg-amber-600 text-white" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]")">
-                <span>📦 Bandeja de Huérfanos</span>
+                <Icon Name="package" Size="14" /> Bandeja de Huérfanos
                 <span class="px-2 py-0.5 rounded-full text-[0.68rem] @(_currentTab == "orphans" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-secondary)]")">
                     @_orphanItems.Count
                 </span>
@@ -121,7 +121,7 @@
             <button type="button"
                     @onclick='() => _currentTab = "approved"'
                     class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @(_currentTab == "approved" ? "bg-emerald-600 text-white" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]")">
-                <span>✅ Aprobados y Públicos</span>
+                <Icon Name="circle-check" Size="14" /> Aprobados y Públicos
                 <span class="px-2 py-0.5 rounded-full text-[0.68rem] @(_currentTab == "approved" ? "bg-black/20 text-white" : "bg-[var(--bg-card)] text-[var(--text-secondary)]")">
                     @_approvedItems.Count
                 </span>
@@ -132,7 +132,7 @@
         @if (_isLoading)
         {
             <div class="py-16 text-center text-[var(--text-muted)]">
-                <div class="inline-block animate-spin text-3xl mb-2">🎲</div>
+                <div class="inline-block animate-spin mb-2"><Icon Name="dices" Size="30" /></div>
                 <p class="text-xs">Cargando cola de moderación...</p>
             </div>
         }
@@ -148,7 +148,7 @@
             @if (activeList.Count == 0)
             {
                 <div class="p-12 text-center rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] max-w-md mx-auto space-y-2">
-                    <span class="text-4xl block">✨</span>
+                    <span class="inline-block"><Icon Name="sparkles" Size="36" /></span>
                     <h3 class="text-base font-bold text-[var(--text-primary)]">Cola despejada</h3>
                     <p class="text-xs text-[var(--text-muted)]">
                         No hay elementos en esta categoría en este momento.
@@ -185,13 +185,13 @@
                                         @if (!string.IsNullOrWhiteSpace(item.PlayerCountBadge))
                                         {
                                             <span class="px-2 py-0.5 rounded text-[0.62rem] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/25">
-                                                👥 @item.PlayerCountBadge
+                                                <Icon Name="users" Size="12" /> @item.PlayerCountBadge
                                             </span>
                                         }
                                         @if (item.IsBroken)
                                         {
                                             <span class="px-2 py-0.5 rounded text-[0.62rem] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-300 border border-rose-500/25">
-                                                ⚠️ Enlace Roto (404)
+                                                <Icon Name="triangle-alert" Size="12" /> Enlace Roto (404)
                                             </span>
                                         }
                                     </div>
@@ -208,7 +208,7 @@
                                         }
                                         else
                                         {
-                                            <span class="text-amber-500 font-semibold"> &bull; ⚠️ Sin juego asignado</span>
+                                            <span class="text-amber-500 font-semibold inline-flex items-center gap-1"> &bull; <Icon Name="triangle-alert" Size="12" /> Sin juego asignado</span>
                                         }
                                     </p>
 
@@ -220,10 +220,10 @@
                                         <select value="@GetSelectedCategory(item)"
                                                 @onchange="(e) => OnCategorySelected(item.Id, e.Value?.ToString())"
                                                 class="px-2 py-1 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[0.72rem] font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]">
-                                            <option value="@MediaCategory.QuickOverview">⚡ Cómo Funciona (2 min)</option>
-                                            <option value="@MediaCategory.Tutorial">🎬 Tutorial (Reglas)</option>
-                                            <option value="@MediaCategory.Gameplay">🎲 Partida Completa</option>
-                                            <option value="@MediaCategory.ReviewOpinion">💬 Reseña / Opinión</option>
+                                            <option value="@MediaCategory.QuickOverview">Cómo Funciona (2 min)</option>
+                                            <option value="@MediaCategory.Tutorial">Tutorial (Reglas)</option>
+                                            <option value="@MediaCategory.Gameplay">Partida Completa</option>
+                                            <option value="@MediaCategory.ReviewOpinion">Reseña / Opinión</option>
                                         </select>
                                     </div>
                                 </div>
@@ -234,7 +234,7 @@
                                 <button type="button"
                                         @onclick="() => PreviewItem(item)"
                                         class="px-2.5 py-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] text-xs font-semibold transition-colors flex items-center gap-1 border border-[var(--border-subtle)]">
-                                    <span>👁️</span> Previsualizar
+                                    <Icon Name="eye" Size="14" /> Previsualizar
                                 </button>
 
                                 <div class="flex items-center gap-2">
@@ -243,7 +243,7 @@
                                         <button type="button"
                                                 @onclick="() => OpenAssignModal(item)"
                                                 class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-sm">
-                                            <span>🔗</span> Asignar Juego
+                                            <Icon Name="link" Size="14" /> Asignar Juego
                                         </button>
                                     }
 
@@ -252,7 +252,7 @@
                                         <button type="button"
                                                 @onclick="() => ApproveItem(item.Id)"
                                                 class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-sm">
-                                            <span>✅</span> Aprobar
+                                            <Icon Name="circle-check" Size="14" /> Aprobar
                                         </button>
                                     }
 
@@ -261,7 +261,7 @@
                                         <button type="button"
                                                 @onclick="() => RejectItem(item.Id)"
                                                 class="px-3 py-1.5 rounded-lg bg-rose-600/90 hover:bg-rose-500 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-sm">
-                                            <span>❌</span> Descartar
+                                            <Icon Name="circle-x" Size="14" /> Descartar
                                         </button>
                                     }
                                 </div>
@@ -283,10 +283,10 @@
              @onclick:stopPropagation="true">
             <div class="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
                 <div class="flex items-center gap-2">
-                    <span class="text-xl">🔗</span>
+                    <Icon Name="link" Size="20" />
                     <h3 class="text-base font-bold text-[var(--text-primary)]">Vincular Contenido Huérfano</h3>
                 </div>
-                <button type="button" @onclick="() => _isAssignModalOpen = false" class="text-[var(--text-muted)] hover:text-[var(--text-primary)]">✕</button>
+                <button type="button" @onclick="() => _isAssignModalOpen = false" class="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><Icon Name="x" Size="16" /></button>
             </div>
 
             <div>
