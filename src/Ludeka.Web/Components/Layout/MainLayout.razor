@@ -36,15 +36,15 @@
                     Tiendas
                 </a>
                 <a href="/sorteos" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
-                    <span>🎁</span>
+                    <Icon Name="gift" Size="14" />
                     <span>Sorteos</span>
                 </a>
                 <a href="/novedades" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
-                    <span>📰</span>
+                    <Icon Name="newspaper" Size="14" />
                     <span>Novedades</span>
                 </a>
                 <a href="/eventos" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
-                    <span>🎪</span>
+                    <Icon Name="tent" Size="14" />
                     <span>Eventos</span>
                 </a>
             </nav>
@@ -59,13 +59,20 @@
                         title="Configurar país para tiendas, eventos y sorteos"
                         aria-label="Configurar país y ámbito territorial"
                         class="px-2.5 py-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] hover:border-[var(--brand-primary)] text-xs font-bold transition-all flex items-center gap-1.5 text-[var(--text-primary)] shadow-sm shrink-0">
-                    <span>@(string.IsNullOrWhiteSpace(_activeCountry) ? "🌍" : CountryCatalog.GetFlag(_activeCountry))</span>
+                    @if (string.IsNullOrWhiteSpace(_activeCountry))
+                    {
+                        <Icon Name="globe" Size="14" />
+                    }
+                    else
+                    {
+                        <span>@CountryCatalog.GetFlag(_activeCountry)</span>
+                    }
                     <span class="hidden sm:inline">@(string.IsNullOrWhiteSpace(_activeCountry) ? "Global" : _activeCountry)</span>
                 </button>
 
                 @* Acceso Mi Ludoteca *@
                 <a href="/mi-ludoteca" class="px-2.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--border-highlight)] transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm shrink-0">
-                    <span>📚</span>
+                    <Icon Name="library" Size="14" />
                     <span class="hidden sm:inline">Mi Ludoteca</span>
                 </a>
 
@@ -75,7 +82,16 @@
                         title="Alternar entre rol de la Mesa Fundadora y rol de Usuario Comunitario"
                         aria-label="Alternar rol entre Mesa Fundadora y Usuario Comunitario"
                         class="px-2.5 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 @(CurrentUserService.IsFoundingTeam ? "bg-[var(--brand-primary)] border-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
-                    <span>@(CurrentUserService.IsFoundingTeam ? "🛡️ Mesa" : "👤 Usuario")</span>
+                    @if (CurrentUserService.IsFoundingTeam)
+                    {
+                        <Icon Name="shield" Size="14" />
+                        <span>Mesa</span>
+                    }
+                    else
+                    {
+                        <Icon Name="user" Size="14" />
+                        <span>Usuario</span>
+                    }
                     <span class="text-[0.65rem] opacity-80 underline">Cambiar</span>
                 </button>
 
@@ -89,7 +105,7 @@
                                 title="Herramientas y paneles de gestión editorial"
                                 aria-expanded="@_isAdminMenuOpen"
                                 aria-haspopup="true">
-                            <span>⚙️</span>
+                            <Icon Name="settings" Size="14" />
                             <span class="hidden sm:inline">Gestión</span>
                             <span class="text-[0.65rem] transition-transform duration-200 @(_isAdminMenuOpen ? "rotate-180" : "")">▼</span>
                         </button>
@@ -111,7 +127,7 @@
                                     @if (CurrentUserService.IsFoundingTeam || CurrentUserService.HasPermission(ModeratorPermission.CanResolveReports))
                                     {
                                         <a href="/moderacion/reportes" @onclick="() => _isAdminMenuOpen = false" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] font-medium transition-colors">
-                                            <span class="text-amber-400 text-sm">🚩</span>
+                                            <span class="text-amber-400"><Icon Name="flag" Size="14" /></span>
                                             <div>
                                                 <div class="font-bold text-[var(--text-primary)]">Reportes de Catálogo</div>
                                                 <div class="text-[0.65rem] text-[var(--text-muted)]">Erratas y correcciones comunitarias</div>
@@ -121,7 +137,7 @@
                                     @if (CurrentUserService.IsFoundingTeam || CurrentUserService.HasPermission(ModeratorPermission.CanEditGames))
                                     {
                                         <a href="/admin/cola-catalogacion" @onclick="() => _isAdminMenuOpen = false" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] font-medium transition-colors">
-                                            <span class="text-indigo-400 text-sm">🌙</span>
+                                            <span class="text-indigo-400"><Icon Name="moon" Size="14" /></span>
                                             <div>
                                                 <div class="font-bold text-[var(--text-primary)]">Cola BGG & Catalogación</div>
                                                 <div class="text-[0.65rem] text-[var(--text-muted)]">Batch nocturno y sincronización BGG</div>
@@ -131,7 +147,7 @@
                                     @if (CurrentUserService.IsFoundingTeam || CurrentUserService.HasPermission(ModeratorPermission.CanApproveMedia))
                                     {
                                         <a href="/moderacion-media" @onclick="() => _isAdminMenuOpen = false" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] font-medium transition-colors">
-                                            <span class="text-emerald-400 text-sm">🎬</span>
+                                            <span class="text-emerald-400"><Icon Name="clapperboard" Size="14" /></span>
                                             <div>
                                                 <div class="font-bold text-[var(--text-primary)]">Moderación Multimedia</div>
                                                 <div class="text-[0.65rem] text-[var(--text-muted)]">Vídeos de YouTube y carátulas</div>
@@ -146,7 +162,7 @@
                                     @if (CurrentUserService.IsFoundingTeam || CurrentUserService.HasPermission(ModeratorPermission.CanPublishInstagram))
                                     {
                                         <a href="/admin/instagram" @onclick="() => _isAdminMenuOpen = false" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] font-medium transition-colors">
-                                            <span class="text-pink-400 text-sm">📸</span>
+                                            <span class="text-pink-400"><Icon Name="camera" Size="14" /></span>
                                             <div>
                                                 <div class="font-bold text-[var(--text-primary)]">Publicador de Instagram</div>
                                                 <div class="text-[0.65rem] text-[var(--text-muted)]">Posts oficiales de sorteos y noticias</div>
@@ -154,7 +170,7 @@
                                         </a>
                                     }
                                     <a href="/admin/notificaciones" @onclick="() => _isAdminMenuOpen = false" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] font-medium transition-colors">
-                                        <span class="text-sky-400 text-sm">🔔</span>
+                                        <span class="text-sky-400"><Icon Name="bell" Size="14" /></span>
                                         <div>
                                             <div class="font-bold text-[var(--text-primary)]">Webhooks & Notificaciones</div>
                                             <div class="text-[0.65rem] text-[var(--text-muted)]">Difusión a Discord y Telegram</div>
@@ -168,14 +184,14 @@
                                     <div class="pt-2 space-y-1">
                                         <span class="px-2 text-[0.65rem] font-bold text-[var(--text-muted)] uppercase tracking-wider block">Gobernanza del Sistema</span>
                                         <a href="/admin/usuarios" @onclick="() => _isAdminMenuOpen = false" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] font-medium transition-colors">
-                                            <span class="text-purple-400 text-sm">👥</span>
+                                            <span class="text-purple-400"><Icon Name="users" Size="14" /></span>
                                             <div>
                                                 <div class="font-bold text-[var(--text-primary)]">Gestión de Usuarios</div>
                                                 <div class="text-[0.65rem] text-[var(--text-muted)]">Roles RBAC y permisos de moderación</div>
                                             </div>
                                         </a>
                                         <a href="/admin/auditoria" @onclick="() => _isAdminMenuOpen = false" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] font-medium transition-colors">
-                                            <span class="text-sky-400 text-sm">📜</span>
+                                            <span class="text-sky-400"><Icon Name="scroll" Size="14" /></span>
                                             <div>
                                                 <div class="font-bold text-[var(--text-primary)]">Bitácora de Auditoría</div>
                                                 <div class="text-[0.65rem] text-[var(--text-muted)]">Histórico inmutable de mutaciones</div>
@@ -203,35 +219,35 @@
             </div>
             <div class="flex items-center gap-4 text-xs font-semibold flex-wrap">
                 <a href="/editoriales" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
-                    🏢 Editoriales
+                    <Icon Name="building-2" Size="12" /> Editoriales
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="/creadores" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
-                    ✍️ Creadores
+                    <Icon Name="pen-line" Size="12" /> Creadores
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="/tiendas" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
-                    🛒 Tiendas
+                    <Icon Name="shopping-cart" Size="12" /> Tiendas
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="/transparencia" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
-                    🛡️ Transparencia
+                    <Icon Name="shield" Size="12" /> Transparencia
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="/sorteos" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
-                    🎁 Sorteos
+                    <Icon Name="gift" Size="12" /> Sorteos
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="/novedades" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
-                    📰 Novedades
+                    <Icon Name="newspaper" Size="12" /> Novedades
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="/eventos" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">
-                    🎪 Eventos
+                    <Icon Name="tent" Size="12" /> Eventos
                 </a>
                 <span class="text-[var(--text-muted)]">&bull;</span>
                 <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="text-[var(--text-secondary)] hover:text-indigo-400 transition-colors">
-                    💬 Discord
+                    <Icon Name="message-circle" Size="12" /> Discord
                 </a>
             </div>
         </div>
@@ -246,7 +262,7 @@
 <div id="blazor-error-ui" class="hidden">
     Ha ocurrido un error inesperado.
     <a href="." class="reload">Recargar</a>
-    <span class="dismiss">🗙</span>
+    <span class="dismiss">&times;</span>
 </div>
 
 @code {

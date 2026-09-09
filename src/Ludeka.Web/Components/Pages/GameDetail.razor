@@ -14,14 +14,14 @@
 @if (_isLoading)
 {
     <div class="container-ludeka py-20 text-center text-slate-400">
-        <div class="inline-block animate-spin text-4xl mb-3">🎲</div>
+        <div class="inline-block animate-spin mb-3"><Icon Name="dices" Size="36" /></div>
         <p class="text-base font-semibold">Cargando ficha lúdica inteligente...</p>
     </div>
 }
 else if (Game == null)
 {
     <div class="container-ludeka py-20 text-center max-w-lg mx-auto">
-        <span class="text-5xl block mb-4">🕵️‍♂️</span>
+        <span class="inline-block mb-4"><Icon Name="search" Size="40" /></span>
         <h1 class="text-2xl font-black text-white mb-2">Juego no encontrado</h1>
         <p class="text-sm text-slate-400 mb-6">
             El juego que buscas con identificador <code class="text-orange-400">@Slug</code> aún no está en nuestro catálogo base.
@@ -47,25 +47,25 @@ else
                        rel="noopener noreferrer"
                        title="Ver en BoardGameGeek"
                        class="px-3 py-1 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                        <span>🌐</span> Ver en BoardGameGeek
+                        <Icon Name="globe" Size="12" /> Ver en BoardGameGeek
                     </a>
                 }
                 <button type="button"
                         @onclick="() => _isReportModalOpen = true"
                         title="Reportar una errata, imagen incorrecta o problema en esta ficha"
                         class="px-3 py-1 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30 text-[var(--text-secondary)] border border-[var(--border-subtle)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                    <span>🚩</span> Reportar problema
+                    <Icon Name="flag" Size="12" /> Reportar problema
                 </button>
                 <button type="button"
                         @onclick="OpenSocialCardModal"
                         class="px-3 py-1 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                    <span>🎨</span> Cartel para Redes
+                    <Icon Name="palette" Size="12" /> Cartel para Redes
                 </button>
                 @if (Game.PurchaseLinks != null && Game.PurchaseLinks.Count > 0)
                 {
                     <a href="#donde-comprar"
                        class="px-3 py-1 rounded-lg bg-[var(--brand-primary)]/10 hover:bg-[var(--brand-primary)]/20 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                        <span>🛒</span> Comprar (@Game.PurchaseLinks.Count)
+                        <Icon Name="shopping-cart" Size="12" /> Comprar (@Game.PurchaseLinks.Count)
                     </a>
                 }
                 @if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanEditGames)))
@@ -74,7 +74,7 @@ else
                             @onclick="() => _isEditorModalOpen = true"
                             title="Editar ficha del catálogo y carátula"
                             class="px-3 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                        <span>✏️</span> Editar Ficha
+                        <Icon Name="pen-line" Size="12" /> Editar Ficha
                     </button>
                     <button type="button"
                             @onclick="HandleRequestAiSummary"
@@ -83,12 +83,12 @@ else
                             class="px-3 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50">
                         @if (_isGeneratingAiSummary)
                         {
-                            <span class="animate-spin">⚙️</span>
+                            <span class="animate-spin"><Icon Name="settings" Size="14" /></span>
                             <span>Sintetizando...</span>
                         }
                         else
                         {
-                            <span>🤖</span>
+                            <Icon Name="bot" Size="12" />
                             <span>@(_aiSummary != null ? "Regenerar con IA" : "Generar con IA")</span>
                         }
                     </button>
@@ -98,11 +98,11 @@ else
                     <button type="button"
                             @onclick="() => _isFoundingModalOpen = true"
                             class="px-3 py-1 rounded-lg bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                        <span>🛡️</span> Gestionar Veredicto Fundador
+                        <Icon Name="shield" Size="12" /> Gestionar Veredicto Fundador
                     </button>
                 }
                 <a href="/mi-ludoteca" class="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1">
-                    <span>📚</span> Ir a Mi Ludoteca
+                    <Icon Name="library" Size="12" /> Ir a Mi Ludoteca
                 </a>
             </div>
         </div>
@@ -129,7 +129,7 @@ else
                     @if (Game.IsExpansion)
                     {
                         <div class="absolute top-3 left-3 z-10 px-3 py-1 rounded-lg bg-purple-950/85 backdrop-blur-md border border-purple-500/40 text-xs font-black text-purple-200 shadow-lg flex items-center gap-1.5">
-                            <span>🧩</span>
+                            <Icon Name="puzzle" Size="12" />
                             <span>Expansión Oficial</span>
                         </div>
                     }
@@ -162,7 +162,7 @@ else
                             @if (Game.IsExpansion)
                             {
                                 <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30">
-                                    🧩 Expansión Oficial
+                                    <Icon Name="puzzle" Size="12" /> Expansión Oficial
                                 </span>
                             }
                             <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
@@ -171,7 +171,7 @@ else
                             @if (Game.BggRank.HasValue)
                             {
                                 <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                                    🏆 #@Game.BggRank Global BGG
+                                    <Icon Name="trophy" Size="12" /> #@Game.BggRank Global BGG
                                 </span>
                             }
                             @if (Game.BggId > 0)
@@ -181,7 +181,7 @@ else
                                    rel="noopener noreferrer"
                                    title="Ver en BoardGameGeek"
                                    class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--brand-primary)] border border-[var(--border-subtle)] transition-colors inline-flex items-center gap-1">
-                                    <span>🌐</span> Ver en BGG
+                                    <Icon Name="globe" Size="12" /> Ver en BGG
                                 </a>
                             }
                         </div>
@@ -273,7 +273,7 @@ else
         {
             <div class="mt-3 p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-secondary)]">
                 <div class="flex items-center gap-2">
-                    <span>📦</span>
+                    <Icon Name="package" Size="14" />
                     <span>
                         Actualmente prestado a <strong class="text-[var(--text-primary)]">@_activeLoan.BorrowerName</strong> desde el @_activeLoan.LoanDate.ToString("dd/MM/yyyy").
                     </span>
@@ -293,7 +293,7 @@ else
         {
             <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-xs text-indigo-300 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
-                    <span>🤖</span>
+                    <Icon Name="bot" Size="14" />
                     <span>@_aiSummaryMessage</span>
                 </div>
                 <button type="button" @onclick="() => _aiSummaryMessage = null" class="text-slate-400 hover:text-white">&times;</button>
@@ -312,7 +312,7 @@ else
         else if (CurrentUserService.IsFoundingTeam || (CurrentUserService.IsInRole("Moderator") && CurrentUserService.HasPermission(ModeratorPermission.CanEditGames)))
         {
             <div class="rounded-xl bg-[var(--bg-card)] border border-dashed border-[var(--border-subtle)] p-5 text-center space-y-3">
-                <div class="text-2xl">🤖</div>
+                <div><Icon Name="bot" Size="24" /></div>
                 <h3 class="text-sm font-bold text-[var(--text-primary)]">Ficha pendiente de síntesis editorial</h3>
                 <p class="text-xs text-[var(--text-muted)] max-w-md mx-auto">
                     Este título aún no cuenta con síntesis de IA ni veredicto de la mesa fundadora. Puedes generar su síntesis ahora bajo demanda.
@@ -323,12 +323,12 @@ else
                         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity shadow-sm disabled:opacity-50">
                     @if (_isGeneratingAiSummary)
                     {
-                        <span class="animate-spin">⚙️</span>
+                        <span class="animate-spin"><Icon Name="settings" Size="14" /></span>
                         <span>Generando síntesis con IA...</span>
                     }
                     else
                     {
-                        <span>⚡</span>
+                        <Icon Name="zap" Size="12" />
                         <span>Generar Síntesis con IA Ahora</span>
                     }
                 </button>
@@ -497,9 +497,9 @@ else
         {
             verdictBadge = _foundingVerdict.Recommendation switch
             {
-                FoundingRecommendation.MustPlay => "🛡️ Imprescindible (Mesa Fundadora)",
-                FoundingRecommendation.RecommendedWithAdaptations => "🛡️ Recomendado con adaptaciones",
-                _ => "🛡️ Prescindible"
+                FoundingRecommendation.MustPlay => "Imprescindible (Mesa Fundadora)",
+                FoundingRecommendation.RecommendedWithAdaptations => "Recomendado con adaptaciones",
+                _ => "Prescindible"
             };
         }
 

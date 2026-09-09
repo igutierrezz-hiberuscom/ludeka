@@ -7,7 +7,7 @@
 <div id="donde-comprar" class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-2">
         <div class="flex items-center gap-2.5">
-            <span class="text-xl">🛒</span>
+            <Icon Name="shopping-cart" Size="20" />
             <div>
                 <div class="flex items-center gap-2">
                     <h2 class="font-bold text-base text-[var(--text-primary)] leading-tight">Dónde Comprar</h2>
@@ -21,7 +21,7 @@
                     @if (_isCheckingStock)
                     {
                         <span class="px-2 py-0.5 rounded-md text-[0.65rem] font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20 inline-flex items-center gap-1 animate-pulse">
-                            <span>⚙️</span>
+                            <Icon Name="settings" Size="12" />
                             <span>Verificando stock en vivo...</span>
                         </span>
                     }
@@ -30,7 +30,7 @@
             </div>
         </div>
         <a href="/transparencia" class="text-[0.7rem] font-medium text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
-            <span>🛡️</span> 100% Transparente
+            <Icon Name="shield" Size="12" /> 100% Transparente
         </a>
     </div>
 
@@ -68,7 +68,7 @@
                             @if (offer.ShippingCountries != null && offer.ShippingCountries.Count > 1)
                             {
                                 <span class="text-[0.65rem] text-[var(--text-muted)]" title="Envíos a: @string.Join(", ", offer.ShippingCountries)">
-                                    ✈️ Envíos a @offer.ShippingCountries.Count países
+                                    <Icon Name="plane" Size="12" /> Envíos a @offer.ShippingCountries.Count países
                                 </span>
                             }
                         </div>
@@ -189,7 +189,7 @@
                                 title="Recomprobar disponibilidad en vivo en @offer.StoreName"
                                 aria-label="Recomprobar disponibilidad en @offer.StoreName"
                                 class="p-2 rounded-lg bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] text-xs transition-colors">
-                            🔄
+                            <Icon Name="refresh-cw" Size="14" />
                         </button>
                     </div>
                 </div>
@@ -199,7 +199,7 @@
     else if (!string.IsNullOrWhiteSpace(_effectiveCountry))
     {
         <div class="p-5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-center sm:text-left flex flex-col sm:flex-row items-center gap-3">
-            <span class="text-2xl">📦</span>
+            <Icon Name="package" Size="24" />
             <div class="text-xs text-[var(--text-secondary)] space-y-1">
                 <p class="font-bold text-[var(--text-primary)]">
                     No hay tiendas asociadas con disponibilidad o envíos para @CountryCatalog.GetFlag(_effectiveCountry) @_effectiveCountry por el momento.
@@ -213,7 +213,7 @@
     else
     {
         <div class="p-4 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-center sm:text-left flex flex-col sm:flex-row items-center gap-3">
-            <span class="text-2xl">📦</span>
+            <Icon Name="package" Size="24" />
             <div class="text-xs text-[var(--text-secondary)] space-y-0.5">
                 <p class="font-medium text-[var(--text-primary)]">Sin enlaces de compra vinculados por el momento.</p>
                 <p>Si eres una tienda física o especializada y dispones de stock de este título, puedes contactar con la comunidad para vincularlo.</p>
@@ -223,7 +223,7 @@
 
     <div class="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[0.68rem] text-[var(--text-muted)] flex-wrap gap-2">
         <span>
-            💡 <em>Al comprar a través de estos enlaces recibimos una pequeña aportación que ayuda a mantener Ludeka libre de publicidad invasiva.</em>
+            <Icon Name="lightbulb" Size="12" /> <em>Al comprar a través de estos enlaces recibimos una pequeña aportación que ayuda a mantener Ludeka libre de publicidad invasiva.</em>
         </span>
         <a href="/transparencia" class="underline hover:text-[var(--text-secondary)]">
             Transparencia de fondos &rarr;

@@ -53,9 +53,9 @@ public class WebMarkupContractTests
           new[] { "@page \"/autores\"", "Directorio de Creadores de Contenido — Ludeka", "Creadores de Contenido &bull; Divulgadores del Hobby", "hobby hispanohablante" },
           new[] { "Creadores y Autores", "Autoría Lúdica", "GamesCount", "diseñadores, ilustradores y divulgadores referentes" } },
 
-        // MainLayout: navegación y pie reetiquetados a Creadores
+        // MainLayout: navegación y pie reetiquetados a Creadores; el pie usa icono Lucide (no ✍️)
         { "MainLayout (nav y pie)", "src/Ludeka.Web/Components/Layout/MainLayout.razor",
-          new[] { "Creadores", "✍️ Creadores" },
+          new[] { "Creadores", "Icon Name=\"pen-line\"" },
           new[] { "Autores" } },
 
         // CreatorEditModal: formulario reetiquetado
@@ -156,6 +156,119 @@ public class WebMarkupContractTests
         { "HomeEventCard (Eventos)", "src/Ludeka.Web/Components/Home/HomeEventCard.razor",
           new[] { "rail-card", "rail-cover--banner", "evento-default.svg", "DefaultImage", "loading=\"lazy\"", "onerror", "width=", "height=" },
           EmojisDePortada },
+
+        // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 2 — layout, catálogo y fichas) =====
+
+        // MainLayout: nav, utilidades, menú de gestión y pie con iconos Lucide (sin emojis)
+        { "MainLayout (iconografia Lucide)", "src/Ludeka.Web/Components/Layout/MainLayout.razor",
+          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"newspaper\"", "<Icon Name=\"tent\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"shield\"", "<Icon Name=\"library\"", "<Icon Name=\"bell\"" },
+          new[] { "🎁", "📰", "🎪", "🌍", "📚", "🛡", "👤", "⚙", "🚩", "🌙", "🎬", "📸", "🔔", "👥", "📜", "🏢", "✍", "🛒", "💬", "🗙" } },
+
+        // GameCard: badges de estilo y público con iconos Lucide
+        { "GameCard (badges sin emojis)", "src/Ludeka.Web/Components/Shared/GameCard.razor",
+          new[] { "<Icon Name=\"puzzle\"", "<Icon Name=\"settings\"", "<Icon Name=\"party-popper\"", "<Icon Name=\"book-open\"", "<Icon Name=\"user\"", "<Icon Name=\"baby\"" },
+          new[] { "🧩", "⚙", "🎉", "📖", "👤", "👶" } },
+
+        // GameDetail: ficha inteligente con cabecera, badges y avisos por iconos Lucide
+        { "GameDetail (ficha sin emojis)", "src/Ludeka.Web/Components/Pages/GameDetail.razor",
+          new[] { "<Icon Name=\"globe\"", "<Icon Name=\"flag\"", "<Icon Name=\"palette\"", "<Icon Name=\"shopping-cart\"", "<Icon Name=\"bot\"", "<Icon Name=\"package\"", "<Icon Name=\"trophy\"" },
+          new[] { "🎲", "🕵", "🌐", "🚩", "🎨", "🛒", "✏", "⚙", "🤖", "🛡", "📚", "🧩", "🏆", "📦", "⚡" } },
+
+        // CreatorsDirectory: buscador, spinner, vacío y acciones por iconos Lucide
+        { "CreatorsDirectory (sin emojis)", "src/Ludeka.Web/Components/Pages/CreatorsDirectory.razor",
+          new[] { "<Icon Name=\"pen-line\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"user\"", "<Icon Name=\"globe\"" },
+          new[] { "✍", "➕", "🔍", "🎲", "👤", "🌍", "✏" } },
+
+        // CreatorDetail: spinner, vacío, badge de canal y enlaces externos por iconos Lucide
+        { "CreatorDetail (sin emojis)", "src/Ludeka.Web/Components/Pages/CreatorDetail.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"search\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"clapperboard\"", "<Icon Name=\"globe\"" },
+          new[] { "🎲", "🔍", "✏", "🎬", "🌍", "🌐" } },
+
+        // Home (/catalogo): filtros, spinner y vacío por iconos Lucide
+        { "Home catalogo (sin emojis)", "src/Ludeka.Web/Components/Pages/Home.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"swords\"", "<Icon Name=\"users\"", "<Icon Name=\"user\"", "<Icon Name=\"timer\"" },
+          new[] { "🎲", "🧩", "⚔", "👨", "👤", "⏱" } },
+
+        // StoreOffersCard: cabecera, envíos, recomprobación y nota de afiliación por iconos Lucide
+        { "StoreOffersCard (sin emojis)", "src/Ludeka.Web/Components/Shared/StoreOffersCard.razor",
+          new[] { "<Icon Name=\"shopping-cart\"", "<Icon Name=\"shield\"", "<Icon Name=\"plane\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"package\"", "<Icon Name=\"lightbulb\"", "<Icon Name=\"settings\"" },
+          new[] { "🛒", "⚙", "🛡", "✈", "🔄", "📦", "💡" } },
+
+        // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 3 — ludoteca y préstamos) =====
+
+        // MyLibrary: pestañas, spinners, vacíos, temas y acciones por iconos Lucide
+        { "MyLibrary (sin emojis)", "src/Ludeka.Web/Components/Pages/MyLibrary.razor",
+          new[] { "<Icon Name=\"library\"", "<Icon Name=\"dices\"", "<Icon Name=\"package\"", "<Icon Name=\"dna\"", "<Icon Name=\"handshake\"", "<Icon Name=\"undo-2\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"wifi-off\"" },
+          new[] { "📥", "🎲", "🔍", "📡", "🔄", "📚", "🛒", "📝", "📦", "⏳", "🎨", "🌍", "🧬", "📖", "🪵", "🌌", "🌑", "⚠", "📍", "📋", "👁", "🤝", "👤", "↩", "🔔", "🧩", "⏱", "👥", "📅" } },
+
+        // CollectionActionBar: estados de colección y préstamos por iconos Lucide
+        { "CollectionActionBar (sin emojis)", "src/Ludeka.Web/Components/Shared/CollectionActionBar.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"plus\"", "<Icon Name=\"package\"", "<Icon Name=\"handshake\"", "<Icon Name=\"library\"", "<Icon Name=\"shopping-cart\"", "<Icon Name=\"bell\"" },
+          new[] { "🎲", "➕", "📦", "🤝", "📚", "🛒", "🔔" } },
+
+        // LoanModal: cabecera y devolución por iconos Lucide
+        { "LoanModal (sin emojis)", "src/Ludeka.Web/Components/Shared/LoanModal.razor",
+          new[] { "<Icon Name=\"package\"", "<Icon Name=\"undo-2\"" },
+          new[] { "📦", "↩" } },
+
+        // RecordPlayModal: cabecera, error y spinner por iconos Lucide
+        { "RecordPlayModal (sin emojis)", "src/Ludeka.Web/Components/Shared/RecordPlayModal.razor",
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"triangle-alert\"", "<Icon Name=\"settings\"" },
+          new[] { "🎲", "⚠", "⚙" } },
+
+        // ReviewBottomSheet: cabecera y contexto familiar por iconos Lucide; semáforo por puntos CSS
+        { "ReviewBottomSheet (sin emojis)", "src/Ludeka.Web/Components/Shared/ReviewBottomSheet.razor",
+          new[] { "<Icon Name=\"zap\"", "<Icon Name=\"baby\"", "rounded-full bg-emerald-500" },
+          new[] { "⚡", "🟢", "🟡", "🔴", "👶", "🏠", "🛡", "👥", "☕", "💻" } },
+
+        // LibraryStatsDashboard: métricas y secciones por iconos Lucide (el badge IconEmoji
+        // proviene de datos del backend y queda documentado como excepción de este contrato)
+        { "LibraryStatsDashboard (sin emojis)", "src/Ludeka.Web/Components/Features/Library/LibraryStatsDashboard.razor",
+          new[] { "<Icon Name=\"hourglass\"", "<Icon Name=\"users\"", "<Icon Name=\"shield\"", "<Icon Name=\"dna\"", "<Icon Name=\"handshake\"", "<Icon Name=\"trophy\"", "<Icon Name=\"building-2\"" },
+          new[] { "⏳", "👥", "🛡", "🧬", "🤝", "🐺", "🏆", "🖋", "🏢" } },
+
+        // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 4 — eventos, sorteos y novedades) =====
+
+        // Events: pestañas, spinner, vacío, metadatos y pie por iconos Lucide
+        { "Events (sin emojis)", "src/Ludeka.Web/Components/Pages/Events.razor",
+          new[] { "<Icon Name=\"tent\"", "<Icon Name=\"calendar-days\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"globe\"", "<Icon Name=\"scroll\"", "<Icon Name=\"settings\"", "rounded-full bg-emerald-500" },
+          new[] { "🎪", "⚙", "🟢", "📜", "🌍", "⭐", "➕", "🗓", "📍", "🌐" } },
+
+        // EventsManagement: cabecera, acciones, tabla y modal de edición por iconos Lucide
+        { "EventsManagement (sin emojis)", "src/Ludeka.Web/Components/Pages/EventsManagement.razor",
+          new[] { "<Icon Name=\"shield\"", "<Icon Name=\"eye\"", "<Icon Name=\"plus\"", "<Icon Name=\"tent\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"trash-2\"", "<Icon Name=\"folder\"" },
+          new[] { "🛡", "👁", "➕", "🎪", "📍", "⭐", "✏", "🗑", "📁", "🇪🇸", "🌎" } },
+
+        // GiveawayCard: badges de plataforma y promoción por iconos Lucide (el switch de
+        // plataforma devuelve el nombre del icono en el catálogo, no un emoji)
+        { "GiveawayCard (sin emojis)", "src/Ludeka.Web/Components/Shared/GiveawayCard.razor",
+          new[] { "<Icon Name=\"@GetPlatformIcon(Giveaway.Platform)\"", "<Icon Name=\"star\"", "<Icon Name=\"gift\"", "<Icon Name=\"dices\"", "<Icon Name=\"camera\"", "GiveawayPlatform.Instagram => \"camera\"" },
+          new[] { "⭐", "🎁", "🎲", "📸", "🔗", "🎬" } },
+
+        // Radar: cabecera, acciones, spinner y vacío por iconos Lucide
+        { "Radar (sin emojis)", "src/Ludeka.Web/Components/Pages/Radar.razor",
+          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"plus\"", "<Icon Name=\"dices\"", "<Icon Name=\"radar\"", "<Icon Name=\"star\"" },
+          new[] { "🎁", "➕", "🌍", "⭐", "🎲", "📡", "🌎" } },
+
+        // News: cabecera, buscador, spinner, vacío y badges por iconos Lucide
+        { "News (sin emojis)", "src/Ludeka.Web/Components/Pages/News.razor",
+          new[] { "<Icon Name=\"newspaper\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"package\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"camera\"", "<Icon Name=\"calendar-days\"" },
+          new[] { "📰", "➕", "🔍", "📦", "🔄", "🆕", "🗓", "📸" } },
+
+        // NotFound: spinner/hero del 404 por icono Lucide
+        { "NotFound (sin emojis)", "src/Ludeka.Web/Components/Pages/NotFound.razor",
+          new[] { "<Icon Name=\"dices\"" },
+          new[] { "🎲" } },
+
+        // OfflineIndicator: visible en la cabecera de todas las páginas (portada incluida)
+        { "OfflineIndicator (sin emojis)", "src/Ludeka.Web/Components/Shared/OfflineIndicator.razor",
+          new[] { "<Icon Name=\"wifi-off\"", "rounded-full bg-emerald-500" },
+          new[] { "📡", "🟢" } },
+
+        // ScalabilityTrafficLight: píldora del ideal por icono Lucide
+        { "ScalabilityTrafficLight (sin emojis)", "src/Ludeka.Web/Components/Shared/ScalabilityTrafficLight.razor",
+          new[] { "<Icon Name=\"sparkles\"" },
+          new[] { "✨" } },
     };
 
     [Theory]
@@ -331,5 +444,33 @@ public class WebMarkupContractTests
         Assert.True(breakPos > casePos, "La rama CssScene del @switch debe terminar en break;");
         var cssSceneBranch = source[casePos..breakPos];
         Assert.DoesNotContain("<picture", cssSceneBranch, StringComparison.Ordinal);
+    }
+
+    // ===== INC-35 PR-3: fix D5 — fallback de imagen en las páginas de eventos =====
+
+    [Theory]
+    [InlineData("src/Ludeka.Web/Components/Pages/Events.razor")]
+    [InlineData("src/Ludeka.Web/Components/Pages/EventsManagement.razor")]
+    public void PaginasEventos_TodaImagenDeEventoTieneFallbackPorDominio(string relativePath)
+    {
+        // Escenario «Página de eventos con evento sin imagen» (spec default-image-fallbacks):
+        // sin URL el cartel es DefaultImage inline por dominio; con URL externa, onerror cae
+        // en el asset estático de eventos. Nadie queda con un <img> roto ni sin dimensiones.
+        var source = ReadSource(relativePath);
+        Assert.Contains("DefaultImageDomain.Evento", source);
+        Assert.Contains("/images/defaults/evento-default.svg", source);
+
+        var imgTags = System.Text.RegularExpressions.Regex.Matches(
+            source, @"<img\b[^>]*>", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Assert.True(imgTags.Count > 0, $"{relativePath}: debe existir al menos una imagen de cartel de evento.");
+
+        foreach (System.Text.RegularExpressions.Match img in imgTags)
+        {
+            Assert.True(img.Value.Contains("onerror=", StringComparison.Ordinal),
+                $"{relativePath}: toda <img> de evento debe declarar onerror con el default de Ludeka.");
+            Assert.True(img.Value.Contains("width=", StringComparison.Ordinal)
+                && img.Value.Contains("height=", StringComparison.Ordinal),
+                $"{relativePath}: toda <img> de evento debe fijar width/height para CLS 0.");
+        }
     }
 }

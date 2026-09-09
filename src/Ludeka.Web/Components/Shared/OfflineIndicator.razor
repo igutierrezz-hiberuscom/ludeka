@@ -7,7 +7,7 @@
     <div role="status" 
          aria-live="polite" 
          class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-sm animate-pulse">
-        <span class="text-sm">📡</span>
+        <Icon Name="wifi-off" Size="14" />
         <span>Modo sin conexión</span>
     </div>
 }
@@ -16,7 +16,7 @@ else if (_showRestoredNotice)
     <div role="status" 
          aria-live="polite" 
          class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm transition-all">
-        <span class="text-sm">🟢</span>
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
         <span>Conexión restablecida</span>
     </div>
 }
