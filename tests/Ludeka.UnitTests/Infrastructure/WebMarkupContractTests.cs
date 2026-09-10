@@ -915,4 +915,25 @@ public class WebMarkupContractTests
             }
         }
     }
+
+    [Fact]
+    public void HeroEditorial_AnchoDelContenedorDeclaradoEnElBloqueCss()
+    {
+        // Remediación DD-01 (INC-36): el bloque .hero-editorial debe fijar width: 100%
+        // para que el ancho lo determine el contenedor y el alto solo se derive del ratio
+        // clampado (medido en navegador: 409,58 y 793,58 px transferidos desde el alto).
+        // La aserción se acota al bloque porque input.css ya contiene 'width: 100%' en
+        // otros bloques: un fragmento global sería tautológico y no detectaría la regresión.
+        var fuenteCss = ReadSource("src/Ludeka.Web/Styles/input.css");
+
+        var inicio = fuenteCss.IndexOf(".hero-editorial {", StringComparison.Ordinal);
+        Assert.True(inicio >= 0, "input.css no declara el bloque .hero-editorial.");
+
+        var fin = fuenteCss.IndexOf('}', inicio);
+        Assert.True(fin > inicio, "El bloque .hero-editorial no cierra con '}'.");
+
+        var bloque = fuenteCss[inicio..fin];
+        Assert.True(bloque.Contains("width: 100%", StringComparison.Ordinal),
+            $"El bloque .hero-editorial debe fijar 'width: 100%'; contenido actual: {bloque}");
+    }
 }

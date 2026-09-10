@@ -349,6 +349,7 @@
    que alcanza ~460px en ultrapanorámicos. Sin min-height fijo de bloque: el alto
    deriva del ancho, no del contenido (CLS 0 conservado). */
 .hero-editorial {
+    width: 100%;
     aspect-ratio: 16 / 9;
     min-height: 200px;
     max-height: clamp(200px, 36vw, 460px);
