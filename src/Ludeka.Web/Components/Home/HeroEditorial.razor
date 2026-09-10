@@ -1,17 +1,14 @@
-@* Hero editorial narrativo de la portada (INC-35, Decisión 1): titular visible en serif
-   display, subtítulo de invitación a la mesa, buscador rápido y las 4 píldoras de acceso
-   (spec congelada, orden intacto). El fondo se conmuta con el parámetro Background
-   (Decisión 2): foto de ambiente servida en <picture> AVIF/WebP/JPG con prioridad de
-   carga (patrón INC-07) o escena compuesta por CSS con variables de tema. La escena CSS
-   se renderiza SIEMPRE bajo la foto: si el asset falla en el navegador (clase
-   hero-bg-media--failed vía onerror) el fondo cae a la escena sin hueco ni petición
-   extra. El scrim por tema deja casi opaco el cuadrante del texto, de modo que el
-   contraste >= 4,5:1 se conserva por construcción en los 5 data-theme (Decisión 10). *@
+@* Hero de imagen protagonista (revisión maintainer): la ilustración/foto llena el
+   hero y SOLO el buscador y las píldoras se superponen (tarjetas propias, legibles
+   sin capa alguna). El h1 queda sr-only para lectores de pantalla y SEO. El fondo
+   se conmuta con el parámetro Background o ?hero= (Decisión 2): foto servida en
+   <picture> AVIF/WebP/JPG con prioridad de carga (patrón INC-07) o escena CSS.
+   Si el asset falla (onerror) el fondo cae a la escena sin hueco ni petición extra. *@
 @using Ludeka.Web.Components.Shared
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
 
-<section class="hero-editorial relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
+<section class="hero-editorial relative min-h-[360px] sm:min-h-[460px] overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
     @* Capa de escena CSS: siempre presente bajo la foto (0 peticiones, fallback por tema) *@
     <div class="hero-scene" aria-hidden="true"></div>
 
@@ -53,18 +50,11 @@
         </nav>
     }
 
-    @* Chips de texto (revisión maintainer): cada línea lleva su propio fondo sólido
-       (box-decoration-break clone) — la ilustración queda visible fuera del texto.
-       Sin scrim global ni panel: buscador y píldoras ya son tarjetas propias. *@
-    <div class="relative max-w-3xl space-y-4 p-6 sm:p-10">
-        <h1 class="hero-title"><span class="hero-text-chip">La mesa está servida</span></h1>
-
-        <p class="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-            <span class="hero-text-chip">Descubre qué títulos merecen tu tapete, participa en los sorteos de la comunidad y sigue las primicias de tiendas y las grandes ferias del sector. Tu próxima partida empieza aquí.</span>
-        </p>
-
-        @* Buscador directo que redirige a /catalogo *@
-        <div class="pt-2 max-w-xl">
+    @* Acciones superpuestas: buscador y píldoras (tarjetas propias, legibles sobre
+       cualquier fondo sin capa intermedia). El h1 es sr-only (accesibilidad/SEO). *@
+    <h1 class="sr-only">La mesa está servida</h1>
+    <div class="hero-actions p-4 sm:p-8">
+        <div class="w-full max-w-xl">
             <form @onsubmit="HandleQuickSearch" class="flex items-center gap-2">
                 <div class="relative flex-1">
                     <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[var(--text-muted)]">
@@ -83,7 +73,7 @@
         </div>
 
         @* Píldoras de acceso directo *@
-        <div class="flex items-center gap-2 pt-2 flex-wrap text-xs font-semibold">
+        <div class="flex items-center gap-2 flex-wrap justify-center text-xs font-semibold">
             <a href="/catalogo" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
                 <Icon Name="dices" Size="14" /> Catálogo Completo
             </a>

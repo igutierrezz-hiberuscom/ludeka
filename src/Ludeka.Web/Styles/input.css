@@ -290,27 +290,18 @@
     display: none;
 }
 
-/* Chips de texto del hero (revisión maintainer): fondo sólido POR LÍNEA con
-   box-decoration-break clone — abraza el texto y garantiza contraste AA en
-   cualquier ancho y tema sin tapar la ilustración. Fallback: navegadores sin
-   box-decoration-break piden el bloque sólido (legible igualmente). */
-.hero-text-chip {
-    background: var(--bg-main);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-    padding: 0.22em 0.45em;
-    border-radius: 0.4rem;
-}
-
-/* Titular visible del hero (h1 de la portada) en serif display */
-.hero-title {
-    font-family: var(--font-display);
-    font-optical-sizing: auto;
-    font-weight: 700;
-    font-size: clamp(2rem, 5vw, 2.75rem);
-    line-height: 1.12;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
+/* Acciones superpuestas del hero (revisión maintainer): buscador y píldoras centrados
+   al borde inferior, sobre la ilustración protagonista. Son tarjetas con fondo propio,
+   así que no necesitan capa intermedia para legibilidad. */
+.hero-actions {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 /* Títulos <h2> de los carriles de portada en serif display (exclusivamente portada) */

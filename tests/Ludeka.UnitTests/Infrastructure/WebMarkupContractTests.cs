@@ -120,7 +120,7 @@ public class WebMarkupContractTests
         { "Fundación CSS (tokens, rail-card y hero)", "src/Ludeka.Web/Styles/input.css",
           new[] { "--ease-out-expo", "--ease-out-quad", "--dur-fast", "--dur-base", "--dur-slow", "--rail-lift", "--rail-zoom", "--font-display: 'Fraunces'",
                   ".rail-card:hover, .rail-card:focus-visible", ".rail-cover--square", ".rail-cover--wide", ".rail-cover--banner",
-                  ".scrollbar-none", "prefers-reduced-motion: reduce", ".hero-title", ".rail-title", ".hero-text-chip" },
+                  ".scrollbar-none", "prefers-reduced-motion: reduce", ".rail-title", ".hero-actions" },
           Array.Empty<string>() },
 
         // HeroEditorial: hero narrativo con <picture> AVIF/WebP/JPG priorizado (patrón INC-07),
@@ -129,9 +129,9 @@ public class WebMarkupContractTests
           new[] { "<picture", "<source type=\"image/avif\"", "<source type=\"image/webp\"",
                   "fetchpriority=\"high\"", "width=\"1600\"", "height=\"900\"",
                   "alt=\"@HeroBackgroundAssets.AltText(Background)\"", "@switch (Background)",
-                  "hero-text-chip",
-                  "<h1 class=\"hero-title\"><span class=\"hero-text-chip\">La mesa está servida</span></h1>" },
-          new[] { "PORTADA EDITORIAL", "alt=\"\"", "hero-scrim", "hero-panel" } },
+                  "hero-actions",
+                  "<h1 class=\"sr-only\">La mesa está servida</h1>" },
+          new[] { "PORTADA EDITORIAL", "alt=\"\"", "hero-text-chip", "hero-scrim", "hero-panel", "hero-title" } },
 
         // RailHeader: cabecera de carril reutilizable con título en serif display, icono Lucide
         // y enlace "Ver todos…" solo cuando hay destino (Decisiones 3 y 7)
