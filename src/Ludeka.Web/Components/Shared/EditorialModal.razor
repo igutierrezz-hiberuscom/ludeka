@@ -1,0 +1,125 @@
+@* Shell de modal editorial compartido (INC-36, DD-07 / D11): overlay fijo a pantalla
+   completa + tarjeta centrada de ancho acotado (max-w-lg) con diálogo etiquetado y
+   botón de cierre identificado. El cuerpo específico de cada formulario vive como
+   ChildContent y el pie de acciones en <Footer> — Radar y News adoptan este shell y
+   eliminan su shell inline. La gestión de foco es mejora progresiva vía ludekaModal
+   (wwwroot/js/editorial-modal.js): guarda el foco previo, enfoca el cierre al abrir,
+   lo restaura al cerrar y cierra con Escape. Sin interop (prerender, sin circuito)
+   el shell degrada a markup puro sin romper apertura ni cierre. *@
+@inject IJSRuntime JS
+
+@if (Open)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <div @ref="_dialogo"
+             role="dialog"
+             aria-modal="true"
+             aria-label="@Title"
+             class="w-full max-w-lg rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <h2 class="text-xl sm:text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    @if (!string.IsNullOrEmpty(TitleIcon))
+                    {
+                        <Icon Name="@TitleIcon" Size="20" />
+                    }
+                    @Title
+                </h2>
+                <button type="button"
+                        @ref="_cierre"
+                        data-editorial-cierre="true"
+                        aria-label="Cerrar @Title"
+                        @onclick="@(() => OnClose.InvokeAsync())"
+                        class="shrink-0 rounded-lg p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)]">
+                    <Icon Name="x" Size="18" />
+                </button>
+            </div>
+
+            @ChildContent
+
+            @if (Footer != null)
+            {
+                <div class="mt-6 flex flex-wrap items-center justify-end gap-3">
+                    @Footer
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Estado de apertura del shell; el estado lo posee la página anfitriona.</summary>
+    [Parameter, EditorRequired]
+    public bool Open { get; set; }
+
+    /// <summary>Título del diálogo (etiqueta accesible y encabezado del shell).</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>Nombre del icono Lucide junto al título (opcional).</summary>
+    [Parameter]
+    public string? TitleIcon { get; set; }
+
+    /// <summary>Callback de cierre: lo dispara el botón de cierre y Escape (vía JS).</summary>
+    [Parameter, EditorRequired]
+    public EventCallback OnClose { get; set; }
+
+    /// <summary>Cuerpo del modal (campos, labels, avisos — fuera del shell por diseño).</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Pie de acciones del modal (Cancelar / Guardar, handlers intactos en la página).</summary>
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    private ElementReference _dialogo;
+    private ElementReference _cierre;
+    private bool _abiertaConFoco;
+    private bool _jsActivo;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsActivo = true;
+        }
+
+        if (Open && !_abiertaConFoco)
+        {
+            _abiertaConFoco = true;
+            await LudekaModalInteropAsync(() => JS.InvokeVoidAsync("ludekaModal.open", _dialogo, _cierre).AsTask());
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_abiertaConFoco && !Open)
+        {
+            _abiertaConFoco = false;
+            await LudekaModalInteropAsync(() => JS.InvokeVoidAsync("ludekaModal.close").AsTask());
+        }
+    }
+
+    /// <summary>La gestión de foco es mejora progresiva (DD-07): si el interop no está
+    /// disponible (prerender o circuito caído) el shell sigue funcionando como markup.</summary>
+    private async Task LudekaModalInteropAsync(Func<Task> llamada)
+    {
+        if (!_jsActivo)
+        {
+            return;
+        }
+
+        try
+        {
+            await llamada();
+        }
+        catch (JSException)
+        {
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+}
