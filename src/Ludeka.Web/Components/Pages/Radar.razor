@@ -105,8 +105,6 @@
 </div>
 
 @* Modal de Proponer / Crear Sorteo *@
-@if (_isCreateModalOpen)
-{
     <EditorialModal Open="@_isCreateModalOpen"
                     Title="Registrar o Proponer Sorteo"
                     TitleIcon="gift"
@@ -234,7 +232,6 @@
                 </button>
         </Footer>
     </EditorialModal>
-}
 
 @code {
     private bool _includeExpired;

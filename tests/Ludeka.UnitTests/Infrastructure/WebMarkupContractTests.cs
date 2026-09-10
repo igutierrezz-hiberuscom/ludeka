@@ -303,17 +303,19 @@ public class WebMarkupContractTests
           new[] { "⭐", "🎁", "🎲", "📸", "🔗", "🎬", "dark:", "hover:scale-105", "text-amber-500", "text-pink-500", "text-sky-500", "text-rose-600" } },
 
         // Radar: cabecera compartida, modal editorial, acciones, spinner y vacío por
-        // iconos Lucide; los estados se expresan con tokens temáticos.
+        // iconos Lucide; los estados se expresan con tokens temáticos. Remediación F4.2:
+        // el shell del modal permanece montado (sin @if) para restaurar el foco al cerrar.
         { "Radar (sin emojis)", "src/Ludeka.Web/Components/Pages/Radar.razor",
           new[] { "BadgeIcon=\"gift\"", "<Icon Name=\"plus\"", "<Icon Name=\"dices\"", "<Icon Name=\"radar\"", "<Icon Name=\"star\"", "<PageHeaderEditorial", "<EditorialModal" },
-          new[] { "🎁", "➕", "🌍", "⭐", "🎲", "📡", "🌎", "dark:", "text-amber-500", "text-rose-600", "fixed inset-0 z-50" } },
+          new[] { "🎁", "➕", "🌍", "⭐", "🎲", "📡", "🌎", "dark:", "text-amber-500", "text-rose-600", "fixed inset-0 z-50", "@if (_isCreateModalOpen)" } },
 
         // News: cabecera compartida, modal editorial, imagen con fallback por dominio,
-        // buscador, spinner, vacío y badges por iconos Lucide.
+        // buscador, spinner, vacío y badges por iconos Lucide. Remediación F4.2:
+        // el shell del modal permanece montado (sin @if) para restaurar el foco al cerrar.
         { "News (sin emojis)", "src/Ludeka.Web/Components/Pages/News.razor",
           new[] { "BadgeIcon=\"newspaper\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"package\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"camera\"", "<Icon Name=\"calendar-days\"",
                   "<PageHeaderEditorial", "<EditorialModal", "DefaultImage", "DefaultImageDomain.Novedad", "novedad-default.svg", "onerror", "this.onerror=null", "width=", "height=", "rail-card" },
-          new[] { "📰", "➕", "🔍", "📦", "🔄", "🆕", "🗓", "📸", "dark:", "text-pink-500", "text-rose-600", "hover:scale-105", "fixed inset-0 z-50" } },
+          new[] { "📰", "➕", "🔍", "📦", "🔄", "🆕", "🗓", "📸", "dark:", "text-pink-500", "text-rose-600", "hover:scale-105", "fixed inset-0 z-50", "@if (_isCreateModalOpen)" } },
 
         // NotFound: spinner/hero del 404 por icono Lucide
         { "NotFound (sin emojis)", "src/Ludeka.Web/Components/Pages/NotFound.razor",

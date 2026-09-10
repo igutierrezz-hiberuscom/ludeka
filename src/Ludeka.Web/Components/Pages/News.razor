@@ -179,8 +179,6 @@
 </div>
 
 @* Modal para Registrar Novedad Manualmente *@
-@if (_isCreateModalOpen)
-{
     <EditorialModal Open="@_isCreateModalOpen"
                     Title="Añadir Novedad Editorial"
                     TitleIcon="newspaper"
@@ -268,7 +266,6 @@
                 </button>
         </Footer>
     </EditorialModal>
-}
 
 @code {
     private bool _isLoading = true;
