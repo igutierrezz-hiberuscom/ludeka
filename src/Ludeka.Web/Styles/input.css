@@ -290,29 +290,16 @@
     display: none;
 }
 
-/* Scrim por tema: el cuadrante del texto (izquierda) queda casi opaco con --bg-main
-   — meseta sólida hasta el 38% y desvanecido hasta el 68% — para garantizar el
-   contraste >= 4,5:1 por construcción en los 5 data-theme, incluidos los claros
-   (editorial y wood) donde un desvanecido corto no bastaba. */
-.hero-scrim {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, var(--bg-main) 0%, var(--bg-main) 38%, transparent 68%),
-                linear-gradient(180deg, transparent 45%, var(--bg-main) 96%);
-}
-
-/* Panel del texto del hero: garantiza la legibilidad en CUALQUIER ancho y tema
-   (un gradiente horizontal no protege en pantallas estrechas donde el texto
-   cruza el dibujo). Fallback sólido en var(--bg-main) para navegadores sin
-   color-mix; con soporte queda un panel 94% con desenfoque del dibujo detrás. */
-.hero-panel {
+/* Chips de texto del hero (revisión maintainer): fondo sólido POR LÍNEA con
+   box-decoration-break clone — abraza el texto y garantiza contraste AA en
+   cualquier ancho y tema sin tapar la ilustración. Fallback: navegadores sin
+   box-decoration-break piden el bloque sólido (legible igualmente). */
+.hero-text-chip {
     background: var(--bg-main);
-    border-radius: 1.25rem;
-    border: 1px solid var(--border-subtle);
-    box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .18);
-    background: color-mix(in srgb, var(--bg-main) 94%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding: 0.22em 0.45em;
+    border-radius: 0.4rem;
 }
 
 /* Titular visible del hero (h1 de la portada) en serif display */

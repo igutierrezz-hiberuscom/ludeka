@@ -38,9 +38,6 @@
         break;
 }
 
-    @* Scrim por tema: el cuadrante inferior-izquierdo (donde vive el texto) queda casi opaco *@
-    <div class="hero-scrim" aria-hidden="true"></div>
-
     @* Selector de variantes para pruebas: solo se renderiza con ?hero= en la querystring
        (autoeliminatorio — los visitantes de producción jamás lo ven). Enlaces SSR puros. *@
     @if (_showSwitcher)
@@ -56,11 +53,14 @@
         </nav>
     }
 
-    <div class="relative hero-panel max-w-3xl space-y-4 p-6 sm:p-10 m-4 sm:m-6">
-        <h1 class="hero-title">La mesa está servida</h1>
+    @* Chips de texto (revisión maintainer): cada línea lleva su propio fondo sólido
+       (box-decoration-break clone) — la ilustración queda visible fuera del texto.
+       Sin scrim global ni panel: buscador y píldoras ya son tarjetas propias. *@
+    <div class="relative max-w-3xl space-y-4 p-6 sm:p-10">
+        <h1 class="hero-title"><span class="hero-text-chip">La mesa está servida</span></h1>
 
         <p class="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-            Descubre qué títulos merecen tu tapete, participa en los sorteos de la comunidad y sigue las primicias de tiendas y las grandes ferias del sector. Tu próxima partida empieza aquí.
+            <span class="hero-text-chip">Descubre qué títulos merecen tu tapete, participa en los sorteos de la comunidad y sigue las primicias de tiendas y las grandes ferias del sector. Tu próxima partida empieza aquí.</span>
         </p>
 
         @* Buscador directo que redirige a /catalogo *@
