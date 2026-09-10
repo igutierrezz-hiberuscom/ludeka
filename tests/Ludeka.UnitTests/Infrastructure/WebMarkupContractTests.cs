@@ -120,7 +120,7 @@ public class WebMarkupContractTests
         { "Fundación CSS (tokens, rail-card y hero)", "src/Ludeka.Web/Styles/input.css",
           new[] { "--ease-out-expo", "--ease-out-quad", "--dur-fast", "--dur-base", "--dur-slow", "--rail-lift", "--rail-zoom", "--font-display: 'Fraunces'",
                   ".rail-card:hover, .rail-card:focus-visible", ".rail-cover--square", ".rail-cover--wide", ".rail-cover--banner",
-                  ".scrollbar-none", "prefers-reduced-motion: reduce", ".hero-title", ".rail-title", ".hero-scrim" },
+                  ".scrollbar-none", "prefers-reduced-motion: reduce", ".hero-title", ".rail-title", ".hero-scrim", ".hero-panel" },
           Array.Empty<string>() },
 
         // HeroEditorial: hero narrativo con <picture> AVIF/WebP/JPG priorizado (patrón INC-07),
@@ -129,6 +129,7 @@ public class WebMarkupContractTests
           new[] { "<picture", "<source type=\"image/avif\"", "<source type=\"image/webp\"",
                   "fetchpriority=\"high\"", "width=\"1600\"", "height=\"900\"",
                   "alt=\"@HeroBackgroundAssets.AltText(Background)\"", "hero-scrim", "@switch (Background)",
+                  "hero-panel",
                   "<h1 class=\"hero-title\">La mesa está servida</h1>" },
           new[] { "PORTADA EDITORIAL", "alt=\"\"" } },
 

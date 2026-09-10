@@ -301,6 +301,20 @@
                 linear-gradient(180deg, transparent 45%, var(--bg-main) 96%);
 }
 
+/* Panel del texto del hero: garantiza la legibilidad en CUALQUIER ancho y tema
+   (un gradiente horizontal no protege en pantallas estrechas donde el texto
+   cruza el dibujo). Fallback sólido en var(--bg-main) para navegadores sin
+   color-mix; con soporte queda un panel 94% con desenfoque del dibujo detrás. */
+.hero-panel {
+    background: var(--bg-main);
+    border-radius: 1.25rem;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .18);
+    background: color-mix(in srgb, var(--bg-main) 94%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
 /* Titular visible del hero (h1 de la portada) en serif display */
 .hero-title {
     font-family: var(--font-display);
