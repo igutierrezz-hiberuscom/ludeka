@@ -58,6 +58,21 @@ public static class HeroBackgroundAssets
         _ => string.Empty,
     };
 
+    /// <summary>
+    /// Clave del foco autoral de la variante (INC-36, DD-02): la <c>&lt;section&gt;</c> del
+    /// hero la compone como la clase <c>hero-focal--{clave}</c>, declarada en
+    /// <c>Styles/input.css</c> con su <c>object-position</c> autorial. Vacío en la escena
+    /// CSS: sin foto no hay encuadre que fijar.
+    /// </summary>
+    public static string FocalClass(HeroBackgroundVariant variant) => variant switch
+    {
+        HeroBackgroundVariant.FotoEurogame => "eurogame",
+        HeroBackgroundVariant.FotoMesaAmigos => "mesa-amigos",
+        HeroBackgroundVariant.FotoPrimerPlano => "primer-plano",
+        HeroBackgroundVariant.Ilustracion => "ilustracion",
+        _ => string.Empty,
+    };
+
     private static string BaseName(HeroBackgroundVariant variant) => variant switch
     {
         HeroBackgroundVariant.FotoEurogame => "/images/home/hero-ambiente-eurogame",

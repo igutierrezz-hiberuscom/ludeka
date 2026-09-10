@@ -132,14 +132,19 @@ public class WebMarkupContractTests
           new[] { "min-height: 360px", "min-height: 460px" } },
 
         // HeroEditorial: hero narrativo con <picture> AVIF/WebP/JPG priorizado (patrón INC-07),
-        // escena CSS bajo la foto, scrim por tema y titular en serif display (Decisiones 1, 2 y 10)
+        // escena CSS bajo la foto y altura derivada del ancho con foco autoral por variante
+        // (Decisiones 1, 2 y 10 + INC-36 DD-01/DD-02/DD-03: sin min-h fijo, la clase de foco
+        // hero-focal--{clave} viaja en la <section> y el botón Buscar usa --on-brand sobre
+        // la marca; el chip de pruebas usa un par autocontenido sobre su fondo literal)
         { "HeroEditorial (picture, prioridad y escena CSS)", "src/Ludeka.Web/Components/Home/HeroEditorial.razor",
           new[] { "<picture", "<source type=\"image/avif\"", "<source type=\"image/webp\"",
                   "fetchpriority=\"high\"", "width=\"1600\"", "height=\"900\"",
                   "alt=\"@HeroBackgroundAssets.AltText(Background)\"", "@switch (Background)",
                   "hero-actions",
-                  "<h1 class=\"sr-only\">La mesa está servida</h1>" },
-          new[] { "PORTADA EDITORIAL", "alt=\"\"", "hero-text-chip", "hero-scrim", "hero-panel", "hero-title", "Catálogo Completo" } },
+                  "<h1 class=\"sr-only\">La mesa está servida</h1>",
+                  "hero-focal--", "text-[var(--on-brand)]" },
+          new[] { "PORTADA EDITORIAL", "alt=\"\"", "hero-text-chip", "hero-scrim", "hero-panel", "hero-title", "Catálogo Completo",
+                  "min-h-[360px]", "sm:min-h-[460px]", "text-white" } },
 
         // RailHeader: cabecera de carril reutilizable con título en serif display, icono Lucide
         // y enlace "Ver todos…" solo cuando hay destino (Decisiones 3 y 7)
