@@ -320,6 +320,14 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 
 ---
 
+## Incremento 36: Rediseño Editorial del Resto de Páginas + Fix Responsive del Hero
+- **Identificador SDD:** `rediseno-paginas-editoriales`
+- **Objetivo Principal:** Extender el lenguaje editorial de la portada (INC-35) a las 5 páginas restantes (Catálogo, Fichas, Eventos, Sorteos, Novedades) mediante tokens/clases compartidos (`PageHeaderEditorial`, shell `EditorialModal`, lenguaje `.rail-card` en tarjetas de página) y corregir el bug responsive del hero (causa raíz: `min-height` fijo + hijos absolutos + recorte destructivo del 16:9; estrategia A: ratio responsiva + `object-position` focal + cap `clamp()` + suelo acotado). Incluye el token `--on-brand` para resolver el fallo WCAG 2.2 AA de los botones de marca en 3 temas.
+- **Estado:** ⏳ **En progreso** (fase sdd-propose completada).
+- **Documento:** [`inc-36-rediseno-paginas-editoriales.md`](file:///c:/repos/Ludeka/docs/increments/inc-36-rediseno-paginas-editoriales.md)
+
+---
+
 ## Convención de Trabajo para Cada Incremento (Ciclo SDD)
 
 Cada incremento se ejecutará siguiendo estrictamente las 7 fases de Spec-Driven Development:

@@ -116,22 +116,35 @@ public class WebMarkupContractTests
           new[] { "game-placeholder" } },
 
         // Fundación CSS de microinteracciones (Decisión 4): tokens compartidos + .rail-card
-        // + tipografía display del hero y de los títulos de carril (Decisiones 7 y 10)
+        // + tipografía display del hero y de los títulos de carril (Decisiones 7 y 10).
+        // INC-36 (PR-1, DD-01..DD-04/DD-06): añade --on-brand y los 4 tokens semánticos de
+        // estado por tema, el modelo de altura responsiva del hero (aspect + cap clamp, sin
+        // min-height fijo de bloque), los focos autoriales hero-focal--* con object-position
+        // y la clase .page-header-title de las cabeceras compartidas.
         { "Fundación CSS (tokens, rail-card y hero)", "src/Ludeka.Web/Styles/input.css",
           new[] { "--ease-out-expo", "--ease-out-quad", "--dur-fast", "--dur-base", "--dur-slow", "--rail-lift", "--rail-zoom", "--font-display: 'Fraunces'",
                   ".rail-card:hover, .rail-card:focus-visible", ".rail-cover--square", ".rail-cover--wide", ".rail-cover--banner",
-                  ".scrollbar-none", "prefers-reduced-motion: reduce", ".rail-title", ".hero-actions" },
-          Array.Empty<string>() },
+                  ".scrollbar-none", "prefers-reduced-motion: reduce", ".rail-title", ".hero-actions",
+                  "--on-brand", "--state-error", "--state-warning", "--state-info", "--state-highlight",
+                  "aspect-ratio: 16 / 9", "max-height: clamp(200px, 36vw, 460px)", ".page-header-title",
+                  "hero-focal--eurogame", "hero-focal--mesa-amigos", "hero-focal--primer-plano", "hero-focal--ilustracion",
+                  "object-position" },
+          new[] { "min-height: 360px", "min-height: 460px" } },
 
         // HeroEditorial: hero narrativo con <picture> AVIF/WebP/JPG priorizado (patrón INC-07),
-        // escena CSS bajo la foto, scrim por tema y titular en serif display (Decisiones 1, 2 y 10)
+        // escena CSS bajo la foto y altura derivada del ancho con foco autoral por variante
+        // (Decisiones 1, 2 y 10 + INC-36 DD-01/DD-02/DD-03: sin min-h fijo, la clase de foco
+        // hero-focal--{clave} viaja en la <section> y el botón Buscar usa --on-brand sobre
+        // la marca; el chip de pruebas usa un par autocontenido sobre su fondo literal)
         { "HeroEditorial (picture, prioridad y escena CSS)", "src/Ludeka.Web/Components/Home/HeroEditorial.razor",
           new[] { "<picture", "<source type=\"image/avif\"", "<source type=\"image/webp\"",
                   "fetchpriority=\"high\"", "width=\"1600\"", "height=\"900\"",
                   "alt=\"@HeroBackgroundAssets.AltText(Background)\"", "@switch (Background)",
                   "hero-actions",
-                  "<h1 class=\"sr-only\">La mesa está servida</h1>" },
-          new[] { "PORTADA EDITORIAL", "alt=\"\"", "hero-text-chip", "hero-scrim", "hero-panel", "hero-title", "Catálogo Completo" } },
+                  "<h1 class=\"sr-only\">La mesa está servida</h1>",
+                  "hero-focal--", "text-[var(--on-brand)]" },
+          new[] { "PORTADA EDITORIAL", "alt=\"\"", "hero-text-chip", "hero-scrim", "hero-panel", "hero-title", "Catálogo Completo",
+                  "min-h-[360px]", "sm:min-h-[460px]", "text-white" } },
 
         // RailHeader: cabecera de carril reutilizable con título en serif display, icono Lucide
         // y enlace "Ver todos…" solo cuando hay destino (Decisiones 3 y 7)
@@ -805,6 +818,61 @@ public class WebMarkupContractTests
             Assert.True(img.Value.Contains("width=", StringComparison.Ordinal)
                 && img.Value.Contains("height=", StringComparison.Ordinal),
                 $"{relativePath}: toda <img> de evento debe fijar width/height para CLS 0.");
+        }
+    }
+
+    // ===== INC-36 PR-1: fundación editorial (tokens on-brand y de estado por tema) =====
+
+    // Los tokens de marca y de estado viven DENTRO de cada bloque [data-theme=…] de
+    // input.css: el patrón TheoryData no sabe acotar por bloque, así que estos Fact
+    // parsean los 5 bloques y afirman token a token (DD-03 y DD-04).
+    private static readonly string[] TemasEditoriales =
+    { "charcoal", "editorial", "tabletop", "midnight", "wood" };
+
+    private static string BloqueTema(string fuenteCss, string tema)
+    {
+        var marcador = $"[data-theme=\"{tema}\"]";
+        var inicio = fuenteCss.IndexOf(marcador, StringComparison.Ordinal);
+        Assert.True(inicio >= 0, $"input.css no declara el bloque del tema '{tema}'.");
+
+        var siguiente = fuenteCss.IndexOf("[data-theme=", inicio + marcador.Length, StringComparison.Ordinal);
+        return siguiente < 0 ? fuenteCss[inicio..] : fuenteCss[inicio..siguiente];
+    }
+
+    [Fact]
+    public void FundacionCss_OnBrand_DeclaradoEnLosCincoDataTheme()
+    {
+        // INC-36, DD-03 (D3): el token de contraste sobre la marca --on-brand se define
+        // en los 5 data-theme (tinta #14181C en charcoal/tabletop/midnight, blanco en
+        // editorial/wood), de modo que todo botón sobre --brand-primary pueda dejar de
+        // usar text-white y alcanzar AA (≥ 4,5:1) en cada tema.
+        var fuenteCss = ReadSource("src/Ludeka.Web/Styles/input.css");
+
+        foreach (var tema in TemasEditoriales)
+        {
+            var bloque = BloqueTema(fuenteCss, tema);
+            Assert.True(bloque.Contains("--on-brand:", StringComparison.Ordinal),
+                $"El tema '{tema}' no declara el token de contraste --on-brand.");
+        }
+    }
+
+    [Fact]
+    public void FundacionCss_TokensEstado_DeclaradosEnLosCincoDataTheme()
+    {
+        // INC-36, DD-04 (D8/D9): los 4 tokens semánticos base de estado (error, warning,
+        // info, highlight — con sus sufijos -bg/-border en cada tema) se declaran en los
+        // 5 data-theme. El colon después del nombre evita que las variantes -bg/-border
+        // satisfagan la aserción del token base.
+        var fuenteCss = ReadSource("src/Ludeka.Web/Styles/input.css");
+
+        foreach (var tema in TemasEditoriales)
+        {
+            var bloque = BloqueTema(fuenteCss, tema);
+            foreach (var token in new[] { "--state-error:", "--state-warning:", "--state-info:", "--state-highlight:" })
+            {
+                Assert.True(bloque.Contains(token, StringComparison.Ordinal),
+                    $"El tema '{tema}' no declara el token de estado '{token}'.");
+            }
         }
     }
 }

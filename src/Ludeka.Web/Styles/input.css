@@ -23,6 +23,20 @@
     --brand-primary-hover: #EA6B4A;
     --brand-accent: #E59866;
     --brand-glow: rgba(224, 90, 56, 0.20);
+    --on-brand: #14181C;
+
+    --state-error: #FB7185;
+    --state-error-bg: rgba(251, 113, 133, 0.10);
+    --state-error-border: rgba(251, 113, 133, 0.28);
+    --state-warning: #FBBF24;
+    --state-warning-bg: rgba(251, 191, 36, 0.10);
+    --state-warning-border: rgba(251, 191, 36, 0.28);
+    --state-info: #38BDF8;
+    --state-info-bg: rgba(56, 189, 248, 0.10);
+    --state-info-border: rgba(56, 189, 248, 0.28);
+    --state-highlight: #C084FC;
+    --state-highlight-bg: rgba(192, 132, 252, 0.10);
+    --state-highlight-border: rgba(192, 132, 252, 0.28);
     
     --color-mustplay: #10B981;
     --color-mustplay-bg: rgba(16, 185, 129, 0.12);
@@ -58,6 +72,20 @@
     --brand-primary-hover: #A03825;
     --brand-accent: #D96550;
     --brand-glow: rgba(184, 67, 47, 0.15);
+    --on-brand: #FFFFFF;
+
+    --state-error: #BE123C;
+    --state-error-bg: rgba(190, 18, 60, 0.10);
+    --state-error-border: rgba(190, 18, 60, 0.28);
+    --state-warning: #92400E;
+    --state-warning-bg: rgba(146, 64, 14, 0.10);
+    --state-warning-border: rgba(146, 64, 14, 0.28);
+    --state-info: #0369A1;
+    --state-info-bg: rgba(3, 105, 161, 0.10);
+    --state-info-border: rgba(3, 105, 161, 0.28);
+    --state-highlight: #A21CAF;
+    --state-highlight-bg: rgba(162, 28, 175, 0.10);
+    --state-highlight-border: rgba(162, 28, 175, 0.28);
     
     --color-mustplay: #059669;
     --color-mustplay-bg: rgba(5, 150, 105, 0.10);
@@ -93,6 +121,20 @@
     --brand-primary-hover: #E68B4D;
     --brand-accent: #F2AE72;
     --brand-glow: rgba(217, 119, 54, 0.25);
+    --on-brand: #14181C;
+
+    --state-error: #FB7185;
+    --state-error-bg: rgba(251, 113, 133, 0.10);
+    --state-error-border: rgba(251, 113, 133, 0.28);
+    --state-warning: #FBBF24;
+    --state-warning-bg: rgba(251, 191, 36, 0.10);
+    --state-warning-border: rgba(251, 191, 36, 0.28);
+    --state-info: #38BDF8;
+    --state-info-bg: rgba(56, 189, 248, 0.10);
+    --state-info-border: rgba(56, 189, 248, 0.28);
+    --state-highlight: #C084FC;
+    --state-highlight-bg: rgba(192, 132, 252, 0.10);
+    --state-highlight-border: rgba(192, 132, 252, 0.28);
     
     --color-mustplay: #10B981;
     --color-mustplay-bg: rgba(16, 185, 129, 0.12);
@@ -128,6 +170,20 @@
     --brand-primary-hover: #22D3EE;
     --brand-accent: #67E8F9;
     --brand-glow: rgba(6, 182, 212, 0.25);
+    --on-brand: #14181C;
+
+    --state-error: #FB7185;
+    --state-error-bg: rgba(251, 113, 133, 0.10);
+    --state-error-border: rgba(251, 113, 133, 0.28);
+    --state-warning: #FBBF24;
+    --state-warning-bg: rgba(251, 191, 36, 0.10);
+    --state-warning-border: rgba(251, 191, 36, 0.28);
+    --state-info: #38BDF8;
+    --state-info-bg: rgba(56, 189, 248, 0.10);
+    --state-info-border: rgba(56, 189, 248, 0.28);
+    --state-highlight: #C084FC;
+    --state-highlight-bg: rgba(192, 132, 252, 0.10);
+    --state-highlight-border: rgba(192, 132, 252, 0.28);
     
     --color-mustplay: #10B981;
     --color-mustplay-bg: rgba(16, 185, 129, 0.12);
@@ -163,6 +219,20 @@
     --brand-primary-hover: #9E4318;
     --brand-accent: #D4743B;
     --brand-glow: rgba(184, 83, 35, 0.16);
+    --on-brand: #FFFFFF;
+
+    --state-error: #BE123C;
+    --state-error-bg: rgba(190, 18, 60, 0.10);
+    --state-error-border: rgba(190, 18, 60, 0.28);
+    --state-warning: #92400E;
+    --state-warning-bg: rgba(146, 64, 14, 0.10);
+    --state-warning-border: rgba(146, 64, 14, 0.28);
+    --state-info: #0369A1;
+    --state-info-bg: rgba(3, 105, 161, 0.10);
+    --state-info-border: rgba(3, 105, 161, 0.28);
+    --state-highlight: #A21CAF;
+    --state-highlight-bg: rgba(162, 28, 175, 0.10);
+    --state-highlight-border: rgba(162, 28, 175, 0.28);
     
     --color-mustplay: #059669;
     --color-mustplay-bg: rgba(5, 150, 105, 0.10);
@@ -256,10 +326,12 @@
 }
 
 /* Equivalencia del movimiento reducido: sin lift ni zoom ni transiciones;
-   la evidencia visual queda en estado estático (borde o glow) */
+   la evidencia visual queda en estado estático (borde o glow). INC-36 (DD-04):
+   la guard también silencia animate-pulse (badges de urgencia de las páginas). */
 @media (prefers-reduced-motion: reduce) {
     .rail-card, .rail-card .rail-cover img { transition: none; }
     .rail-card:hover, .rail-card:focus-visible, .rail-card:has(:focus-visible), .rail-card:hover .rail-cover img { transform: none; }
+    .animate-pulse { animation: none; }
 }
 
 /* ===== Hero editorial narrativo de la portada (INC-35, Decisiones 7 y 10) ===== */
@@ -270,6 +342,16 @@
     inset: 0;
     background: radial-gradient(circle at 50% -20%, var(--brand-glow) 0%, transparent 70%),
                 linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-main) 100%);
+}
+
+/* Hero editorial: alto derivado del ancho (INC-36, D1=A). Ratio 16/9 fiel al asset,
+   suelo acotado que garantiza el buscador superpuesto (~110-130px) y cap progresivo
+   que alcanza ~460px en ultrapanorámicos. Sin min-height fijo de bloque: el alto
+   deriva del ancho, no del contenido (CLS 0 conservado). */
+.hero-editorial {
+    aspect-ratio: 16 / 9;
+    min-height: 200px;
+    max-height: clamp(200px, 36vw, 460px);
 }
 
 /* Foto de ambiente: cubre el hero con dimensiones fijas del <img> (CLS 0) */
@@ -283,6 +365,15 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* Foco autoral por variante (INC-36, DD-02): la <section> del hero compone la clase
+   hero-focal--{clave} y aquí fija el encuadre del object-fit: cover. Ninguna variante
+   queda en el centrado 50% 50% por defecto: cada valor conserva la composición
+   (tablero, caras, miepas o logotipo) en el recorte del nuevo modelo de altura. */
+.hero-focal--eurogame img     { object-position: 62% 70%; }
+.hero-focal--mesa-amigos img  { object-position: 45% 55%; }
+.hero-focal--primer-plano img { object-position: 50% 30%; }
+.hero-focal--ilustracion img  { object-position: 35% 45%; }
 
 /* Si el asset falla en el navegador (onerror), el <picture> desaparece y el fondo
    cae a la escena CSS sin hueco */
@@ -304,8 +395,9 @@
     gap: 0.75rem;
 }
 
-/* Títulos <h2> de los carriles de portada en serif display (exclusivamente portada) */
-.rail-title {
+/* Títulos serif display: h2 de los carriles de portada (.rail-title, Decisiones 7 y 10)
+   y h1 de las cabeceras compartidas de página (.page-header-title, INC-36 DD-06) */
+.rail-title, .page-header-title {
     font-family: var(--font-display);
     font-optical-sizing: auto;
     font-weight: 600;
@@ -594,7 +686,7 @@ a {
 .filter-btn.active {
     background-color: var(--brand-primary);
     border-color: var(--brand-primary);
-    color: #FFFFFF;
+    color: var(--on-brand);
     box-shadow: 0 2px 10px var(--brand-glow);
 }
 

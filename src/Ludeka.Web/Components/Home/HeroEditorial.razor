@@ -1,14 +1,16 @@
 @* Hero de imagen protagonista (revisión maintainer): la ilustración/foto llena el
-   hero y SOLO el buscador y las píldoras se superponen (tarjetas propias, legibles
-   sin capa alguna). El h1 queda sr-only para lectores de pantalla y SEO. El fondo
-   se conmuta con el parámetro Background o ?hero= (Decisión 2): foto servida en
-   <picture> AVIF/WebP/JPG con prioridad de carga (patrón INC-07) o escena CSS.
-   Si el asset falla (onerror) el fondo cae a la escena sin hueco ni petición extra. *@
+   hero y SOLO el buscador se superpone (tarjeta propia, legible sin capa alguna).
+   El h1 queda sr-only para lectores de pantalla y SEO. El fondo se conmuta con el
+   parámetro Background o ?hero= (Decisión 2): foto servida en <picture> AVIF/WebP/JPG
+   con prioridad de carga (patrón INC-07) o escena CSS. Si el asset falla (onerror)
+   el fondo cae a la escena sin hueco ni petición extra. El alto deriva del ancho
+   (INC-36, DD-01: .hero-editorial en input.css) y la clase hero-focal--{clave} fija
+   el foco autoral por variante (DD-02). *@
 @using Ludeka.Web.Components.Shared
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
 
-<section class="hero-editorial relative min-h-[360px] sm:min-h-[460px] overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
+<section class="hero-editorial@(GetFocalClass()) relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
     @* Capa de escena CSS: siempre presente bajo la foto (0 peticiones, fallback por tema) *@
     <div class="hero-scene" aria-hidden="true"></div>
 
@@ -44,7 +46,7 @@
             @foreach (var (key, variante) in _switcherOptions)
             {
                 <a href="@Navigation.GetUriWithQueryParameter("hero", key)"
-                   class="px-2.5 py-1 rounded-full text-xs font-semibold transition-colors @(key == _activeKey ? "bg-white text-[#14181C]" : "bg-white/10 text-white hover:bg-white/20")"
+                    class="px-2.5 py-1 rounded-full text-xs font-semibold transition-colors @(key == _activeKey ? "bg-white text-[#14181C]" : "bg-white/10 text-[#F1F5F9] hover:bg-white/20")"
                    aria-current="@(key == _activeKey ? "page" : null)">@key</a>
             }
         </nav>
@@ -67,7 +69,7 @@
                            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] shadow-sm" />
                 </div>
                 <button type="submit"
-                        class="px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs sm:text-sm transition-opacity shadow-sm whitespace-nowrap">
+                        class="px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-[var(--on-brand)] font-bold text-xs sm:text-sm transition-opacity shadow-sm whitespace-nowrap">
                     Buscar
                 </button>
             </form>
@@ -118,6 +120,15 @@
             Background = variante;
             break;
         }
+    }
+
+    /// <summary>Clase de foco autoral por variante (INC-36, DD-02): la clave la resuelve
+    /// HeroBackgroundAssets.FocalClass y aquí compone la clase hero-focal--{clave} que
+    /// fija el object-position declarado en Styles/input.css; vacío en la escena CSS.</summary>
+    private string GetFocalClass()
+    {
+        var clave = HeroBackgroundAssets.FocalClass(Background);
+        return clave.Length == 0 ? string.Empty : $" hero-focal--{clave}";
     }
 
     /// <summary>Buscador rápido de la portada: submit con término → /catalogo?q={término}; vacío → /catalogo.</summary>
