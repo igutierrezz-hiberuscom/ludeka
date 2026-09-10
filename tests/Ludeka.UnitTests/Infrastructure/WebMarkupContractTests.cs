@@ -294,21 +294,28 @@ public class WebMarkupContractTests
           new[] { "<Icon Name=\"shield\"", "<Icon Name=\"eye\"", "<Icon Name=\"plus\"", "<Icon Name=\"tent\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"trash-2\"", "<Icon Name=\"folder\"" },
           new[] { "🛡", "👁", "➕", "🎪", "📍", "⭐", "✏", "🗑", "📁", "🇪🇸", "🌎" } },
 
-        // GiveawayCard: badges de plataforma y promoción por iconos Lucide (el switch de
-        // plataforma devuelve el nombre del icono en el catálogo, no un emoji)
+        // GiveawayCard: tarjeta editorial con fallback de imagen por dominio, tokens de
+        // estado y badges de plataforma/promoción por iconos Lucide (el switch devuelve el
+        // nombre del icono en el catálogo, no un emoji).
         { "GiveawayCard (sin emojis)", "src/Ludeka.Web/Components/Shared/GiveawayCard.razor",
-          new[] { "<Icon Name=\"@GetPlatformIcon(Giveaway.Platform)\"", "<Icon Name=\"star\"", "<Icon Name=\"gift\"", "<Icon Name=\"dices\"", "<Icon Name=\"camera\"", "GiveawayPlatform.Instagram => \"camera\"" },
-          new[] { "⭐", "🎁", "🎲", "📸", "🔗", "🎬" } },
+          new[] { "<Icon Name=\"@GetPlatformIcon(Giveaway.Platform)\"", "<Icon Name=\"star\"", "<Icon Name=\"gift\"", "<Icon Name=\"dices\"", "<Icon Name=\"camera\"", "GiveawayPlatform.Instagram => \"camera\"",
+                  "rail-card", "rail-cover", "DefaultImage", "DefaultImageDomain.Sorteo", "sorteo-default.svg", "onerror", "this.onerror=null", "width=", "height=", "text-[var(--on-brand)]" },
+          new[] { "⭐", "🎁", "🎲", "📸", "🔗", "🎬", "dark:", "hover:scale-105", "text-amber-500", "text-pink-500", "text-sky-500", "text-rose-600" } },
 
-        // Radar: cabecera, acciones, spinner y vacío por iconos Lucide
+        // Radar: cabecera compartida, modal editorial, acciones, spinner y vacío por
+        // iconos Lucide; los estados se expresan con tokens temáticos. Remediación F4.2:
+        // el shell del modal permanece montado (sin @if) para restaurar el foco al cerrar.
         { "Radar (sin emojis)", "src/Ludeka.Web/Components/Pages/Radar.razor",
-          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"plus\"", "<Icon Name=\"dices\"", "<Icon Name=\"radar\"", "<Icon Name=\"star\"" },
-          new[] { "🎁", "➕", "🌍", "⭐", "🎲", "📡", "🌎" } },
+          new[] { "BadgeIcon=\"gift\"", "<Icon Name=\"plus\"", "<Icon Name=\"dices\"", "<Icon Name=\"radar\"", "<Icon Name=\"star\"", "<PageHeaderEditorial", "<EditorialModal" },
+          new[] { "🎁", "➕", "🌍", "⭐", "🎲", "📡", "🌎", "dark:", "text-amber-500", "text-rose-600", "fixed inset-0 z-50", "@if (_isCreateModalOpen)" } },
 
-        // News: cabecera, buscador, spinner, vacío y badges por iconos Lucide
+        // News: cabecera compartida, modal editorial, imagen con fallback por dominio,
+        // buscador, spinner, vacío y badges por iconos Lucide. Remediación F4.2:
+        // el shell del modal permanece montado (sin @if) para restaurar el foco al cerrar.
         { "News (sin emojis)", "src/Ludeka.Web/Components/Pages/News.razor",
-          new[] { "<Icon Name=\"newspaper\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"package\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"camera\"", "<Icon Name=\"calendar-days\"" },
-          new[] { "📰", "➕", "🔍", "📦", "🔄", "🆕", "🗓", "📸" } },
+          new[] { "BadgeIcon=\"newspaper\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"package\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"camera\"", "<Icon Name=\"calendar-days\"",
+                  "<PageHeaderEditorial", "<EditorialModal", "DefaultImage", "DefaultImageDomain.Novedad", "novedad-default.svg", "onerror", "this.onerror=null", "width=", "height=", "rail-card" },
+          new[] { "📰", "➕", "🔍", "📦", "🔄", "🆕", "🗓", "📸", "dark:", "text-pink-500", "text-rose-600", "hover:scale-105", "fixed inset-0 z-50", "@if (_isCreateModalOpen)" } },
 
         // NotFound: spinner/hero del 404 por icono Lucide
         { "NotFound (sin emojis)", "src/Ludeka.Web/Components/Pages/NotFound.razor",
@@ -907,5 +914,26 @@ public class WebMarkupContractTests
                     $"El tema '{tema}' no declara el token de estado '{token}'.");
             }
         }
+    }
+
+    [Fact]
+    public void HeroEditorial_AnchoDelContenedorDeclaradoEnElBloqueCss()
+    {
+        // Remediación DD-01 (INC-36): el bloque .hero-editorial debe fijar width: 100%
+        // para que el ancho lo determine el contenedor y el alto solo se derive del ratio
+        // clampado (medido en navegador: 409,58 y 793,58 px transferidos desde el alto).
+        // La aserción se acota al bloque porque input.css ya contiene 'width: 100%' en
+        // otros bloques: un fragmento global sería tautológico y no detectaría la regresión.
+        var fuenteCss = ReadSource("src/Ludeka.Web/Styles/input.css");
+
+        var inicio = fuenteCss.IndexOf(".hero-editorial {", StringComparison.Ordinal);
+        Assert.True(inicio >= 0, "input.css no declara el bloque .hero-editorial.");
+
+        var fin = fuenteCss.IndexOf('}', inicio);
+        Assert.True(fin > inicio, "El bloque .hero-editorial no cierra con '}'.");
+
+        var bloque = fuenteCss[inicio..fin];
+        Assert.True(bloque.Contains("width: 100%", StringComparison.Ordinal),
+            $"El bloque .hero-editorial debe fijar 'width: 100%'; contenido actual: {bloque}");
     }
 }

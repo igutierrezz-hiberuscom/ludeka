@@ -1,9 +1,9 @@
 # 16. Módulo de Sorteos, Novedades y Grandes Eventos Lúdicos
 
-> **Estado:** Implementado y Verificado  
-> **Incremento SDD:** `change-22-draws-news-events-split` (Incremento 22)  
+> **Estado:** Implementado y Verificado (rediseño editorial INC-36)  
+> **Incrementos SDD:** `change-22-draws-news-events-split` (Incremento 22) · [`rediseno-paginas-editoriales` (INC-36, archivado)](file:///c:/repos/Ludeka/openspec/changes/archive/2026-09-10-rediseno-paginas-editoriales/proposal.md)  
 > **Rutas:** `/sorteos` (alias `/radar`), `/novedades`, `/eventos`, `/admin/eventos`  
-> **Tests:** 472 pruebas pasando al 100% en verde.
+> **Tests:** suite total **855/855** en verde al 100% (INC-36 añade los contratos editoriales de las 3 verticales: cabeceras compartidas, modales, tarjetas y fallbacks).
 
 ---
 
@@ -76,9 +76,14 @@ Ubicación: `src/Ludeka.Core/Entities/WeeklyRelease.cs`
 2. **`Radar.razor` (`/sorteos` y alias `/radar`):**
    - Especializado exclusivamente en sorteos. Si el usuario accede por `/radar`, muestra banner informativo hacia novedades y eventos.
    - Conmutación en 1 clic de `IsPromoted` para moderadores y badge destacado "⭐ Promocionado".
+   - INC-36: cabecera compartida `PageHeaderEditorial` (badge «Radar de Sorteos Comunitarios» + `gift`; h1 «Sorteos de Juegos de Mesa»; acción «Proponer Sorteo»), modal de alta sobre `EditorialModal` (shell compartido con foco accesible: entrada al abrir, restauración al cerrar y Escape), filtros territoriales y chips con tokens de estado y `--on-brand`.
 3. **`News.razor` (`/novedades`):**
    - Cronología editorial de lanzamientos de viernes, buscador por texto, filtro por editorial y modal para alta manual de novedades.
+   - INC-36: cabecera compartida (badge «Calendario de Estrenos» + `newspaper`; h1 «Novedades de los Viernes & Lanzamientos»), modal sobre `EditorialModal` con los pies de acción como `Footer`, zona de imagen SIEMPRE renderizada (sin URL → `DefaultImage` dominio novedad; URL externa → `width`/`height` y `onerror` hacia `novedad-default.svg`), tarjetas `.rail-card` y eliminación de las variantes `dark:` muertas.
 4. **`Events.razor` (`/eventos`):**
    - Calendario con dos pestañas ("Próximas Citas" e "Histórico de Ediciones"), tarjetas con carteles, fecha formateada, cuenta atrás y enlace directo a la web oficial (`rel="noopener noreferrer"`).
-5. **`EventsManagement.razor` (`/admin/eventos`):**
+   - INC-36: cabecera compartida (badge «Calendario Oficial del Sector» + `tent`), tarjetas `.rail-card` con `rail-cover`, badges de urgencia tokenizados (`--state-error`/`--state-warning` + `--on-brand`), pestañas con `role="tabpanel"`/`aria-controls` (`panel-upcoming`/`panel-past`) y botones de marca con `--on-brand`.
+5. **`GiveawayCard.razor` (`Components/Shared/`):**
+   - Tarjeta de sorteo reutilizada por `/sorteos`: INC-36 la pasa a `.rail-card` + `rail-cover`, con `DefaultImage` dominio sorteo ante miniatura ausente, `width`/`height` + `onerror` hacia `sorteo-default.svg` ante URL externa caída y tokens de estado (`--state-warning`/`--state-highlight`/`--state-info`/`--state-error`).
+6. **`EventsManagement.razor` (`/admin/eventos`):**
    - Panel de control CRUD protegido por roles para la Mesa Fundadora y moderadores, con subida directa de carteles locales (`InputFile`) y vista previa.

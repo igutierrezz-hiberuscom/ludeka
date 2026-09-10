@@ -207,3 +207,131 @@
 ### Base para PR-5
 
 - Rama del PR-4: `inc/rediseno-paginas-editoriales-4` (encima de `inc/rediseno-paginas-editoriales-3`). El PR-5 debe crearse encima de esta rama (cadena feature-branch-chain, DD-11). Presupuesto PR-4: 92 líneas cambiadas (57+/35−), dentro del forecast ~140-180.
+
+---
+
+## Estado PR-5 «Sorteos + Novedades»: COMPLETADO ✅
+
+> Fase SDD `sdd-apply`, PR-5 «Sorteos + Novedades» (tareas 5.1–5.6). Rama `inc/rediseno-paginas-editoriales-5` creada desde la cabeza limpia de `inc/rediseno-paginas-editoriales-4` (PR-4 #12), conforme a `feature-branch-chain` y `delivery_strategy=auto-chain`. Modo: **TDD estricto**. Presupuesto observado del slice: por debajo de 400 líneas.
+
+| Tarea | Estado | Ciclo TDD | Commit |
+|---|---|---|---|
+| 5.1 Contrato `Radar (sin emojis)` ajustado (`PageHeaderEditorial`, `EditorialModal`, prohibiciones) | ✅ | ROJO confirmado (3 fallos exactos de las tres filas PR-5) → | incluido en `2f67036` |
+| 5.2 Radar.razor: cabecera compartida, `EditorialModal`, fragments, tokens de estado y `--on-brand` | ✅ | VERDE focal `DisplayName~Radar` (4/4) → suite contractual final 102/102; smoke `/sorteos` y `/radar` | `2f67036` |
+| 5.3 Contratos `News` y `GiveawayCard` ajustados (fallbacks, dimensiones, rail y prohibiciones) | ✅ | ROJO confirmado (2 fallos exactos pendientes tras Radar) → | incluido en `dd7f42c` |
+| 5.4 News.razor: cabecera, `EditorialModal`, imagen siempre presente y tokens | ✅ | VERDE contractual 102/102; smoke `/novedades` con default de novedad | `dd7f42c` |
+| 5.5 GiveawayCard.razor: `rail-card`, `rail-cover h-44`, fallback de sorteo, tokens y botón accesible | ✅ | VERDE contractual 102/102; smoke `/sorteos` con default de sorteo | `dd7f42c` |
+| 5.6 Boundary PR-5: `app.css`, suite, smokes, documentación y tareas | ✅ | Suite completa 854/854 antes y después de regenerar; smoke HTTP 200 de las 5 rutas | `c08cd9b` |
+
+### Commits de PR-5
+
+| Sha | Mensaje |
+|---|---|
+| `2f67036` | `feat: sorteos con modal editorial y tokens de estado` |
+| `dd7f42c` | `feat: novedades y GiveawayCard con imagen por defecto y rail-card` |
+| `c08cd9b` | `docs: progreso pr-5 inc-36 y casillas de sorteos-novedades` |
+
+## TDD Cycle Evidence (PR-5)
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 5.1 | `tests/Ludeka.UnitTests/Infrastructure/WebMarkupContractTests.cs` (fila `Radar`) | Unit (contrato por texto Ordinal) | ✅ 102/102 | ✅ 3 fallos exactos al activar las aserciones PR-5: `Radar` sin `PageHeaderEditorial`, `News` sin `PageHeaderEditorial` y `GiveawayCard` sin `rail-card` | ✅ Fila Radar incluida en `DisplayName~Radar` (4/4) y suite contractual final 102/102 | ✅ `/sorteos` y `/radar`: 200, un `<h1>`, cabecera, rail y fallback de sorteo | ✅ Shell inline sustituido por `EditorialModal`; contenido y pie separados en `ChildContent`/`Footer` |
+| 5.2 | `WebMarkupContractTests.cs` (fila `Radar`) | Unit + runtime SSR | ✅ 102/102 inicial | ✅ Contrato escrito antes de la implementación | ✅ `dotnet test --filter DisplayName~Radar`: 4/4; suite final 102/102 | ✅ Handlers de apertura, cierre y `HandleSubmitGiveaway` conservados mediante fragments; dos rutas sirven la misma página | ✅ Se corrigió el primer intento de composición Razor usando `ChildContent` explícito tras el error RZ9996 |
+| 5.3 | `WebMarkupContractTests.cs` (filas `News`/`GiveawayCard`) | Unit (contrato por texto Ordinal) | ✅ Baseline contractual 102/102 antes de editar contratos | ✅ 2 fallos exactos tras Radar: `News` sin `PageHeaderEditorial` y `GiveawayCard` sin `rail-card` | ✅ Suite contractual final 102/102 | ✅ `/novedades` y `/sorteos`: 200, un `<h1>`, rail y fallback por dominio | ✅ Contratos expresan la API real de `PageHeaderEditorial` mediante `BadgeIcon` |
+| 5.4 | `WebMarkupContractTests.cs` (fila `News`) | Unit + runtime SSR | ✅ 102/102 | ✅ Cubierto por el contrato 5.3 escrito antes del markup | ✅ 102/102 | ✅ `/novedades` sirvió `novedad-default.svg`, `rail-card`, cabecera y h1 único; `EditorialModal` quedó referenciado | ✅ Se conservaron los handlers de formulario dentro de `ChildContent`/`Footer`; URLs externas conservan `width`/`height`/`onerror` |
+| 5.5 | `WebMarkupContractTests.cs` (fila `GiveawayCard`) | Unit + runtime SSR | ✅ 102/102 | ✅ Cubierto por el contrato 5.3 escrito antes del markup | ✅ 102/102 | ✅ `/sorteos` y `/` sirvieron `sorteo-default.svg`; la tarjeta externa declara dimensiones y fallback estático | ✅ `.rail-card` centraliza lift/focus/reduced-motion; `animate-pulse` conserva la guarda CSS existente |
+| 5.6 | `WebMarkupContractTests.cs` + `PerformanceAndAccessibilityTests.cs` (contratos existentes) | Unit boundary + runtime HTTP | ✅ Suite completa 854/854 antes de regenerar | ➖ Contratos `AppCss_FundacionInc36_Regenerada` y barrido ya existentes; la tarea solo regenera el artefacto derivado | ✅ Suite completa final 854/854 y contrato de CSS verde | ✅ Cinco rutas HTTP 200, h1 único, cabeceras/rails/fallbacks y puerto liberado antes de la suite final | ✅ `app.css` regenerado después de todo el markup; sin cambios en `input.css` ni en scripts compartidos |
+
+## Work Unit Evidence (PR-5)
+
+| Unidad / commit | Prueba focal y resultado exacto | Runtime harness y resultado exacto | Límite de rollback |
+|---|---|---|---|
+| U5-Radar / `2f67036` | `dotnet test --filter DisplayName~Radar` → **4/4**; la suite contractual completa quedó en **102/102** al cerrar PR-5 | `dotnet run --project src/Ludeka.Web --urls http://localhost:5199` + HTTP `/sorteos` y `/radar` → **200**, `<h1>` único, `page-header-title`, `rail-card`, título y `sorteo-default.svg` | Revertir `Radar.razor` y las aserciones Radar de `WebMarkupContractTests.cs`; no afecta News/GiveawayCard ni los componentes compartidos |
+| U5-News-Giveaway / `dd7f42c` | `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` → **102/102** | Mismo servidor en 5199: `/novedades` → **200**, `<h1>` único, cabecera, rail, título y `novedad-default.svg`; `/sorteos` → **200** y `sorteo-default.svg` | Revertir `News.razor`, `GiveawayCard.razor` y sus contratos; no afecta Radar ni el shell `EditorialModal` |
+| U5-Boundary / documentación | `dotnet test Ludeka.sln` antes y después de la regeneración → **854/854** | Smoke HTTP `/sorteos`, `/radar`, `/novedades`, `/juegos/wingspan`, `/` → **200** en las cinco; exactamente un `<h1>` en cada documento; puerto 5199 detenido antes de la suite final | Revertir únicamente `wwwroot/app.css`, `tasks.md` y esta sección de `apply-progress.md`; el comportamiento de los dos commits de código permanece independiente |
+
+## Verificación observada (registro PR-5)
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (safety net inicial) | **102/102 verde** |
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (ROJO contratos PR-5) | **3 fallos exactos, 99/102 verde**: `GiveawayCard` sin `rail-card`, `News` sin `<PageHeaderEditorial>` y `Radar` sin `<PageHeaderEditorial>` |
+| `dotnet test --filter DisplayName~Radar` (Radar VERDE focal) | **4/4 verde** |
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (ROJO News/Giveaway tras Radar) | **2 fallos exactos, 100/102 verde**: `GiveawayCard` sin `rail-card` y `News` sin `BadgeIcon="newspaper"` |
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (News/Giveaway VERDE) | **102/102 verde** |
+| `dotnet test Ludeka.sln` (safety net de boundary, antes de Tailwind) | **854/854 verde** |
+| `npx.cmd -y tailwindcss@3.4.17 -i ./Styles/input.css -o ./wwwroot/app.css --minify` (desde `src/Ludeka.Web`) | **Correcto en 2447 ms**; advertencia no bloqueante de Browserslist desactualizado |
+| Facts de `src/Ludeka.Web/wwwroot/app.css` | `--on-brand=True`, `state-error=True`, `state-warning=True`, `state-highlight=True`, `state-info=True`, `aspect-ratio:16/9=True`, `hero-focal--eurogame=True`, `page-header-title=True`; `min-height:360px=False`, `min-height:460px=False`; 248402 bytes, 1 línea minificada |
+| `dotnet run --project src/Ludeka.Web --urls http://localhost:5199` | Proceso PID 19928 arrancado y estable para el smoke; detenido después, `port=5199 free` |
+| Smoke HTTP UTF-8 en `/sorteos`, `/radar`, `/novedades`, `/juegos/wingspan`, `/` | **200 ×5**, exactamente **1 `<h1>` ×5**; `/sorteos` y `/radar`: cabecera, título, rail y `sorteo-fallback`; `/novedades`: cabecera, título, rail y `novedad-fallback`; ficha y portada: 200 y h1 único |
+| Contrato de modal y fallback por dominio | `WebMarkupContractTests` **102/102**; `Radar.razor` y `News.razor` referencian `EditorialModal`; `News`/`GiveawayCard` declaran `DefaultImageDomain.Novedad`/`Sorteo`, dimensiones y `onerror`; `editorial-modal.js` conserva foco al abrir, restaura foco y cierra con Escape |
+| Barrido de shells/hardcodes contratados | Grep Ordinal sin resultados en los tres archivos para `fixed inset-0 z-50`, `dark:`, familias de color prohibidas y `text-white`; comentarios Radar/News/GiveawayCard sin literal `<img>` |
+| `dotnet test Ludeka.sln` (suite final, con servidor detenido) | **854/854 verde** |
+
+## Desviaciones y hallazgos PR-5
+
+1. La API de `PageHeaderEditorial` recibe el icono como `BadgeIcon`; por eso los contratos de Radar y News exigen `BadgeIcon="gift"`/`BadgeIcon="newspaper"` en vez de buscar un `<Icon>` inline que ya vive dentro del componente compartido. El markup servido sí renderiza el icono Lucide mediante el componente.
+2. Razor exige expresión explícita para atributos de componentes con texto interpolado: `Alt="@($"Carátula de {release.Title}")"` y su equivalente de sorteos. El primer intento provocó RZ9986; se corrigió sin cambiar el contrato funcional.
+3. Al adoptar `EditorialModal`, el contenido de formulario debe estar bajo `<ChildContent>` explícito cuando también se usa `<Footer>`; omitirlo provocó RZ9996. Los handlers de apertura, cierre y envío no cambiaron.
+4. `app.css` se regeneró después de todo el markup, como exige DD-10. La advertencia de Browserslist no modificó el resultado ni los 854 tests.
+
+## Estado acumulado
+
+- **22/22 tareas completadas** (PR-1: 1.1–1.7; PR-2: 2.1–2.3; PR-3: 3.1–3.3; PR-4: 4.1–4.3; PR-5: 5.1–5.6).
+- Boundary de PR-5 publicado en [PR #13](https://github.com/igutierrezz-hiberuscom/ludeka/pull/13), con base `inc/rediseno-paginas-editoriales-4`.
+- Pendiente para el orquestador: ejecución independiente de `sdd-verify` y `sdd-archive`; no se ejecutaron desde apply.
+
+---
+
+## Remediación F4.2 (PR-5-Fix-F4.2) — COMPLETADA ✅
+
+> Fase SDD `sdd-apply`, remediación focal autorizada por el maintainer tras el `sdd-verify` fallido (CRITICAL `F4.2` + WARNING DD-01). Worktree `C:\repos\ludeka-wt\rediseno-paginas-editoriales`, rama `inc/rediseno-paginas-editoriales-5` (PR #13, base `-4`), HEAD previo `09949a2`. Modo: **TDD estricto**. Intento ya adquirido por el orquestador: este apply no ejecutó `acquire`/`settle` ni `sdd-archive`.
+
+| Tarea | Estado | Ciclo TDD | Commit |
+|---|---|---|---|
+| A. F4.2 — `Radar.razor` y `News.razor` sin envoltorio `@if (_isCreateModalOpen)`: el shell del modal queda siempre montado y `OnParametersSetAsync` restaura el foco | ✅ | ROJO 2 fallos exactos → VERDE 102/102 + suite 854/854 | `310c464` |
+| B. DD-01 — `width: 100%` en `.hero-editorial` + `app.css` regenerado después + contrato acotado al bloque y a la regla compilada | ✅ | ROJO 2 fallos exactos → VERDE 103/103 y 5/5 + suite 855/855 | `379c074` |
+| C. Documentación y push de la rama | ✅ | — | `docs: remediacion f4.2 inc-36` |
+
+### TDD Cycle Evidence (Remediación F4.2)
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| A | `tests/Ludeka.UnitTests/Infrastructure/WebMarkupContractTests.cs` (filas `Radar`/`News`, `mustNotContain`) | Unit (contrato Ordinal) | ✅ 102/102 focal + 854/854 suite | ✅ 2 fallos exactos: `Radar (sin emojis): ... no debe contener '@if (_isCreateModalOpen)'` y `News (sin emojis): ...` (100/102) | ✅ 102/102 focal; 854/854 suite (sin tests nuevos) | ✅ Runtime Chrome real: `/sorteos` con Escape y `/novedades` con clic en X devuelven el foco al disparador | ➖ Sin refactor (solo eliminación del envoltorio, 3 líneas por archivo) |
+| B | `WebMarkupContractTests.cs` (Fact nuevo acotado al bloque) + `PerformanceAndAccessibilityTests.cs` (`AppCss_FundacionInc36_Regenerada`) | Unit (contrato CSS acotado) + artefacto derivado DD-10 | ✅ 102/102 focal + 854/854 suite | ✅ 2 fallos exactos: Fact `HeroEditorial_AnchoDelContenedorDeclaradoEnElBloqueCss` (`contenido actual: .hero-editorial {`) y `AppCss_FundacionInc36_Regenerada` (`Not found: "width:100%"`) | ✅ 103/103 + 5/5 focales; 855/855 suite | ✅ Runtime Chrome a 360/640/1240: 305/585/1185 × 200/230,4/446,4 y sin desborde propio | ➖ Sin refactor |
+
+- Justificación del alcance del contrato B: `width: 100%` ya existía en 6 bloques de `input.css` y `width:100%` en 9 puntos de `app.css` (incluida `.w-full`); un fragmento global habría sido tautológico y no habría producido ROJO real (riesgo explícitamente auditado en verificación). Por eso la aserción se acota al bloque `.hero-editorial` (parseo por índices, mismo patrón de acotado que `BloqueTema`) y a su regla compilada.
+- Coste en pruebas: B añade 1 test contractual (WebMarkup 102→103; suite 854→855). A no añade tests: aserciones nuevas en filas existentes.
+
+### Work Unit Evidence (Remediación F4.2)
+
+| Unidad / commit | Prueba focal y resultado exacto | Runtime harness y resultado exacto | Límite de rollback |
+|---|---|---|---|
+| A-F4.2 / `310c464` | `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` → ROJO `Con error: 2, Superado: 100, Total: 102` (solo las dos aserciones nuevas); VERDE **102/102**; `dotnet test Ludeka.sln` → **854/854** | Chrome DevTools MCP (Chrome real, servidor 5199): `/sorteos` «Proponer Sorteo» → foco en `BUTTON aria-label="Cerrar Registrar o Proponer Sorteo"` → Escape → `role=dialog` ausente y `document.activeElement` = el mismo botón «Proponer Sorteo» (`activeIsTrigger=true`); `/novedades` análogo con «Añadir Novedad» y clic en X | Revertir las 3 líneas de envoltorio en `Radar.razor`/`News.razor` y las 2 aserciones `mustNotContain` de las filas `Radar`/`News`; no afecta al shell `EditorialModal` ni a otras páginas |
+| B-DD-01 / `379c074` | `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` → ROJO `Con error: 1, Superado: 102, Total: 103`; `dotnet test --filter FullyQualifiedName~PerformanceAndAccessibilityTests` → ROJO `Con error: 1, Superado: 4, Total: 5`; VERDE **103/103** y **5/5**; `dotnet test Ludeka.sln` → **855/855** | `npx.cmd -y tailwindcss@3.4.17 -i ./Styles/input.css -o ./wwwroot/app.css --minify` desde `src/Ludeka.Web` → `Done in 2976ms`; `app.css` 248402→248413 bytes (+11 = `width:100%;`); regla compilada `.hero-editorial{width:100%;aspect-ratio:16/9;min-height:200px;max-height:clamp(200px,36vw,460px)}`; Chrome a 360/640/1240 (ver tabla de verificación) | Revertir `width: 100%` de `input.css` y regenerar `app.css` (vuelve a las medidas previas del verify-report); el Fact acotado y la aserción compilada se retiran en la misma frontera; no toca markup ni otros bloques |
+
+### Verificación observada (registro remediación)
+
+| Comando / herramienta | Resultado observado |
+|---|---|
+| Safety net `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (pre-cambios) | **102/102 verde** |
+| Safety net `dotnet test Ludeka.sln` (pre-cambios) | **854/854 verde** |
+| ROJO A | **2 fallos exactos** (`Radar`/`News` no deben contener `@if (_isCreateModalOpen)`), 100/102 verde |
+| VERDE A | **102/102** focal; `dotnet test Ludeka.sln` → **854/854** |
+| ROJO B | Fact nuevo: `El bloque .hero-editorial debe fijar 'width: 100%'; contenido actual: .hero-editorial {` (102/103); `AppCss_FundacionInc36_Regenerada`: `Not found: "width:100%"` (4/5) |
+| `npx.cmd -y tailwindcss@3.4.17 -i ./Styles/input.css -o ./wwwroot/app.css --minify` | `Done in 2976ms` (warning Browserslist preexistente); `--on-brand`, `aspect-ratio:16/9`, `hero-focal--eurogame`, `page-header-title` presentes; `min-height:360px/460px` ausentes |
+| VERDE B | **103/103** (WebMarkup) y **5/5** (Performance); `dotnet test Ludeka.sln` → **855/855** |
+| Chrome MCP `/sorteos` (viewport 360) | `BUTTON "Proponer Sorteo"` → abrir: `BUTTON aria-label="Cerrar Registrar o Proponer Sorteo"` (`role=dialog`, `aria-modal=true`) → Escape: `role=dialog` ausente, `activeElement` = `BUTTON "Proponer Sorteo"` (mismo nodo, `activeIsTrigger=true`) |
+| Chrome MCP `/novedades` (viewport 360) | `BUTTON "Añadir Novedad"` → abrir: `BUTTON aria-label="Cerrar Añadir Novedad Editorial"` → clic X: `role=dialog` ausente, `activeElement` = `BUTTON "Añadir Novedad"` (mismo nodo) |
+| Chrome MCP hero 360×740 | `clientWidth=345`; contenedor `container-ludeka` 345 (padding 20/20 → útil 305); hero **305 × 200** (`x=20`, `right=325`, dentro del viewport); antes: 355,55 × 200 con borde derecho 375,5 |
+| Chrome MCP hero 640×800 | `clientWidth=625`; útil 585; hero **585 × 230,39** (`right=605`); antes: 409,58 × 230,38 |
+| Chrome MCP hero 1240×900 | `clientWidth=1225`; útil 1185; hero **1185 × 446,39** (`right=1205`); `scrollWidth=1225` sin desborde; antes: 793,58 × 446,38 |
+| Consola del navegador | Sin errores atribuibles: warning preexistente del manifiesto (`icon-192.png`) y 5× HTTP 400 de imágenes externas `cf.geekdo-images.com` (fallback I2.2 preexistente, fuera de alcance) |
+| `dotnet run --project src/Ludeka.Web --urls http://localhost:5199` | `Ludeka.Web` PID 18416; detenido al final; `PORT_5199_FREE`; sin procesos `dotnet` del worktree remanentes |
+
+### Desviaciones y hallazgos (remediación)
+
+1. **Recuento de tests**: B añade 1 test contractual (102→103 en WebMarkup; suite 854→855) porque el contrato de ancho debía acotarse al bloque `.hero-editorial` para producir un ROJO real; los fragmentos globales ya existían y habrían sido tautológicos. A no añade tests (aserciones en filas existentes): 102/854.
+2. **`@if` eliminado sin reindentar** (3 líneas por archivo): se retiraron únicamente las dos líneas del envoltorio y su `}` de cierre, tal como indicó la autorización; el contenido interno conserva su indentación para un diff mínimo y sin cambios semánticos.
+3. **Medición**: el desborde de 375,5 px a 360 era transferencia del ancho desde el alto clampado; con `width: 100%` la caja queda en 305 px. El `scrollWidth` del documento a 360 (501) sigue dominado por la fila preexistente del nav (fuera de alcance, ya documentado en el verify-report).
+4. **Evidencia de foco**: la restauración se comprobó por identidad de nodo (`el === trigger`, marcado en runtime con `data-smoke-trigger`), no solo por texto/aria-label; el diálogo se ausenta tras el cierre en ambos casos.
