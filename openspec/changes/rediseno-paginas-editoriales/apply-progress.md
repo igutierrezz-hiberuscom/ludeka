@@ -163,3 +163,47 @@
 ### Base para PR-4
 
 - Rama del PR-3: `inc/rediseno-paginas-editoriales-3` (encima de `inc/rediseno-paginas-editoriales-2`). El PR-4 debe crearse encima de esta rama (cadena feature-branch-chain, DD-11). Presupuesto PR-3: 110 líneas cambiadas (60+/50−), dentro del forecast ~120-160.
+
+---
+
+## Estado PR-4 «Eventos»: COMPLETADO ✅
+
+> Fase SDD `sdd-apply`, PR-4 «Eventos» (tareas 4.1–4.3). Rama `inc/rediseno-paginas-editoriales-4` creada encima de `inc/rediseno-paginas-editoriales-3` (cabeza de la cadena, PR #11). Modo: TDD estricto.
+
+| Tarea | Estado | Ciclo TDD | Commit |
+|---|---|---|---|
+| 4.1 Contrato `Events (sin emojis)` ajustado (mustContain + `<PageHeaderEditorial`, `text-[var(--on-brand)]`, `rail-card`, `role="tabpanel"`, `aria-controls="panel-`; mustNotContain + `hover:scale-105`, `bg-rose-500/90`, `bg-amber-500/90`, `text-zinc-300`, `dark:`, `text-white` acotado con 2 fragmentos de patrón de botón de marca) | ✅ | ROJO confirmado (1 fallo exacto, la fila: primer mustContain ausente) | incluido en `6fed384` |
+| 4.2 Events.razor: PageHeaderEditorial (badge «Calendario Oficial del Sector» + `tent`, h1, subtítulo conservado, acción «Gestionar Eventos» moderador en `Actions`); pestañas con `aria-controls="panel-upcoming|past"` + panel único `role="tabpanel"` con `id`/`aria-labelledby` conmutables (helpers `ActiveTabId`/`ActivePanelId`, expresiones completas — gotcha Razor); tarjetas a `.rail-card justify-between shadow-sm` con imagen `rail-cover h-48` y sin `hover:scale-105` suelto (zoom por `.rail-card:hover .rail-cover img`); badges de urgencia → `--state-error`/`--state-warning` triple con `--on-brand`; overlay «Finalizado» → `text-white/80 border-white/10` (par autocontenido); botones de marca 30/66/73/117/208 → `text-[var(--on-brand)]` | ✅ | VERDE (contratos 102/102) | `6fed384` |
+| 4.3 Boundary PR-4: suite completa + smoke `/eventos` ×4 temas + PR (base = rama PR-3) | ✅ | 854/854 + smoke 4/4 | (docs) + PR |
+
+### TDD Cycle Evidence (PR-4)
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 4.1 | `WebMarkupContractTests.cs` (fila `Events (sin emojis)`) | Unit (contrato) | ✅ 11/11 pre-cambio (`--filter DisplayName~Events`) | ✅ 1 fallo exacto (primer mustContain: `<PageHeaderEditorial` ausente; 101 filas restantes en verde) | ✅ 102/102 | ➖ Estructural (swap positivo+negativo en la misma fila) | ➖ No needed |
+| 4.2 | idem (contrato de 4.1) | Unit | ✅ | ✅ (mismo ciclo) | ✅ 102/102 (incluida invariante `PaginasEventos_TodaImagenDeEventoTieneFallbackPorDominio`) | ✅ Triangulación por runtime: smoke verifica las clases tokenizadas y la relación tab/tabpanel en el markup servido ×4 temas | ➖ No needed |
+| 4.3 | suite completa | Full | ✅ | — | ✅ 854/854 | ✅ smoke runtime /eventos ×4 + emparejamiento ARIA | ➖ No needed |
+
+### Verificación observada (registro PR-4)
+
+| Comando | Resultado observado |
+|---|---|
+| Safety net `dotnet test --filter DisplayName~Events` (pre-cambios) | 11/11 verde |
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (ROJO 4.1) | 1 fallo exacto (fila `Events (sin emojis)`, primer mustContain ausente) |
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (VERDE 4.2) | 102/102 verde (incluida la invariante de eventos) |
+| `dotnet test Ludeka.sln` (boundary 4.3) | **854/854 verde** (baseline PR-3 exacta; sin tests nuevos, solo fila ajustada) |
+| Smoke `dotnet run --project src/Ludeka.Web --urls http://localhost:5199` → `Invoke-WebRequest /eventos` (y `?theme=charcoal|editorial|wood`) | HTTP 200 ×4; `page-header-title`, `role="tabpanel"`, `aria-controls="panel-`, `rail-card` (×6 tarjetas con seed local), `text-[var(--on-brand)]` y `badge-pill` presentes; `hover:scale-105`, `dark:`, `bg-rose-500/90`, `bg-amber-500/90`, `text-zinc-300` ausentes; `hover:opacity-90 text-white` ausente en el documento |
+| Smoke ARIA del tablist | `role="tab"` ×2 + `role="tablist"`; panel activo servido `id="panel-upcoming"` + `aria-labelledby="tab-upcoming"`; ambas pestañas declaran `aria-controls="panel-upcoming"`/`panel-past` (el id del panel conmuta con la pestaña activa); un único `<h1>` en el documento |
+
+### Desviaciones y hallazgos PR-4
+
+1. **GOTCHA de la invariante + comentarios Razor**: el regex de `PaginasEventos_TodaImagenDeEventoTieneFallbackPorDominio` (`<img\b[^>]*>`, Singleline) captura el literal `<img>` dentro de comentarios `@* … *@` del fuente: un comentario que mencionara `<img>` rompía la invariante en verde (fallo espurio). Reescrito el comentario sin el literal («en el cartel»). Regla: ningún comentario .razor de páginas de eventos debe contener el literal `<img>`.
+2. **Formulación del mustNotContain de `text-white` acotado**: dos fragmentos cubren las 5 variantes de botón de marca sin capturar el par overlay contratado `bg-black/60 + text-white` (líneas 152/281, ahora ~164/287) ni `text-white/80`: `hover:opacity-90 text-white` (botones con hover: 30/117/208) y `)] text-white` (filtros activos: 66/73, la píldora contiene `]` antes del espacio; el overlay `bg-black/60` no tiene corchetes). El smoke del DOCUMENTO sirve 1 ocurrencia de `)] text-white` desde `MainLayout.razor:103` (badge de equipo fundador con aislado CSS `b-*`) — fuera de alcance contratado en DD-03 (barrido futuro, segunda ola); el ARCHIVO Events.razor sirve 0.
+3. **Panel único con id conmutable** (aplicación DD-09): el contenido de ambas pestañas comparte un bloque de render; en vez de duplicar paneles, un solo `<div role="tabpanel">` cuyo `id`/`aria-labelledby` conmutan con la pestaña activa (helpers en `@code`); `aria-controls` en cada botón es estático (`panel-upcoming`/`panel-past`). Emparejamiento tab↔panel completo servido y verificado en runtime.
+4. **GOTCHA de filtros VSTest en PowerShell 5.1**: los valores con espacios se descotizan en todos los formatos probados (`DisplayName~"..."`, comillas simples incrustadas, backslash-escape → incluso rompe MSB1008 en `dotnet test`). Filtro robusto: por nombre de clase (`FullyQualifiedName~WebMarkupContractTests`), sin espacios; los `DisplayName~Events` compactos sí funcionan (sin espacios ni paréntesis).
+5. **Hueco preexistente de utilidades `var(--state-*)` en app.css (registrado, no corregido aquí)**: el `app.css` compilado (última regeneración PR-1, commit `09c12e3`) contiene la utilidad `.text-[var(--on-brand)]` y `bg-[var(--brand-primary)]` (los chips de marca de Events se sirven con contraste real ✓), pero NO las utilidades alfa de estado introducidas por PR-3 (`bg-[var(--state-*-bg)]`, `hover:bg-[var(--state-*-border)]`) ni las nuevas sólidas de PR-4 (`bg-[var(--state-error)]`, `border-[var(--state-error-border)]`, `bg-[var(--state-warning)]`, `border-[var(--state-warning-border)]`, `text-white/80`). Los badges de urgencia quedan en el markup con tokens pero sin regla CSS servida hasta el barrido final de PR-5 (regeneración DD-10 contratada, que también purga utilidades muertas). Mismo patrón que PR-3 dejó; se cierra en la frontera contratada del PR-5. Verificación en app.css por subcadenas SIN corchetes (`--on-brand`, `state-error`) porque el minificado escapa los selectores (`\.text-\[var\(--on-brand\)\]`).
+6. GOTCHA heredado aplicado: smoke verificado por subcadenas ASCII y `RawContentStream` UTF8 (sin comparar «Calendario»/acentos con `Invoke-WebRequest`); servidor en 5199 (`--urls` explícito, 5081 ocupado).
+
+### Base para PR-5
+
+- Rama del PR-4: `inc/rediseno-paginas-editoriales-4` (encima de `inc/rediseno-paginas-editoriales-3`). El PR-5 debe crearse encima de esta rama (cadena feature-branch-chain, DD-11). Presupuesto PR-4: 92 líneas cambiadas (57+/35−), dentro del forecast ~140-180.
