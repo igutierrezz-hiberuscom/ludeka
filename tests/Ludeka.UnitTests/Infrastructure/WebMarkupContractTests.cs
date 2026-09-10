@@ -731,7 +731,7 @@ public class WebMarkupContractTests
             ("FotoEurogame", "Mesa de juego con un eurogame en marcha sobre el tapete y una estantería lúdica al fondo"),
             ("FotoMesaAmigos", "Grupo de amigos riendo alrededor de una mesa de madera con juegos de mesa"),
             ("FotoPrimerPlano", "Primer plano de manos colocando piezas sobre el tablero de un juego de mesa"),
-            ("Ilustracion", "Ilustración editorial de una mesa de juego con estantería al fondo"),
+            ("Ilustracion", "Ilustración editorial de una sala de juegos con estantería, mesa con eurogame y el logotipo de Ludeka"),
         };
 
         foreach (var (variantName, expectedAlt) in expectedByVariant)
