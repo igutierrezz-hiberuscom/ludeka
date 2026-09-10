@@ -1,0 +1,53 @@
+@* Cabecera editorial compartida de página (INC-36, DD-06 / D4+D5): badge en píldora,
+   h1 único en serif display (.page-header-title), subtítulo opcional y zona de acción
+   opcional a la derecha. Réplica del patrón vigente de Events: las 4 páginas de
+   listado la adoptan (Catálogo, Eventos, Sorteos, Novedades) y la ficha NO (su
+   cabecera es el hero de ficha con backdrop). El título es RenderFragment para
+   conservar composición rica, p. ej. el punto terracota del Catálogo. *@
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+    <div>
+        <div class="badge-pill mb-2 px-3 py-1 text-xs font-bold">
+            @if (!string.IsNullOrEmpty(BadgeIcon))
+            {
+                <Icon Name="@BadgeIcon" Size="14" />
+            }
+            @Badge
+        </div>
+        <h1 class="page-header-title text-3xl sm:text-4xl">@Title</h1>
+        @if (!string.IsNullOrEmpty(Subtitle))
+        {
+            <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">@Subtitle</p>
+        }
+    </div>
+
+    @if (Actions != null)
+    {
+        <div class="flex items-center gap-3">
+            @Actions
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>Píldora editorial sobre la página (obligatoria: microtexto de identidad,
+    /// 3 segundos de lectura).</summary>
+    [Parameter, EditorRequired]
+    public string Badge { get; set; } = string.Empty;
+
+    /// <summary>Nombre del icono Lucide de la píldora (opcional).</summary>
+    [Parameter]
+    public string? BadgeIcon { get; set; }
+
+    /// <summary>Título h1 de la página — el ÚNICO h1 de cada listado (RenderFragment
+    /// para permitir composición rica dentro del título).</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment Title { get; set; } = _ => { };
+
+    /// <summary>Subtítulo opcional bajo el h1.</summary>
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    /// <summary>Zona de acción opcional a la derecha (botones de página o de moderador).</summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+}

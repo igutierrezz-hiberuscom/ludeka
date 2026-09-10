@@ -131,6 +131,13 @@ public class WebMarkupContractTests
                   "object-position" },
           new[] { "min-height: 360px", "min-height: 460px" } },
 
+        // PageHeaderEditorial (INC-36 PR-1, DD-06): cabecera compartida de las 4 páginas de
+        // listado — badge en píldora, h1 único en serif display y zona de acción opcional;
+        // el título es RenderFragment para conservar composición rica (punto terracota)
+        { "PageHeaderEditorial (cabecera compartida)", "src/Ludeka.Web/Components/Shared/PageHeaderEditorial.razor",
+          new[] { "page-header-title", "<h1", "badge-pill", "Actions" },
+          Array.Empty<string>() },
+
         // HeroEditorial: hero narrativo con <picture> AVIF/WebP/JPG priorizado (patrón INC-07),
         // escena CSS bajo la foto y altura derivada del ancho con foco autoral por variante
         // (Decisiones 1, 2 y 10 + INC-36 DD-01/DD-02/DD-03: sin min-h fijo, la clase de foco
