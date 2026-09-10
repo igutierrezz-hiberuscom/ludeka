@@ -120,3 +120,46 @@
 ### Base para PR-3
 
 - Rama del PR-2: `inc/rediseno-paginas-editoriales-2` (encima de `inc/rediseno-paginas-editoriales-1b`). El PR-3 debe crearse encima de esta rama (cadena feature-branch-chain, DD-11).
+
+---
+
+## Estado PR-3 «Ficha»: COMPLETADO ✅
+
+> Fase SDD `sdd-apply`, PR-3 «Ficha» (tareas 3.1–3.3). Rama `inc/rediseno-paginas-editoriales-3` creada encima de `inc/rediseno-paginas-editoriales-2` (cabeza de la cadena, PR #10). Modo: TDD estricto.
+
+| Tarea | Estado | Ciclo TDD | Commit |
+|---|---|---|---|
+| 3.1 Contrato `GameDetail (ficha sin emojis)` ajustado (mustContain + `flex-wrap`, `text-[var(--on-brand)]`; mustNotContain + `Ludeca`, `text-white`, `text-slate-400`, `bg-amber-500`, `bg-indigo-500`, `bg-purple-950`, `bg-rose-500`, `text-orange-400`) | ✅ | ROJO confirmado (1 fallo exacto, la fila; diseñador texto plano read-only en verde) | incluido en `5ed2cfd` |
+| 3.2 GameDetail.razor: PageTitle «Ludeka» ×2, estado no-encontrado tokenizado (`--text-primary`/`--text-muted`, código slug `--text-primary`+`font-mono`), back-bar DD-08 (envoltura `flex flex-wrap ... gap-x-4 gap-y-2`, «Ir a Mi Ludoteca» con `hidden sm:inline-flex` al grupo izquierdo, moderación agrupada en subcontenedor `border-l border-[var(--border-subtle)]`), hardcodes → tokens de estado, chip expansión sólido `--state-highlight`+`--on-brand`, botón IA `--on-brand` | ✅ | VERDE (focal 4/4, incluida fila diseñador) | `5ed2cfd` |
+| 3.3 Boundary PR-3: suite completa + smoke ficha (moderador, envoltura, 5 temas) + PR (base = rama PR-2) | ✅ | 854/854 + smoke ficha/no-encontrado 5/5 | (docs) + PR |
+
+### TDD Cycle Evidence (PR-3)
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 3.1 | `WebMarkupContractTests.cs` (fila `GameDetail (ficha sin emojis)`) | Unit (contrato) | ✅ 4/4 pre-cambio | ✅ 1 fallo exacto (los 10 mustNotContain nuevos fallan en el fuente: `Ludeca` ×2, `text-white` ×3, `text-slate-400` ×3, `bg-amber-500`, `bg-indigo-500`, `bg-purple-950`, `bg-rose-500`, `text-orange-400`; `flex-wrap` ya presente no era el rojo) | ✅ 4/4 | ➖ Estructural (swap positivo+negativo en la misma fila) | ➖ No needed |
+| 3.2 | idem (contrato de 3.1) | Unit | ✅ | ✅ (mismo ciclo) | ✅ 4/4 (contrato + fila diseñador read-only) | ✅ Triangulación por runtime: smoke verifica las clases tokenizadas en el markup servido (back-bar envolvente ×1, moderación con borde, ausencia de los 8 hardcodes en el fragmento propio) | ➖ No needed |
+| 3.3 | suite completa | Full | ✅ | — | ✅ 854/854 | ✅ smoke runtime ficha + no-encontrado ×5 temas | ➖ No needed |
+
+### Verificación observada (registro PR-3)
+
+| Comando | Resultado observado |
+|---|---|
+| Safety net `dotnet test Ludeka.sln --filter DisplayName~"GameDetail"` (pre-cambios) | 4/4 verde |
+| `dotnet test --filter DisplayName~"GameDetail"` (ROJO 3.1) | 1 fallo exacto (fila `GameDetail (ficha sin emojis)`); diseñador texto plano y el resto de la clase en verde |
+| `dotnet test --filter DisplayName~"GameDetail"` (VERDE 3.2) | 4/4 verde |
+| `dotnet test Ludeka.sln` (boundary 3.3) | **854/854 verde** (baseline PR-2 exacta; sin tests nuevos, solo fila ajustada) |
+| Smoke `/juegos/wingspan` (BD local con seed; servidor en 5199) | HTTP 200; `flex-wrap` presente (×19 en documento); back-bar servida con la estructura DD-08 exacta (envoltura `gap-x-4 gap-y-2`, grupo izquierdo con «Volver al catálogo» + «Ir a Mi Ludoteca» `hidden sm:inline-flex`, moderación agrupada `border-l` con Editar Ficha `--state-warning-*` y Generar con IA `--state-info-*`, Gestionar Veredicto servido); `Ludeca` 0 ocurrencias; `text-orange-400`/`text-slate-400`/`hover:bg-rose-500`/`hover:bg-amber-500`/`bg-indigo-500` 0 ocurrencias; `hover:text-white` 0 |
+| Smoke `/juegos/slug-inexistente?theme={5 temas}` | HTTP 200 ×5; estado no-encontrado servido con `text-[var(--text-primary)]` (h1+código slug) y `text-[var(--text-muted)]` (2), sin `text-orange-400` |
+
+### Desviaciones y hallazgos PR-3
+
+1. **Escalón de hover con tokens congelados (aplicación DD-04)**: el mapa de sustitución colapsa los alfas hardcodeados (bg /10 y hover /20) sobre la familia de tokens (bg alfa 0,10, border alfa 0,28). Para no perder el feedback de hover de los botones de moderación, `hover:bg-amber-500/20` y `hover:bg-indigo-500/20` se mapean al siguiente escalón de su misma familia congelada: `hover:bg-[var(--state-warning-border)]` / `hover:bg-[var(--state-info-border)]` (mismo tono, alfa mayor). No se reabre PR-1 (sin tokens nuevos); reportado para revisión del maintainer.
+2. **`text-white` residual en el DOCUMENTO servido (fuera de alcance, contratado)**: el markup propio de GameDetail.razor sirve 0 ocurrencias, pero el documento completo contiene `text-white` de componentes compartidos fuera de alcance: badge de equipo fundador en `MainLayout.razor:103` (DD-03 lo documenta como barrido futuro) y `text-white` de familias compartidas (`ExpansionEcosystemSection`, `ExpansionSisterList`, `CollectionActionBar`, `QuickBadges`, `StoreOffersCard`, `MultimediaHub`… — DD-05, segunda ola). La ausencia contratada aplica al ARCHIVO de la ficha (grep del contrato) y se verificó también en su fragmento servido.
+3. **Sesión local autenticada como fundador**: el smoke sirve la rama moderador/fundador (badge de marca de MainLayout y grupo de moderación visibles), lo que permitió verificar el grupo de moderación en vivo. La rama «sin moderador» comparte el mismo contenedor `flex flex-wrap` (la envoltura es estructural para ambas ramas); la confirmación visual en móvil la añade `sdd-verify`.
+4. **Chip de expansión simplificado**: al pasar a chip sólido (`bg-[var(--state-highlight)] text-[var(--on-brand)]`) se eliminan `backdrop-blur-md` y `border-purple-500/40` (ya sin translucidez que difuminar ni borde contraplantado); se conservan posición/sombra/peso tipográfico. Contraste verificado por cálculo DD-04 (tinta sobre `#C084FC` ≈ 6,7:1; blanco sobre `#A21CAF` ≈ 6,4:1).
+5. GOTCHA heredado aplicado: smoke verificado por subcadenas ASCII y `RawContentStream` UTF8 (sin comparar «Catálogo»/acentos con `Invoke-WebRequest`).
+
+### Base para PR-4
+
+- Rama del PR-3: `inc/rediseno-paginas-editoriales-3` (encima de `inc/rediseno-paginas-editoriales-2`). El PR-4 debe crearse encima de esta rama (cadena feature-branch-chain, DD-11). Presupuesto PR-3: 110 líneas cambiadas (60+/50−), dentro del forecast ~120-160.
