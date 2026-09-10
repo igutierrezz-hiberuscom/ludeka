@@ -9,17 +9,18 @@ Definir el comportamiento de la cabecera (hero) de la portada de Ludeka como blo
 
 ## Requirements
 
-### Requirement: Hero editorial con narrativa
+### Requirement: Hero de imagen protagonista
 
-La portada **DEBE** renderizar un hero editorial con narrativa visible compuesto por: titular visible en serif display (`--font-display`), párrafo descriptivo reescrito como invitación a la mesa, fondo de ambiente hogareño según la variante configurada, el buscador rápido y las píldoras de acceso. La portada **NO DEBE** renderizar el badge decorativo ("✨ PORTADA EDITORIAL"). El `<PageTitle>` del navegador queda fuera de alcance y no cambia.
-(Previously: el hero era minimalista, sin badge ni titular visible, compuesto solo por párrafo, buscador y píldoras.)
+La portada **DEBE** renderizar un hero de imagen protagonista: el fondo de ambiente hogareño (según la variante configurada) ocupa el bloque y **SOLO** el buscador rápido y las píldoras de acceso se superponen sobre él como tarjetas con fondo propio, sin capa intermedia (sin scrim global, sin panel ni chips de texto) para que la ilustración quede visible fuera del texto. La portada **NO DEBE** renderizar titular visible ni párrafo descriptivo dentro del hero, ni el badge decorativo ("✨ PORTADA EDITORIAL"). El `<PageTitle>` del navegador queda fuera de alcance y no cambia.
+(Previously: el hero era un dashboard con titular `sr-only`; pasó a editorial con titular visible en serif y, tras la revisión del maintainer (2026-09-10), evolucionó a imagen protagonista sin texto visible.)
 
-#### Scenario: Portada renderiza hero editorial
+#### Scenario: Portada renderiza hero de imagen protagonista
 
 - GIVEN un visitante anónimo que solicita la portada `/`
 - WHEN la página se renderiza por completo
-- THEN el documento contiene un titular visible en serif display, el párrafo descriptivo, el formulario del buscador y las 4 píldoras de acceso
-- AND el documento NO contiene el texto "PORTADA EDITORIAL"
+- THEN el documento contiene el fondo de ambiente configurado, el formulario del buscador y las 4 píldoras de acceso superpuestas como tarjetas
+- AND el documento NO contiene el texto "PORTADA EDITORIAL", ni `hero-scrim`, ni `hero-panel`, ni `hero-text-chip`
+- AND el texto de la página NO queda superpuesto al fondo sin fondo propio que garantice contraste
 
 ### Requirement: Buscador rápido conservado
 
@@ -61,15 +62,15 @@ En la sección "Novedades en Tiendas" de la portada, el enlace "Ver todas las no
 
 ### Requirement: Jerarquía de encabezados accesible (WCAG 2.2 AA)
 
-La portada **DEBE** contener exactamente un `<h1>` en el documento. Con el hero editorial, ese `<h1>` es visible y es el titular del hero (deja de ser `sr-only`). Su texto definitivo lo fija `sdd-design` y **DEBE** estar redactado en castellano y describir la invitación a la mesa de Ludeka.
-(Previously: el `<h1>` era único y visualmente oculto (`sr-only`) con el texto fijo "Ludeka — Juegos de mesa en español".)
+La portada **DEBE** contener exactamente un `<h1>` en el documento. Con el hero de imagen protagonista, ese `<h1>` vuelve a ser visualmente oculto (`sr-only`) con el texto "La mesa está servida" — la imagen es la narrativa y las acciones se bastan (revisión del maintainer, 2026-09-10). El `<h1>` **DEBE** estar redactado en castellano y describir la invitación a la mesa de Ludeka.
+(Previously: con el hero editorial visible, el `<h1>` era visible en serif display con texto fijado por `sdd-design`.)
 
-#### Scenario: Único h1 visible con serif display
+#### Scenario: Único h1 accesible oculto visualmente
 
 - GIVEN la portada `/` renderizada
 - WHEN se inspecciona la jerarquía de encabezados del documento
 - THEN existe exactamente un elemento `<h1>` en toda la página
-- AND ese `<h1>` es visible (ya no `sr-only`) y aplica la familia `--font-display`
+- AND ese `<h1>` es `sr-only` (no visible, accesible para lectores de pantalla) con el texto "La mesa está servida"
 
 ### Requirement: Variantes de fondo intercambiables del hero (D1)
 
