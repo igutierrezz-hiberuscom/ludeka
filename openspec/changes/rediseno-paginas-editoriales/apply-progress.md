@@ -221,7 +221,7 @@
 | 5.3 Contratos `News` y `GiveawayCard` ajustados (fallbacks, dimensiones, rail y prohibiciones) | ✅ | ROJO confirmado (2 fallos exactos pendientes tras Radar) → | incluido en `dd7f42c` |
 | 5.4 News.razor: cabecera, `EditorialModal`, imagen siempre presente y tokens | ✅ | VERDE contractual 102/102; smoke `/novedades` con default de novedad | `dd7f42c` |
 | 5.5 GiveawayCard.razor: `rail-card`, `rail-cover h-44`, fallback de sorteo, tokens y botón accesible | ✅ | VERDE contractual 102/102; smoke `/sorteos` con default de sorteo | `dd7f42c` |
-| 5.6 Boundary PR-5: `app.css`, suite, smokes, documentación y tareas | ✅ | Suite completa 854/854 antes y después de regenerar; smoke HTTP 200 de las 5 rutas | `pendiente` (commit de documentación) |
+| 5.6 Boundary PR-5: `app.css`, suite, smokes, documentación y tareas | ✅ | Suite completa 854/854 antes y después de regenerar; smoke HTTP 200 de las 5 rutas | `c08cd9b` |
 
 ### Commits de PR-5
 
@@ -229,7 +229,7 @@
 |---|---|
 | `2f67036` | `feat: sorteos con modal editorial y tokens de estado` |
 | `dd7f42c` | `feat: novedades y GiveawayCard con imagen por defecto y rail-card` |
-| pendiente | `docs: progreso pr-5 inc-36 y casillas de sorteos-novedades` |
+| `c08cd9b` | `docs: progreso pr-5 inc-36 y casillas de sorteos-novedades` |
 
 ## TDD Cycle Evidence (PR-5)
 
@@ -278,5 +278,5 @@
 ## Estado acumulado
 
 - **22/22 tareas completadas** (PR-1: 1.1–1.7; PR-2: 2.1–2.3; PR-3: 3.1–3.3; PR-4: 4.1–4.3; PR-5: 5.1–5.6).
-- Boundary de PR-5 listo para push y PR contra `inc/rediseno-paginas-editoriales-4`.
-- Pendiente para el orquestador: push, apertura del PR-5 y ejecución independiente de `sdd-verify`; no se ejecutó `sdd-verify` ni `sdd-archive`.
+- Boundary de PR-5 publicado en [PR #13](https://github.com/igutierrezz-hiberuscom/ludeka/pull/13), con base `inc/rediseno-paginas-editoriales-4`.
+- Pendiente para el orquestador: ejecución independiente de `sdd-verify` y `sdd-archive`; no se ejecutaron desde apply.
