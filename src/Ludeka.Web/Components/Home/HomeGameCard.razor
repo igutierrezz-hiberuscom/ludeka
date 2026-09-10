@@ -1,0 +1,59 @@
+@* Tarjeta del carril Top 20 de la portada (INC-35, Decisión 3): conserva el fallback
+   vigente de carátulas de juego con onerror (expansión → expansion-placeholder.svg) y
+   adopta el lenguaje común .rail-card (lift + glow + zoom de imagen con los tokens de
+   microinteracción del PR-1) y badges con Icon, sin emojis. *@
+@using Ludeka.Web.Components.Shared
+@using Ludeka.Application.DTOs
+
+<a href="/juegos/@Game.Slug"
+   class="rail-card w-40 sm:w-48 shrink-0 snap-start"
+   role="listitem"
+   aria-label="Ver ficha de @Game.SpanishTitle">
+    <div class="rail-cover rail-cover--square">
+        @{
+            var placeholder = Game.IsExpansion ? "/images/expansion-placeholder.svg" : "/images/game-placeholder.svg";
+        }
+        <img src="@(!string.IsNullOrWhiteSpace(Game.CoverImageUrl) ? Game.CoverImageUrl : placeholder)"
+             alt="Carátula de @Game.SpanishTitle"
+             loading="lazy"
+             decoding="async"
+             width="192"
+             height="192"
+             onerror="this.onerror=null; this.src='@placeholder';" />
+
+        @* Badge de Rating *@
+        <div class="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-sm border border-amber-500/40 text-amber-300 text-[0.7rem] font-black flex items-center gap-1 shadow-md">
+            <Icon Name="star" Size="12" />
+            <span>@Game.BggRating.ToString("0.0")</span>
+        </div>
+
+        @if (Game.IsExpansion)
+        {
+            <div class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-950/80 backdrop-blur-sm border border-purple-500/40 text-[0.65rem] font-bold text-purple-200 flex items-center gap-1">
+                <Icon Name="puzzle" Size="12" /> Expansión
+            </div>
+        }
+    </div>
+
+    <div class="p-3">
+        <div class="flex items-center justify-between text-[0.7rem] font-semibold text-[var(--text-muted)] mb-1">
+            <span>@Game.YearPublished</span>
+            @if (!string.IsNullOrWhiteSpace(Game.IdealPlayerCountText))
+            {
+                <span class="text-[var(--color-mustplay)] font-bold">@Game.IdealPlayerCountText</span>
+            }
+        </div>
+        <h3 class="text-sm font-extrabold text-[var(--text-primary)] line-clamp-2 leading-snug">
+            @Game.SpanishTitle
+        </h3>
+    </div>
+
+    <div class="p-3 pt-0 text-[0.7rem] text-[var(--text-secondary)] truncate">
+        @Game.Designer
+    </div>
+</a>
+
+@code {
+    /// <summary>Juego del carril Top 20 (datos puros; la card no accede a servicios).</summary>
+    [Parameter, EditorRequired] public GameSummaryDto Game { get; set; } = null!;
+}

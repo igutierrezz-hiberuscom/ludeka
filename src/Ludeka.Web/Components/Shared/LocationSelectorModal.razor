@@ -17,7 +17,7 @@
             @* Cabecera *@
             <div class="p-5 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-surface-elevated)]/50">
                 <div class="flex items-center gap-2.5">
-                    <span class="text-2xl">🌍</span>
+                    <Icon Name="earth" Size="24" />
                     <div>
                         <h2 id="location-modal-title" class="text-base font-black text-[var(--text-primary)]">
                             Ubicación y Ámbito Territorial
@@ -39,7 +39,7 @@
                 @* Advertencia obligatoria *@
                 <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-500 dark:text-amber-400 space-y-1">
                     <div class="flex items-center gap-1.5 font-black text-xs">
-                        <span>⚠️</span>
+                        <Icon Name="triangle-alert" Size="14" />
                         <span>Aviso de Filtrado Territorial</span>
                     </div>
                     <p class="leading-relaxed">
@@ -56,7 +56,7 @@
                     <button type="button"
                             @onclick="AutoDetectCountryAsync"
                             class="px-3 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white font-bold text-xs transition-colors inline-flex items-center gap-1.5 shadow-sm">
-                        <span>📍</span>
+                        <Icon Name="map-pin" Size="14" />
                         <span>Detectar</span>
                     </button>
                 </div>
@@ -83,7 +83,7 @@
                             @onclick="() => SelectCountryAsync(null)"
                             class="w-full p-3 rounded-2xl border text-left transition-all flex items-center justify-between @(string.IsNullOrWhiteSpace(_currentCountry) ? "border-[var(--brand-primary)] bg-[var(--brand-glow)] ring-2 ring-[var(--brand-primary)]/20" : "border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] hover:border-[var(--border-highlight)]")">
                         <div class="flex items-center gap-2.5">
-                            <span class="text-xl">🌍</span>
+                            <Icon Name="earth" Size="20" />
                             <div>
                                 <span class="font-black text-sm text-[var(--text-primary)] block">Sin país seleccionado (Global)</span>
                                 <span class="text-[var(--text-muted)] text-[0.7rem]">Ver todas las tiendas, sorteos y eventos sin filtrado territorial</span>

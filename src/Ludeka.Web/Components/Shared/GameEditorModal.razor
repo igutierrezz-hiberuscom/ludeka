@@ -22,12 +22,12 @@
                 <div class="space-y-1">
                     <div class="flex items-center gap-2">
                         <span class="px-2 py-0.5 rounded text-[0.65rem] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                            🛡️ Panel Editorial
+                            <Icon Name="shield" Size="12" /> Panel Editorial
                         </span>
                         @if (AssociatedReportId.HasValue)
                         {
                             <span class="px-2 py-0.5 rounded text-[0.65rem] font-black uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/30">
-                                🚩 Resolviendo Incidencia
+                                <Icon Name="flag" Size="12" /> Resolviendo Incidencia
                             </span>
                         }
                     </div>
@@ -47,7 +47,7 @@
             @if (AssociatedReportId.HasValue)
             {
                 <div class="px-5 py-3 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-200/90 flex items-start gap-2.5 shrink-0">
-                    <span class="text-amber-400 text-base">⚠️</span>
+                    <span class="text-amber-400"><Icon Name="triangle-alert" Size="16" /></span>
                     <div class="flex-1 leading-snug">
                         <strong class="text-amber-300 font-bold block">Incidencia Comunitaria Asociada:</strong>
                         <p class="text-amber-100/80 mt-0.5">
@@ -62,27 +62,27 @@
                 <button type="button"
                         @onclick="() => _activeTab = EditorTab.Metadata"
                         class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Metadata ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
-                    <span>📝</span> Metadatos
+                    <Icon Name="notebook-pen" Size="14" /> Metadatos
                 </button>
                 <button type="button"
                         @onclick="() => _activeTab = EditorTab.Table"
                         class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Table ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
-                    <span>🎲</span> Mesa y ADN
+                    <Icon Name="dices" Size="14" /> Mesa y ADN
                 </button>
                 <button type="button"
                         @onclick="() => _activeTab = EditorTab.Synopsis"
                         class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Synopsis ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
-                    <span>📄</span> Sinopsis
+                    <Icon Name="file-text" Size="14" /> Sinopsis
                 </button>
                 <button type="button"
                         @onclick="() => _activeTab = EditorTab.Cover"
                         class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Cover ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
-                    <span>🖼️</span> Carátula
+                    <Icon Name="image" Size="14" /> Carátula
                 </button>
                 <button type="button"
                         @onclick="() => _activeTab = EditorTab.Sleeves"
                         class="px-3.5 py-2 text-xs font-extrabold rounded-t-xl transition-colors border-b-2 flex items-center gap-1.5 @(_activeTab == EditorTab.Sleeves ? "text-[var(--brand-primary)] border-[var(--brand-primary)] bg-[var(--bg-surface-elevated)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]")">
-                    <span>🛡️</span> Fundas (@_sleeves.Count)
+                    <Icon Name="shield" Size="14" /> Fundas (@_sleeves.Count)
                 </button>
             </div>
 
@@ -91,7 +91,7 @@
                 @if (!string.IsNullOrWhiteSpace(_errorMessage))
                 {
                     <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold flex items-center gap-2">
-                        <span>⚠️</span>
+                        <Icon Name="triangle-alert" Size="14" />
                         <span>@_errorMessage</span>
                     </div>
                 }
@@ -99,7 +99,7 @@
                 @if (!string.IsNullOrWhiteSpace(_successMessage))
                 {
                     <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">
-                        <span>✅</span>
+                        <Icon Name="circle-check" Size="14" />
                         <span>@_successMessage</span>
                     </div>
                 }
@@ -250,9 +250,9 @@
                                 <label for="select-language" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Dependencia de Idioma</label>
                                 <select id="select-language" @bind="_language"
                                         class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]">
-                                    <option value="@LanguageDependence.None">🟢 Nula (solo iconografía)</option>
-                                    <option value="@LanguageDependence.Low">🟡 Baja (frases cortas)</option>
-                                    <option value="@LanguageDependence.High">🔴 Alta (texto continuo/denso)</option>
+                                    <option value="@LanguageDependence.None">Nula (solo iconografía)</option>
+                                    <option value="@LanguageDependence.Low">Baja (frases cortas)</option>
+                                    <option value="@LanguageDependence.High">Alta (texto continuo/denso)</option>
                                 </select>
                             </div>
 
@@ -260,9 +260,9 @@
                                 <label for="select-footprint" class="text-[0.7rem] font-bold text-[var(--text-secondary)] block mb-1">Espacio en Mesa</label>
                                 <select id="select-footprint" @bind="_footprint"
                                         class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]">
-                                    <option value="@TableFootprint.SmallTable">🪑 Mesa pequeña / Cafetería</option>
-                                    <option value="@TableFootprint.StandardTable">🍽️ Mesa estándar de comedor</option>
-                                    <option value="@TableFootprint.TableMonster">🏰 Monstruo de mesa / Despliegue masivo</option>
+                                    <option value="@TableFootprint.SmallTable">Mesa pequeña / Cafetería</option>
+                                    <option value="@TableFootprint.StandardTable">Mesa estándar de comedor</option>
+                                    <option value="@TableFootprint.TableMonster">Monstruo de mesa / Despliegue masivo</option>
                                 </select>
                             </div>
                         </div>
@@ -314,7 +314,7 @@
                             @* Opción 1: Subida de archivo físico *@
                             <div class="p-3.5 rounded-2xl bg-[var(--bg-surface-elevated)]/60 border border-[var(--border-subtle)] space-y-2">
                                 <label for="input-cover-file" class="text-xs font-extrabold text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer">
-                                    <span>📁</span> Subir Archivo Local (.jpg, .png, .webp &le; 5 MB)
+                                    <Icon Name="folder" Size="14" /> Subir Archivo Local (.jpg, .png, .webp &le; 5 MB)
                                 </label>
                                 <InputFile id="input-cover-file"
                                            OnChange="HandleFileSelected"
@@ -324,7 +324,7 @@
                                 @if (_isUploadingImage)
                                 {
                                     <div class="flex items-center gap-2 text-xs text-amber-400">
-                                        <span class="animate-spin">⚙️</span>
+                                        <span class="animate-spin inline-block"><Icon Name="settings" Size="14" /></span>
                                         <span>Procesando y guardando imagen...</span>
                                     </div>
                                 }
@@ -333,7 +333,7 @@
                             @* Opción 2: URL Externa *@
                             <div class="p-3.5 rounded-2xl bg-[var(--bg-surface-elevated)]/60 border border-[var(--border-subtle)] space-y-2">
                                 <label for="input-cover-url" class="text-xs font-extrabold text-[var(--text-primary)] flex items-center gap-1.5">
-                                    <span>🔗</span> O especificar URL de Imagen Remota
+                                    <Icon Name="link" Size="14" /> O especificar URL de Imagen Remota
                                 </label>
                                 <div class="flex gap-2">
                                     <input id="input-cover-url"
@@ -371,7 +371,7 @@
                                     var sl = _sleeves[idx];
                                     <div class="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-lg">🃏</span>
+                                            <Icon Name="club" Size="18" />
                                             <div>
                                                 <div class="font-bold text-xs text-[var(--text-primary)]">@sl.FormatName</div>
                                                 <div class="text-[0.7rem] text-[var(--text-secondary)]">
@@ -384,7 +384,7 @@
                                                 @onclick="() => RemoveSleeve(idx)"
                                                 class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs transition-colors"
                                                 title="Eliminar este formato de funda">
-                                            🗑️ Eliminar
+                                            <Icon Name="trash-2" Size="12" /> Eliminar
                                         </button>
                                     </div>
                                 }
@@ -400,7 +400,7 @@
                         @* Formulario para añadir nueva funda *@
                         <div class="p-3.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-3">
                             <h4 class="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                                <span>➕</span> Añadir Formato de Funda
+                                <Icon Name="plus" Size="14" /> Añadir Formato de Funda
                             </h4>
 
                             @* Selector de Presets de Catálogo Estándar *@
@@ -463,7 +463,7 @@
                             <button type="button"
                                     @onclick="AddSleeve"
                                     class="w-full py-2 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] transition-colors flex items-center justify-center gap-1.5">
-                                <span>➕</span> Añadir Formato a la Ficha
+                                <Icon Name="plus" Size="14" /> Añadir Formato a la Ficha
                             </button>
                         </div>
                     </div>
@@ -505,17 +505,17 @@
                             class="px-5 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 disabled:opacity-50">
                         @if (_isSaving)
                         {
-                            <span class="animate-spin">⚙️</span>
+                            <span class="animate-spin inline-block"><Icon Name="settings" Size="14" /></span>
                             <span>Guardando...</span>
                         }
                         else if (AssociatedReportId.HasValue)
                         {
-                            <span>💾</span>
+                            <Icon Name="save" Size="14" />
                             <span>Guardar Ficha y Resolver Reporte</span>
                         }
                         else
                         {
-                            <span>💾</span>
+                            <Icon Name="save" Size="14" />
                             <span>Guardar Cambios</span>
                         }
                     </button>

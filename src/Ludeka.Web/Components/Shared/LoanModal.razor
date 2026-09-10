@@ -14,7 +14,7 @@
             @* Header *@
             <div class="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)]">
                 <div class="flex items-center gap-2">
-                    <span class="text-2xl">📦</span>
+                    <Icon Name="package" Size="24" />
                     <h3 id="loan-modal-title" class="text-base font-bold text-[var(--text-primary)]">
                         @(ActiveLoan != null ? "Préstamo Activo" : "Registrar Préstamo")
                     </h3>
@@ -55,7 +55,7 @@
                     <button type="button"
                             @onclick="HandleReturnLoan"
                             class="w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-[var(--color-mustplay)] hover:opacity-90 text-white shadow-sm transition-all flex items-center justify-center gap-2">
-                        <span>↩️</span>
+                        <Icon Name="undo-2" Size="14" />
                         <span>Marcar como devuelto (1 clic)</span>
                     </button>
                 }

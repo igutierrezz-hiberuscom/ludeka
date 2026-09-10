@@ -21,7 +21,7 @@
     @if (!_isAuthorized)
     {
         <div class="p-8 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-center space-y-4 max-w-xl mx-auto my-12">
-            <span class="text-4xl block">🛡️</span>
+            <span class="inline-block"><Icon Name="shield" Size="36" /></span>
             <h2 class="text-xl font-black text-[var(--text-primary)]">Acceso Reservado a Moderación</h2>
             <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Esta zona requiere el rol de <strong>Mesa Fundadora</strong> o disponer del permiso granular
@@ -40,7 +40,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--brand-primary)] text-xs font-bold mb-2">
-                    <span>📸</span> Automatización Omnicanal & Publicación Directa
+                    <Icon Name="camera" Size="14" /> Automatización Omnicanal & Publicación Directa
                 </div>
                 <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-3">
                     <span>Publicador de Instagram</span>
@@ -54,7 +54,7 @@
                     else
                     {
                         <span class="text-xs px-2.5 py-1 rounded-full font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 inline-flex items-center gap-1.5" title="En modo simulado no se requieren credenciales de Meta para publicar">
-                            <span>🧪</span>
+                            <Icon Name="flask-conical" Size="12" />
                             <span>Modo Simulado Activo</span>
                         </span>
                     }
@@ -69,13 +69,13 @@
                 <button type="button"
                         @onclick="() => _isSelectGiveawayModalOpen = true"
                         class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                    <span>🎁</span>
+                    <Icon Name="gift" Size="14" />
                     <span>Post desde Sorteo</span>
                 </button>
                 <button type="button"
                         @onclick="() => _isSelectReleaseModalOpen = true"
                         class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                    <span>📰</span>
+                    <Icon Name="newspaper" Size="14" />
                     <span>Post desde Novedad</span>
                 </button>
             </div>
@@ -85,7 +85,7 @@
         {
             <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
                 <div class="flex items-center gap-2 font-semibold">
-                    <span>⚠️</span>
+                    <Icon Name="triangle-alert" Size="14" />
                     <span>@_errorMessage</span>
                 </div>
                 <button type="button" @onclick="LoadDataAsync" class="px-3 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-white font-bold transition-colors">
@@ -97,7 +97,7 @@
         @if (_isLoading)
         {
             <div class="py-20 text-center text-[var(--text-muted)] space-y-3">
-                <div class="inline-block animate-spin text-3xl">📸</div>
+                <div class="inline-block animate-spin"><Icon Name="camera" Size="30" /></div>
                 <p class="text-sm font-semibold">Sincronizando bandeja de Instagram...</p>
             </div>
         }
@@ -151,8 +151,9 @@
                                             class="w-full text-left p-3 rounded-2xl border transition-all flex items-start justify-between gap-2 @(_activeDraft?.Id == draft.Id ? "bg-[var(--brand-primary)]/15 border-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-highlight)]")">
                                         <div class="space-y-1 min-w-0">
                                             <div class="flex items-center gap-1.5 flex-wrap">
-                                                <span class="px-1.5 py-0.5 rounded text-[0.65rem] font-bold @GetSourceBadgeClass(draft.SourceType)">
-                                                    @GetSourceIcon(draft.SourceType) @draft.SourceType
+                                                <span class="px-1.5 py-0.5 rounded text-[0.65rem] font-bold @GetSourceBadgeClass(draft.SourceType) inline-flex items-center gap-1">
+                                                    <Icon Name="@GetSourceIcon(draft.SourceType)" />
+                                                    @draft.SourceType
                                                 </span>
                                                 <span class="font-bold truncate text-[var(--text-primary)]">@draft.Title</span>
                                             </div>
@@ -175,7 +176,7 @@
                     {
                         <div class="space-y-2">
                             <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block px-1">
-                                📱 Previsualización Feed de Instagram (1:1)
+                                <Icon Name="smartphone" Size="12" /> Previsualización Feed de Instagram (1:1)
                             </span>
 
                             <div class="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl overflow-hidden max-w-md mx-auto">
@@ -220,7 +221,7 @@
                                     else
                                     {
                                         <div class="p-8 text-center text-[var(--text-muted)]">
-                                            <span class="text-4xl block mb-2">🖼️</span>
+                                            <span class="inline-block mb-2"><Icon Name="image" Size="36" /></span>
                                             <span class="text-xs">Sin imagen seleccionada</span>
                                         </div>
                                     }
@@ -233,17 +234,17 @@
                                     }
                                 </div>
 
-                                @* Barra de Interacción Social (❤️ 💬 ↗️ 🔖) *@
+                                @* Barra de Interacción Social (corazón, comentario, compartir y guardar) *@
                                 <div class="p-3.5 pb-2 space-y-2 text-xs">
                                     <div class="flex items-center justify-between text-xl text-[var(--text-primary)]">
                                         <div class="flex items-center gap-4">
                                             <button type="button" @onclick="() => _isLiked = !_isLiked" class="hover:scale-110 transition-transform @(_isLiked ? "text-rose-500" : "")">
-                                                @(_isLiked ? "❤️" : "🤍")
+                                                <Icon Name="heart" Size="20" />
                                             </button>
-                                            <button type="button" class="hover:scale-110 transition-transform">💬</button>
-                                            <button type="button" class="hover:scale-110 transition-transform">↗️</button>
+                                            <button type="button" class="hover:scale-110 transition-transform"><Icon Name="message-circle" Size="20" /></button>
+                                            <button type="button" class="hover:scale-110 transition-transform"><Icon Name="arrow-up-right" Size="20" /></button>
                                         </div>
-                                        <button type="button" class="hover:scale-110 transition-transform">🔖</button>
+                                        <button type="button" class="hover:scale-110 transition-transform"><Icon Name="bookmark" Size="20" /></button>
                                     </div>
 
                                     @* Conteo de Likes *@
@@ -270,7 +271,7 @@
                     @if (_activeDraft == null)
                     {
                         <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-4">
-                            <span class="text-5xl block">📸</span>
+                            <span class="inline-block"><Icon Name="camera" Size="48" /></span>
                             <h3 class="text-lg font-bold text-[var(--text-primary)]">Ningún borrador seleccionado</h3>
                             <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto leading-relaxed">
                                 Selecciona un borrador existente de la columna izquierda o crea uno nuevo a partir de un sorteo o novedad aprobados.
@@ -285,7 +286,7 @@
                             {
                                 <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                     <div class="flex items-center gap-2.5">
-                                        <span class="text-2xl">🎉</span>
+                                        <Icon Name="party-popper" Size="24" />
                                         <div>
                                             <p class="font-bold text-xs">¡Publicado oficialmente en Instagram!</p>
                                             <p class="text-[0.7rem] opacity-90">ID de Medio: <code>@_activeDraft.InstagramMediaId</code></p>
@@ -297,8 +298,10 @@
                                            target="_blank"
                                            rel="noopener noreferrer"
                                            class="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-black font-bold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-sm hover:opacity-90">
-                                            <span>🔗 Ver en Instagram</span>
-                                            <span>↗</span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <Icon Name="link" Size="12" /> Ver en Instagram
+                                                <span>↗</span>
+                                            </span>
                                         </a>
                                     }
                                 </div>
@@ -307,7 +310,7 @@
                             {
                                 <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 space-y-1">
                                     <div class="flex items-center gap-2 font-bold text-xs">
-                                        <span>⚠️</span> Error en el último intento de publicación
+                                        <Icon Name="triangle-alert" Size="14" /> Error en el último intento de publicación
                                     </div>
                                     <p class="text-[0.7rem] opacity-90">@_activeDraft.ErrorMessage</p>
                                 </div>
@@ -316,8 +319,8 @@
                             @* Título y Origen *@
                             <div class="flex items-start justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
                                 <div>
-                                    <span class="text-[0.65rem] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                                        Origen: @GetSourceIcon(_activeDraft.SourceType) @_activeDraft.SourceType &bull; ID: @_activeDraft.SourceId
+                                    <span class="text-[0.65rem] font-bold text-[var(--text-muted)] uppercase tracking-wider inline-flex items-center gap-1">
+                                        Origen: <Icon Name="@GetSourceIcon(_activeDraft.SourceType)" /> @_activeDraft.SourceType &bull; ID: @_activeDraft.SourceId
                                     </span>
                                     <h2 class="text-xl font-black text-[var(--text-primary)] mt-0.5">
                                         @_activeDraft.Title
@@ -326,7 +329,7 @@
                                 <button type="button"
                                         @onclick="DeleteActiveDraft"
                                         class="text-[var(--text-muted)] hover:text-rose-400 text-xs font-bold transition-colors flex items-center gap-1">
-                                    <span>🗑️</span>
+                                    <Icon Name="trash-2" Size="14" />
                                     <span>Descartar</span>
                                 </button>
                             </div>
@@ -342,14 +345,14 @@
                                         <button type="button"
                                                 @onclick='() => SetPreviewMode("vector")'
                                                 class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 @(_previewMode == "vector" ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
-                                            <span>🎨</span>
+                                            <Icon Name="palette" Size="12" />
                                             <span>Tarjeta 1:1</span>
                                         </button>
                                         <button type="button"
                                                 @onclick='() => SetPreviewMode("cover")'
                                                 disabled="@(string.IsNullOrWhiteSpace(_activeDraft.ImageUrl))"
                                                 class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 @(_previewMode == "cover" ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
-                                            <span>🖼️</span>
+                                            <Icon Name="image" Size="12" />
                                             <span>Carátula</span>
                                         </button>
                                     </div>
@@ -364,13 +367,13 @@
                                         <button type="button"
                                                 @onclick='() => ChangeTheme("Dark")'
                                                 class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 @(_editorTheme == "Dark" ? "bg-slate-900 text-white border-slate-700 shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
-                                            <span>🌙</span>
+                                            <Icon Name="moon" Size="12" />
                                             <span>Oscuro</span>
                                         </button>
                                         <button type="button"
                                                 @onclick='() => ChangeTheme("Light")'
                                                 class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 @(_editorTheme == "Light" ? "bg-white text-slate-900 border-slate-300 shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]")">
-                                            <span>☀️</span>
+                                            <Icon Name="sun" Size="12" />
                                             <span>Claro</span>
                                         </button>
                                     </div>
@@ -422,12 +425,12 @@
                                             class="px-4 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm">
                                         @if (_isSaving)
                                         {
-                                            <span class="animate-spin">⏳</span>
+                                            <span class="animate-spin inline-block"><Icon Name="hourglass" Size="14" /></span>
                                             <span>Guardando...</span>
                                         }
                                         else
                                         {
-                                            <span>💾</span>
+                                            <Icon Name="save" Size="14" />
                                             <span>Guardar Cambios</span>
                                         }
                                     </button>
@@ -441,7 +444,7 @@
                                         }
                                         else
                                         {
-                                            <span>📋</span>
+                                            <Icon Name="clipboard-copy" Size="14" />
                                             <span>Copiar Copy</span>
                                         }
                                     </button>
@@ -453,7 +456,7 @@
                                         class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:opacity-95 text-white font-black text-xs transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
                                     @if (_isPublishing)
                                     {
-                                        <span class="animate-spin text-sm">⏳</span>
+                                        <span class="animate-spin inline-block"><Icon Name="hourglass" Size="14" /></span>
                                         <span>Despachando a Instagram API...</span>
                                     }
                                     else if (_activeDraft.Status == InstagramPostDraftStatus.Published)
@@ -462,7 +465,7 @@
                                     }
                                     else
                                     {
-                                        <span>🚀 Validar y Publicar en Instagram</span>
+                                        <span class="inline-flex items-center gap-2"><Icon Name="rocket" Size="14" /> Validar y Publicar en Instagram</span>
                                     }
                                 </button>
                             </div>
@@ -481,7 +484,7 @@
         <div class="w-full max-w-xl max-h-[85vh] rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl flex flex-col space-y-4">
             <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
                 <h3 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>🎁</span> Seleccionar Sorteo para Crear Post
+                    <Icon Name="gift" Size="16" /> Seleccionar Sorteo para Crear Post
                 </h3>
                 <button type="button" @onclick="() => _isSelectGiveawayModalOpen = false" class="text-xl text-[var(--text-muted)] hover:text-[var(--text-primary)]">&times;</button>
             </div>
@@ -519,7 +522,7 @@
         <div class="w-full max-w-xl max-h-[85vh] rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl flex flex-col space-y-4">
             <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
                 <h3 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>📰</span> Seleccionar Novedad Editorial para Crear Post
+                    <Icon Name="newspaper" Size="16" /> Seleccionar Novedad Editorial para Crear Post
                 </h3>
                 <button type="button" @onclick="() => _isSelectReleaseModalOpen = false" class="text-xl text-[var(--text-muted)] hover:text-[var(--text-primary)]">&times;</button>
             </div>
@@ -802,10 +805,10 @@
 
     private static string GetSourceIcon(InstagramPostSourceType type) => type switch
     {
-        InstagramPostSourceType.Giveaway => "🎁",
-        InstagramPostSourceType.WeeklyRelease => "📰",
-        InstagramPostSourceType.Game => "🎲",
-        _ => "📝"
+        InstagramPostSourceType.Giveaway => "gift",
+        InstagramPostSourceType.WeeklyRelease => "newspaper",
+        InstagramPostSourceType.Game => "dices",
+        _ => "notebook-pen"
     };
 
     private static string GetSourceBadgeClass(InstagramPostSourceType type) => type switch

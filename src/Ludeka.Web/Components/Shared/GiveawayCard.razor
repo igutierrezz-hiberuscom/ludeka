@@ -11,7 +11,7 @@
                 @if (Giveaway.IsPromoted)
                 {
                     <span class="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-xs font-black bg-amber-500 text-black shadow-md flex items-center gap-1">
-                        <span>⭐</span> Promocionado
+                        <Icon Name="star" Size="12" /> Promocionado
                     </span>
                 }
             </div>
@@ -23,7 +23,7 @@
                 @if (Giveaway.IsPromoted && string.IsNullOrWhiteSpace(Giveaway.ThumbnailUrl))
                 {
                     <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-amber-500/20 text-amber-500 border border-amber-500/40 flex items-center gap-1 shadow-sm">
-                        <span>⭐</span> Promocionado
+                        <Icon Name="star" Size="12" /> Promocionado
                     </span>
                 }
 
@@ -34,14 +34,14 @@
                 </span>
 
                 <span class="px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide border flex items-center gap-1.5 @GetPlatformBadgeClass(Giveaway.Platform)">
-                    <span>@GetPlatformIcon(Giveaway.Platform)</span>
+                    <Icon Name="@GetPlatformIcon(Giveaway.Platform)" Size="12" />
                     <span>@Giveaway.Platform</span>
                 </span>
 
                 @if (Giveaway.IsCommunityExclusive)
                 {
                     <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-[var(--brand-glow)] text-[var(--brand-primary)] border border-[var(--brand-primary)] flex items-center gap-1">
-                        <span>🎁</span> Exclusivo Comunidad
+                        <Icon Name="gift" Size="12" /> Exclusivo Comunidad
                     </span>
                 }
             </div>
@@ -67,7 +67,7 @@
             @if (!string.IsNullOrWhiteSpace(Giveaway.GameTitle))
             {
                 <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
-                    <span>🎲</span>
+                    <Icon Name="dices" Size="12" />
                     <span>Juego: <strong class="text-[var(--text-primary)]">@Giveaway.GameTitle</strong></span>
                 </div>
             }
@@ -85,7 +85,7 @@
                 <button type="button"
                         @onclick="() => OnTogglePromoted.InvokeAsync(Giveaway.Id)"
                         class="mt-1 text-[0.65rem] font-bold text-left underline transition-colors @(Giveaway.IsPromoted ? "text-amber-500 hover:text-amber-600" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")">
-                    @(Giveaway.IsPromoted ? "⭐ Quitar Promocionado" : "☆ Marcar Promocionado")
+                    @(Giveaway.IsPromoted ? "Quitar Promocionado" : "Marcar Promocionado")
                 </button>
             }
             @if (Giveaway.IsPublishedOnInstagram && !string.IsNullOrWhiteSpace(Giveaway.InstagramPermalink))
@@ -94,14 +94,14 @@
                    target="_blank"
                    rel="noopener noreferrer"
                    class="mt-1 inline-flex items-center gap-1 text-[0.65rem] font-bold text-pink-500 hover:text-pink-600 dark:text-pink-400">
-                    <span>📸</span> <span>Publicado en Instagram</span> <span>↗</span>
+                    <Icon Name="camera" Size="12" /> <span>Publicado en Instagram</span> <span>↗</span>
                 </a>
             }
             else if (CanModerate)
             {
                 <a href="/admin/instagram?sourceType=Giveaway&sourceId=@Giveaway.Id"
                    class="mt-1 inline-flex items-center gap-1 text-[0.65rem] font-bold text-sky-500 hover:text-sky-600 dark:text-sky-400">
-                    <span>📸</span> <span>Crear Post Instagram</span>
+                    <Icon Name="camera" Size="12" /> <span>Crear Post Instagram</span>
                 </a>
             }
         </div>
@@ -128,11 +128,11 @@
 
     private string GetPlatformIcon(GiveawayPlatform platform) => platform switch
     {
-        GiveawayPlatform.Instagram => "📸",
-        GiveawayPlatform.TwitterX => "𝕏",
-        GiveawayPlatform.YouTube => "🎬",
-        GiveawayPlatform.Community => "🎲",
-        _ => "🔗"
+        GiveawayPlatform.Instagram => "camera",
+        GiveawayPlatform.TwitterX => "twitter",
+        GiveawayPlatform.YouTube => "clapperboard",
+        GiveawayPlatform.Community => "dices",
+        _ => "link"
     };
 
     private string GetPlatformBadgeClass(GiveawayPlatform platform) => "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)]";

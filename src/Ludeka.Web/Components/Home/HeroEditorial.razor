@@ -1,0 +1,135 @@
+@* Hero de imagen protagonista (revisión maintainer): la ilustración/foto llena el
+   hero y SOLO el buscador y las píldoras se superponen (tarjetas propias, legibles
+   sin capa alguna). El h1 queda sr-only para lectores de pantalla y SEO. El fondo
+   se conmuta con el parámetro Background o ?hero= (Decisión 2): foto servida en
+   <picture> AVIF/WebP/JPG con prioridad de carga (patrón INC-07) o escena CSS.
+   Si el asset falla (onerror) el fondo cae a la escena sin hueco ni petición extra. *@
+@using Ludeka.Web.Components.Shared
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager Navigation
+
+<section class="hero-editorial relative min-h-[360px] sm:min-h-[460px] overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
+    @* Capa de escena CSS: siempre presente bajo la foto (0 peticiones, fallback por tema) *@
+    <div class="hero-scene" aria-hidden="true"></div>
+
+@switch (Background)
+{
+    case HeroBackgroundVariant.CssScene:
+        @* Escena de serie: sin elemento de imagen, el fondo es 100% CSS con variables de tema *@
+        break;
+    case HeroBackgroundVariant.FotoEurogame:
+    case HeroBackgroundVariant.FotoMesaAmigos:
+    case HeroBackgroundVariant.FotoPrimerPlano:
+    case HeroBackgroundVariant.Ilustracion:
+        <picture class="hero-bg-media">
+            <source type="image/avif" srcset="@HeroBackgroundAssets.Avif(Background)" />
+            <source type="image/webp" srcset="@HeroBackgroundAssets.Webp(Background)" />
+            <img src="@HeroBackgroundAssets.Jpg(Background)"
+                 alt="@HeroBackgroundAssets.AltText(Background)"
+                 width="1600"
+                 height="900"
+                 fetchpriority="high"
+                 decoding="async"
+                 onerror="this.onerror=null; this.parentElement.classList.add('hero-bg-media--failed');" />
+        </picture>
+        break;
+}
+
+    @* Selector de variantes para pruebas: solo se renderiza con ?hero= en la querystring
+       (autoeliminatorio — los visitantes de producción jamás lo ven). Enlaces SSR puros. *@
+    @if (_showSwitcher)
+    {
+        <nav aria-label="Selector de variante del hero (pruebas)"
+             class="absolute top-3 right-3 z-20 flex flex-wrap gap-1.5 rounded-xl bg-[#0d0a18]/80 p-2 backdrop-blur-sm">
+            @foreach (var (key, variante) in _switcherOptions)
+            {
+                <a href="@Navigation.GetUriWithQueryParameter("hero", key)"
+                   class="px-2.5 py-1 rounded-full text-xs font-semibold transition-colors @(key == _activeKey ? "bg-white text-[#14181C]" : "bg-white/10 text-white hover:bg-white/20")"
+                   aria-current="@(key == _activeKey ? "page" : null)">@key</a>
+            }
+        </nav>
+    }
+
+    @* Acciones superpuestas: solo el buscador, arriba a la izquierda (revisión
+       maintainer 2026-09-10 — sin píldoras: redundantes con la nav superior y los
+       carriles; la navegación vive en el menú superior y en el menú móvil). *@
+    <h1 class="sr-only">La mesa está servida</h1>
+    <div class="hero-actions p-4 sm:p-6">
+        <div class="w-full max-w-xl">
+            <form @onsubmit="HandleQuickSearch" class="flex items-center gap-2">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[var(--text-muted)]">
+                        <Icon Name="search" Size="18" />
+                    </span>
+                    <input type="text"
+                           @bind="_searchTerm"
+                           placeholder="Buscar por juego, editorial o diseñador..."
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] shadow-sm" />
+                </div>
+                <button type="submit"
+                        class="px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs sm:text-sm transition-opacity shadow-sm whitespace-nowrap">
+                    Buscar
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+@code {
+    /// <summary>Variante de fondo activa (Decisión 2): el cambio de variante es 1 línea
+    /// en el orquestador; el parámetro ?hero= de la querystring la sobreescribe para
+    /// pruebas in situ, y solo entonces se muestra la tira de selección.</summary>
+    [Parameter] public HeroBackgroundVariant Background { get; set; } = HeroBackgroundVariant.FotoEurogame;
+
+    private string _searchTerm = string.Empty;
+    private bool _showSwitcher;
+    private string _activeKey = string.Empty;
+
+    /// <summary>Claves de querystring → variante, en el orden de la tira de selección.</summary>
+    private static readonly (string Key, HeroBackgroundVariant Variante)[] _switcherOptions =
+    {
+        ("eurogame", HeroBackgroundVariant.FotoEurogame),
+        ("amigos", HeroBackgroundVariant.FotoMesaAmigos),
+        ("primer-plano", HeroBackgroundVariant.FotoPrimerPlano),
+        ("ilustracion", HeroBackgroundVariant.Ilustracion),
+        ("css", HeroBackgroundVariant.CssScene),
+    };
+
+    /// <summary>Lee ?hero= de la querystring (SSR): activa la tira de selección y
+    /// sobreescribe la variante si la clave es válida. Sin el parámetro no hay tira.</summary>
+    protected override void OnInitialized()
+    {
+        var query = QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+        if (!query.TryGetValue("hero", out var raw))
+        {
+            return;
+        }
+
+        _showSwitcher = true;
+        var requested = raw.ToString();
+        foreach (var (key, variante) in _switcherOptions)
+        {
+            if (!string.Equals(key, requested, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            _activeKey = key;
+            Background = variante;
+            break;
+        }
+    }
+
+    /// <summary>Buscador rápido de la portada: submit con término → /catalogo?q={término}; vacío → /catalogo.</summary>
+    private void HandleQuickSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            Navigation.NavigateTo($"/catalogo?q={Uri.EscapeDataString(_searchTerm.Trim())}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/catalogo");
+        }
+    }
+}

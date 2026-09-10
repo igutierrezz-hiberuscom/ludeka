@@ -25,7 +25,12 @@
             <button type="button"
                     @onclick="() => _isAskingQuestion = !_isAskingQuestion"
                     class="px-3.5 py-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                <span>@(_isAskingQuestion ? "Cerrar Formulario" : "➕ Preguntar una Duda")</span>
+                <span>@(_isAskingQuestion ? "Cerrar Formulario" : "")</span>
+                @if (!_isAskingQuestion)
+                {
+                    <Icon Name="plus" Size="12" />
+                    <span>Preguntar una Duda</span>
+                }
             </button>
         </div>
     </div>
@@ -81,14 +86,14 @@
     @if (_isLoading)
     {
         <div class="py-8 text-center text-[var(--text-secondary)]">
-            <div class="inline-block animate-spin text-2xl mb-1">🎲</div>
+            <div class="inline-block animate-spin mb-1"><Icon Name="dices" Size="24" /></div>
             <p class="text-xs font-semibold">Cargando consultorio de reglas...</p>
         </div>
     }
     else if (_questions.Count == 0)
     {
         <div class="p-8 text-center rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
-            <span class="text-3xl block mb-2">📖</span>
+            <span class="inline-block mb-2"><Icon Name="book-open" Size="30" /></span>
             <p class="text-sm font-bold text-[var(--text-primary)]">No hay dudas registradas aún para este juego</p>
             <p class="text-xs text-[var(--text-secondary)] mt-1 max-w-sm mx-auto">
                 ¿Os ha surgido alguna duda jugando? Sé el primero en plantearla para que la comunidad aporte la solución oficial.
@@ -153,7 +158,7 @@
                                             @if (!string.IsNullOrWhiteSpace(answer.OfficialRuleReference))
                                             {
                                                 <p class="text-[0.68rem] text-[var(--text-secondary)] italic">
-                                                    📖 Referencia: <span class="text-[var(--text-primary)] font-semibold">@answer.OfficialRuleReference</span>
+                                                    <span class="inline-flex items-center gap-1.5"><Icon Name="book-open" Size="12" /> Referencia: <span class="text-[var(--text-primary)] font-semibold">@answer.OfficialRuleReference</span></span>
                                                 </p>
                                             }
 
@@ -247,7 +252,7 @@
                             <button type="button"
                                     @onclick="() => OpenAnswerForm(question.Id)"
                                     class="text-xs font-bold text-[var(--brand-primary)] hover:opacity-80 flex items-center gap-1">
-                                <span>💬</span> Responder a esta duda
+                                <Icon Name="message-circle" Size="12" /> Responder a esta duda
                             </button>
                         </div>
                     }

@@ -7,16 +7,16 @@
         @switch (Confrontation)
         {
             case ConfrontationType.Cooperative:
-                <span>🤝 Cooperativo</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="handshake" Size="12" /> Cooperativo</span>
                 break;
             case ConfrontationType.SemiCooperative:
-                <span>🗡️ Semi-coop</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="swords" Size="12" /> Semi-coop</span>
                 break;
             case ConfrontationType.HiddenRolesOrTeams:
-                <span>👥 Roles / Equipos</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="users" Size="12" /> Roles / Equipos</span>
                 break;
             default:
-                <span>⚔️ Competitivo</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="swords" Size="12" /> Competitivo</span>
                 break;
         }
     </div>
@@ -26,19 +26,19 @@
         @switch (Style)
         {
             case GameStyle.Eurogame:
-                <span>⚙️ Eurogame</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="settings" Size="12" /> Eurogame</span>
                 break;
             case GameStyle.Ameritrash:
-                <span>🎲 Temático</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="dices" Size="12" /> Temático</span>
                 break;
             case GameStyle.PartyGame:
-                <span>🎉 Party Game</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="party-popper" Size="12" /> Party Game</span>
                 break;
             case GameStyle.FillerAbstract:
-                <span>🧩 Filler / Abstracto</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="puzzle" Size="12" /> Filler / Abstracto</span>
                 break;
             default:
-                <span>📖 Narrativo</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="book-open" Size="12" /> Narrativo</span>
                 break;
         }
     </div>
@@ -47,7 +47,7 @@
     @if (IsOfficialSolo)
     {
         <div class="badge-pill active-pill" role="listitem">
-            <span>👤 Modo Solitario Oficial</span>
+            <span class="inline-flex items-center gap-1"><Icon Name="user" Size="12" /> Modo Solitario Oficial</span>
         </div>
     }
 
@@ -57,13 +57,13 @@
         @if (Age.IsAccessibleEarlier)
         {
             <div class="badge-pill active-pill" role="listitem" title="La comunidad lo considera jugable a partir de @Age.CommunityAge años aunque la caja marque +@Age.BoxAge">
-                <span>👶 Accesible antes: @Age.CommunityAge+ años</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="baby" Size="12" /> Accesible antes: @Age.CommunityAge+ años</span>
             </div>
         }
         else
         {
             <div class="badge-pill" role="listitem">
-                <span>🎂 @Age.CommunityAge+ años</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="cake" Size="12" /> @Age.CommunityAge+ años</span>
             </div>
         }
     }
@@ -73,13 +73,13 @@
         @switch (Language)
         {
             case LanguageDependence.None:
-                <span title="Solo iconografía">🌐 Idioma: Nulo</span>
+                <span title="Solo iconografía" class="inline-flex items-center gap-1"><Icon Name="globe" Size="12" /> Idioma: Nulo</span>
                 break;
             case LanguageDependence.Low:
-                <span title="Textos cortos">🌐 Idioma: Bajo</span>
+                <span title="Textos cortos" class="inline-flex items-center gap-1"><Icon Name="globe" Size="12" /> Idioma: Bajo</span>
                 break;
             default:
-                <span title="Párrafos densos">🌐 Idioma: Alto</span>
+                <span title="Párrafos densos" class="inline-flex items-center gap-1"><Icon Name="globe" Size="12" /> Idioma: Alto</span>
                 break;
         }
     </div>
@@ -88,7 +88,7 @@
     @if (EstimatedMinutesPerPlayer > 0)
     {
         <div class="badge-pill" role="listitem">
-            <span>⏱️ ~@EstimatedMinutesPerPlayer min/jugador</span>
+            <span class="inline-flex items-center gap-1"><Icon Name="timer" Size="12" /> ~@EstimatedMinutesPerPlayer min/jugador</span>
         </div>
     }
 
@@ -97,13 +97,13 @@
         @switch (Footprint)
         {
             case TableFootprint.SmallTable:
-                <span>🪑 Mesa pequeña</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="armchair" Size="12" /> Mesa pequeña</span>
                 break;
             case TableFootprint.TableMonster:
-                <span>🏰 Monstruo de mesa</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="castle" Size="12" /> Monstruo de mesa</span>
                 break;
             default:
-                <span>🍽️ Comedor estándar</span>
+                <span class="inline-flex items-center gap-1"><Icon Name="utensils" Size="12" /> Comedor estándar</span>
                 break;
         }
     </div>

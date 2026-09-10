@@ -48,7 +48,7 @@ Este documento es el índice central de los paquetes de trabajo e incrementos (*
 | **INC-32** | Fix HTTP 500 en Fichas de Juego (ORDER BY DateTimeOffset en SQLite) | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 32) |
 | **INC-33** | Fix 500 Latente en Mi Ludoteca (ORDER BY DateTimeOffset en GetByUserIdAsync) | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 33) |
 | **INC-34** | Barrido Sistémico de ORDER BY DateTimeOffset en Repositorios SQLite | ✅ Archivado | Fix directo (bugfix Strict TDD; ver `docs/specs/ROADMAP_MVP_SLICES.md`, Incremento 34) |
-| **INC-35** | Portada Editorial: Narrativa Hogareña, Microinteracciones e Imágenes por Defecto | ⏳ En progreso | [portada-editorial (SDD, en worktree)](file:///c:/repos/ludeka-wt/portada-editorial/openspec/changes/portada-editorial/proposal.md) |
+| **INC-35** | Portada Editorial: Narrativa Hogareña, Microinteracciones e Imágenes por Defecto | ✅ Archivado | [inc-35-portada-editorial.md](file:///c:/repos/Ludeka/docs/increments/archive/inc-35-portada-editorial.md) |
 | **INC-36** | Rediseño Editorial del Resto de Páginas (Catálogo, Fichas, Eventos, Sorteos, Novedades) | 🗓️ Pendiente | Por definir — registrado desde el fuera-de-alcance de INC-35 |
 
 ## 🌿 Incrementos en Curso (Worktrees / PRs)
@@ -57,4 +57,4 @@ Un incremento activo = un worktree en `C:\repos\ludeka-wt\<slug>` + rama `inc/<s
 
 | ID | Incremento | Slug / Rama | Worktree | PR |
 |---|---|---|---|---|
-| **INC-35** | Portada Editorial | `portada-editorial` / `inc/portada-editorial` | `C:\repos\ludeka-wt\portada-editorial` | — (pendiente) |
+| *(Ningún incremento en curso. INC-35 cerró su cadena de 4 PRs apilados con el archivo del 2026-09-10; INC-36 queda 🗓️ Pendiente en el registro central.)* | | | | |

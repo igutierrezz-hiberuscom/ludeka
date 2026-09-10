@@ -27,22 +27,22 @@
             Todos (@_totalCount)
         </button>
         <button type="button" class="filter-btn @(_activePreset == Preset.JuegosBase ? "active" : "")" @onclick="() => SetPreset(Preset.JuegosBase)">
-            🎲 Juegos Base
+            <Icon Name="dices" Size="12" /> Juegos Base
         </button>
         <button type="button" class="filter-btn @(_activePreset == Preset.Expansiones ? "active" : "")" @onclick="() => SetPreset(Preset.Expansiones)">
-            🧩 Expansiones
+            <Icon Name="puzzle" Size="12" /> Expansiones
         </button>
         <button type="button" class="filter-btn @(_activePreset == Preset.EspecialParejas ? "active" : "")" @onclick="() => SetPreset(Preset.EspecialParejas)">
-            ⚔️ Especial Parejas (2J)
+            <Icon Name="swords" Size="12" /> Especial Parejas (2J)
         </button>
         <button type="button" class="filter-btn @(_activePreset == Preset.MesaFamiliar ? "active" : "")" @onclick="() => SetPreset(Preset.MesaFamiliar)">
-            👨‍👩‍👧 Mesa Familiar
+            <Icon Name="users" Size="12" /> Mesa Familiar
         </button>
         <button type="button" class="filter-btn @(_activePreset == Preset.SoloTop ? "active" : "")" @onclick="() => SetPreset(Preset.SoloTop)">
-            👤 Modo Solitario
+            <Icon Name="user" Size="12" /> Modo Solitario
         </button>
         <button type="button" class="filter-btn @(_activePreset == Preset.PartidasRapidas ? "active" : "")" @onclick="() => SetPreset(Preset.PartidasRapidas)">
-            ⏱️ &le; 45 min
+            <Icon Name="timer" Size="12" /> &le; 45 min
         </button>
     </div>
 
@@ -50,14 +50,14 @@
     @if (_isLoading)
     {
         <div class="py-16 text-center text-[var(--text-secondary)]">
-            <div class="inline-block animate-spin text-3xl mb-2">🎲</div>
+            <div class="inline-block animate-spin mb-2"><Icon Name="dices" Size="30" /></div>
             <p class="text-sm font-medium">Cargando catálogo lúdico...</p>
         </div>
     }
     else if (_games == null || _games.Count == 0)
     {
         <div class="py-16 text-center max-w-md mx-auto p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
-            <span class="text-4xl mb-3 block">🧩</span>
+            <span class="inline-block mb-3"><Icon Name="puzzle" Size="40" /></span>
             <h3 class="text-lg font-bold text-[var(--text-primary)] mb-1">Sin resultados</h3>
             <p class="text-xs text-[var(--text-muted)] mb-4">
                 No hemos encontrado ningún juego que coincida con tu búsqueda. Prueba a limpiar los filtros.

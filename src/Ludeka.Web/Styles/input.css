@@ -212,13 +212,13 @@
                 border-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
 }
 
-.rail-card:hover, .rail-card:focus-visible {
+.rail-card:hover, .rail-card:focus-visible, .rail-card:has(:focus-visible) {
     transform: translateY(var(--rail-lift));
     border-color: var(--brand-primary);
     box-shadow: 0 16px 36px -6px rgba(0, 0, 0, .25), 0 0 0 1px var(--brand-glow), 0 0 24px var(--brand-glow);
 }
 
-.rail-card:focus-visible {
+.rail-card:focus-visible, .rail-card:has(:focus-visible) {
     outline: 2px solid var(--brand-primary);
     outline-offset: 2px;
 }
@@ -241,7 +241,7 @@
     transition: transform var(--dur-slow) var(--ease-out-quad);
 }
 
-.rail-card:hover .rail-cover img, .rail-card:focus-visible .rail-cover img {
+.rail-card:hover .rail-cover img, .rail-card:focus-visible .rail-cover img, .rail-card:has(:focus-visible) .rail-cover img {
     transform: scale(var(--rail-zoom));
 }
 
@@ -259,7 +259,58 @@
    la evidencia visual queda en estado estático (borde o glow) */
 @media (prefers-reduced-motion: reduce) {
     .rail-card, .rail-card .rail-cover img { transition: none; }
-    .rail-card:hover, .rail-card:focus-visible, .rail-card:hover .rail-cover img { transform: none; }
+    .rail-card:hover, .rail-card:focus-visible, .rail-card:has(:focus-visible), .rail-card:hover .rail-cover img { transform: none; }
+}
+
+/* ===== Hero editorial narrativo de la portada (INC-35, Decisiones 7 y 10) ===== */
+/* Escena de fondo en CSS puro (variables de tema): vive bajo la foto del <picture>
+   y actúa como fondo completo cuando la variante es CssScene o el asset falla. */
+.hero-scene {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% -20%, var(--brand-glow) 0%, transparent 70%),
+                linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-main) 100%);
+}
+
+/* Foto de ambiente: cubre el hero con dimensiones fijas del <img> (CLS 0) */
+.hero-bg-media {
+    position: absolute;
+    inset: 0;
+}
+
+.hero-bg-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Si el asset falla en el navegador (onerror), el <picture> desaparece y el fondo
+   cae a la escena CSS sin hueco */
+.hero-bg-media--failed {
+    display: none;
+}
+
+/* Acciones superpuestas del hero (revisión maintainer): solo el buscador, arriba a la
+   izquierda sobre la ilustración protagonista. Es una tarjeta con fondo propio, así
+   que no necesita capa intermedia para legibilidad. */
+.hero-actions {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+/* Títulos <h2> de los carriles de portada en serif display (exclusivamente portada) */
+.rail-title {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
 }
 
 body {

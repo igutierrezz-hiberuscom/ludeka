@@ -18,7 +18,7 @@
             @* Header *@
             <div class="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)] shrink-0">
                 <div class="flex items-center gap-2">
-                    <span class="text-2xl">⚡</span>
+                    <Icon Name="zap" Size="24" />
                     <div>
                         <h3 id="review-sheet-title" class="text-base font-bold text-[var(--text-primary)]">
                             @(ExistingReview != null ? "Editar mi Valoración" : "Valoración del Juego")
@@ -108,17 +108,17 @@
                                         <button type="button"
                                                 @onclick="() => SetPlayerVote(pCount, ScalabilityStatus.MustPlay)"
                                                 class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.MustPlay ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40" : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-subtle)]")">
-                                            🟢 Imprescindible
+                                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true"></span> Imprescindible
                                         </button>
                                         <button type="button"
                                                 @onclick="() => SetPlayerVote(pCount, ScalabilityStatus.Recommended)"
                                                 class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.Recommended ? "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40" : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-subtle)]")">
-                                            🟡 Recomendado
+                                            <span class="inline-block w-2 h-2 rounded-full bg-amber-500" aria-hidden="true"></span> Recomendado
                                         </button>
                                         <button type="button"
                                                 @onclick="() => SetPlayerVote(pCount, ScalabilityStatus.NotRecommended)"
                                                 class="px-2 py-1 rounded-md font-bold transition-all @(_playerVotes[pCount] == ScalabilityStatus.NotRecommended ? "bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/40" : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-subtle)]")">
-                                            🔴 No recomendado
+                                            <span class="inline-block w-2 h-2 rounded-full bg-rose-500" aria-hidden="true"></span> No recomendado
                                         </button>
                                     </div>
                                 }
@@ -135,7 +135,7 @@
                 <div class="p-3.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-3">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" @bind="_playedWithChildren" class="rounded accent-[var(--brand-primary)] w-4 h-4" />
-                        <span class="text-xs font-bold text-[var(--text-primary)]">👶 Lo he jugado con niños / en familia</span>
+                        <span class="text-xs font-bold text-[var(--text-primary)]" inline-flex items-center gap-1.5"><Icon Name="baby" Size="12" /> Lo he jugado con niños / en familia</span>
                     </label>
 
                     @if (_playedWithChildren)
@@ -319,11 +319,11 @@
 
     private static string GetContextLabel(PlayContextType ctx) => ctx switch
     {
-        PlayContextType.Owned => "🏠 Mi copia",
-        PlayContextType.ClubOrAssociation => "🛡️ Club/Asociación",
-        PlayContextType.Friends => "👥 Amigos",
-        PlayContextType.BoardGameBar => "☕ Bar lúdico",
-        PlayContextType.Bga => "💻 BGA / Digital",
+        PlayContextType.Owned => "Mi copia",
+        PlayContextType.ClubOrAssociation => "Club/Asociación",
+        PlayContextType.Friends => "Amigos",
+        PlayContextType.BoardGameBar => "Bar lúdico",
+        PlayContextType.Bga => "BGA / Digital",
         _ => ctx.ToString()
     };
 }

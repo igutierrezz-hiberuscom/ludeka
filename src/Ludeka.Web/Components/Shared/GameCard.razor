@@ -34,7 +34,7 @@
             @if (Game.IsExpansion)
             {
                 <div class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md bg-purple-950/85 backdrop-blur-sm border border-purple-500/40 text-[0.68rem] font-black text-purple-200 shadow-md flex items-center gap-1">
-                    <span>🧩</span>
+                    <Icon Name="puzzle" Size="12" />
                     <span>Expansión</span>
                 </div>
             }
@@ -80,30 +80,30 @@
                 @switch (Game.Style)
                 {
                     case GameStyle.Eurogame:
-                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">⚙️ Euro</span>
+                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"><Icon Name="settings" Size="12" /> Euro</span>
                         break;
                     case GameStyle.Ameritrash:
-                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">🎲 Temático</span>
+                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"><Icon Name="dices" Size="12" /> Temático</span>
                         break;
                     case GameStyle.PartyGame:
-                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">🎉 Party</span>
+                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"><Icon Name="party-popper" Size="12" /> Party</span>
                         break;
                     case GameStyle.FillerAbstract:
-                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">🧩 Filler</span>
+                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"><Icon Name="puzzle" Size="12" /> Filler</span>
                         break;
                     default:
-                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">📖 Narrativo</span>
+                        <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"><Icon Name="book-open" Size="12" /> Narrativo</span>
                         break;
                 }
 
                 @if (Game.IsOfficialSolo)
                 {
-                    <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">👤 Solo</span>
+                    <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"><Icon Name="user" Size="12" /> Solo</span>
                 }
 
                 @if (Game.IsAccessibleEarlier)
                 {
-                    <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">👶 @Game.CommunityAge+</span>
+                    <span class="px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"><Icon Name="baby" Size="12" /> @Game.CommunityAge+</span>
                 }
             </div>
         </div>

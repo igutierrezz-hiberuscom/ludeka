@@ -38,7 +38,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-2 gap-3 shrink-0 lg:w-80">
                 <div class="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                     <div class="text-[0.7rem] uppercase font-bold text-[var(--text-muted)] flex items-center gap-1">
-                        <span>⏳</span>
+                        <Icon Name="hourglass" Size="12" />
                         <span>Horas de Juego</span>
                     </div>
                     <div class="text-base sm:text-lg font-black text-[var(--text-primary)] mt-0.5">
@@ -56,7 +56,7 @@
 
                 <div class="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                     <div class="text-[0.7rem] uppercase font-bold text-[var(--text-muted)] flex items-center gap-1">
-                        <span>👥</span>
+                        <Icon Name="users" Size="12" />
                         <span>Mesa Óptima</span>
                     </div>
                     <div class="text-base sm:text-lg font-black text-[var(--brand-primary)] mt-0.5">
@@ -74,7 +74,7 @@
 
                 <div class="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                     <div class="text-[0.7rem] uppercase font-bold text-[var(--text-muted)] flex items-center gap-1">
-                        <span>🛡️</span>
+                        <Icon Name="shield" Size="12" />
                         <span>Cartas</span>
                     </div>
                     <div class="text-base sm:text-lg font-black text-[var(--text-primary)] mt-0.5">
@@ -85,7 +85,7 @@
 
                 <div class="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                     <div class="text-[0.7rem] uppercase font-bold text-[var(--text-muted)] flex items-center gap-1">
-                        <span>🧬</span>
+                        <Icon Name="dna" Size="12" />
                         <span>Estilo Dominante</span>
                     </div>
                     <div class="text-xs sm:text-sm font-black text-[var(--text-primary)] mt-1 truncate">
@@ -102,7 +102,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
                 <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>🧬</span>
+                    <Icon Name="dna" Size="12" />
                     <span>El ADN de tu Estantería</span>
                 </h3>
                 <p class="text-xs text-[var(--text-secondary)]">
@@ -111,11 +111,11 @@
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-xs font-bold px-3 py-1 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 inline-flex items-center gap-1">
-                    <span>🤝</span>
+                    <Icon Name="handshake" Size="12" />
                     <span>@Stats.DnaDistribution.CooperativePercentage% Cooperativos</span>
                 </span>
                 <span class="text-xs font-bold px-3 py-1 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 inline-flex items-center gap-1">
-                    <span>🐺</span>
+                    <Icon Name="user" Size="12" />
                     <span>@Stats.DnaDistribution.SoloReadyPercentage% Solitario</span>
                 </span>
             </div>
@@ -164,7 +164,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
                 <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>👥</span>
+                    <Icon Name="users" Size="12" />
                     <span>Curva de Comensales y Escalabilidad</span>
                 </h3>
                 <p class="text-xs text-[var(--text-secondary)]">
@@ -216,7 +216,7 @@
         <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-5">
             <div>
                 <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>🛡️</span>
+                    <Icon Name="shield" Size="12" />
                     <span>Radar de Fundas y Protección</span>
                 </h3>
                 <p class="text-xs text-[var(--text-secondary)]">
@@ -270,7 +270,7 @@
         <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-5">
             <div>
                 <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>🏆</span>
+                    <Icon Name="trophy" Size="14" />
                     <span>Autores y Editoriales Favoritas</span>
                 </h3>
                 <p class="text-xs text-[var(--text-secondary)]">
@@ -282,7 +282,7 @@
                 @* Diseñadores *@
                 <div>
                     <div class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span>🖋️</span>
+                        <Icon Name="pen-line" Size="12" />
                         <span>Top Diseñadores</span>
                     </div>
                     @if (Stats.TopDesigners.Count == 0)
@@ -311,7 +311,7 @@
                 @* Editoriales *@
                 <div>
                     <div class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span>🏢</span>
+                        <Icon Name="building-2" Size="12" />
                         <span>Top Editoriales</span>
                     </div>
                     @if (Stats.TopPublishers.Count == 0)

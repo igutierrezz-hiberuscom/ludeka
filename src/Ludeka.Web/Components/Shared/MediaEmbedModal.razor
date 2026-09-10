@@ -14,19 +14,19 @@
                     <span class="text-xl">
                         @if (Item.Type == MediaType.Tutorial)
                         {
-                            <span>🎬</span>
+                            <Icon Name="clapperboard" Size="20" />
                         }
                         else if (Item.Type == MediaType.Playthrough)
                         {
-                            <span>🎲</span>
+                            <Icon Name="dices" Size="20" />
                         }
                         else if (Item.Type == MediaType.InstagramPost)
                         {
-                            <span>📸</span>
+                            <Icon Name="camera" Size="20" />
                         }
                         else
                         {
-                            <span>📱</span>
+                            <Icon Name="smartphone" Size="20" />
                         }
                     </span>
                     <div class="min-w-0">
@@ -43,7 +43,7 @@
                         @onclick="CloseModal"
                         class="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors"
                         aria-label="Cerrar modal de reproducción">
-                    ✕
+                    <Icon Name="x" Size="16" />
                 </button>
             </div>
 
@@ -86,19 +86,19 @@
                     @if (!string.IsNullOrWhiteSpace(Item.PlayerCountBadge))
                     {
                         <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/25 font-semibold text-[0.68rem]">
-                            👥 @Item.PlayerCountBadge
+                            <Icon Name="users" Size="12" /> @Item.PlayerCountBadge
                         </span>
                     }
                     @if (!string.IsNullOrWhiteSpace(Item.FormattedDuration))
                     {
                         <span class="px-2 py-0.5 rounded-full bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-subtle)] font-semibold text-[0.68rem]">
-                            ⏱️ @Item.FormattedDuration
+                            <Icon Name="timer" Size="12" /> @Item.FormattedDuration
                         </span>
                     }
                     @if (Item.LikesCount.HasValue)
                     {
                         <span class="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-300 border border-rose-500/25 font-semibold text-[0.68rem]">
-                            ❤️ @Item.LikesCount likes
+                            <Icon Name="heart" Size="12" /> @Item.LikesCount likes
                         </span>
                     }
                 </div>

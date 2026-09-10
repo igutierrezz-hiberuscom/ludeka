@@ -26,7 +26,7 @@
             {
                 @* Estado de Éxito y Agradecimiento *@
                 <div class="py-8 text-center space-y-4 animate-fade-in">
-                    <span class="text-6xl block animate-bounce">🎲</span>
+                    <span class="inline-block animate-bounce"><Icon Name="dices" Size="56" /></span>
                     <h2 class="text-2xl font-black text-[var(--text-primary)] tracking-tight">
                         ¡Gracias por tu colaboración!
                     </h2>
@@ -47,7 +47,7 @@
                 @* Cabecera *@
                 <div class="border-b border-[var(--border-subtle)] pb-4 pr-8">
                     <div class="flex items-center gap-2 text-xs uppercase font-bold tracking-wider text-[var(--brand-primary)] mb-1">
-                        <span>🚩</span>
+                        <Icon Name="flag" Size="12" />
                         <span>Calidad Comunitaria</span>
                     </div>
                     <h2 id="report-modal-title" class="text-xl font-bold text-[var(--text-primary)] tracking-tight">
@@ -61,7 +61,7 @@
                 @if (!string.IsNullOrEmpty(_errorMessage))
                 {
                     <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold flex items-center gap-2">
-                        <span>⚠️</span>
+                        <Icon Name="triangle-alert" Size="14" />
                         <span>@_errorMessage</span>
                     </div>
                 }
@@ -78,7 +78,7 @@
                             <button type="button"
                                     @onclick="() => _selectedIssueType = type"
                                     class="p-3 rounded-2xl text-left border transition-all flex items-start gap-2.5 text-xs @(isSelected ? "bg-[var(--brand-primary)]/10 border-[var(--brand-primary)] text-[var(--text-primary)] font-bold shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-highlight)]")">
-                                <span class="text-lg shrink-0">@icon</span>
+                                <span class="shrink-0"><Icon Name="@icon" Size="18" /></span>
                                 <div class="flex-1">
                                     <span class="block">@label</span>
                                 </div>
@@ -114,7 +114,7 @@
                         <div class="p-3 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex items-center justify-between text-xs">
                             <span class="text-[var(--text-muted)]">Reportando como:</span>
                             <div class="flex items-center gap-1.5 font-bold text-[var(--text-primary)]">
-                                <span>@(CurrentUserService.IsFoundingTeam ? "🛡️" : "👤")</span>
+                                <Icon Name="@(CurrentUserService.IsFoundingTeam ? "shield" : "user")" Size="14" />
                                 <span>@CurrentUserService.UserName</span>
                             </div>
                         </div>
@@ -149,12 +149,12 @@
                             class="px-5 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 disabled:opacity-50">
                         @if (_isSubmitting)
                         {
-                            <span class="animate-spin text-sm">⚙️</span>
+                            <span class="animate-spin inline-block"><Icon Name="settings" Size="14" /></span>
                             <span>Enviando...</span>
                         }
                         else
                         {
-                            <span>🚩</span>
+                            <Icon Name="flag" Size="14" />
                             <span>Enviar reporte</span>
                         }
                     </button>
@@ -181,14 +181,14 @@
 
     private static readonly (GameIssueType Type, string Label, string Icon)[] _issueTypes =
     [
-        (GameIssueType.WrongImage, "Imagen incorrecta o de otra edición", "🖼️"),
-        (GameIssueType.BrokenImage, "Imagen no carga o enlace caído", "🚫"),
-        (GameIssueType.IncorrectPlayerCount, "Nº de jugadores o semáforo erróneo", "👥"),
-        (GameIssueType.IncorrectDuration, "Duración de partida desajustada", "⏱️"),
-        (GameIssueType.IncorrectAge, "Edad mínima o recomendada errónea", "🎂"),
-        (GameIssueType.ErroneousMetadata, "Erratas en título, autor o editorial", "📝"),
-        (GameIssueType.BrokenPurchaseLink, "Enlace de compra caído o sin stock", "🛒"),
-        (GameIssueType.Other, "Otro problema o sugerencia libre", "💬")
+        (GameIssueType.WrongImage, "Imagen incorrecta o de otra edición", "image"),
+        (GameIssueType.BrokenImage, "Imagen no carga o enlace caído", "ban"),
+        (GameIssueType.IncorrectPlayerCount, "Nº de jugadores o semáforo erróneo", "users"),
+        (GameIssueType.IncorrectDuration, "Duración de partida desajustada", "timer"),
+        (GameIssueType.IncorrectAge, "Edad mínima o recomendada errónea", "cake"),
+        (GameIssueType.ErroneousMetadata, "Erratas en título, autor o editorial", "notebook-pen"),
+        (GameIssueType.BrokenPurchaseLink, "Enlace de compra caído o sin stock", "shopping-cart"),
+        (GameIssueType.Other, "Otro problema o sugerencia libre", "message-circle")
     ];
 
     private async Task SubmitReport()

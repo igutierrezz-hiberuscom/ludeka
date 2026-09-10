@@ -13,7 +13,7 @@
     @if (!IsAuthorized)
     {
         <div class="p-8 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center space-y-3">
-            <span class="text-4xl block">🛡️</span>
+            <span class="inline-block"><Icon Name="shield" Size="40" /></span>
             <h2 class="text-lg font-bold text-rose-500">Acceso Restringido a Moderación</h2>
             <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto">
                 Esta sección está reservada a miembros de la Mesa Fundadora y moderadores del catálogo lúdico.
@@ -28,7 +28,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-emerald-400 text-xs font-bold mb-2">
-                    <span>🛡️</span> Mesa Fundadora & Moderación
+                    <Icon Name="shield" Size="12" /> Mesa Fundadora &amp; Moderación
                 </div>
                 <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
                     Gestión Editorial de Eventos & Ferias
@@ -40,12 +40,12 @@
 
             <div class="flex items-center gap-3">
                 <a href="/eventos" class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
-                    👁️ Ver Público
+                    <Icon Name="eye" Size="12" /> Ver Público
                 </a>
                 <button type="button"
                         @onclick="OpenCreateModal"
                         class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>➕</span> Nuevo Evento
+                    <Icon Name="plus" Size="12" /> Nuevo Evento
                 </button>
             </div>
         </div>
@@ -53,7 +53,7 @@
         @if (_isLoading)
         {
             <div class="py-16 text-center text-[var(--text-muted)]">
-                <div class="inline-block animate-spin text-3xl mb-2">🎪</div>
+                <div class="inline-block animate-spin mb-2"><Icon Name="tent" Size="30" /></div>
                 <p class="text-sm font-semibold">Cargando directorio de ferias...</p>
             </div>
         }
@@ -78,13 +78,28 @@
                             {
                                 <tr class="hover:bg-[var(--bg-surface)] transition-colors">
                                     <td class="p-3.5">
+                                    @* Cartel (D5: sin URL el default inline; con URL caída, onerror) *@
+                                    @if (string.IsNullOrWhiteSpace(evt.ImageUrl))
+                                    {
+                                        <DefaultImage Domain="DefaultImageDomain.Evento"
+                                                      Alt="@evt.Title"
+                                                      CssClass="w-12 h-12 rounded-lg object-cover" />
+                                    }
+                                    else
+                                    {
                                         <img src="@evt.ImageUrl"
                                              alt="@evt.Title"
-                                             class="w-12 h-12 rounded-lg object-cover border border-[var(--border-subtle)]" />
+                                             class="w-12 h-12 rounded-lg object-cover border border-[var(--border-subtle)]"
+                                             width="48"
+                                             height="48"
+                                             loading="lazy"
+                                             decoding="async"
+                                             onerror="this.onerror=null; this.src='/images/defaults/evento-default.svg';" />
+                                    }
                                     </td>
                                     <td class="p-3.5 font-medium">
                                         <div class="font-bold text-[var(--text-primary)] text-sm">@evt.Title</div>
-                                        <div class="text-[var(--text-secondary)] mt-0.5">📍 @evt.Location</div>
+                                        <div class="text-[var(--text-secondary)] mt-0.5"><Icon Name="map-pin" Size="12" /> @evt.Location</div>
                                     </td>
                                     <td class="p-3.5">
                                         <span class="inline-flex items-center gap-1 font-semibold text-[var(--text-primary)]">
@@ -100,19 +115,19 @@
                                     </td>
                                     <td class="p-3.5">
                                         <span class="px-2.5 py-1 rounded-full font-bold @(evt.IsOfficial ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20")">
-                                            @(evt.IsOfficial ? "⭐ Oficial" : "Comunitario")
+                                            @(evt.IsOfficial ? "Oficial" : "Comunitario")
                                         </span>
                                     </td>
                                     <td class="p-3.5 text-right space-x-2">
                                         <button type="button"
                                                 @onclick="() => OpenEditModal(evt)"
                                                 class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-[var(--brand-primary)] font-bold transition-colors">
-                                            ✏️ Editar
+                                            <Icon Name="pen-line" Size="12" /> Editar
                                         </button>
                                         <button type="button"
                                                 @onclick="() => ConfirmDelete(evt.Id, evt.Title)"
                                                 class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-500 hover:bg-rose-500/20 font-bold transition-colors">
-                                            🗑️
+                                            <Icon Name="trash-2" Size="12" />
                                         </button>
                                     </td>
                                 </tr>
@@ -134,7 +149,7 @@
         <div class="w-full max-w-lg rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
                 <h2 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>🎪</span> @(_editingId.HasValue ? "Editar Evento Lúdico" : "Nuevo Evento Lúdico")
+                    <Icon Name="tent" Size="14" /> @(_editingId.HasValue ? "Editar Evento Lúdico" : "Nuevo Evento Lúdico")
                 </h2>
                 <button type="button"
                         @onclick="() => _isModalOpen = false"
@@ -196,8 +211,8 @@
                     <label class="font-semibold text-[var(--text-secondary)] block mb-1">País / Ámbito Territorial *</label>
                     <select @bind="_formCountry"
                             class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]">
-                        <option value="España">🇪🇸 España</option>
-                        <option value="Internacional">🌎 Internacional (Circuito Global)</option>
+                        <option value="España">España</option>
+                        <option value="Internacional">Internacional (Circuito Global)</option>
                         @foreach (var c in CountryCatalog.GetAllCountries().Where(c => c.Name != "España"))
                         {
                             <option value="@c.Name">@c.FlagEmoji @c.Name</option>
@@ -213,7 +228,7 @@
                            class="w-full px-3 py-2 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)] mb-2" />
 
                     <div class="flex items-center gap-2 p-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
-                        <span class="text-base">📁</span>
+                        <Icon Name="folder" Size="16" />
                         <div class="flex-1">
                             <span class="text-[0.65rem] text-[var(--text-muted)] block">O subir archivo local (PNG, JPG, WEBP &lt; 5MB):</span>
                             <InputFile OnChange="HandlePosterUpload" class="text-xs text-[var(--text-secondary)] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[var(--brand-primary)] file:text-white hover:file:opacity-90 cursor-pointer" />
@@ -235,7 +250,7 @@
                            @bind="_formIsOfficial"
                            class="rounded bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--brand-primary)] focus:ring-0" />
                     <label for="isOfficialEvt" class="text-[var(--text-secondary)] font-medium cursor-pointer">
-                        ⭐ Gran Cita Oficial del Calendario
+                        Gran Cita Oficial del Calendario
                     </label>
                 </div>
             </div>

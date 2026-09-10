@@ -13,7 +13,7 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
         <div class="space-y-2">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold">
-                <span>🏢</span> Ecosistema Lúdico &bull; Casas de Edición
+                <Icon Name="building-2" Size="14" /> Ecosistema Lúdico &bull; Casas de Edición
             </div>
             <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
                 Editoriales
@@ -29,7 +29,7 @@
                 <button type="button"
                         @onclick="OpenCreateModal"
                         class="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
-                    <span>➕</span> Nueva Editorial
+                    <Icon Name="plus" Size="12" /> Nueva Editorial
                 </button>
             }
         </div>
@@ -38,7 +38,7 @@
     @* Buscador reactivo *@
     <div class="max-w-md">
         <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base">🔍</span>
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"><Icon Name="search" Size="16" /></span>
             <input type="text"
                    @bind="_searchTerm"
                    @bind:event="oninput"
@@ -52,14 +52,14 @@
     @if (_loading)
     {
         <div class="py-16 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
-            <span class="animate-spin text-xl">🎲</span>
+            <span class="animate-spin inline-block"><Icon Name="dices" Size="20" /></span>
             <span>Cargando directorio de editoriales...</span>
         </div>
     }
     else if (_publishers.Count == 0)
     {
         <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3">
-            <span class="text-4xl block">📦</span>
+            <span class="inline-block"><Icon Name="package" Size="36" /></span>
             <h2 class="text-base font-bold text-[var(--text-primary)]">No se encontraron editoriales</h2>
             <p class="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
                 No hay resultados para la búsqueda actual. Puedes reiniciar el filtro o dar de alta una nueva editorial si eres moderador.
@@ -94,8 +94,8 @@
                                        class="font-black text-base text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] transition-colors line-clamp-1">
                                         @pub.Name
                                     </a>
-                                    <span class="text-xs text-[var(--text-muted)] block">
-                                        📍 @pub.Country @(!string.IsNullOrWhiteSpace(pub.City) ? $"({pub.City})" : "")
+                                    <span class="text-xs text-[var(--text-muted)] block inline-flex items-center gap-1">
+                                        <Icon Name="map-pin" Size="10" /> @pub.Country @(!string.IsNullOrWhiteSpace(pub.City) ? $"({pub.City})" : "")
                                     </span>
                                 </div>
                             </div>
@@ -130,7 +130,7 @@
                             <button type="button"
                                     @onclick="() => OpenEditModal(pub)"
                                     class="text-[var(--text-muted)] hover:text-amber-400 font-semibold text-[0.7rem] px-2 py-1 rounded bg-[var(--bg-surface-elevated)] transition-colors">
-                                ✏️ Editar
+                                <span class="inline-flex items-center gap-1"><Icon Name="pencil" Size="12" /> Editar</span>
                             </button>
                         }
                     </div>

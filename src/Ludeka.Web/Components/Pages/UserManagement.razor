@@ -15,14 +15,14 @@
     @if (!CurrentUserService.IsFoundingTeam)
     {
         <div class="max-w-md mx-auto py-16 text-center space-y-4">
-            <span class="text-5xl block">🛡️</span>
+            <span class="inline-block"><Icon Name="shield" Size="48" /></span>
             <h1 class="text-2xl font-bold text-[var(--text-primary)]">Acceso Exclusivo Mesa Fundadora</h1>
             <p class="text-sm text-[var(--text-secondary)]">
                 La administración de cuentas, asignación de roles y configuración de permisos granulares está reservada a la Mesa Fundadora de Ludeka.
             </p>
             <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
                 <p class="mb-2">
-                    💡 Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
+                    <Icon Name="lightbulb" Size="14" /> Para fines de demostración, puedes activar el <strong>Modo Fundador</strong> en la barra superior.
                 </p>
                 <button type="button"
                         @onclick="SwitchToFounder"
@@ -41,7 +41,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
             <div>
                 <div class="flex items-center gap-2 mb-1">
-                    <span class="text-2xl">👥</span>
+                    <Icon Name="users" Size="24" />
                     <h1 class="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
                         Gestión de Usuarios & Permisos RBAC
                     </h1>
@@ -54,12 +54,12 @@
             <div class="flex items-center gap-2.5">
                 <a href="/admin/auditoria"
                    class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
-                    <span>📜</span>
+                    <Icon Name="scroll" Size="14" />
                     <span>Bitácora de Auditoría</span>
                 </a>
                 <a href="/moderacion/reportes"
                    class="px-3.5 py-2 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-amber-400 text-xs font-semibold transition-colors flex items-center gap-2 border border-[var(--border-subtle)] shadow-sm">
-                    <span>🚩</span>
+                    <Icon Name="flag" Size="14" />
                     <span>Reportes</span>
                 </a>
             </div>
@@ -70,7 +70,7 @@
         {
             <div class="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between animate-fade-in">
                 <div class="flex items-center gap-2">
-                    <span class="text-base">🎭</span>
+                    <Icon Name="drama" Size="16" />
                     <span>@_simulationMessage</span>
                 </div>
                 <button type="button" @onclick="() => _simulationMessage = null" class="text-amber-400 hover:text-white font-bold">&times;</button>
@@ -85,7 +85,7 @@
                        @bind:event="oninput"
                        placeholder="Buscar usuario por nombre o correo..."
                        class="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] text-xs" />
-                <span class="absolute left-3 top-2.5 text-[var(--text-muted)]">🔍</span>
+                <span class="absolute left-3 top-2.5 text-[var(--text-muted)]"><Icon Name="search" Size="14" /></span>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
@@ -99,17 +99,17 @@
                     <button type="button"
                             @onclick="() => SetRoleFilter(UserRole.FoundingTeam)"
                             class="px-2.5 py-1 rounded-lg font-bold transition-all @(_selectedRoleFilter == UserRole.FoundingTeam ? "bg-amber-500/20 text-amber-300" : "text-[var(--text-secondary)]")">
-                        👑 Mesa
+                        <Icon Name="crown" Size="12" /> Mesa
                     </button>
                     <button type="button"
                             @onclick="() => SetRoleFilter(UserRole.Moderator)"
                             class="px-2.5 py-1 rounded-lg font-bold transition-all @(_selectedRoleFilter == UserRole.Moderator ? "bg-sky-500/20 text-sky-300" : "text-[var(--text-secondary)]")">
-                        🛡️ Mods
+                        <Icon Name="shield" Size="12" /> Mods
                     </button>
                     <button type="button"
                             @onclick="() => SetRoleFilter(UserRole.CommunityUser)"
                             class="px-2.5 py-1 rounded-lg font-bold transition-all @(_selectedRoleFilter == UserRole.CommunityUser ? "bg-slate-500/20 text-slate-300" : "text-[var(--text-secondary)]")">
-                        👤 Comunidad
+                        <Icon Name="user" Size="12" /> Comunidad
                     </button>
                 </div>
 
@@ -128,14 +128,14 @@
         @if (_isLoading)
         {
             <div class="p-12 text-center text-xs text-[var(--text-muted)] space-y-2">
-                <span class="animate-spin text-2xl block">⏳</span>
+                <span class="animate-spin inline-block"><Icon Name="hourglass" Size="24" /></span>
                 <span>Cargando padrón de usuarios...</span>
             </div>
         }
         else if (FilteredUsers.Count == 0)
         {
             <div class="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-2 text-xs text-[var(--text-muted)]">
-                <span class="text-3xl block">👤</span>
+                <span class="inline-block"><Icon Name="user" Size="30" /></span>
                 <p class="font-bold text-[var(--text-secondary)]">No se encontraron usuarios coincidentes</p>
                 <p>Prueba a modificar los filtros o el término de búsqueda.</p>
             </div>
@@ -149,7 +149,7 @@
                         @* Datos del usuario *@
                         <div class="flex items-start gap-3.5">
                             <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-base font-black shrink-0 @GetAvatarStyle(user)">
-                                @GetAvatarIcon(user)
+                                <Icon Name="@GetRoleIcon(user.Role)" Size="18" />
                             </div>
                             <div class="space-y-1">
                                 <div class="flex flex-wrap items-center gap-2">
@@ -174,7 +174,7 @@
                                     @if (user.Role == UserRole.FoundingTeam)
                                     {
                                         <span class="px-2 py-0.5 rounded-md text-[0.65rem] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                                            ✨ Privilegios Plenos
+                                            <Icon Name="sparkles" Size="12" /> Privilegios Plenos
                                         </span>
                                     }
                                     else if (user.Role == UserRole.Moderator)
@@ -207,14 +207,14 @@
                                     @onclick="() => SimulateUser(user)"
                                     title="Simular navegación activa bajo este usuario"
                                     class="px-2.5 py-1.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-amber-400 font-semibold border border-[var(--border-subtle)] transition-colors flex items-center gap-1">
-                                <span>🎭</span>
+                                <Icon Name="drama" Size="14" />
                                 <span>Simular</span>
                             </button>
 
                             <button type="button"
                                     @onclick="() => OpenPermissionsModal(user)"
                                     class="px-3 py-1.5 rounded-xl bg-[var(--brand-primary)]/15 hover:bg-[var(--brand-primary)]/25 text-[var(--brand-primary)] font-bold border border-[var(--brand-primary)]/30 transition-colors flex items-center gap-1">
-                                <span>⚙️</span>
+                                <Icon Name="settings" Size="14" />
                                 <span>Rol & Permisos</span>
                             </button>
 
@@ -224,7 +224,7 @@
                                         @onclick="() => ToggleStatus(user)"
                                         title="Suspender cuenta de usuario"
                                         class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/20 transition-colors">
-                                    🚫 Suspender
+                                    <Icon Name="ban" Size="12" /> Suspender
                                 </button>
                             }
                             else
@@ -233,7 +233,7 @@
                                         @onclick="() => ToggleStatus(user)"
                                         title="Reactivar cuenta de usuario"
                                         class="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/20 transition-colors">
-                                    🟢 Reactivar
+                                    <span class="inline-block size-2 rounded-full bg-emerald-400" aria-hidden="true"></span> Reactivar
                                 </button>
                             }
                         </div>
@@ -359,11 +359,11 @@
         Navigation.NavigateTo("/admin/usuarios", forceLoad: true);
     }
 
-    private static string GetAvatarIcon(AppUserDto user) => user.Role switch
+    private static string GetRoleIcon(UserRole role) => role switch
     {
-        UserRole.FoundingTeam => "👑",
-        UserRole.Moderator => "🛡️",
-        _ => "👤"
+        UserRole.FoundingTeam => "crown",
+        UserRole.Moderator => "shield",
+        _ => "user"
     };
 
     private static string GetAvatarStyle(AppUserDto user) => user.Role switch

@@ -37,7 +37,7 @@
                     @onclick="() => _showBggImportModal = true"
                     class="px-4 py-2 rounded-xl text-xs font-bold @(_isOfflineMode ? "opacity-50 cursor-not-allowed bg-zinc-600 text-zinc-300" : "bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white") transition-all inline-flex items-center gap-1.5 shadow-sm"
                     title="@(_isOfflineMode ? "La importación de BGG requiere conexión a internet" : "")">
-                <span>📥</span>
+                <Icon Name="download" Size="14" />
                 <span>Importar BGG</span>
             </button>
             <button type="button"
@@ -45,11 +45,11 @@
                     @onclick="() => _showBggSearchModal = true"
                     class="px-4 py-2 rounded-xl text-xs font-bold @(_isOfflineMode ? "opacity-50 cursor-not-allowed bg-zinc-700 text-zinc-400" : "bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)]") transition-colors inline-flex items-center gap-1.5 shadow-sm"
                     title="@(_isOfflineMode ? "La búsqueda asistida requiere conexión a internet" : "")">
-                <span>🎲</span>
+                <Icon Name="dices" Size="14" />
                 <span>+ Añadir por BGG</span>
             </button>
             <a href="/" class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-subtle)] transition-colors inline-flex items-center gap-1.5 shadow-sm">
-                <span>🔍</span>
+                <Icon Name="search" Size="14" />
                 <span>Explorar Catálogo</span>
             </a>
         </div>
@@ -59,7 +59,7 @@
     {
         <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm" role="status">
             <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-medium">
-                <span class="text-base">📡</span>
+                <span><Icon Name="wifi-off" Size="14" /></span>
                 <span>
                     <strong>Modo Consulta Offline activo:</strong> Mostrando los títulos guardados en este dispositivo
                     @if (!string.IsNullOrWhiteSpace(_offlineTimestamp))
@@ -71,7 +71,7 @@
             <button type="button" 
                     @onclick="LoadSummaryAsync"
                     class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 font-bold self-start sm:self-auto transition-colors flex items-center gap-1.5 shadow-sm">
-                <span>🔄</span>
+                <Icon Name="refresh-cw" Size="14" />
                 <span>Reconectar</span>
             </button>
         </div>
@@ -80,7 +80,7 @@
     @if (_isLoading)
     {
         <div class="py-20 text-center text-[var(--text-secondary)]">
-            <div class="inline-block animate-spin text-4xl mb-3">🎲</div>
+            <div class="inline-block animate-spin mb-3"><Icon Name="dices" Size="36" /></div>
             <p class="text-base font-semibold">Cargando tu ludoteca...</p>
         </div>
     }
@@ -95,7 +95,7 @@
                     aria-controls="panel-collection"
                     @onclick="() => _activeTab = TabType.InCollection"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.InCollection)">
-                <span>📚 En mi ludoteca</span>
+                <span class="inline-flex items-center gap-1.5"><Icon Name="library" Size="14" /> En mi ludoteca</span>
                 <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.InCollection)">
                     @_summary.TotalInCollection
                 </span>
@@ -108,7 +108,7 @@
                     aria-controls="panel-collection"
                     @onclick="() => _activeTab = TabType.Played"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Played)">
-                <span>🎲 Jugados</span>
+                <span class="inline-flex items-center gap-1.5"><Icon Name="dices" Size="14" /> Jugados</span>
                 <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.Played)">
                     @_summary.TotalPlayed
                 </span>
@@ -121,7 +121,7 @@
                     aria-controls="panel-collection"
                     @onclick="() => _activeTab = TabType.WantToBuy"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.WantToBuy)">
-                <span>🛒 Comprar</span>
+                <span class="inline-flex items-center gap-1.5"><Icon Name="shopping-cart" Size="14" /> Comprar</span>
                 <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.WantToBuy)">
                     @_summary.TotalWantToBuy
                 </span>
@@ -134,7 +134,7 @@
                     aria-controls="panel-plays"
                     @onclick="SwitchToPlaysAsync"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Plays)">
-                <span>📝 Diario de Partidas</span>
+                <span class="inline-flex items-center gap-1.5"><Icon Name="notebook-pen" Size="14" /> Diario de Partidas</span>
                 @if (_playsStats != null && _playsStats.TotalPlays > 0)
                 {
                     <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.Plays)">
@@ -150,7 +150,7 @@
                     aria-controls="panel-loans"
                     @onclick="() => _activeTab = TabType.Loans"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Loans)">
-                <span>📦 Préstamos</span>
+                <span class="inline-flex items-center gap-1.5"><Icon Name="package" Size="14" /> Préstamos</span>
                 <span class="px-2 py-0.5 rounded-full text-[0.68rem] font-black @GetBadgeClass(TabType.Loans)">
                     @_summary.TotalActiveLoans
                 </span>
@@ -163,7 +163,7 @@
                     aria-controls="panel-queue"
                     @onclick="() => _activeTab = TabType.Queue"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Queue)">
-                <span>⏳ Cola comunitaria</span>
+                <span class="inline-flex items-center gap-1.5"><Icon Name="hourglass" Size="14" /> Cola comunitaria</span>
             </button>
 
             <button type="button"
@@ -173,7 +173,7 @@
                     aria-controls="panel-appearance"
                     @onclick="() => _activeTab = TabType.Appearance"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Appearance)">
-                <span>🎨 Apariencia & 🌍 País</span>
+                <span class="inline-flex items-center gap-1.5"><Icon Name="palette" Size="14" /> Apariencia &amp; <Icon Name="globe" Size="14" /> País</span>
             </button>
 
             <button type="button"
@@ -183,7 +183,7 @@
                     aria-controls="panel-stats"
                     @onclick="SwitchToStatsAsync"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 @GetTabClass(TabType.Stats)">
-                <span>🧬 ADN y Estadísticas</span>
+                <span class="inline-flex items-center gap-1.5"><Icon Name="dna" Size="14" /> ADN y Estadísticas</span>
             </button>
         </div>
 
@@ -195,7 +195,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xl">🎨</span>
+                                <Icon Name="palette" Size="20" />
                                 <h2 class="text-xl font-bold text-[var(--text-primary)]">
                                     Estilo Visual y Paleta de tu Mesa
                                 </h2>
@@ -221,7 +221,7 @@
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-lg">📖</span>
+                                        <Icon Name="book-open" Size="18" />
                                         <h3 class="text-sm font-black text-[var(--text-primary)]">Papel & Tinta</h3>
                                     </div>
                                     @if (_userCurrentTheme == "editorial")
@@ -252,7 +252,7 @@
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-lg">🪵</span>
+                                        <Icon Name="tree-pine" Size="18" />
                                         <h3 class="text-sm font-black text-[var(--text-primary)]">Madera Clara</h3>
                                     </div>
                                     @if (_userCurrentTheme == "wood")
@@ -287,7 +287,7 @@
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-lg">🎲</span>
+                                        <Icon Name="dices" Size="18" />
                                         <h3 class="text-sm font-black text-[var(--text-primary)]">Mesa Cálida</h3>
                                     </div>
                                     @if (_userCurrentTheme == "tabletop")
@@ -318,7 +318,7 @@
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-lg">🌌</span>
+                                        <Icon Name="moon-star" Size="18" />
                                         <h3 class="text-sm font-black text-[var(--text-primary)]">Azul Medianoche</h3>
                                     </div>
                                     @if (_userCurrentTheme == "midnight")
@@ -349,7 +349,7 @@
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-lg">🌑</span>
+                                        <Icon Name="moon" Size="18" />
                                         <h3 class="text-sm font-black text-[var(--text-primary)]">Carbón Oscuro</h3>
                                     </div>
                                     @if (_userCurrentTheme == "charcoal")
@@ -381,7 +381,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xl">🌍</span>
+                                <Icon Name="globe" Size="20" />
                                 <h2 class="text-xl font-bold text-[var(--text-primary)]">
                                     Ubicación y Filtrado Territorial
                                 </h2>
@@ -402,7 +402,7 @@
                     @* Advertencia Obligatoria *@
                     <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 dark:text-amber-400 text-xs space-y-1.5">
                         <div class="flex items-center gap-1.5 font-black text-sm">
-                            <span>⚠️</span>
+                            <Icon Name="triangle-alert" Size="14" />
                             <span>Aviso Importante sobre el Filtrado por País</span>
                         </div>
                         <p class="leading-relaxed">
@@ -418,7 +418,7 @@
                             <select @bind="_userCurrentCountry"
                                     @bind:after="OnCountrySelectChangedAsync"
                                     class="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]">
-                                <option value="">🌍 Sin país (Global - Todo visible sin filtrar)</option>
+                                <option value="">Sin país (Global - Todo visible sin filtrar)</option>
                                 @foreach (var c in CountryCatalog.GetAllCountries())
                                 {
                                     <option value="@c.Name">@c.FlagEmoji @c.Name (@c.Code)</option>
@@ -430,7 +430,7 @@
                             <button type="button"
                                     @onclick="AutoDetectCountryAsync"
                                     class="px-4 py-2.5 rounded-xl bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center justify-center gap-2 shadow-sm">
-                                <span>📍</span>
+                                <Icon Name="map-pin" Size="12" />
                                 <span>Detectar automáticamente por zona horaria</span>
                             </button>
                         </div>
@@ -444,7 +444,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
                     <div>
                         <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-                            <span>🧬</span>
+                            <Icon Name="dna" Size="14" />
                             <span>ADN de tu Estantería y Analíticas de Colección</span>
                         </h2>
                         <p class="text-xs text-[var(--text-secondary)] mt-0.5">
@@ -455,13 +455,13 @@
                         <button type="button"
                                 @onclick="CopyPublicProfileLinkAsync"
                                 class="px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] transition-all flex items-center gap-1.5 shadow-sm">
-                            <span>@(_copiedProfileLink ? "✓" : "📋")</span>
+                            <Icon Name="@(_copiedProfileLink ? "check" : "copy")" Size="12" />
                             <span>@(_copiedProfileLink ? "¡Enlace copiado!" : "Copiar enlace de mi perfil")</span>
                         </button>
                         <a href="/u/@CurrentUserService.UserId"
                            target="_blank"
                            class="px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-all flex items-center gap-1.5 shadow-sm">
-                            <span>👁️</span>
+                            <Icon Name="eye" Size="12" />
                             <span>Ver Perfil Público</span>
                         </a>
                     </div>
@@ -470,7 +470,7 @@
                 @if (_isLoadingStats)
                 {
                     <div class="py-20 text-center text-[var(--text-secondary)]">
-                        <div class="inline-block animate-spin text-4xl mb-3">🧬</div>
+                        <div class="inline-block animate-spin mb-3"><Icon Name="dna" Size="36" /></div>
                         <p class="text-base font-semibold">Analizando el ADN de tu estantería...</p>
                     </div>
                 }
@@ -492,7 +492,7 @@
                 @if (_isLoadingPlays)
                 {
                     <div class="py-20 text-center text-[var(--text-secondary)]">
-                        <div class="inline-block animate-spin text-4xl mb-3">🎲</div>
+                        <div class="inline-block animate-spin mb-3"><Icon Name="dices" Size="36" /></div>
                         <p class="text-base font-semibold">Cargando tu diario de partidas...</p>
                     </div>
                 }
@@ -537,7 +537,7 @@
                     @if (_userPlayLogs == null || _userPlayLogs.Count == 0)
                     {
                         <div class="py-16 text-center max-w-md mx-auto p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
-                            <span class="text-4xl block mb-3">🎲</span>
+                            <span class="inline-block mb-3"><Icon Name="dices" Size="40" /></span>
                             <h3 class="text-lg font-bold text-[var(--text-primary)] mb-1">Tu diario de partidas está vacío</h3>
                             <p class="text-xs text-[var(--text-secondary)] mb-6">
                                 Registra cada sesión con fecha, lugar, número de jugadores y notas desde la ficha de cualquier juego.
@@ -576,21 +576,21 @@
                                                 </a>
                                                 <div class="flex flex-wrap items-center gap-2 mt-1 text-xs text-[var(--text-secondary)]">
                                                     <span class="inline-flex items-center gap-1 font-semibold text-[var(--text-primary)]">
-                                                        <span>📅</span> @play.PlayDate.ToString("dd/MM/yyyy")
+                                                        <Icon Name="calendar" Size="12" /> @play.PlayDate.ToString("dd/MM/yyyy")
                                                     </span>
                                                     <span>·</span>
                                                     <span class="inline-flex items-center gap-1">
-                                                        <span>👥</span> @play.PlayerCount @(play.PlayerCount == 1 ? "jugador" : "jugadores")
+                                                        <Icon Name="users" Size="12" /> @play.PlayerCount @(play.PlayerCount == 1 ? "jugador" : "jugadores")
                                                     </span>
                                                     <span>·</span>
                                                     <span class="inline-flex items-center gap-1">
-                                                        <span>📍</span> @play.Location
+                                                        <Icon Name="map-pin" Size="12" /> @play.Location
                                                     </span>
                                                     @if (play.DurationMinutes.HasValue)
                                                     {
                                                         <span>·</span>
                                                         <span class="inline-flex items-center gap-1">
-                                                            <span>⏱️</span> @(play.DurationMinutes)m
+                                                            <Icon Name="timer" Size="12" /> @(play.DurationMinutes)m
                                                         </span>
                                                     }
                                                 </div>
@@ -617,7 +617,7 @@
                 @if (_summary.ActiveLoans.Count == 0)
                 {
                     <div class="py-16 text-center max-w-md mx-auto p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
-                        <span class="text-4xl block mb-3">🤝</span>
+                        <span class="inline-block mb-3"><Icon Name="handshake" Size="40" /></span>
                         <h3 class="text-lg font-bold text-[var(--text-primary)] mb-1">Todos tus juegos están a buen recaudo</h3>
                         <p class="text-xs text-[var(--text-secondary)]">
                             No tienes ningún juego prestado en este momento. Cuando le dejes un título a un amigo o asociación, regístralo desde su ficha.
@@ -659,7 +659,7 @@
                                     </a>
                                     <div class="mt-2 space-y-1">
                                         <div class="flex items-center gap-1.5 text-xs text-[var(--brand-primary)] font-bold">
-                                            <span>👤</span>
+                                            <Icon Name="user" Size="12" />
                                             <span>@loan.BorrowerName</span>
                                         </div>
                                         <div class="text-[0.68rem] text-[var(--text-secondary)]">
@@ -678,7 +678,7 @@
                             <button type="button"
                                     @onclick="() => HandleReturnLoan(loan.Id)"
                                     class="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-                                <span>↩️</span>
+                                <Icon Name="undo-2" Size="12" />
                                 <span>Marcar como devuelto</span>
                             </button>
                         </div>
@@ -694,7 +694,7 @@
                 @if (_activeTab == TabType.WantToBuy)
                 {
                     <div class="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/25 flex items-center gap-3 text-xs text-sky-700 dark:text-sky-300 shadow-sm mb-6">
-                        <span class="text-2xl shrink-0">🔔</span>
+                        <span class="shrink-0"><Icon Name="bell" Size="24" /></span>
                         <div>
                             <strong class="font-bold block text-sm mb-0.5">Radar de Compra Inteligente Activo</strong>
                             <span>Ludeka monitoriza bajadas de precio, ofertas especiales, sorteos y reimpresiones en tiendas para todos los títulos de tu lista de seguimiento para comprar.</span>
@@ -709,7 +709,7 @@
                 @if (currentList.Count == 0)
                 {
                     <div class="py-16 text-center max-w-md mx-auto p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
-                        <span class="text-4xl block mb-3">🎲</span>
+                        <span class="inline-block mb-3"><Icon Name="dices" Size="40" /></span>
                         <h3 class="text-lg font-bold text-[var(--text-primary)] mb-1">Sin juegos en esta lista</h3>
                         <p class="text-xs text-[var(--text-secondary)] mb-6">
                             Aún no tienes ningún título clasificado como @GetActiveTabName(). Puedes importar tu colección desde BGG o añadir juegos con el buscador.
@@ -761,13 +761,13 @@
                                         @if (item.IsExpansion)
                                         {
                                             <div class="absolute top-2 right-2 z-20 px-2 py-0.5 rounded-md bg-purple-950/85 backdrop-blur-sm border border-purple-500/40 text-[0.62rem] font-black text-purple-200 shadow-md flex items-center gap-1">
-                                                <span>🧩</span>
+                                                <Icon Name="puzzle" Size="12" />
                                                 <span>Expansión</span>
                                             </div>
                                         }
 
                                         <div class="absolute bottom-2 left-2 right-2 px-2 py-1 rounded-md bg-[var(--bg-nav)] text-[var(--brand-primary)] border border-[var(--border-subtle)] text-[0.6rem] font-bold uppercase tracking-wider backdrop-blur-sm z-10 flex items-center gap-1 shadow-sm">
-                                            <span>⏳</span>
+                                            <Icon Name="hourglass" Size="12" />
                                             <span class="truncate">En cola de catalogación</span>
                                         </div>
                                     </div>
@@ -798,7 +798,7 @@
                                         @if (item.IsExpansion)
                                         {
                                             <div class="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-md bg-purple-950/85 backdrop-blur-sm border border-purple-500/40 text-[0.62rem] font-black text-purple-200 shadow-md flex items-center gap-1">
-                                                <span>🧩</span>
+                                                <Icon Name="puzzle" Size="12" />
                                                 <span>Expansión</span>
                                             </div>
                                         }
@@ -806,7 +806,7 @@
                                         @if (item.IsCurrentlyLoaned)
                                         {
                                             <div class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-[var(--bg-nav)] text-[var(--text-primary)] border border-[var(--border-highlight)] text-[0.62rem] font-bold uppercase tracking-wider backdrop-blur-sm z-10">
-                                                📦 Prestado
+                                                <Icon Name="package" Size="12" /> Prestado
                                             </div>
                                         }
                                     </a>
@@ -820,7 +820,7 @@
                                                 @item.GameTitle
                                             </div>
                                             <span class="text-[0.62rem] text-[var(--brand-primary)] font-medium block mt-0.5">
-                                                ⏳ Auto-catalogación pendiente
+                                                <Icon Name="hourglass" Size="12" /> Auto-catalogación pendiente
                                             </span>
                                         }
                                         else
