@@ -49,8 +49,8 @@ Dependencias: 1.1 → 1.2 → 1.3 → 1.4 → 1.5 → 1.6 → 1.7. PR-2..5 depen
 
 ## PR-2 «Catálogo» (DD-06, D12)
 
-- [ ] 2.1 [ROJO] Ajustar fila `Home catalogo (sin emojis)` sobre `src/Ludeka.Web/Components/Pages/Home.razor`: mustContain + `<PageHeaderEditorial`, `scrollbar-none`; mustNotContain + `<h1`, `no-scrollbar`. Rojo: falla.
-- [ ] 2.2 [VERDE] En `src/Ludeka.Web/Components/Pages/Home.razor`: adoptar `PageHeaderEditorial` (badge «Catálogo Colaborativo» + `dices`; h1 «Descubre tu próxima partida.» conservando el punto terracota vía RenderFragment; sin acción); `CatalogSearchBar` a bloque propio debajo (`max-w-xl`, handler intacto); `no-scrollbar` → `scrollbar-none`; abandonar la variante centrada (`max-w-3xl mx-auto text-center`). Verde: 2.1 + un único `<h1>` en la página. Commit: `feat: cabecera editorial y tira de filtros real en el catalogo`.
+- [x] 2.1 [ROJO] Ajustar fila `Home catalogo (sin emojis)` sobre `src/Ludeka.Web/Components/Pages/Home.razor`: mustContain + `<PageHeaderEditorial`, `scrollbar-none`; mustNotContain + `<h1`, `no-scrollbar`. Rojo: falla.
+- [x] 2.2 [VERDE] En `src/Ludeka.Web/Components/Pages/Home.razor`: adoptar `PageHeaderEditorial` (badge «Catálogo Colaborativo» + `dices`; h1 «Descubre tu próxima partida.» conservando el punto terracota vía RenderFragment; sin acción); `CatalogSearchBar` a bloque propio debajo (`max-w-xl`, handler intacto); `no-scrollbar` → `scrollbar-none`; abandonar la variante centrada (`max-w-3xl mx-auto text-center`). Verde: 2.1 + un único `<h1>` en la página. Commit: `feat: cabecera editorial y tira de filtros real en el catalogo`.
 - [ ] 2.3 [Boundary PR-2] `dotnet test Ludeka.sln` verde; smoke `/catalogo` (un solo h1 serif, buscador funcional, tira de filtros sin banda de scroll). Pushear y abrir PR-2 (base = rama del PR-1).
 
 Riesgo PR-2 (del diseño): bajo — PR más pequeño; la cabecera duplicada se elimina en la misma edición del rediseño.

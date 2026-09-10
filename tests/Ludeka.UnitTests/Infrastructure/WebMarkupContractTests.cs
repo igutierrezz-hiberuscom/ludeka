@@ -220,10 +220,13 @@ public class WebMarkupContractTests
           new[] { "<Icon Name=\"dices\"", "<Icon Name=\"search\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"clapperboard\"", "<Icon Name=\"globe\"" },
           new[] { "🎲", "🔍", "✏", "🎬", "🌍", "🌐" } },
 
-        // Home (/catalogo): filtros, spinner y vacío por iconos Lucide
+        // Home (/catalogo): cabecera editorial compartida (INC-36 DD-06), buscador en bloque
+        // propio debajo, tira de filtros con la clase real scrollbar-none (INC-36 D12: se
+        // abandona la variante centrada y el h1 viaja a PageHeaderEditorial) e iconos Lucide
         { "Home catalogo (sin emojis)", "src/Ludeka.Web/Components/Pages/Home.razor",
-          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"swords\"", "<Icon Name=\"users\"", "<Icon Name=\"user\"", "<Icon Name=\"timer\"" },
-          new[] { "🎲", "🧩", "⚔", "👨", "👤", "⏱" } },
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"swords\"", "<Icon Name=\"users\"", "<Icon Name=\"user\"", "<Icon Name=\"timer\"",
+                  "<PageHeaderEditorial", "scrollbar-none" },
+          new[] { "🎲", "🧩", "⚔", "👨", "👤", "⏱", "<h1", "no-scrollbar" } },
 
         // StoreOffersCard: cabecera, envíos, recomprobación y nota de afiliación por iconos Lucide
         { "StoreOffersCard (sin emojis)", "src/Ludeka.Web/Components/Shared/StoreOffersCard.razor",
