@@ -32,22 +32,17 @@ El buscador del hero **DEBE** conservar su comportamiento actual: un formulario 
 - WHEN introduce "azul" en el buscador y lo envía
 - THEN la navegación resulta en `/catalogo?q=azul`
 
-### Requirement: Píldoras de acceso finales (D4)
+### Requirement: Píldoras de acceso eliminadas (revisión maintainer 2026-09-10)
 
-El hero **DEBE** renderizar exactamente cuatro píldoras de acceso, en este orden y con estas etiquetas y destinos: "Catálogo Completo" → `/catalogo`, "Sorteos" → `/sorteos`, "Novedades" → `/novedades`, "Eventos" → `/eventos`. El hero **NO DEBE** renderizar píldoras hacia `/editoriales` ni hacia `/creadores`.
+El hero **NO DEBE** renderizar píldoras de acceso: duplicaban la navegación superior y los carriles de portada. La navegación vive en el menú superior (visible ≥ 1024px) y en el menú móvil desplegable de MainLayout (visible < 1024px, `details`/`summary` SSR puro con los 7 destinos: Catálogo, Editoriales, Creadores, Tiendas, Sorteos, Novedades y Eventos).
+(Previously: el hero debía renderizar exactamente cuatro píldoras — "Catálogo Completo", "Sorteos", "Novedades" y "Eventos" — en orden y destinos congelados por D4.)
 
-#### Scenario: Píldoras exactas con destinos exactos
-
-- GIVEN la portada `/` renderizada
-- WHEN se inspeccionan los enlaces del bloque de píldoras del hero
-- THEN existen exactamente 4 enlaces con las etiquetas y destinos del requerimiento, en el orden indicado
-- AND ninguno apunta a `/editoriales` ni a `/creadores`, y no existe etiqueta "Radar & Sorteos" ni "Autores"
-
-#### Scenario: Etiqueta de Sorteos sin herencia legacy
+#### Scenario: El hero sin píldoras
 
 - GIVEN la portada `/` renderizada
-- WHEN se inspecciona la píldora de sorteos
-- THEN su etiqueta es exactamente "Sorteos" y su destino es `/sorteos`
+- WHEN se inspecciona el markup del hero
+- THEN no existen píldoras de acceso dentro del hero (sin "Catálogo Completo" ni enlaces a /sorteos, /novedades o /eventos en el hero)
+- AND la navegación de la portada se realiza desde el menú superior y el menú móvil desplegable
 
 ### Requirement: Link "Ver todas las novedades" corregido
 

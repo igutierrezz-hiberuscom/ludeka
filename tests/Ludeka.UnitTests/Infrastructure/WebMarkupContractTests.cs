@@ -131,7 +131,7 @@ public class WebMarkupContractTests
                   "alt=\"@HeroBackgroundAssets.AltText(Background)\"", "@switch (Background)",
                   "hero-actions",
                   "<h1 class=\"sr-only\">La mesa está servida</h1>" },
-          new[] { "PORTADA EDITORIAL", "alt=\"\"", "hero-text-chip", "hero-scrim", "hero-panel", "hero-title" } },
+          new[] { "PORTADA EDITORIAL", "alt=\"\"", "hero-text-chip", "hero-scrim", "hero-panel", "hero-title", "Catálogo Completo" } },
 
         // RailHeader: cabecera de carril reutilizable con título en serif display, icono Lucide
         // y enlace "Ver todos…" solo cuando hay destino (Decisiones 3 y 7)
@@ -164,8 +164,14 @@ public class WebMarkupContractTests
         // MainLayout: nav, utilidades, menú de gestión y pie con iconos Lucide (sin emojis).
         // El pie reducido (Transparencia + Discord) ya no usa pen-line (Creadores solo en nav).
         { "MainLayout (iconografia Lucide)", "src/Ludeka.Web/Components/Layout/MainLayout.razor",
-          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"newspaper\"", "<Icon Name=\"tent\"", "<Icon Name=\"shield\"", "<Icon Name=\"library\"", "<Icon Name=\"bell\"" },
+          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"newspaper\"", "<Icon Name=\"tent\"", "<Icon Name=\"shield\"", "<Icon Name=\"library\"", "<Icon Name=\"bell\"", "<Icon Name=\"menu\"" },
           new[] { "🎁", "📰", "🎪", "🌍", "📚", "🛡", "👤", "⚙", "🚩", "🌙", "🎬", "📸", "🔔", "👥", "📜", "🏢", "✍", "🛒", "💬", "🗙" } },
+
+        // MainLayout: menú móvil desplegable (details/summary, SSR puro) con los mismos
+        // 7 destinos de la nav superior; la nav principal se oculta bajo lg (1024px).
+        { "MainLayout (menú móvil)", "src/Ludeka.Web/Components/Layout/MainLayout.razor",
+          new[] { "<details", "aria-label=\"Menú de navegación\"", "href=\"/catalogo\"", "href=\"/editoriales\"", "href=\"/creadores\"", "href=\"/tiendas\"", "href=\"/sorteos\"", "href=\"/novedades\"", "href=\"/eventos\"" },
+          new string[] { } },
 
         // GameCard: badges de estilo y público con iconos Lucide
         { "GameCard (badges sin emojis)", "src/Ludeka.Web/Components/Shared/GameCard.razor",
@@ -610,27 +616,16 @@ public class WebMarkupContractTests
     }
 
     [Fact]
-    public void HeroEditorial_Pills_AreExactlyTheFourD4PillsInOrder()
+    public void HeroEditorial_NoRenderizaPildorasRedundantes()
     {
-        // Retarget tras la extracción del hero (Decisión 3): las 4 píldoras D4 viven en
-        // HeroEditorial.razor, congeladas en orden por la spec home-landing-hero.
+        // Revisión del maintainer (2026-09-10): las píldoras D4 se eliminan — duplicaban
+        // la navegación superior y los carriles de portada. Los destinos viven en la nav
+        // superior (lg+) y en el menú móvil desplegable de MainLayout (< lg).
         var source = ReadSource("src/Ludeka.Web/Components/Home/HeroEditorial.razor");
-        var start = source.IndexOf("@* Píldoras de acceso directo *@", StringComparison.Ordinal);
-        var end = source.IndexOf("</section>", StringComparison.Ordinal);
-        Assert.True(start >= 0 && end > start, "No se encontró el bloque de píldoras del hero.");
-        var pillBlock = source[start..end];
-
-        // Exactamente 4 píldoras D4, en orden: Catálogo Completo, Sorteos, Novedades, Eventos
-        Assert.Equal(4, System.Text.RegularExpressions.Regex.Matches(pillBlock, "href=\"").Count);
-
-        var positions = new List<int>();
-        foreach (var destination in new[] { "/catalogo", "/sorteos", "/novedades", "/eventos" })
-        {
-            var pos = pillBlock.IndexOf($"href=\"{destination}\"", StringComparison.Ordinal);
-            Assert.True(pos >= 0, $"Falta la píldora con destino {destination}.");
-            positions.Add(pos);
-        }
-        Assert.Equal(positions.OrderBy(p => p).ToList(), positions);
+        Assert.DoesNotContain("Catálogo Completo", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"/sorteos\"", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"/novedades\"", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"/eventos\"", source, StringComparison.Ordinal);
     }
 
     [Fact]

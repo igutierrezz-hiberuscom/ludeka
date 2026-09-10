@@ -290,17 +290,17 @@
     display: none;
 }
 
-/* Acciones superpuestas del hero (revisión maintainer): buscador y píldoras centrados
-   al borde inferior, sobre la ilustración protagonista. Son tarjetas con fondo propio,
-   así que no necesitan capa intermedia para legibilidad. */
+/* Acciones superpuestas del hero (revisión maintainer): solo el buscador, arriba a la
+   izquierda sobre la ilustración protagonista. Es una tarjeta con fondo propio, así
+   que no necesita capa intermedia para legibilidad. */
 .hero-actions {
     position: absolute;
     inset-inline: 0;
-    bottom: 0;
+    top: 0;
     z-index: 10;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
 }
 

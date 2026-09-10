@@ -50,10 +50,11 @@
         </nav>
     }
 
-    @* Acciones superpuestas: buscador y píldoras (tarjetas propias, legibles sobre
-       cualquier fondo sin capa intermedia). El h1 es sr-only (accesibilidad/SEO). *@
+    @* Acciones superpuestas: solo el buscador, arriba a la izquierda (revisión
+       maintainer 2026-09-10 — sin píldoras: redundantes con la nav superior y los
+       carriles; la navegación vive en el menú superior y en el menú móvil). *@
     <h1 class="sr-only">La mesa está servida</h1>
-    <div class="hero-actions p-4 sm:p-8">
+    <div class="hero-actions p-4 sm:p-6">
         <div class="w-full max-w-xl">
             <form @onsubmit="HandleQuickSearch" class="flex items-center gap-2">
                 <div class="relative flex-1">
@@ -70,22 +71,6 @@
                     Buscar
                 </button>
             </form>
-        </div>
-
-        @* Píldoras de acceso directo *@
-        <div class="flex items-center gap-2 flex-wrap justify-center text-xs font-semibold">
-            <a href="/catalogo" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                <Icon Name="dices" Size="14" /> Catálogo Completo
-            </a>
-            <a href="/sorteos" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                <Icon Name="gift" Size="14" /> Sorteos
-            </a>
-            <a href="/novedades" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                <Icon Name="newspaper" Size="14" /> Novedades
-            </a>
-            <a href="/eventos" class="px-3 py-1.5 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 shadow-sm">
-                <Icon Name="tent" Size="14" /> Eventos
-            </a>
         </div>
     </div>
 </section>

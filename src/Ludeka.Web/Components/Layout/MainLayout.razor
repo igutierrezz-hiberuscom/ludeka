@@ -51,6 +51,25 @@
 
             @* Zona de Utilidades y Controles de Usuario *@
             <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                @* Menú móvil: los destinos de la nav principal, accesibles siempre
+                   (details/summary SSR puro, accesible, sin JavaScript) *@
+                <details class="lg:hidden relative">
+                    <summary aria-label="Menú de navegación"
+                             class="px-2.5 py-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] hover:border-[var(--brand-primary)] text-xs font-bold transition-all flex items-center gap-1.5 text-[var(--text-primary)] shadow-sm cursor-pointer list-none [&::-webkit-details-marker]:hidden shrink-0">
+                        <Icon Name="menu" Size="14" />
+                        <span>Menú</span>
+                    </summary>
+                    <div class="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-lg p-2 z-50">
+                        <a href="/catalogo" class="block px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors">Catálogo</a>
+                        <a href="/editoriales" class="block px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors">Editoriales</a>
+                        <a href="/creadores" class="block px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors">Creadores</a>
+                        <a href="/tiendas" class="block px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors">Tiendas</a>
+                        <a href="/sorteos" class="block px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors">Sorteos</a>
+                        <a href="/novedades" class="block px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors">Novedades</a>
+                        <a href="/eventos" class="block px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-colors">Eventos</a>
+                    </div>
+                </details>
+
                 <OfflineIndicator />
 
                 @* Selector de país / territorio *@
