@@ -87,6 +87,27 @@ public class PerformanceAndAccessibilityTests
     }
 
     [Fact]
+    public void AppCss_FundacionInc36_Regenerada()
+    {
+        // INC-36 (DD-09/DD-10): tras cada cambio de Styles/input.css el CSS compilado se
+        // regenera con el pipeline vigente, de modo que la fundación del rediseño (token
+        // --on-brand, altura responsiva del hero, focos autoriales por variante y cabecera
+        // compartida) esté presente en el CSS servido y el min-height fijo del hero haya
+        // desaparecido del minificado (sin espacios).
+        var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var appCssPath = Path.Combine(projectRoot, "src", "Ludeka.Web", "wwwroot", "app.css");
+
+        Assert.True(File.Exists(appCssPath), $"El archivo CSS de producción compilado no existe en: {appCssPath}");
+
+        var cssContent = File.ReadAllText(appCssPath);
+        Assert.Contains("--on-brand", cssContent);
+        Assert.Contains("aspect-ratio:16/9", cssContent);
+        Assert.Contains("hero-focal--eurogame", cssContent);
+        Assert.Contains("page-header-title", cssContent);
+        Assert.DoesNotContain("min-height:360px", cssContent);
+    }
+
+    [Fact]
     public void AppRazor_DebeDefinirIdiomaEspanol_YPreconexionesParaOptimizarLcp()
     {
         // Arrange
