@@ -273,10 +273,21 @@ public class WebMarkupContractTests
 
         // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 4 — eventos, sorteos y novedades) =====
 
-        // Events: pestañas, spinner, vacío, metadatos y pie por iconos Lucide
+        // Events: pestañas, spinner, vacío, metadatos y pie por iconos Lucide.
+        // INC-36 (PR-4, DD-03/DD-04/DD-06/DD-09): cabecera compartida PageHeaderEditorial,
+        // pestañas con relación accesible tabpanel/aria-controls, tarjetas .rail-card y
+        // tokens de marca/estado. El text-white queda ACOTADO al patrón de botón de marca
+        // (dos fragmentos que cubren las 5 variantes de botón); el par overlay
+        // bg-black/60 + text-white de los badges sobre fotografía es la excepción
+        // contratada de DD-04 y el mustNotContain se formula sin capturarlo — igual que
+        // el chip del hero en PR-1 (text-white/80 y los badges de estado tampoco los
+        // contienen). `dark:` es guarda profiláctica (hoy el archivo no lo usa).
         { "Events (sin emojis)", "src/Ludeka.Web/Components/Pages/Events.razor",
-          new[] { "<Icon Name=\"tent\"", "<Icon Name=\"calendar-days\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"globe\"", "<Icon Name=\"scroll\"", "<Icon Name=\"settings\"", "rounded-full bg-emerald-500" },
-          new[] { "🎪", "⚙", "🟢", "📜", "🌍", "⭐", "➕", "🗓", "📍", "🌐" } },
+          new[] { "<Icon Name=\"tent\"", "<Icon Name=\"calendar-days\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"globe\"", "<Icon Name=\"scroll\"", "<Icon Name=\"settings\"", "rounded-full bg-emerald-500",
+                  "<PageHeaderEditorial", "text-[var(--on-brand)]", "rail-card", "role=\"tabpanel\"", "aria-controls=\"panel-" },
+          new[] { "🎪", "⚙", "🟢", "📜", "🌍", "⭐", "➕", "🗓", "📍", "🌐",
+                  "hover:scale-105", "bg-rose-500/90", "bg-amber-500/90", "text-zinc-300", "dark:",
+                  "hover:opacity-90 text-white", ")] text-white" } },
 
         // EventsManagement: cabecera, acciones, tabla y modal de edición por iconos Lucide
         { "EventsManagement (sin emojis)", "src/Ludeka.Web/Components/Pages/EventsManagement.razor",
