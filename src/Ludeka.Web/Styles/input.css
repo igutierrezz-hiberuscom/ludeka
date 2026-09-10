@@ -290,14 +290,15 @@
     display: none;
 }
 
-/* Scrim por tema: el cuadrante inferior-izquierdo (donde vive el texto) queda casi
-   opaco con --bg-main, así el contraste >= 4,5:1 se conserva por construcción en
-   los 5 data-theme */
+/* Scrim por tema: el cuadrante del texto (izquierda) queda casi opaco con --bg-main
+   — meseta sólida hasta el 38% y desvanecido hasta el 68% — para garantizar el
+   contraste >= 4,5:1 por construcción en los 5 data-theme, incluidos los claros
+   (editorial y wood) donde un desvanecido corto no bastaba. */
 .hero-scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, var(--bg-main) 0%, transparent 60%),
-                linear-gradient(180deg, transparent 40%, var(--bg-main) 100%);
+    background: linear-gradient(90deg, var(--bg-main) 0%, var(--bg-main) 38%, transparent 68%),
+                linear-gradient(180deg, transparent 45%, var(--bg-main) 96%);
 }
 
 /* Titular visible del hero (h1 de la portada) en serif display */

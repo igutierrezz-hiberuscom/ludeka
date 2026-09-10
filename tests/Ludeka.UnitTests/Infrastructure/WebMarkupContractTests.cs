@@ -53,9 +53,10 @@ public class WebMarkupContractTests
           new[] { "@page \"/autores\"", "Directorio de Creadores de Contenido — Ludeka", "Creadores de Contenido &bull; Divulgadores del Hobby", "hobby hispanohablante" },
           new[] { "Creadores y Autores", "Autoría Lúdica", "GamesCount", "diseñadores, ilustradores y divulgadores referentes" } },
 
-        // MainLayout: navegación y pie reetiquetados a Creadores; el pie usa icono Lucide (no ✍️)
+        // MainLayout: navegación y pie reetiquetados a Creadores; el pie solo mantiene
+        // Transparencia y Discord (el resto de accesos vive en la nav superior, INC-35)
         { "MainLayout (nav y pie)", "src/Ludeka.Web/Components/Layout/MainLayout.razor",
-          new[] { "Creadores", "Icon Name=\"pen-line\"" },
+          new[] { "Creadores", "href=\"/transparencia\"", "Discord" },
           new[] { "Autores" } },
 
         // CreatorEditModal: formulario reetiquetado
@@ -82,7 +83,7 @@ public class WebMarkupContractTests
         // sin markup de card inline, sin emojis, sin h1 propio (vive en el hero) y sin la
         // clase inválida sm:w-68
         { "HomeDashboard (orquestador editorial)", "src/Ludeka.Web/Components/Pages/HomeDashboard.razor",
-          new[] { "<HeroEditorial", "Background=\"HeroBackgroundVariant.FotoEurogame\"", "<RailHeader", "<HomeGameCard", "<HomeGiveawayCard", "<HomeReleaseCard", "<HomeEventCard", "Name=\"dices\"" },
+          new[] { "<HeroEditorial", "Background=\"HeroBackgroundVariant.Ilustracion\"", "<RailHeader", "<HomeGameCard", "<HomeGiveawayCard", "<HomeReleaseCard", "<HomeEventCard", "Name=\"dices\"" },
           new[] { "PORTADA EDITORIAL", "href=\"/radar\"", "sm:w-68", "BggRating", "RemainingTimeText", "<h1", "sr-only" } },
 
         // Radar: sin banner legacy, alias silencioso con ambas rutas @page
@@ -159,9 +160,10 @@ public class WebMarkupContractTests
 
         // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 2 — layout, catálogo y fichas) =====
 
-        // MainLayout: nav, utilidades, menú de gestión y pie con iconos Lucide (sin emojis)
+        // MainLayout: nav, utilidades, menú de gestión y pie con iconos Lucide (sin emojis).
+        // El pie reducido (Transparencia + Discord) ya no usa pen-line (Creadores solo en nav).
         { "MainLayout (iconografia Lucide)", "src/Ludeka.Web/Components/Layout/MainLayout.razor",
-          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"newspaper\"", "<Icon Name=\"tent\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"shield\"", "<Icon Name=\"library\"", "<Icon Name=\"bell\"" },
+          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"newspaper\"", "<Icon Name=\"tent\"", "<Icon Name=\"shield\"", "<Icon Name=\"library\"", "<Icon Name=\"bell\"" },
           new[] { "🎁", "📰", "🎪", "🌍", "📚", "🛡", "👤", "⚙", "🚩", "🌙", "🎬", "📸", "🔔", "👥", "📜", "🏢", "✍", "🛒", "💬", "🗙" } },
 
         // GameCard: badges de estilo y público con iconos Lucide
