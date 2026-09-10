@@ -280,3 +280,58 @@
 - **22/22 tareas completadas** (PR-1: 1.1–1.7; PR-2: 2.1–2.3; PR-3: 3.1–3.3; PR-4: 4.1–4.3; PR-5: 5.1–5.6).
 - Boundary de PR-5 publicado en [PR #13](https://github.com/igutierrezz-hiberuscom/ludeka/pull/13), con base `inc/rediseno-paginas-editoriales-4`.
 - Pendiente para el orquestador: ejecución independiente de `sdd-verify` y `sdd-archive`; no se ejecutaron desde apply.
+
+---
+
+## Remediación F4.2 (PR-5-Fix-F4.2) — COMPLETADA ✅
+
+> Fase SDD `sdd-apply`, remediación focal autorizada por el maintainer tras el `sdd-verify` fallido (CRITICAL `F4.2` + WARNING DD-01). Worktree `C:\repos\ludeka-wt\rediseno-paginas-editoriales`, rama `inc/rediseno-paginas-editoriales-5` (PR #13, base `-4`), HEAD previo `09949a2`. Modo: **TDD estricto**. Intento ya adquirido por el orquestador: este apply no ejecutó `acquire`/`settle` ni `sdd-archive`.
+
+| Tarea | Estado | Ciclo TDD | Commit |
+|---|---|---|---|
+| A. F4.2 — `Radar.razor` y `News.razor` sin envoltorio `@if (_isCreateModalOpen)`: el shell del modal queda siempre montado y `OnParametersSetAsync` restaura el foco | ✅ | ROJO 2 fallos exactos → VERDE 102/102 + suite 854/854 | `310c464` |
+| B. DD-01 — `width: 100%` en `.hero-editorial` + `app.css` regenerado después + contrato acotado al bloque y a la regla compilada | ✅ | ROJO 2 fallos exactos → VERDE 103/103 y 5/5 + suite 855/855 | `379c074` |
+| C. Documentación y push de la rama | ✅ | — | `docs: remediacion f4.2 inc-36` |
+
+### TDD Cycle Evidence (Remediación F4.2)
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| A | `tests/Ludeka.UnitTests/Infrastructure/WebMarkupContractTests.cs` (filas `Radar`/`News`, `mustNotContain`) | Unit (contrato Ordinal) | ✅ 102/102 focal + 854/854 suite | ✅ 2 fallos exactos: `Radar (sin emojis): ... no debe contener '@if (_isCreateModalOpen)'` y `News (sin emojis): ...` (100/102) | ✅ 102/102 focal; 854/854 suite (sin tests nuevos) | ✅ Runtime Chrome real: `/sorteos` con Escape y `/novedades` con clic en X devuelven el foco al disparador | ➖ Sin refactor (solo eliminación del envoltorio, 3 líneas por archivo) |
+| B | `WebMarkupContractTests.cs` (Fact nuevo acotado al bloque) + `PerformanceAndAccessibilityTests.cs` (`AppCss_FundacionInc36_Regenerada`) | Unit (contrato CSS acotado) + artefacto derivado DD-10 | ✅ 102/102 focal + 854/854 suite | ✅ 2 fallos exactos: Fact `HeroEditorial_AnchoDelContenedorDeclaradoEnElBloqueCss` (`contenido actual: .hero-editorial {`) y `AppCss_FundacionInc36_Regenerada` (`Not found: "width:100%"`) | ✅ 103/103 + 5/5 focales; 855/855 suite | ✅ Runtime Chrome a 360/640/1240: 305/585/1185 × 200/230,4/446,4 y sin desborde propio | ➖ Sin refactor |
+
+- Justificación del alcance del contrato B: `width: 100%` ya existía en 6 bloques de `input.css` y `width:100%` en 9 puntos de `app.css` (incluida `.w-full`); un fragmento global habría sido tautológico y no habría producido ROJO real (riesgo explícitamente auditado en verificación). Por eso la aserción se acota al bloque `.hero-editorial` (parseo por índices, mismo patrón de acotado que `BloqueTema`) y a su regla compilada.
+- Coste en pruebas: B añade 1 test contractual (WebMarkup 102→103; suite 854→855). A no añade tests: aserciones nuevas en filas existentes.
+
+### Work Unit Evidence (Remediación F4.2)
+
+| Unidad / commit | Prueba focal y resultado exacto | Runtime harness y resultado exacto | Límite de rollback |
+|---|---|---|---|
+| A-F4.2 / `310c464` | `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` → ROJO `Con error: 2, Superado: 100, Total: 102` (solo las dos aserciones nuevas); VERDE **102/102**; `dotnet test Ludeka.sln` → **854/854** | Chrome DevTools MCP (Chrome real, servidor 5199): `/sorteos` «Proponer Sorteo» → foco en `BUTTON aria-label="Cerrar Registrar o Proponer Sorteo"` → Escape → `role=dialog` ausente y `document.activeElement` = el mismo botón «Proponer Sorteo» (`activeIsTrigger=true`); `/novedades` análogo con «Añadir Novedad» y clic en X | Revertir las 3 líneas de envoltorio en `Radar.razor`/`News.razor` y las 2 aserciones `mustNotContain` de las filas `Radar`/`News`; no afecta al shell `EditorialModal` ni a otras páginas |
+| B-DD-01 / `379c074` | `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` → ROJO `Con error: 1, Superado: 102, Total: 103`; `dotnet test --filter FullyQualifiedName~PerformanceAndAccessibilityTests` → ROJO `Con error: 1, Superado: 4, Total: 5`; VERDE **103/103** y **5/5**; `dotnet test Ludeka.sln` → **855/855** | `npx.cmd -y tailwindcss@3.4.17 -i ./Styles/input.css -o ./wwwroot/app.css --minify` desde `src/Ludeka.Web` → `Done in 2976ms`; `app.css` 248402→248413 bytes (+11 = `width:100%;`); regla compilada `.hero-editorial{width:100%;aspect-ratio:16/9;min-height:200px;max-height:clamp(200px,36vw,460px)}`; Chrome a 360/640/1240 (ver tabla de verificación) | Revertir `width: 100%` de `input.css` y regenerar `app.css` (vuelve a las medidas previas del verify-report); el Fact acotado y la aserción compilada se retiran en la misma frontera; no toca markup ni otros bloques |
+
+### Verificación observada (registro remediación)
+
+| Comando / herramienta | Resultado observado |
+|---|---|
+| Safety net `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (pre-cambios) | **102/102 verde** |
+| Safety net `dotnet test Ludeka.sln` (pre-cambios) | **854/854 verde** |
+| ROJO A | **2 fallos exactos** (`Radar`/`News` no deben contener `@if (_isCreateModalOpen)`), 100/102 verde |
+| VERDE A | **102/102** focal; `dotnet test Ludeka.sln` → **854/854** |
+| ROJO B | Fact nuevo: `El bloque .hero-editorial debe fijar 'width: 100%'; contenido actual: .hero-editorial {` (102/103); `AppCss_FundacionInc36_Regenerada`: `Not found: "width:100%"` (4/5) |
+| `npx.cmd -y tailwindcss@3.4.17 -i ./Styles/input.css -o ./wwwroot/app.css --minify` | `Done in 2976ms` (warning Browserslist preexistente); `--on-brand`, `aspect-ratio:16/9`, `hero-focal--eurogame`, `page-header-title` presentes; `min-height:360px/460px` ausentes |
+| VERDE B | **103/103** (WebMarkup) y **5/5** (Performance); `dotnet test Ludeka.sln` → **855/855** |
+| Chrome MCP `/sorteos` (viewport 360) | `BUTTON "Proponer Sorteo"` → abrir: `BUTTON aria-label="Cerrar Registrar o Proponer Sorteo"` (`role=dialog`, `aria-modal=true`) → Escape: `role=dialog` ausente, `activeElement` = `BUTTON "Proponer Sorteo"` (mismo nodo, `activeIsTrigger=true`) |
+| Chrome MCP `/novedades` (viewport 360) | `BUTTON "Añadir Novedad"` → abrir: `BUTTON aria-label="Cerrar Añadir Novedad Editorial"` → clic X: `role=dialog` ausente, `activeElement` = `BUTTON "Añadir Novedad"` (mismo nodo) |
+| Chrome MCP hero 360×740 | `clientWidth=345`; contenedor `container-ludeka` 345 (padding 20/20 → útil 305); hero **305 × 200** (`x=20`, `right=325`, dentro del viewport); antes: 355,55 × 200 con borde derecho 375,5 |
+| Chrome MCP hero 640×800 | `clientWidth=625`; útil 585; hero **585 × 230,39** (`right=605`); antes: 409,58 × 230,38 |
+| Chrome MCP hero 1240×900 | `clientWidth=1225`; útil 1185; hero **1185 × 446,39** (`right=1205`); `scrollWidth=1225` sin desborde; antes: 793,58 × 446,38 |
+| Consola del navegador | Sin errores atribuibles: warning preexistente del manifiesto (`icon-192.png`) y 5× HTTP 400 de imágenes externas `cf.geekdo-images.com` (fallback I2.2 preexistente, fuera de alcance) |
+| `dotnet run --project src/Ludeka.Web --urls http://localhost:5199` | `Ludeka.Web` PID 18416; detenido al final; `PORT_5199_FREE`; sin procesos `dotnet` del worktree remanentes |
+
+### Desviaciones y hallazgos (remediación)
+
+1. **Recuento de tests**: B añade 1 test contractual (102→103 en WebMarkup; suite 854→855) porque el contrato de ancho debía acotarse al bloque `.hero-editorial` para producir un ROJO real; los fragmentos globales ya existían y habrían sido tautológicos. A no añade tests (aserciones en filas existentes): 102/854.
+2. **`@if` eliminado sin reindentar** (3 líneas por archivo): se retiraron únicamente las dos líneas del envoltorio y su `}` de cierre, tal como indicó la autorización; el contenido interno conserva su indentación para un diff mínimo y sin cambios semánticos.
+3. **Medición**: el desborde de 375,5 px a 360 era transferencia del ancho desde el alto clampado; con `width: 100%` la caja queda en 305 px. El `scrollWidth` del documento a 360 (501) sigue dominado por la fila preexistente del nav (fuera de alcance, ya documentado en el verify-report).
+4. **Evidencia de foco**: la restauración se comprobó por identidad de nodo (`el === trigger`, marcado en runtime con `data-smoke-trigger`), no solo por texto/aria-label; el diálogo se ausenta tras el cierre en ambos casos.
