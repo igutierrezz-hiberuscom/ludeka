@@ -69,3 +69,11 @@
 - PR-5: interop de foco `ludekaModal` ya disponible; los shells inline de Radar/News se restan (~240 líneas). Regeneración final de app.css (purga de utilidades muertas) al cierre del PR-5.
 - El `safelist` de `tailwind.config.js` mantiene patrones 500-950 aunque las páginas abandonen los hardcodes (vigilar con la fact de app.css y los mustNotContain).
 - Ratios reales de assets ≠ `width`/`height` declarados: deuda documentada para la ola C (sin impacto runtime).
+
+## Partición del PR-1 → PR-1a / PR-1b (decisión del maintainer, 2026-09-10)
+
+- El PR-1 original (#7, 464 líneas de código) superó el presupuesto de revisión de 400 líneas/PR; el ledger nativo registró el intento como `passed` con 549 líneas cambiadas y exigió decisión de maintainer. El maintainer decidió **partir el PR** (no size:exception) y **autorizó el reset nativo** del work unit (revisión del ledger consumida; exceso auditado en lifetime).
+- **PR-1a (#8)**: `inc/rediseno-paginas-editoriales-1a` (base `main`) = artefactos SDD + tokens + hero responsivo + app.css + fix de clase de foco. Verificación: **852/852 verde**.
+- **PR-1b (#9)**: `inc/rediseno-paginas-editoriales-1b` (base PR-1a) = `PageHeaderEditorial` + `EditorialModal` + marcas de tareas + `apply-progress.md`. Verificación: **854/854 verde**; árbol final idéntico al original (`git diff 1b7485c` vacío). El PR #7 quedó cerrado con comentario.
+- Reconstrucción por cherry-picks en orden: PR-1a = 0f13f41, f618e3d, 35c6451, 7890c0e, 02a0332, 36115bb(.razor); PR-1b = 3584407, a5d00df, d262108, 36115bb(tasks), 1b7485c. El hunk de tasks.md del fix (casilla 1.7) se resolvió a favor de PR-1b.
+- Base para PR-2: rama `inc/rediseno-paginas-editoriales-1b` (cabeza de la cadena).
