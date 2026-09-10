@@ -207,3 +207,76 @@
 ### Base para PR-5
 
 - Rama del PR-4: `inc/rediseno-paginas-editoriales-4` (encima de `inc/rediseno-paginas-editoriales-3`). El PR-5 debe crearse encima de esta rama (cadena feature-branch-chain, DD-11). Presupuesto PR-4: 92 líneas cambiadas (57+/35−), dentro del forecast ~140-180.
+
+---
+
+## Estado PR-5 «Sorteos + Novedades»: COMPLETADO ✅
+
+> Fase SDD `sdd-apply`, PR-5 «Sorteos + Novedades» (tareas 5.1–5.6). Rama `inc/rediseno-paginas-editoriales-5` creada desde la cabeza limpia de `inc/rediseno-paginas-editoriales-4` (PR-4 #12), conforme a `feature-branch-chain` y `delivery_strategy=auto-chain`. Modo: **TDD estricto**. Presupuesto observado del slice: por debajo de 400 líneas.
+
+| Tarea | Estado | Ciclo TDD | Commit |
+|---|---|---|---|
+| 5.1 Contrato `Radar (sin emojis)` ajustado (`PageHeaderEditorial`, `EditorialModal`, prohibiciones) | ✅ | ROJO confirmado (3 fallos exactos de las tres filas PR-5) → | incluido en `2f67036` |
+| 5.2 Radar.razor: cabecera compartida, `EditorialModal`, fragments, tokens de estado y `--on-brand` | ✅ | VERDE focal `DisplayName~Radar` (4/4) → suite contractual final 102/102; smoke `/sorteos` y `/radar` | `2f67036` |
+| 5.3 Contratos `News` y `GiveawayCard` ajustados (fallbacks, dimensiones, rail y prohibiciones) | ✅ | ROJO confirmado (2 fallos exactos pendientes tras Radar) → | incluido en `dd7f42c` |
+| 5.4 News.razor: cabecera, `EditorialModal`, imagen siempre presente y tokens | ✅ | VERDE contractual 102/102; smoke `/novedades` con default de novedad | `dd7f42c` |
+| 5.5 GiveawayCard.razor: `rail-card`, `rail-cover h-44`, fallback de sorteo, tokens y botón accesible | ✅ | VERDE contractual 102/102; smoke `/sorteos` con default de sorteo | `dd7f42c` |
+| 5.6 Boundary PR-5: `app.css`, suite, smokes, documentación y tareas | ✅ | Suite completa 854/854 antes y después de regenerar; smoke HTTP 200 de las 5 rutas | `pendiente` (commit de documentación) |
+
+### Commits de PR-5
+
+| Sha | Mensaje |
+|---|---|
+| `2f67036` | `feat: sorteos con modal editorial y tokens de estado` |
+| `dd7f42c` | `feat: novedades y GiveawayCard con imagen por defecto y rail-card` |
+| pendiente | `docs: progreso pr-5 inc-36 y casillas de sorteos-novedades` |
+
+## TDD Cycle Evidence (PR-5)
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 5.1 | `tests/Ludeka.UnitTests/Infrastructure/WebMarkupContractTests.cs` (fila `Radar`) | Unit (contrato por texto Ordinal) | ✅ 102/102 | ✅ 3 fallos exactos al activar las aserciones PR-5: `Radar` sin `PageHeaderEditorial`, `News` sin `PageHeaderEditorial` y `GiveawayCard` sin `rail-card` | ✅ Fila Radar incluida en `DisplayName~Radar` (4/4) y suite contractual final 102/102 | ✅ `/sorteos` y `/radar`: 200, un `<h1>`, cabecera, rail y fallback de sorteo | ✅ Shell inline sustituido por `EditorialModal`; contenido y pie separados en `ChildContent`/`Footer` |
+| 5.2 | `WebMarkupContractTests.cs` (fila `Radar`) | Unit + runtime SSR | ✅ 102/102 inicial | ✅ Contrato escrito antes de la implementación | ✅ `dotnet test --filter DisplayName~Radar`: 4/4; suite final 102/102 | ✅ Handlers de apertura, cierre y `HandleSubmitGiveaway` conservados mediante fragments; dos rutas sirven la misma página | ✅ Se corrigió el primer intento de composición Razor usando `ChildContent` explícito tras el error RZ9996 |
+| 5.3 | `WebMarkupContractTests.cs` (filas `News`/`GiveawayCard`) | Unit (contrato por texto Ordinal) | ✅ Baseline contractual 102/102 antes de editar contratos | ✅ 2 fallos exactos tras Radar: `News` sin `PageHeaderEditorial` y `GiveawayCard` sin `rail-card` | ✅ Suite contractual final 102/102 | ✅ `/novedades` y `/sorteos`: 200, un `<h1>`, rail y fallback por dominio | ✅ Contratos expresan la API real de `PageHeaderEditorial` mediante `BadgeIcon` |
+| 5.4 | `WebMarkupContractTests.cs` (fila `News`) | Unit + runtime SSR | ✅ 102/102 | ✅ Cubierto por el contrato 5.3 escrito antes del markup | ✅ 102/102 | ✅ `/novedades` sirvió `novedad-default.svg`, `rail-card`, cabecera y h1 único; `EditorialModal` quedó referenciado | ✅ Se conservaron los handlers de formulario dentro de `ChildContent`/`Footer`; URLs externas conservan `width`/`height`/`onerror` |
+| 5.5 | `WebMarkupContractTests.cs` (fila `GiveawayCard`) | Unit + runtime SSR | ✅ 102/102 | ✅ Cubierto por el contrato 5.3 escrito antes del markup | ✅ 102/102 | ✅ `/sorteos` y `/` sirvieron `sorteo-default.svg`; la tarjeta externa declara dimensiones y fallback estático | ✅ `.rail-card` centraliza lift/focus/reduced-motion; `animate-pulse` conserva la guarda CSS existente |
+| 5.6 | `WebMarkupContractTests.cs` + `PerformanceAndAccessibilityTests.cs` (contratos existentes) | Unit boundary + runtime HTTP | ✅ Suite completa 854/854 antes de regenerar | ➖ Contratos `AppCss_FundacionInc36_Regenerada` y barrido ya existentes; la tarea solo regenera el artefacto derivado | ✅ Suite completa final 854/854 y contrato de CSS verde | ✅ Cinco rutas HTTP 200, h1 único, cabeceras/rails/fallbacks y puerto liberado antes de la suite final | ✅ `app.css` regenerado después de todo el markup; sin cambios en `input.css` ni en scripts compartidos |
+
+## Work Unit Evidence (PR-5)
+
+| Unidad / commit | Prueba focal y resultado exacto | Runtime harness y resultado exacto | Límite de rollback |
+|---|---|---|---|
+| U5-Radar / `2f67036` | `dotnet test --filter DisplayName~Radar` → **4/4**; la suite contractual completa quedó en **102/102** al cerrar PR-5 | `dotnet run --project src/Ludeka.Web --urls http://localhost:5199` + HTTP `/sorteos` y `/radar` → **200**, `<h1>` único, `page-header-title`, `rail-card`, título y `sorteo-default.svg` | Revertir `Radar.razor` y las aserciones Radar de `WebMarkupContractTests.cs`; no afecta News/GiveawayCard ni los componentes compartidos |
+| U5-News-Giveaway / `dd7f42c` | `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` → **102/102** | Mismo servidor en 5199: `/novedades` → **200**, `<h1>` único, cabecera, rail, título y `novedad-default.svg`; `/sorteos` → **200** y `sorteo-default.svg` | Revertir `News.razor`, `GiveawayCard.razor` y sus contratos; no afecta Radar ni el shell `EditorialModal` |
+| U5-Boundary / documentación | `dotnet test Ludeka.sln` antes y después de la regeneración → **854/854** | Smoke HTTP `/sorteos`, `/radar`, `/novedades`, `/juegos/wingspan`, `/` → **200** en las cinco; exactamente un `<h1>` en cada documento; puerto 5199 detenido antes de la suite final | Revertir únicamente `wwwroot/app.css`, `tasks.md` y esta sección de `apply-progress.md`; el comportamiento de los dos commits de código permanece independiente |
+
+## Verificación observada (registro PR-5)
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (safety net inicial) | **102/102 verde** |
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (ROJO contratos PR-5) | **3 fallos exactos, 99/102 verde**: `GiveawayCard` sin `rail-card`, `News` sin `<PageHeaderEditorial>` y `Radar` sin `<PageHeaderEditorial>` |
+| `dotnet test --filter DisplayName~Radar` (Radar VERDE focal) | **4/4 verde** |
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (ROJO News/Giveaway tras Radar) | **2 fallos exactos, 100/102 verde**: `GiveawayCard` sin `rail-card` y `News` sin `BadgeIcon="newspaper"` |
+| `dotnet test --filter FullyQualifiedName~WebMarkupContractTests` (News/Giveaway VERDE) | **102/102 verde** |
+| `dotnet test Ludeka.sln` (safety net de boundary, antes de Tailwind) | **854/854 verde** |
+| `npx.cmd -y tailwindcss@3.4.17 -i ./Styles/input.css -o ./wwwroot/app.css --minify` (desde `src/Ludeka.Web`) | **Correcto en 2447 ms**; advertencia no bloqueante de Browserslist desactualizado |
+| Facts de `src/Ludeka.Web/wwwroot/app.css` | `--on-brand=True`, `state-error=True`, `state-warning=True`, `state-highlight=True`, `state-info=True`, `aspect-ratio:16/9=True`, `hero-focal--eurogame=True`, `page-header-title=True`; `min-height:360px=False`, `min-height:460px=False`; 248402 bytes, 1 línea minificada |
+| `dotnet run --project src/Ludeka.Web --urls http://localhost:5199` | Proceso PID 19928 arrancado y estable para el smoke; detenido después, `port=5199 free` |
+| Smoke HTTP UTF-8 en `/sorteos`, `/radar`, `/novedades`, `/juegos/wingspan`, `/` | **200 ×5**, exactamente **1 `<h1>` ×5**; `/sorteos` y `/radar`: cabecera, título, rail y `sorteo-fallback`; `/novedades`: cabecera, título, rail y `novedad-fallback`; ficha y portada: 200 y h1 único |
+| Contrato de modal y fallback por dominio | `WebMarkupContractTests` **102/102**; `Radar.razor` y `News.razor` referencian `EditorialModal`; `News`/`GiveawayCard` declaran `DefaultImageDomain.Novedad`/`Sorteo`, dimensiones y `onerror`; `editorial-modal.js` conserva foco al abrir, restaura foco y cierra con Escape |
+| Barrido de shells/hardcodes contratados | Grep Ordinal sin resultados en los tres archivos para `fixed inset-0 z-50`, `dark:`, familias de color prohibidas y `text-white`; comentarios Radar/News/GiveawayCard sin literal `<img>` |
+| `dotnet test Ludeka.sln` (suite final, con servidor detenido) | **854/854 verde** |
+
+## Desviaciones y hallazgos PR-5
+
+1. La API de `PageHeaderEditorial` recibe el icono como `BadgeIcon`; por eso los contratos de Radar y News exigen `BadgeIcon="gift"`/`BadgeIcon="newspaper"` en vez de buscar un `<Icon>` inline que ya vive dentro del componente compartido. El markup servido sí renderiza el icono Lucide mediante el componente.
+2. Razor exige expresión explícita para atributos de componentes con texto interpolado: `Alt="@($"Carátula de {release.Title}")"` y su equivalente de sorteos. El primer intento provocó RZ9986; se corrigió sin cambiar el contrato funcional.
+3. Al adoptar `EditorialModal`, el contenido de formulario debe estar bajo `<ChildContent>` explícito cuando también se usa `<Footer>`; omitirlo provocó RZ9996. Los handlers de apertura, cierre y envío no cambiaron.
+4. `app.css` se regeneró después de todo el markup, como exige DD-10. La advertencia de Browserslist no modificó el resultado ni los 854 tests.
+
+## Estado acumulado
+
+- **22/22 tareas completadas** (PR-1: 1.1–1.7; PR-2: 2.1–2.3; PR-3: 3.1–3.3; PR-4: 4.1–4.3; PR-5: 5.1–5.6).
+- Boundary de PR-5 listo para push y PR contra `inc/rediseno-paginas-editoriales-4`.
+- Pendiente para el orquestador: push, apertura del PR-5 y ejecución independiente de `sdd-verify`; no se ejecutó `sdd-verify` ni `sdd-archive`.
