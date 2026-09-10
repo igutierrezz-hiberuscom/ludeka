@@ -762,6 +762,26 @@ public class WebMarkupContractTests
         Assert.DoesNotContain("<picture", cssSceneBranch, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void HeroEditorial_SelectorPruebas_SoloApareceConQuerystringHero()
+    {
+        // Selector de variantes del hero para pruebas: lee el parámetro ?hero= de la
+        // querystring (SSR, sin JavaScript), construye los enlaces con
+        // GetUriWithQueryParameter y cubre las 5 variantes. La tira de enlaces SOLO
+        // se renderiza cuando el parámetro está presente: los visitantes normales
+        // de producción jamás la ven (autoeliminatoria).
+        var source = ReadSource("src/Ludeka.Web/Components/Home/HeroEditorial.razor");
+        Assert.Contains("QueryHelpers.ParseQuery", source, StringComparison.Ordinal);
+        Assert.Contains("_showSwitcher", source, StringComparison.Ordinal);
+        Assert.Contains("GetUriWithQueryParameter", source, StringComparison.Ordinal);
+        Assert.Contains("aria-label=\"Selector de variante del hero (pruebas)\"", source, StringComparison.Ordinal);
+        Assert.Contains("aria-current", source, StringComparison.Ordinal);
+        foreach (var key in new[] { "eurogame", "amigos", "primer-plano", "ilustracion", "css" })
+        {
+            Assert.Contains(key, source, StringComparison.Ordinal);
+        }
+    }
+
     // ===== INC-35 PR-3: fix D5 — fallback de imagen en las páginas de eventos =====
 
     [Theory]

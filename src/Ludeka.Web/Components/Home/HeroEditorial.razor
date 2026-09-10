@@ -8,6 +8,7 @@
    extra. El scrim por tema deja casi opaco el cuadrante del texto, de modo que el
    contraste >= 4,5:1 se conserva por construcción en los 5 data-theme (Decisión 10). *@
 @using Ludeka.Web.Components.Shared
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
 
 <section class="hero-editorial relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
@@ -39,6 +40,21 @@
 
     @* Scrim por tema: el cuadrante inferior-izquierdo (donde vive el texto) queda casi opaco *@
     <div class="hero-scrim" aria-hidden="true"></div>
+
+    @* Selector de variantes para pruebas: solo se renderiza con ?hero= en la querystring
+       (autoeliminatorio — los visitantes de producción jamás lo ven). Enlaces SSR puros. *@
+    @if (_showSwitcher)
+    {
+        <nav aria-label="Selector de variante del hero (pruebas)"
+             class="absolute top-3 right-3 z-20 flex flex-wrap gap-1.5 rounded-xl bg-[#0d0a18]/80 p-2 backdrop-blur-sm">
+            @foreach (var (key, variante) in _switcherOptions)
+            {
+                <a href="@Navigation.GetUriWithQueryParameter("hero", key)"
+                   class="px-2.5 py-1 rounded-full text-xs font-semibold transition-colors @(key == _activeKey ? "bg-white text-[#14181C]" : "bg-white/10 text-white hover:bg-white/20")"
+                   aria-current="@(key == _activeKey ? "page" : null)">@key</a>
+            }
+        </nav>
+    }
 
     <div class="relative max-w-3xl space-y-4 p-6 sm:p-10">
         <h1 class="hero-title">La mesa está servida</h1>
@@ -85,10 +101,49 @@
 </section>
 
 @code {
-    /// <summary>Variante de fondo activa (Decisión 2): el cambio de variante es 1 línea en el orquestador.</summary>
+    /// <summary>Variante de fondo activa (Decisión 2): el cambio de variante es 1 línea
+    /// en el orquestador; el parámetro ?hero= de la querystring la sobreescribe para
+    /// pruebas in situ, y solo entonces se muestra la tira de selección.</summary>
     [Parameter] public HeroBackgroundVariant Background { get; set; } = HeroBackgroundVariant.FotoEurogame;
 
     private string _searchTerm = string.Empty;
+    private bool _showSwitcher;
+    private string _activeKey = string.Empty;
+
+    /// <summary>Claves de querystring → variante, en el orden de la tira de selección.</summary>
+    private static readonly (string Key, HeroBackgroundVariant Variante)[] _switcherOptions =
+    {
+        ("eurogame", HeroBackgroundVariant.FotoEurogame),
+        ("amigos", HeroBackgroundVariant.FotoMesaAmigos),
+        ("primer-plano", HeroBackgroundVariant.FotoPrimerPlano),
+        ("ilustracion", HeroBackgroundVariant.Ilustracion),
+        ("css", HeroBackgroundVariant.CssScene),
+    };
+
+    /// <summary>Lee ?hero= de la querystring (SSR): activa la tira de selección y
+    /// sobreescribe la variante si la clave es válida. Sin el parámetro no hay tira.</summary>
+    protected override void OnInitialized()
+    {
+        var query = QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+        if (!query.TryGetValue("hero", out var raw))
+        {
+            return;
+        }
+
+        _showSwitcher = true;
+        var requested = raw.ToString();
+        foreach (var (key, variante) in _switcherOptions)
+        {
+            if (!string.Equals(key, requested, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            _activeKey = key;
+            Background = variante;
+            break;
+        }
+    }
 
     /// <summary>Buscador rápido de la portada: submit con término → /catalogo?q={término}; vacío → /catalogo.</summary>
     private void HandleQuickSearch()
