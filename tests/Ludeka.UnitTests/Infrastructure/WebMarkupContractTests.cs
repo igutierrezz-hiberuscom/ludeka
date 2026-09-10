@@ -138,6 +138,13 @@ public class WebMarkupContractTests
           new[] { "page-header-title", "<h1", "badge-pill", "Actions" },
           Array.Empty<string>() },
 
+        // EditorialModal (INC-36 PR-1, DD-07): shell compartido de los modales de página —
+        // overlay fijo, tarjeta centrada max-w-lg, cierre identificado y diálogo etiquetado;
+        // el cuerpo vive como ChildContent, el pie en <Footer> y el foco via ludekaModal
+        { "EditorialModal (shell compartido)", "src/Ludeka.Web/Components/Shared/EditorialModal.razor",
+          new[] { "role=\"dialog\"", "aria-modal=\"true\"", "aria-label=\"@Title\"", "OnClose", "ChildContent", "Footer", "ludekaModal.open" },
+          Array.Empty<string>() },
+
         // HeroEditorial: hero narrativo con <picture> AVIF/WebP/JPG priorizado (patrón INC-07),
         // escena CSS bajo la foto y altura derivada del ancho con foco autoral por variante
         // (Decisiones 1, 2 y 10 + INC-36 DD-01/DD-02/DD-03: sin min-h fijo, la clase de foco
