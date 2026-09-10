@@ -1,6 +1,8 @@
 # 15. Dashboard de Inicio Editorial, Desacople de Catálogo y Enlace Canónico BGG
 
 > **Nota (INC-35):** los 4 carriles descritos aquí se renderizan ahora mediante **componentes dedicados** (`Components/Home/`) con fallback de imagen por dominio, tokens `.rail-card` y microinteracciones hover/foco. La fuente de datos, ordenación y caché de este módulo siguen vigentes; el comportamiento de presentación actual está en el [módulo 23 — Portada Editorial](file:///c:/repos/Ludeka/docs/specs/sistema/23-portada-editorial.md).
+>
+> **Nota (INC-36):** el catálogo (`/catalogo`) adopta la cabecera editorial compartida `PageHeaderEditorial`, el buscador en bloque propio (`max-w-xl`) y la tira de filtros con la clase real `scrollbar-none`; el detalle transversal de tokens y componentes está en el [módulo 24](file:///c:/repos/Ludeka/docs/specs/sistema/24-fundaciones-editoriales-y-componentes.md).
 
 ## 1. Visión General y Propósito
 El módulo de **Dashboard de Inicio Editorial** transforma la experiencia de bienvenida en la ruta raíz (`/`) de Ludeka en una portada viva inspirada en los referentes editoriales de la cultura y el streaming (Letterboxd, Netflix lúdico).
@@ -105,6 +107,6 @@ graph TD
 ## 6. Componentes Razor Blazor (`Ludeka.Web`)
 
 - `HomeDashboard.razor` (`@page "/"`): Portada editorial con buscador rápido, botones de salto temático y 4 carriles horizontales con *touch snap*. *(Desde INC-35 las tarjetas se renderizan vía `Components/Home/*Card.razor` con fallback de imagen y microinteracciones — ver [módulo 23](file:///c:/repos/Ludeka/docs/specs/sistema/23-portada-editorial.md)).*
-- `Home.razor` (`@page "/catalogo"`): Catálogo desacoplado con soporte para query param `?q=...` y filtros facetados de situación real.
+- `Home.razor` (`@page "/catalogo"`): Catálogo desacoplado con soporte para query param `?q=...` y filtros facetados de situación real. INC-36: cabecera editorial compartida (`PageHeaderEditorial` con badge «Catálogo Colaborativo» e icono `dices`; h1 único «Descubre tu próxima partida.» con punto terracota, sin la variante centrada anterior), buscador `CatalogSearchBar` en bloque propio (`max-w-xl`), tira de filtros con la clase real `scrollbar-none` (la clase muerta `no-scrollbar` ya no existe) y tarjetas `.game-card-editorial` conservadas.
 - `MainLayout.razor`: Cabecera optimizada sin selector de temas en el Navbar y enlace Catálogo actualizado a `/catalogo`.
 - `GameDetail.razor`: Botones `[ 🌐 Ver en BoardGameGeek ]` en la barra superior de acciones y en la sección de metadatos de la cabecera.

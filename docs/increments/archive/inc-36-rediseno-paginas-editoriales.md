@@ -1,9 +1,12 @@
 # Incremento 36: Rediseño Editorial del Resto de Páginas + Fix Responsive del Hero
 
 - **Identificador SDD:** `rediseno-paginas-editoriales`
-- **Estado:** ⏳ **En progreso** (fase `sdd-propose` completada; propuesta pendiente de aprobación del maintainer).
-- **Worktree / Rama:** `C:\repos\ludeka-wt\rediseno-paginas-editoriales` / `inc/rediseno-paginas-editoriales`
-- **Propuesta SDD:** [`openspec/changes/rediseno-paginas-editoriales/proposal.md`](file:///c:/repos/ludeka-wt/rediseno-paginas-editoriales/openspec/changes/rediseno-paginas-editoriales/proposal.md)
+- **Estado:** ✅ **Completado y Archivado** (suite **855/855** en verde al 100%; baseline 854 al inicio del incremento + el Fact acotado del ancho del hero; build con 0 errores)
+- **Entrega:** cadena de **6 PRs apilados** (`inc/rediseno-paginas-editoriales-1a` → `-1b` → `-2` → `-3` → `-4` → `-5`): PR-1a «Fundación» (#8), PR-1b «Componentes compartidos» (#9), PR-2 «Catálogo» (#10), PR-3 «Ficha» (#11), PR-4 «Eventos» (#12) y PR-5 «Sorteos + Novedades» con la remediación F4.2/DD-01 (#13); **pendiente del merge ordenado por el maintainer**.
+- **Verificación SDD:** **PASS** — 13/13 requerimientos y 34/34 escenarios COMPLIANT, 0 blockers, 0 hallazgos críticos (evidencia ligada al asentamiento nativo `sha256:19aa14ff…`).
+- **Artefactos SDD archivados:** [`openspec/changes/archive/2026-09-10-rediseno-paginas-editoriales/`](file:///c:/repos/Ludeka/openspec/changes/archive/2026-09-10-rediseno-paginas-editoriales/proposal.md) (proposal, 3 deltas de specs, design, tasks 22/22, apply-progress, verify-report y archive-report)
+- **Módulos de la Especificación Viva:** [`24-fundaciones-editoriales-y-componentes.md`](file:///c:/repos/Ludeka/docs/specs/sistema/24-fundaciones-editoriales-y-componentes.md) (nuevo) + módulos [23](file:///c:/repos/Ludeka/docs/specs/sistema/23-portada-editorial.md), [15](file:///c:/repos/Ludeka/docs/specs/sistema/15-dashboard-inicio-editorial.md), [01](file:///c:/repos/Ludeka/docs/specs/sistema/01-catalogo-y-fichas.md) y [16](file:///c:/repos/Ludeka/docs/specs/sistema/16-sorteos-novedades-y-eventos.md)
+- **Worktree / Rama:** `C:\repos\ludeka-wt\rediseno-paginas-editoriales` / `inc/rediseno-paginas-editoriales-5`
 - **Origen:** registrado desde el fuera-de-alcance de INC-35 + bug responsive del hero reportado por el maintainer con captura («la imagen se aplasta por los bordes y ocupa mucho; el alto debería reducirse proporcionalmente y quedar bien»).
 
 ---

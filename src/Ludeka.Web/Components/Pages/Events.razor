@@ -9,30 +9,22 @@
 <PageTitle>Grandes Citas y Ferias Lúdicas — Ludeka</PageTitle>
 
 <div class="container-ludeka py-8 space-y-8">
-    @* Encabezado de Página *@
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
-        <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold mb-2">
-                <Icon Name="tent" Size="14" /> Calendario Oficial del Sector
-            </div>
-            <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
-                Grandes Citas, Ferias & Festivales
-            </h1>
-            <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
-                La guía de referencia para los grandes festivales, convenciones y encuentros de juegos de mesa en España y el circuito internacional.
-            </p>
-        </div>
-
-        @if (IsModerator)
-        {
-            <div class="flex items-center gap-3">
+    @* Cabecera editorial de página (INC-36, DD-06): componente compartido con el
+       único h1 de la página y la acción de moderador en la zona Actions *@
+    <PageHeaderEditorial Badge="Calendario Oficial del Sector"
+                         BadgeIcon="tent"
+                         Subtitle="La guía de referencia para los grandes festivales, convenciones y encuentros de juegos de mesa en España y el circuito internacional.">
+        <Title>Grandes Citas, Ferias & Festivales</Title>
+        <Actions>
+            @if (IsModerator)
+            {
                 <a href="/admin/eventos"
-                   class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                   class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-[var(--on-brand)] font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
                     <Icon Name="settings" Size="12" /> Gestionar Eventos
                 </a>
-            </div>
-        }
-    </div>
+            }
+        </Actions>
+    </PageHeaderEditorial>
 
     @* Pestañas de Navegación Temporal *@
     <div class="flex items-center gap-3 border-b border-[var(--border-subtle)]" role="tablist" aria-label="Pestañas de Eventos">
@@ -40,6 +32,7 @@
                 id="tab-upcoming"
                 role="tab"
                 aria-selected="@(_activeTab == Tab.Upcoming ? "true" : "false")"
+                aria-controls="panel-upcoming"
                 @onclick="() => SwitchTab(Tab.Upcoming)"
                 class="pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 @(_activeTab == Tab.Upcoming ? "border-[var(--brand-primary)] text-[var(--text-primary)]" : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true"></span> Próximas Citas
@@ -50,6 +43,7 @@
                 id="tab-past"
                 role="tab"
                 aria-selected="@(_activeTab == Tab.Past ? "true" : "false")"
+                aria-controls="panel-past"
                 @onclick="() => SwitchTab(Tab.Past)"
                 class="pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 @(_activeTab == Tab.Past ? "border-[var(--brand-primary)] text-[var(--text-primary)]" : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
             <Icon Name="scroll" Size="14" /> Histórico de Ediciones
@@ -63,14 +57,14 @@
             <span class="text-xs text-[var(--text-muted)] mr-1">Ámbito:</span>
             <button type="button"
                     @onclick="() => SetCountryFilter(null)"
-                    class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors @(string.IsNullOrWhiteSpace(_countryFilter) ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors @(string.IsNullOrWhiteSpace(_countryFilter) ? "bg-[var(--brand-primary)] text-[var(--on-brand)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
                 <Icon Name="globe" Size="12" /> Todos (con Internacionales)
             </button>
             @if (!string.IsNullOrWhiteSpace(_userActiveCountry) && _userActiveCountry != "Internacional")
             {
                 <button type="button"
                         @onclick="() => SetCountryFilter(_userActiveCountry)"
-                        class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors @(_countryFilter == _userActiveCountry ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                        class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors @(_countryFilter == _userActiveCountry ? "bg-[var(--brand-primary)] text-[var(--on-brand)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
                     @CountryCatalog.GetFlag(_userActiveCountry) Solo @_userActiveCountry
                 </button>
             }
@@ -90,7 +84,10 @@
         </span>
     </div>
 
-    @if (_isLoading)
+    @* Panel de la pestaña activa (INC-36, DD-09): el id conmuta con la pestaña y la
+       pestaña activa queda emparejada vía aria-labelledby (relación tab/panel completa) *@
+    <div id="@ActivePanelId" role="tabpanel" aria-labelledby="@ActiveTabId">
+        @if (_isLoading)
     {
         <div class="py-16 text-center text-[var(--text-muted)]">
             <div class="inline-block animate-spin mb-2"><Icon Name="tent" Size="30" /></div>
@@ -114,7 +111,7 @@
                 @if (IsModerator)
                 {
                     <a href="/admin/eventos"
-                       class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity inline-flex items-center gap-1.5">
+                       class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-[var(--on-brand)] font-bold text-xs transition-opacity inline-flex items-center gap-1.5">
                         <Icon Name="plus" Size="12" /> Añadir Evento Ahora
                     </a>
                 }
@@ -125,11 +122,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach (var evt in currentList)
                 {
-                    <div class="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--brand-primary)] transition-all overflow-hidden flex flex-col justify-between shadow-sm">
+                    @* Tarjeta de evento (INC-36, DD-04: lenguaje .rail-card de portada —
+                       lift/glow/focus-visible/reduced-motion) *@
+                    <div class="rail-card justify-between shadow-sm">
                         <div>
                             @* Cartel o Portada del Evento (D5: con URL vacía el SVG inline temable
                                ocupa la zona; con URL externa caída el onerror cae en el default estático) *@
-                            <div class="w-full h-48 overflow-hidden bg-[var(--bg-surface)] relative border-b border-[var(--border-subtle)]">
+                            <div class="rail-cover h-48 border-b border-[var(--border-subtle)]">
                                 @if (string.IsNullOrWhiteSpace(evt.ImageUrl))
                                 {
                                     <DefaultImage Domain="DefaultImageDomain.Evento"
@@ -138,9 +137,10 @@
                                 }
                                 else
                                 {
+                                    @* El zoom al hover lo da .rail-card:hover .rail-cover img
+                                       (input.css); sin utilidades de escala sueltas en el cartel *@
                                     <img src="@evt.ImageUrl"
                                          alt="Cartel de @evt.Title"
-                                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                                          width="400"
                                          height="225"
                                          loading="lazy"
@@ -205,7 +205,7 @@
                                 <a href="@evt.WebsiteUrl"
                                    target="_blank"
                                    rel="noopener noreferrer"
-                                   class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity inline-flex items-center gap-1.5 shadow-sm">
+                                   class="px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-[var(--on-brand)] font-bold text-xs transition-opacity inline-flex items-center gap-1.5 shadow-sm">
                                     <Icon Name="globe" Size="12" /> Web Oficial
                                     <span>&rarr;</span>
                                 </a>
@@ -216,6 +216,7 @@
             </div>
         }
     }
+    </div>
 </div>
 
 @code {
@@ -229,6 +230,12 @@
     private IReadOnlyList<BoardGameEventDto> _pastEvents = new List<BoardGameEventDto>();
 
     private bool IsModerator => CurrentUserService.IsFoundingTeam || CurrentUserService.IsInRole("Moderator");
+
+    // Identificadores ARIA de la pestaña activa y su panel (relación tab/tabpanel de
+    // la spec editorial-page-foundations): expresiones completas en el atributo,
+    // nunca @ pegado a texto (gotcha Razor de INC-36)
+    private string ActiveTabId => _activeTab == Tab.Upcoming ? "tab-upcoming" : "tab-past";
+    private string ActivePanelId => _activeTab == Tab.Upcoming ? "panel-upcoming" : "panel-past";
 
     protected override async Task OnInitializedAsync()
     {
@@ -269,14 +276,18 @@
 
     private string GetRemainingBadgeClass(string remainingText)
     {
+        // INC-36 (DD-04): badges de urgencia con tokens semánticos de estado del tema
+        // (+--on-brand). El overlay «Finalizado» conserva su familia blanca neutra sobre
+        // bg-black/60: contrata contra la fotografía del cartel, no contra el tema
+        // (excepción contratada del barrido, igual que los badges territoriales).
         if (remainingText.Contains("curso", StringComparison.OrdinalIgnoreCase))
-            return "bg-rose-500/90 text-white border-rose-600 animate-pulse";
+            return "bg-[var(--state-error)] text-[var(--on-brand)] border-[var(--state-error-border)] animate-pulse";
 
         if (remainingText.Contains("hoy", StringComparison.OrdinalIgnoreCase) || remainingText.Contains("mañana", StringComparison.OrdinalIgnoreCase))
-            return "bg-amber-500/90 text-black border-amber-600 font-black";
+            return "bg-[var(--state-warning)] text-[var(--on-brand)] border-[var(--state-warning-border)] font-black";
 
         if (remainingText.Contains("Finalizado", StringComparison.OrdinalIgnoreCase))
-            return "bg-black/60 text-zinc-300 border-zinc-600";
+            return "bg-black/60 text-white/80 border-white/10";
 
         return "bg-black/60 text-white border-white/20";
     }

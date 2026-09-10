@@ -10,28 +10,18 @@
 <PageTitle>Radar de Sorteos — Ludeka</PageTitle>
 
 <div class="container-ludeka py-8 space-y-8">
-    @* Encabezado de Página *@
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
-        <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold mb-2">
-                <Icon Name="gift" Size="14" /> Radar de Sorteos Comunitarios
-            </div>
-            <h1 class="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
-                Sorteos de Juegos de Mesa
-            </h1>
-            <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">
-                Oportunidades lúdicas verificadas sin spam. Sorteos activos en Instagram, YouTube y redes con alertas de expiración y destacados oficiales.
-            </p>
-        </div>
-
-        <div class="flex items-center gap-3">
+    <PageHeaderEditorial Badge="Radar de Sorteos Comunitarios"
+                         BadgeIcon="gift"
+                         Subtitle="Oportunidades lúdicas verificadas sin spam. Sorteos activos en Instagram, YouTube y redes con alertas de expiración y destacados oficiales.">
+        <Title>Sorteos de Juegos de Mesa</Title>
+        <Actions>
             <button type="button"
                     @onclick="() => _isCreateModalOpen = true"
-                    class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                    class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-[var(--on-brand)] font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">
                 <Icon Name="plus" Size="12" /> Proponer Sorteo
             </button>
-        </div>
-    </div>
+        </Actions>
+    </PageHeaderEditorial>
 
     @* Filtro de activos / todos y filtro territorial *@
     <div class="flex items-center justify-between flex-wrap gap-3">
@@ -52,14 +42,14 @@
             @* Filtro territorial *@
             <button type="button"
                     @onclick="() => SetCountryFilter(null)"
-                    class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors @(string.IsNullOrWhiteSpace(_countryFilter) ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors @(string.IsNullOrWhiteSpace(_countryFilter) ? "bg-[var(--brand-primary)] text-[var(--on-brand)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
                 <Icon Name="globe" Size="12" /> Global (Todos)
             </button>
             @if (!string.IsNullOrWhiteSpace(_userActiveCountry) && _userActiveCountry != "Internacional")
             {
                 <button type="button"
                         @onclick="() => SetCountryFilter(_userActiveCountry)"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors @(_countryFilter == _userActiveCountry ? "bg-[var(--brand-primary)] text-white shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
+                        class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors @(_countryFilter == _userActiveCountry ? "bg-[var(--brand-primary)] text-[var(--on-brand)] shadow-sm" : "bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]")">
                     @CountryCatalog.GetFlag(_userActiveCountry) Solo @_userActiveCountry
                 </button>
             }
@@ -96,7 +86,7 @@
             </p>
             <button type="button"
                     @onclick="() => _isCreateModalOpen = true"
-                    class="px-3 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white font-bold text-xs transition-opacity">
+                    class="px-3 py-1.5 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-[var(--on-brand)] font-bold text-xs transition-opacity">
                 <Icon Name="plus" Size="12" /> Añadir Sorteo
             </button>
         </div>
@@ -115,25 +105,11 @@
 </div>
 
 @* Modal de Proponer / Crear Sorteo *@
-@if (_isCreateModalOpen)
-{
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="radar-create-modal-title">
-        <div class="w-full max-w-lg rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-                <h2 id="radar-create-modal-title" class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <Icon Name="gift" Size="14" /> Registrar o Proponer Sorteo
-                </h2>
-                <button type="button"
-                        @onclick="() => _isCreateModalOpen = false"
-                        aria-label="Cerrar modal de sorteo"
-                        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xl">
-                    &times;
-                </button>
-            </div>
-
+    <EditorialModal Open="@_isCreateModalOpen"
+                    Title="Registrar o Proponer Sorteo"
+                    TitleIcon="gift"
+                    OnClose="@(() => _isCreateModalOpen = false)">
+        <ChildContent>
             <div class="space-y-3 text-xs">
                 <div>
                     <label class="font-semibold text-[var(--text-secondary)] block mb-1">Título del Sorteo *</label>
@@ -223,12 +199,12 @@
 
                 @if (IsModerator)
                 {
-                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-[var(--state-warning-bg)] border border-[var(--state-warning-border)]">
                         <input type="checkbox"
                                id="isPromotedInput"
                                @bind="_formIsPromoted"
-                               class="rounded bg-[var(--bg-surface-elevated)] border-amber-500/50 text-amber-500 focus:ring-0" />
-                        <label for="isPromotedInput" class="text-amber-500 font-bold cursor-pointer">
+                               class="rounded bg-[var(--bg-surface-elevated)] border-[var(--state-warning-border)] text-[var(--state-warning)] focus:ring-0" />
+                        <label for="isPromotedInput" class="text-[var(--state-warning)] font-bold cursor-pointer">
                             Destacar como Sorteo Promocionado en cabecera
                         </label>
                     </div>
@@ -237,12 +213,13 @@
 
             @if (!string.IsNullOrWhiteSpace(_formError))
             {
-                <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs">
+                <div class="p-2.5 rounded-xl bg-[var(--state-error-bg)] border border-[var(--state-error-border)] text-[var(--state-error)] text-xs">
                     @_formError
                 </div>
             }
+        </ChildContent>
 
-            <div class="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-subtle)]">
+        <Footer>
                 <button type="button"
                         @onclick="() => _isCreateModalOpen = false"
                         class="px-4 py-2 rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] text-xs font-bold transition-colors">
@@ -250,13 +227,11 @@
                 </button>
                 <button type="button"
                         @onclick="HandleSubmitGiveaway"
-                        class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-white text-xs font-bold transition-opacity">
+                        class="px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:opacity-90 text-[var(--on-brand)] text-xs font-bold transition-opacity">
                     Guardar y Publicar
                 </button>
-            </div>
-        </div>
-    </div>
-}
+        </Footer>
+    </EditorialModal>
 
 @code {
     private bool _includeExpired;

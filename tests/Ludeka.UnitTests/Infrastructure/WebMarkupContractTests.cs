@@ -131,6 +131,20 @@ public class WebMarkupContractTests
                   "object-position" },
           new[] { "min-height: 360px", "min-height: 460px" } },
 
+        // PageHeaderEditorial (INC-36 PR-1, DD-06): cabecera compartida de las 4 páginas de
+        // listado — badge en píldora, h1 único en serif display y zona de acción opcional;
+        // el título es RenderFragment para conservar composición rica (punto terracota)
+        { "PageHeaderEditorial (cabecera compartida)", "src/Ludeka.Web/Components/Shared/PageHeaderEditorial.razor",
+          new[] { "page-header-title", "<h1", "badge-pill", "Actions" },
+          Array.Empty<string>() },
+
+        // EditorialModal (INC-36 PR-1, DD-07): shell compartido de los modales de página —
+        // overlay fijo, tarjeta centrada max-w-lg, cierre identificado y diálogo etiquetado;
+        // el cuerpo vive como ChildContent, el pie en <Footer> y el foco via ludekaModal
+        { "EditorialModal (shell compartido)", "src/Ludeka.Web/Components/Shared/EditorialModal.razor",
+          new[] { "role=\"dialog\"", "aria-modal=\"true\"", "aria-label=\"@Title\"", "OnClose", "ChildContent", "Footer", "ludekaModal.open" },
+          Array.Empty<string>() },
+
         // HeroEditorial: hero narrativo con <picture> AVIF/WebP/JPG priorizado (patrón INC-07),
         // escena CSS bajo la foto y altura derivada del ancho con foco autoral por variante
         // (Decisiones 1, 2 y 10 + INC-36 DD-01/DD-02/DD-03: sin min-h fijo, la clase de foco
@@ -191,10 +205,15 @@ public class WebMarkupContractTests
           new[] { "<Icon Name=\"puzzle\"", "<Icon Name=\"settings\"", "<Icon Name=\"party-popper\"", "<Icon Name=\"book-open\"", "<Icon Name=\"user\"", "<Icon Name=\"baby\"" },
           new[] { "🧩", "⚙", "🎉", "📖", "👤", "👶" } },
 
-        // GameDetail: ficha inteligente con cabecera, badges y avisos por iconos Lucide
+        // GameDetail: ficha editorial tokenizada (INC-36 PR-3, DD-03/DD-04/DD-08): back-bar
+        // envolvente con la moderación agrupada en subcontenedor, botón de marca con --on-brand,
+        // estado «no encontrado» legible en los 5 temas, sin errata «Ludeca» y sin hardcodes
+        // de estado (familias rose/amber/indigo/purple/slate/orange)
         { "GameDetail (ficha sin emojis)", "src/Ludeka.Web/Components/Pages/GameDetail.razor",
-          new[] { "<Icon Name=\"globe\"", "<Icon Name=\"flag\"", "<Icon Name=\"palette\"", "<Icon Name=\"shopping-cart\"", "<Icon Name=\"bot\"", "<Icon Name=\"package\"", "<Icon Name=\"trophy\"" },
-          new[] { "🎲", "🕵", "🌐", "🚩", "🎨", "🛒", "✏", "⚙", "🤖", "🛡", "📚", "🧩", "🏆", "📦", "⚡" } },
+          new[] { "<Icon Name=\"globe\"", "<Icon Name=\"flag\"", "<Icon Name=\"palette\"", "<Icon Name=\"shopping-cart\"", "<Icon Name=\"bot\"", "<Icon Name=\"package\"", "<Icon Name=\"trophy\"",
+                  "flex-wrap", "text-[var(--on-brand)]" },
+          new[] { "🎲", "🕵", "🌐", "🚩", "🎨", "🛒", "✏", "⚙", "🤖", "🛡", "📚", "🧩", "🏆", "📦", "⚡",
+                  "Ludeca", "text-white", "text-slate-400", "bg-amber-500", "bg-indigo-500", "bg-purple-950", "bg-rose-500", "text-orange-400" } },
 
         // CreatorsDirectory: buscador, spinner, vacío y acciones por iconos Lucide
         { "CreatorsDirectory (sin emojis)", "src/Ludeka.Web/Components/Pages/CreatorsDirectory.razor",
@@ -206,10 +225,13 @@ public class WebMarkupContractTests
           new[] { "<Icon Name=\"dices\"", "<Icon Name=\"search\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"clapperboard\"", "<Icon Name=\"globe\"" },
           new[] { "🎲", "🔍", "✏", "🎬", "🌍", "🌐" } },
 
-        // Home (/catalogo): filtros, spinner y vacío por iconos Lucide
+        // Home (/catalogo): cabecera editorial compartida (INC-36 DD-06), buscador en bloque
+        // propio debajo, tira de filtros con la clase real scrollbar-none (INC-36 D12: se
+        // abandona la variante centrada y el h1 viaja a PageHeaderEditorial) e iconos Lucide
         { "Home catalogo (sin emojis)", "src/Ludeka.Web/Components/Pages/Home.razor",
-          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"swords\"", "<Icon Name=\"users\"", "<Icon Name=\"user\"", "<Icon Name=\"timer\"" },
-          new[] { "🎲", "🧩", "⚔", "👨", "👤", "⏱" } },
+          new[] { "<Icon Name=\"dices\"", "<Icon Name=\"puzzle\"", "<Icon Name=\"swords\"", "<Icon Name=\"users\"", "<Icon Name=\"user\"", "<Icon Name=\"timer\"",
+                  "<PageHeaderEditorial", "scrollbar-none" },
+          new[] { "🎲", "🧩", "⚔", "👨", "👤", "⏱", "<h1", "no-scrollbar" } },
 
         // StoreOffersCard: cabecera, envíos, recomprobación y nota de afiliación por iconos Lucide
         { "StoreOffersCard (sin emojis)", "src/Ludeka.Web/Components/Shared/StoreOffersCard.razor",
@@ -251,31 +273,49 @@ public class WebMarkupContractTests
 
         // ===== INC-35 PR-3: migración global de emojis a Icon (Fase 4 — eventos, sorteos y novedades) =====
 
-        // Events: pestañas, spinner, vacío, metadatos y pie por iconos Lucide
+        // Events: pestañas, spinner, vacío, metadatos y pie por iconos Lucide.
+        // INC-36 (PR-4, DD-03/DD-04/DD-06/DD-09): cabecera compartida PageHeaderEditorial,
+        // pestañas con relación accesible tabpanel/aria-controls, tarjetas .rail-card y
+        // tokens de marca/estado. El text-white queda ACOTADO al patrón de botón de marca
+        // (dos fragmentos que cubren las 5 variantes de botón); el par overlay
+        // bg-black/60 + text-white de los badges sobre fotografía es la excepción
+        // contratada de DD-04 y el mustNotContain se formula sin capturarlo — igual que
+        // el chip del hero en PR-1 (text-white/80 y los badges de estado tampoco los
+        // contienen). `dark:` es guarda profiláctica (hoy el archivo no lo usa).
         { "Events (sin emojis)", "src/Ludeka.Web/Components/Pages/Events.razor",
-          new[] { "<Icon Name=\"tent\"", "<Icon Name=\"calendar-days\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"globe\"", "<Icon Name=\"scroll\"", "<Icon Name=\"settings\"", "rounded-full bg-emerald-500" },
-          new[] { "🎪", "⚙", "🟢", "📜", "🌍", "⭐", "➕", "🗓", "📍", "🌐" } },
+          new[] { "<Icon Name=\"tent\"", "<Icon Name=\"calendar-days\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"globe\"", "<Icon Name=\"scroll\"", "<Icon Name=\"settings\"", "rounded-full bg-emerald-500",
+                  "<PageHeaderEditorial", "text-[var(--on-brand)]", "rail-card", "role=\"tabpanel\"", "aria-controls=\"panel-" },
+          new[] { "🎪", "⚙", "🟢", "📜", "🌍", "⭐", "➕", "🗓", "📍", "🌐",
+                  "hover:scale-105", "bg-rose-500/90", "bg-amber-500/90", "text-zinc-300", "dark:",
+                  "hover:opacity-90 text-white", ")] text-white" } },
 
         // EventsManagement: cabecera, acciones, tabla y modal de edición por iconos Lucide
         { "EventsManagement (sin emojis)", "src/Ludeka.Web/Components/Pages/EventsManagement.razor",
           new[] { "<Icon Name=\"shield\"", "<Icon Name=\"eye\"", "<Icon Name=\"plus\"", "<Icon Name=\"tent\"", "<Icon Name=\"map-pin\"", "<Icon Name=\"pen-line\"", "<Icon Name=\"trash-2\"", "<Icon Name=\"folder\"" },
           new[] { "🛡", "👁", "➕", "🎪", "📍", "⭐", "✏", "🗑", "📁", "🇪🇸", "🌎" } },
 
-        // GiveawayCard: badges de plataforma y promoción por iconos Lucide (el switch de
-        // plataforma devuelve el nombre del icono en el catálogo, no un emoji)
+        // GiveawayCard: tarjeta editorial con fallback de imagen por dominio, tokens de
+        // estado y badges de plataforma/promoción por iconos Lucide (el switch devuelve el
+        // nombre del icono en el catálogo, no un emoji).
         { "GiveawayCard (sin emojis)", "src/Ludeka.Web/Components/Shared/GiveawayCard.razor",
-          new[] { "<Icon Name=\"@GetPlatformIcon(Giveaway.Platform)\"", "<Icon Name=\"star\"", "<Icon Name=\"gift\"", "<Icon Name=\"dices\"", "<Icon Name=\"camera\"", "GiveawayPlatform.Instagram => \"camera\"" },
-          new[] { "⭐", "🎁", "🎲", "📸", "🔗", "🎬" } },
+          new[] { "<Icon Name=\"@GetPlatformIcon(Giveaway.Platform)\"", "<Icon Name=\"star\"", "<Icon Name=\"gift\"", "<Icon Name=\"dices\"", "<Icon Name=\"camera\"", "GiveawayPlatform.Instagram => \"camera\"",
+                  "rail-card", "rail-cover", "DefaultImage", "DefaultImageDomain.Sorteo", "sorteo-default.svg", "onerror", "this.onerror=null", "width=", "height=", "text-[var(--on-brand)]" },
+          new[] { "⭐", "🎁", "🎲", "📸", "🔗", "🎬", "dark:", "hover:scale-105", "text-amber-500", "text-pink-500", "text-sky-500", "text-rose-600" } },
 
-        // Radar: cabecera, acciones, spinner y vacío por iconos Lucide
+        // Radar: cabecera compartida, modal editorial, acciones, spinner y vacío por
+        // iconos Lucide; los estados se expresan con tokens temáticos. Remediación F4.2:
+        // el shell del modal permanece montado (sin @if) para restaurar el foco al cerrar.
         { "Radar (sin emojis)", "src/Ludeka.Web/Components/Pages/Radar.razor",
-          new[] { "<Icon Name=\"gift\"", "<Icon Name=\"plus\"", "<Icon Name=\"dices\"", "<Icon Name=\"radar\"", "<Icon Name=\"star\"" },
-          new[] { "🎁", "➕", "🌍", "⭐", "🎲", "📡", "🌎" } },
+          new[] { "BadgeIcon=\"gift\"", "<Icon Name=\"plus\"", "<Icon Name=\"dices\"", "<Icon Name=\"radar\"", "<Icon Name=\"star\"", "<PageHeaderEditorial", "<EditorialModal" },
+          new[] { "🎁", "➕", "🌍", "⭐", "🎲", "📡", "🌎", "dark:", "text-amber-500", "text-rose-600", "fixed inset-0 z-50", "@if (_isCreateModalOpen)" } },
 
-        // News: cabecera, buscador, spinner, vacío y badges por iconos Lucide
+        // News: cabecera compartida, modal editorial, imagen con fallback por dominio,
+        // buscador, spinner, vacío y badges por iconos Lucide. Remediación F4.2:
+        // el shell del modal permanece montado (sin @if) para restaurar el foco al cerrar.
         { "News (sin emojis)", "src/Ludeka.Web/Components/Pages/News.razor",
-          new[] { "<Icon Name=\"newspaper\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"package\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"camera\"", "<Icon Name=\"calendar-days\"" },
-          new[] { "📰", "➕", "🔍", "📦", "🔄", "🆕", "🗓", "📸" } },
+          new[] { "BadgeIcon=\"newspaper\"", "<Icon Name=\"plus\"", "<Icon Name=\"search\"", "<Icon Name=\"package\"", "<Icon Name=\"refresh-cw\"", "<Icon Name=\"camera\"", "<Icon Name=\"calendar-days\"",
+                  "<PageHeaderEditorial", "<EditorialModal", "DefaultImage", "DefaultImageDomain.Novedad", "novedad-default.svg", "onerror", "this.onerror=null", "width=", "height=", "rail-card" },
+          new[] { "📰", "➕", "🔍", "📦", "🔄", "🆕", "🗓", "📸", "dark:", "text-pink-500", "text-rose-600", "hover:scale-105", "fixed inset-0 z-50", "@if (_isCreateModalOpen)" } },
 
         // NotFound: spinner/hero del 404 por icono Lucide
         { "NotFound (sin emojis)", "src/Ludeka.Web/Components/Pages/NotFound.razor",
@@ -874,5 +914,26 @@ public class WebMarkupContractTests
                     $"El tema '{tema}' no declara el token de estado '{token}'.");
             }
         }
+    }
+
+    [Fact]
+    public void HeroEditorial_AnchoDelContenedorDeclaradoEnElBloqueCss()
+    {
+        // Remediación DD-01 (INC-36): el bloque .hero-editorial debe fijar width: 100%
+        // para que el ancho lo determine el contenedor y el alto solo se derive del ratio
+        // clampado (medido en navegador: 409,58 y 793,58 px transferidos desde el alto).
+        // La aserción se acota al bloque porque input.css ya contiene 'width: 100%' en
+        // otros bloques: un fragmento global sería tautológico y no detectaría la regresión.
+        var fuenteCss = ReadSource("src/Ludeka.Web/Styles/input.css");
+
+        var inicio = fuenteCss.IndexOf(".hero-editorial {", StringComparison.Ordinal);
+        Assert.True(inicio >= 0, "input.css no declara el bloque .hero-editorial.");
+
+        var fin = fuenteCss.IndexOf('}', inicio);
+        Assert.True(fin > inicio, "El bloque .hero-editorial no cierra con '}'.");
+
+        var bloque = fuenteCss[inicio..fin];
+        Assert.True(bloque.Contains("width: 100%", StringComparison.Ordinal),
+            $"El bloque .hero-editorial debe fijar 'width: 100%'; contenido actual: {bloque}");
     }
 }

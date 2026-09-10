@@ -1,9 +1,9 @@
 # 23. Portada Editorial: Hero Narrativo, Carriles Componentizados, Fallbacks de Imagen e Iconografía Lucide
 
-> **Estado del Módulo:** ✅ Implementado y Verificado  
-> **Incremento Asociado:** [INC-35 — cambio SDD `portada-editorial` (archivado)](file:///c:/repos/Ludeka/openspec/changes/archive/2026-09-10-portada-editorial/proposal.md)  
-> **Pruebas Automatizadas:** suite total **847/847** en verde (+108 sobre el baseline real 739 de INC-34; +142 sobre el baseline nominal 705); verificación SDD **PASS WITH WARNINGS** con 19/19 requerimientos y 30/30 escenarios COMPLIANT (WARNING-1 de foco corregido en el commit 44e5ae4; WARNING-2 de medición LCP/CLS pendiente del maintainer)  
-> **Specs Vivas:** [`home-landing-hero`](file:///c:/repos/Ludeka/openspec/specs/home-landing-hero/spec.md) (modificada), [`home-dashboard-rails`](file:///c:/repos/Ludeka/openspec/specs/home-dashboard-rails/spec.md), [`default-image-fallbacks`](file:///c:/repos/Ludeka/openspec/specs/default-image-fallbacks/spec.md) e [`iconography-lucide`](file:///c:/repos/Ludeka/openspec/specs/iconography-lucide/spec.md) (nuevas)
+> **Estado del Módulo:** ✅ Implementado y Verificado (ampliado por INC-36)  
+> **Incrementos Asociados:** [INC-35 — `portada-editorial` (archivado)](file:///c:/repos/Ludeka/openspec/changes/archive/2026-09-10-portada-editorial/proposal.md) · [INC-36 — `rediseno-paginas-editoriales` (archivado)](file:///c:/repos/Ludeka/openspec/changes/archive/2026-09-10-rediseno-paginas-editoriales/proposal.md)  
+> **Pruebas Automatizadas:** suite total **855/855** en verde (INC-35: +108 sobre el baseline real 739 de INC-34; INC-36: baseline 854 + el Fact acotado del ancho del hero, con `WebMarkupContractTests` en 103/103); verificación SDD de INC-36 **PASS** con 13/13 requerimientos y 34/34 escenarios COMPLIANT  
+> **Specs Vivas:** [`home-landing-hero`](file:///c:/repos/Ludeka/openspec/specs/home-landing-hero/spec.md) (modificada por INC-35/INC-36), [`editorial-page-foundations`](file:///c:/repos/Ludeka/openspec/specs/editorial-page-foundations/spec.md) (nueva, INC-36), [`home-dashboard-rails`](file:///c:/repos/Ludeka/openspec/specs/home-dashboard-rails/spec.md), [`default-image-fallbacks`](file:///c:/repos/Ludeka/openspec/specs/default-image-fallbacks/spec.md) e [`iconography-lucide`](file:///c:/repos/Ludeka/openspec/specs/iconography-lucide/spec.md)
 
 ---
 
@@ -20,10 +20,18 @@ Este módulo transforma la portada `/` de un dashboard utilitario (INC-21/INC-31
 
 ## 2. Hero Editorial con Narrativa (`HeroEditorial.razor`)
 
-- **Composición:** titular `<h1>` visible con familia `--font-display` (Fraunces), subtítulo de 2 frases y párrafo de invitación a la mesa, buscador rápido (form → `/catalogo?q={término}`) y las 4 píldoras de acceso exactas de D4 (Catálogo Completo `/catalogo`, Sorteos `/sorteos`, Novedades `/novedades`, Eventos `/eventos`).
-- **Jerarquía accesible:** exactamente un `<h1>` en el documento, ahora **visible** (ya no `sr-only` como en INC-31). El `<PageTitle>` del navegador no cambia.
+- **Composición (estado vigente):** hero de imagen protagonista — la foto/ilustración llena el bloque y SOLO el buscador rápido se superpone como tarjeta propia (form → `/catalogo?q={término}`), arriba a la izquierda. La revisión del maintainer (2026-09-10) retiró el titular visible, el párrafo y las 4 píldoras de acceso: el hero queda limpio y la navegación vive en el menú superior/móvil y en los carriles.
+- **Jerarquía accesible:** exactamente un `<h1>` en el documento, `sr-only` («La mesa está servida») para lectores de pantalla y SEO. El `<PageTitle>` del navegador no cambia.
 - **Variantes de fondo (D1):** enum `HeroBackgroundVariant` con 5 valores — `FotoPrimerPlano`, `FotoMesaAmigos`, `FotoEurogame` (default), `CssScene` e `Ilustracion` — mapeados por `HeroBackgroundAssets` (4 fotos × 3 formatos AVIF/WebP/JPG). La conmutación es un cambio de 1 línea (parámetro `Background`) que no altera el markup del resto del hero.
-- **Patrón de rendimiento INC-07:** `<picture>` con `<source>` AVIF/WebP y `<img>` JPEG de fallback, `fetchpriority="high"`, `width="1600"`/`height="900"`, `alt` descriptivo en castellano; pesos verificados en disco < 200 KB (máximo 193,9 KB). Objetivos de portada: LCP < 2,5 s y CLS = 0 (medición real pendiente del maintainer).
+- **Patrón de rendimiento INC-07:** `<picture>` con `<source>` AVIF/WebP y `<img>` JPEG de fallback, `fetchpriority="high"`, `width="1600"`/`height="900"`, `alt` descriptivo en castellano; pesos verificados en disco < 200 KB (máximo 193,9 KB). Objetivos de portada: LCP < 2,5 s y CLS = 0 — medidos en la verificación de INC-36 con Chrome real: **LCP 115 ms** (AVIF servido) y **CLS 0,00** a 360×740 en servidor local.
+
+### 2.1 Fix Responsivo del Hero y Botón Buscar (INC-36)
+
+- **Modelo de altura (DD-01, estrategia A):** el bloque `.hero-editorial` de `Styles/input.css` deriva el alto del ancho (`aspect-ratio: 16 / 9`, suelo `min-height: 200px`, cap progresivo `max-height: clamp(200px, 36vw, 460px)`); el markup elimina `min-h-[360px] sm:min-h-[460px]`. Sin media queries, la transición entre breakpoints es continua y el CLS se mantiene en 0.
+- **Verificación runtime (Chrome DevTools MCP):** a 360×740 el hero mide 305×200 (ancho = contenedor útil; sin desborde propio, antes 355,55 px transferidos del ratio); a 640×800 mide 585×230,4; a 1240×900 mide 1185×446,4. Traza de rendimiento: LCP 115 ms, CLS 0,00 y 0 entradas `layout-shift`.
+- **Foco autoral por variante (DD-02):** `HeroBackgroundAssets.FocalClass` resuelve la clase `hero-focal--{eurogame|mesa-amigos|primer-plano|ilustracion}` (vacía en `CssScene`) y `input.css` declara su `object-position`: 62% 70%, 45% 55%, 50% 30% y 35% 45% respectivamente — ninguno deja el `50% 50%` por defecto.
+- **Botón Buscar accesible (D3):** el botón usa `text-[var(--on-brand)]` sobre `--brand-primary`, con contraste ≥ 4,5:1 en los 5 `data-theme` (antes 3,69:1 con `text-white` en charcoal).
+- **Congelado por contrato:** `<picture>` AVIF/WebP/JPG, `fetchpriority="high"`, `width`/`height`, `onerror` → escena CSS, alt castellano, h1 `sr-only` y el handler `HandleQuickSearch` permanecen intactos.
 - **Scrim y escena CSS:** `.hero-scrim` aplica doble gradiente sobre `var(--bg-main)` sobre el cuadrante del texto (contraste objetivo ≥ 4,5:1 en los 5 `data-theme`); `.hero-scene` (100% CSS, sin peticiones de imagen) queda siempre bajo la foto como fallback de serie. Sin `preload` (razón documentada en el design).
 - **Fuente:** Fraunces variable cargada en la **misma petición** de Google Fonts existente (sin `<link>` nuevo; test dedicado lo exige), `display=swap` intacto.
 
@@ -125,7 +133,7 @@ Trazabilidad completa (AD-1 a AD-n): [`design.md del cambio archivado`](file:///
 
 ## 8. Estrategia de Pruebas
 
-Suite **847/847** (baseline real 739 de INC-34 + 108 pruebas nuevas del incremento). Herramientas y focos:
+Suite **855/855** (INC-35: baseline real 739 de INC-34 + 108; INC-36: baseline 854 + el Fact acotado del ancho del hero, con `WebMarkupContractTests` en 103/103). Herramientas y focos:
 
 | Foco | Mecanismo |
 |---|---|
@@ -133,13 +141,14 @@ Suite **847/847** (baseline real 739 de INC-34 + 108 pruebas nuevas del incremen
 | Catálogo de iconos y assets | `IconCatalogTests`, tests de `HeroBackgroundAssets`/`HeroBackgroundVariant` (TheoryData 4×3 formatos) |
 | Render real | Verificación runtime con `dotnet run` (puerto 5081): portada, `/eventos`, `/images/defaults/*` HTTP 200 |
 | Fallback REAL (datos sin imagen) | Seed temporal marcado `TEMP-VERIFY` (sorteo y novedad sin imagen) → SVG inline sin `<img>`; reversión completa del seed y de la BD tras verificar |
+| Runtime INC-36 (navegador real) | Chrome DevTools MCP: hero ×3 viewports con traza LCP/CLS y observador independiente, modales de Radar/News ×2 con instrumentación de foco, 7 rutas y consola |
 
 ---
 
 ## 9. Seguimiento Posterior (Checklist del Maintainer)
 
 1. **Scrim:** contraste visual del texto del hero sobre la foto en los 5 `data-theme`.
-2. **LCP/CLS reales:** Lighthouse móvil (LCP < 2,5 s, CLS = 0) — WARNING-2 de la verificación.
+2. **LCP/CLS reales:** medidos en la verificación de INC-36 (Chrome real: LCP 115 ms y CLS 0,00 a 360×740 en local); la corrida Lighthouse móvil del maintainer queda como comprobación opcional.
 3. **Variantes del hero:** probar las 5 (cambio de 1 línea; la escena CSS debe verse bajo la foto y cubrirla entera con `CssScene`).
 4. **URLs BGG sintéticas del seed:** 404 que activan `onerror`; en producción apuntar a imágenes reales o a los defaults (SUGGESTION-2).
 5. **Smoke del `onerror`:** ejecución real en navegador (la verificación SSR es de wiring) (SUGGESTION-3).

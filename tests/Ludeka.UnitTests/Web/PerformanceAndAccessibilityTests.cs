@@ -102,6 +102,15 @@ public class PerformanceAndAccessibilityTests
         var cssContent = File.ReadAllText(appCssPath);
         Assert.Contains("--on-brand", cssContent);
         Assert.Contains("aspect-ratio:16/9", cssContent);
+
+        // Remediación DD-01: la regla compilada del hero fija su ancho al contenedor
+        // (width:100%); se acota a la regla porque 'width:100%' aparece en utilidades
+        // .w-full y otros bloques: un fragmento global sería tautológico.
+        var inicioHero = cssContent.IndexOf(".hero-editorial{");
+        Assert.True(inicioHero >= 0, "El CSS compilado no contiene la regla .hero-editorial.");
+        var finHero = cssContent.IndexOf('}', inicioHero);
+        Assert.Contains("width:100%", cssContent[inicioHero..finHero]);
+
         Assert.Contains("hero-focal--eurogame", cssContent);
         Assert.Contains("page-header-title", cssContent);
         Assert.DoesNotContain("min-height:360px", cssContent);

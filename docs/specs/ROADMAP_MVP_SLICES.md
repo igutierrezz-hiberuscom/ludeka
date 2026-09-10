@@ -323,8 +323,9 @@ Este documento desglosa los bloques de la especificación funcional maestra (`LU
 ## Incremento 36: Rediseño Editorial del Resto de Páginas + Fix Responsive del Hero
 - **Identificador SDD:** `rediseno-paginas-editoriales`
 - **Objetivo Principal:** Extender el lenguaje editorial de la portada (INC-35) a las 5 páginas restantes (Catálogo, Fichas, Eventos, Sorteos, Novedades) mediante tokens/clases compartidos (`PageHeaderEditorial`, shell `EditorialModal`, lenguaje `.rail-card` en tarjetas de página) y corregir el bug responsive del hero (causa raíz: `min-height` fijo + hijos absolutos + recorte destructivo del 16:9; estrategia A: ratio responsiva + `object-position` focal + cap `clamp()` + suelo acotado). Incluye el token `--on-brand` para resolver el fallo WCAG 2.2 AA de los botones de marca en 3 temas.
-- **Estado:** ⏳ **En progreso** (fase sdd-propose completada).
-- **Documento:** [`inc-36-rediseno-paginas-editoriales.md`](file:///c:/repos/Ludeka/docs/increments/inc-36-rediseno-paginas-editoriales.md)
+- **Estado:** ✅ **Completado y Archivado** (suite 855/855 en verde al 100%; baseline 854 + el Fact acotado del ancho del hero; verificación **PASS** 13/13 requerimientos y 34/34 escenarios, 0 blockers y 0 hallazgos críticos). Cadena de 6 PRs apilados (#8–#13) pendiente del merge ordenado por el maintainer.
+- **Documento:** [`inc-36-rediseno-paginas-editoriales.md`](file:///c:/repos/Ludeka/docs/increments/archive/inc-36-rediseno-paginas-editoriales.md) (cambio SDD archivado en `openspec/changes/archive/2026-09-10-rediseno-paginas-editoriales/`)
+- **Módulos del Sistema:** [`24-fundaciones-editoriales-y-componentes.md`](file:///c:/repos/Ludeka/docs/specs/sistema/24-fundaciones-editoriales-y-componentes.md) (nuevo), [`23-portada-editorial.md`](file:///c:/repos/Ludeka/docs/specs/sistema/23-portada-editorial.md), [`01-catalogo-y-fichas.md`](file:///c:/repos/Ludeka/docs/specs/sistema/01-catalogo-y-fichas.md), [`15-dashboard-inicio-editorial.md`](file:///c:/repos/Ludeka/docs/specs/sistema/15-dashboard-inicio-editorial.md) y [`16-sorteos-novedades-y-eventos.md`](file:///c:/repos/Ludeka/docs/specs/sistema/16-sorteos-novedades-y-eventos.md)
 
 ---
 

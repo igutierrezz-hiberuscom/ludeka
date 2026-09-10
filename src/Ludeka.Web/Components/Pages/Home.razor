@@ -7,22 +7,18 @@
 <PageTitle>Catálogo de Juegos de Mesa — Ludeka</PageTitle>
 
 <div class="container-ludeka py-6">
-    @* Cabecera y buscador principal *@
-    <div class="max-w-3xl mx-auto text-center mb-8">
-        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)] mb-2">
-            Descubre tu próxima partida<span class="text-[var(--brand-primary)]">.</span>
-        </h1>
-        <p class="text-sm sm:text-base text-[var(--text-secondary)] mb-6">
-            Catálogo colaborativo, valoraciones comunitarias y escalabilidad en mesa.
-        </p>
+    @* Cabecera editorial compartida (INC-36, DD-06) y buscador principal en bloque propio *@
+    <PageHeaderEditorial Badge="Catálogo Colaborativo" BadgeIcon="dices"
+                         Subtitle="Catálogo colaborativo, valoraciones comunitarias y escalabilidad en mesa.">
+        <Title>Descubre tu próxima partida<span class="text-[var(--brand-primary)]">.</span></Title>
+    </PageHeaderEditorial>
 
-        <div class="max-w-xl mx-auto">
-            <CatalogSearchBar Value="@_searchTerm" ValueChanged="@OnSearchChanged" />
-        </div>
+    <div class="max-w-xl mt-6 mb-8">
+        <CatalogSearchBar Value="@_searchTerm" ValueChanged="@OnSearchChanged" />
     </div>
 
     @* Filtros prácticos de situación real y tipo de juego *@
-    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar" role="group" aria-label="Filtros del catálogo">
+    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none" role="group" aria-label="Filtros del catálogo">
         <button type="button" class="filter-btn @(_activePreset == Preset.Todos ? "active" : "")" @onclick="() => SetPreset(Preset.Todos)">
             Todos (@_totalCount)
         </button>
