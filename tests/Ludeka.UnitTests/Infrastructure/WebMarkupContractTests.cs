@@ -205,10 +205,15 @@ public class WebMarkupContractTests
           new[] { "<Icon Name=\"puzzle\"", "<Icon Name=\"settings\"", "<Icon Name=\"party-popper\"", "<Icon Name=\"book-open\"", "<Icon Name=\"user\"", "<Icon Name=\"baby\"" },
           new[] { "🧩", "⚙", "🎉", "📖", "👤", "👶" } },
 
-        // GameDetail: ficha inteligente con cabecera, badges y avisos por iconos Lucide
+        // GameDetail: ficha editorial tokenizada (INC-36 PR-3, DD-03/DD-04/DD-08): back-bar
+        // envolvente con la moderación agrupada en subcontenedor, botón de marca con --on-brand,
+        // estado «no encontrado» legible en los 5 temas, sin errata «Ludeca» y sin hardcodes
+        // de estado (familias rose/amber/indigo/purple/slate/orange)
         { "GameDetail (ficha sin emojis)", "src/Ludeka.Web/Components/Pages/GameDetail.razor",
-          new[] { "<Icon Name=\"globe\"", "<Icon Name=\"flag\"", "<Icon Name=\"palette\"", "<Icon Name=\"shopping-cart\"", "<Icon Name=\"bot\"", "<Icon Name=\"package\"", "<Icon Name=\"trophy\"" },
-          new[] { "🎲", "🕵", "🌐", "🚩", "🎨", "🛒", "✏", "⚙", "🤖", "🛡", "📚", "🧩", "🏆", "📦", "⚡" } },
+          new[] { "<Icon Name=\"globe\"", "<Icon Name=\"flag\"", "<Icon Name=\"palette\"", "<Icon Name=\"shopping-cart\"", "<Icon Name=\"bot\"", "<Icon Name=\"package\"", "<Icon Name=\"trophy\"",
+                  "flex-wrap", "text-[var(--on-brand)]" },
+          new[] { "🎲", "🕵", "🌐", "🚩", "🎨", "🛒", "✏", "⚙", "🤖", "🛡", "📚", "🧩", "🏆", "📦", "⚡",
+                  "Ludeca", "text-white", "text-slate-400", "bg-amber-500", "bg-indigo-500", "bg-purple-950", "bg-rose-500", "text-orange-400" } },
 
         // CreatorsDirectory: buscador, spinner, vacío y acciones por iconos Lucide
         { "CreatorsDirectory (sin emojis)", "src/Ludeka.Web/Components/Pages/CreatorsDirectory.razor",
