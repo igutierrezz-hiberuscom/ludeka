@@ -10,7 +10,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
 
-<section class="hero-editorial@GetFocalClass() relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
+<section class="hero-editorial@(GetFocalClass()) relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-xl">
     @* Capa de escena CSS: siempre presente bajo la foto (0 peticiones, fallback por tema) *@
     <div class="hero-scene" aria-hidden="true"></div>
 
