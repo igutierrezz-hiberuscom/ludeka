@@ -77,3 +77,46 @@
 - **PR-1b (#9)**: `inc/rediseno-paginas-editoriales-1b` (base PR-1a) = `PageHeaderEditorial` + `EditorialModal` + marcas de tareas + `apply-progress.md`. Verificación: **854/854 verde**; árbol final idéntico al original (`git diff 1b7485c` vacío). El PR #7 quedó cerrado con comentario.
 - Reconstrucción por cherry-picks en orden: PR-1a = 0f13f41, f618e3d, 35c6451, 7890c0e, 02a0332, 36115bb(.razor); PR-1b = 3584407, a5d00df, d262108, 36115bb(tasks), 1b7485c. El hunk de tasks.md del fix (casilla 1.7) se resolvió a favor de PR-1b.
 - Base para PR-2: rama `inc/rediseno-paginas-editoriales-1b` (cabeza de la cadena).
+
+---
+
+## Estado PR-2 «Catálogo»: COMPLETADO ✅
+
+> Fase SDD `sdd-apply`, PR-2 «Catálogo» (tareas 2.1–2.3). Rama `inc/rediseno-paginas-editoriales-2` creada encima de `inc/rediseno-paginas-editoriales-1b` (cabeza de la cadena, PR #9). Modo: TDD estricto.
+
+| Tarea | Estado | Ciclo TDD | Commit |
+|---|---|---|---|
+| 2.1 Contrato `Home catalogo` ajustado (mustContain + `<PageHeaderEditorial`, `scrollbar-none`; mustNotContain + `<h1`, `no-scrollbar`) | ✅ | ROJO confirmado (1 fallo exacto, la fila) | incluido en `3b1a392` |
+| 2.2 Home.razor: PageHeaderEditorial (badge «Catálogo Colaborativo» + `dices`, punto terracota vía RenderFragment `<Title>`, subtítulo conservado, sin acción), buscador a bloque propio (`max-w-xl mt-6 mb-8`, handler intacto), `no-scrollbar` → `scrollbar-none`, variante centrada abandonada | ✅ | VERDE (focal 1/1; suite 854/854) | `3b1a392` |
+| 2.3 Boundary PR-2: suite completa + smoke `/catalogo` + PR (base = 1b) | ✅ | 854/854 + smoke 9/9 | (docs) + PR |
+
+### TDD Cycle Evidence (PR-2)
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 2.1 | `WebMarkupContractTests.cs` (fila `Home catalogo (sin emojis)`) | Unit (contrato) | ✅ 1/1 pre-cambio | ✅ 1 fallo exacto | ✅ 1/1 | ➖ Estructural (swap de markup, positivo+negativo en la misma fila) | ➖ No needed |
+| 2.2 | idem (contrato de 2.1) | Unit | ✅ | ✅ (mismo ciclo) | ✅ 1/1 | ➖ Triangulación por runtime: smoke `/catalogo` verifica h1 único + clases en el markup servido | ➖ No needed |
+| 2.3 | suite completa | Full | ✅ | — | ✅ 854/854 | ✅ smoke runtime 9/9 | ➖ No needed |
+
+- Nota de triangulación (2.2): el contrato grepea el archivo (presencia + ausencia); la variante de comportamiento real (render SSR con un solo `<h1>`) se cubre en el smoke runtime del boundary, que es donde la página se ejecuta de verdad.
+
+### Verificación observada (registro PR-2)
+
+| Comando | Resultado observado |
+|---|---|
+| Safety net `dotnet test --filter DisplayName~"Home catalogo"` (pre-cambios) | 1/1 verde |
+| `dotnet test --filter DisplayName~"Home catalogo"` (ROJO 2.1) | 1 fallo exacto (fila `Home catalogo (sin emojis)`) |
+| `dotnet test --filter DisplayName~"Home catalogo"` (VERDE 2.2) | 1/1 verde |
+| `dotnet test Ludeka.sln` (boundary 2.3) | **854/854 verde** (baseline PR-1b exacta; sin tests nuevos, solo fila ajustada) |
+| Smoke runtime `dotnet run --project src/Ludeka.Web --urls http://localhost:5199` → `Invoke-WebRequest /catalogo` | HTTP 200; `page-header-title` presente; `scrollbar-none` presente; `no-scrollbar` ausente; **exactamente 1 `<h1`** en el documento; badge «Catálogo Colaborativo» (pill `badge-pill` con `dices`), subtítulo y buscador presentes |
+
+### Desviaciones y hallazgos PR-2
+
+1. **Subtítulo conservado** (decisión de aplicación): tasks.md 2.2 no menciona el subtítulo pero el escenario de la spec («la renderiza vía `PageHeaderEditorial` con badge píldora, h1 en serif display **y subtítulo**») lo exige; se pasa el texto vigente «Catálogo colaborativo, valoraciones comunitarias y escalabilidad en mesa.» al parámetro `Subtitle` del componente en vez de perderlo al eliminar la cabecera inline. DD-06 lo declara opcional; la spec lo pide para los 4 listados.
+2. **GOTCHA encoding en smoke PowerShell**: `Invoke-WebRequest -UseBasicParsing` decodifica el body con la codepage de la consola y «Catálogo» se corrompe (mojibake); un `Contains('Catálogo Colaborativo')` da **falso negativo**. Verificar por subcadena ASCII (`'Colaborativo'`) o decodificar `$r.RawContentStream.ToArray()` con `[System.Text.Encoding]::UTF8`. Afecta a los smokes de PR-3..5 con texto castellano acentuado.
+3. El span terracota del punto (`text-[var(--brand-primary)]`) aparece 88 veces en la página completa (las GameCard también lo usan); el check estructural fiable del punto es la presencia del fragment `<Title>` en el markup fuente + 1 único `<h1>`, no un conteo global.
+4. `HeroEditorialQuickSearchTests` intacto (el handler del buscador no se tocó: `Value`/`ValueChanged` pasan idénticos).
+
+### Base para PR-3
+
+- Rama del PR-2: `inc/rediseno-paginas-editoriales-2` (encima de `inc/rediseno-paginas-editoriales-1b`). El PR-3 debe crearse encima de esta rama (cadena feature-branch-chain, DD-11).
